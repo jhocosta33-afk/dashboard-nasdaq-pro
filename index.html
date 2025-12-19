@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Dashboard NASDAQ PRO</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -129,29 +128,36 @@ const meses=[...new Set(data.map(d=>d.mes))];
 filtroMes.innerHTML='<option value="ALL">TODOS OS MESES</option>'+
 meses.map(m=>`<option value="${m}">${mesesNome[m]}</option>`).join("");
 filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
+
 filtroMes.onchange=atualizar;
 filtroSemana.onchange=atualizar;
 }
 
 function atualizar(){
-const m=filtroMes.value;
-let semanas=[...new Set(data.filter(d=>m==="ALL"||d.mes===m).map(d=>d.semana))];
+const mes=filtroMes.value;
 
-if(m==="ALL"){
+/* === SEMANAS DEPENDENTES DO MÊS === */
+if(mes==="ALL"){
 filtroSemana.disabled=true;
 filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
 }else{
 filtroSemana.disabled=false;
+const semanas=[...new Set(
+data.filter(d=>d.mes===mes).map(d=>d.semana)
+)];
 filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
-semanas.map(s=>`<option>${s}</option>`).join("");
+semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
 }
 
-const s=filtroSemana.value;
-const f=data.filter(d=>
-(m==="ALL"||d.mes===m)&&(s==="ALL"||d.semana===s)
+/* === AGORA SIM LÊ O VALOR CORRETO === */
+const semana=filtroSemana.value;
+
+const filtrado=data.filter(d=>
+(mes==="ALL"||d.mes===mes) &&
+(semana==="ALL"||d.semana===semana)
 );
 
-const total=f.reduce((a,d)=>{
+const total=filtrado.reduce((a,d)=>{
 a.trades+=d.trades;a.pontos+=d.pontos;
 a.gain+=d.gain;a.stop+=d.stop;a.zero+=d.zero;
 return a;
@@ -165,8 +171,8 @@ kZero.textContent=total.zero;
 kAcc.textContent=(total.gain+total.stop)?
 ((total.gain/(total.gain+total.stop))*100).toFixed(1)+"%":"0%";
 
-renderTable(f,total);
-renderCharts(f,total);
+renderTable(filtrado,total);
+renderCharts(filtrado,total);
 }
 
 function renderTable(f,total){
@@ -193,7 +199,7 @@ const bal=f.map(d=>acc+=d.pontos);
 if(chartLinha)chartLinha.destroy();
 if(chartBar)chartBar.destroy();
 
-chartLinha=new Chart(chartLinha=document.getElementById("chartLinha"),{
+chartLinha=new Chart(document.getElementById("chartLinha"),{
 type:"line",
 data:{labels,datasets:[{
 data:bal,
@@ -207,7 +213,7 @@ scales:{y:{beginAtZero:false,grace:"15%"}}
 }
 });
 
-chartBar=new Chart(chartBar=document.getElementById("chartBar"),{
+chartBar=new Chart(document.getElementById("chartBar"),{
 type:"bar",
 data:{
 labels:["Gain","Stop","0x0"],
