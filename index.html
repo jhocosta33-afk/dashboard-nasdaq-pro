@@ -31,6 +31,7 @@ body{
 h1{margin-bottom:16px}
 
 .filters{display:flex;gap:12px;margin-bottom:20px}
+
 select{
   background:var(--card);
   color:var(--text);
@@ -67,10 +68,12 @@ select{
   border:1px solid var(--border);
   border-radius:22px;
   padding:18px;
-  min-height:360px;
+  min-height:380px;
 }
 
-.card canvas{height:260px!important}
+.card canvas{
+  height:300px!important;
+}
 
 table{width:100%;border-collapse:collapse}
 th,td{
@@ -159,11 +162,11 @@ function init(){
  filtroMes.innerHTML='<option value="ALL">TODOS OS MESES</option>'+
  meses.map(m=>`<option value="${m}">${m}</option>`).join("");
 
- filtroSemana.onchange=update;
  filtroMes.onchange=()=>{
    updateSemanas();
    update();
  };
+ filtroSemana.onchange=update;
 
  updateSemanas();
  update();
@@ -184,53 +187,40 @@ function update(){
   (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
  );
 
- let acc=0;
- const saldo=f.map(d=>acc+=d.pontos);
+ let saldo=0;
+ const acumulado=f.map(d=>saldo+=d.pontos);
 
- const total=f.reduce((a,d)=>{
-  a.tr+=d.trades;a.pt+=d.pontos;
-  a.g+=d.gain;a.s+=d.stop;a.z+=d.zero;return a
- },{tr:0,pt:0,g:0,s:0,z:0});
+ const minY=Math.min(...acumulado,0);
+ const margem=Math.abs(minY)*0.15 || 50;
 
- kTrades.textContent=total.tr;
- kPontos.textContent=total.pt;
- kGains.textContent=total.g;
- kStops.textContent=total.s;
- kZero.textContent=total.z;
- kAcc.textContent=(total.g+total.s)?
- ((total.g/(total.g+total.s))*100).toFixed(2)+"%":"0%";
+ renderCharts(f.map(d=>d.dia),acumulado,minY-margem);
 
- tbody.innerHTML=f.map(d=>`
- <tr>
- <td>${d.dia}</td><td>${d.semana}</td><td>${d.pontos}</td>
- <td>${d.trades}</td>
- <td style="color:var(--green)">${d.gain}</td>
- <td style="color:var(--red)">${d.stop}</td>
- <td style="color:var(--yellow)">${d.zero}</td>
- </tr>`).join("");
-
- renderCharts(f.map(d=>d.dia),saldo,total);
+ renderTabela(f);
 }
 
-function renderCharts(labels,saldo,total){
+function renderCharts(labels,acumulado,minY){
  if(chartLinha)chartLinha.destroy();
  if(chartBar)chartBar.destroy();
 
  chartLinha=new Chart(chartLinhaEl,{
  type:"line",
  data:{labels,datasets:[{
-   data:saldo,
-   borderColor:"#22c55e",
-   backgroundColor:"rgba(34,197,94,.35)",
-   fill:true,
-   tension:.4,
-   pointRadius:4
+  data:acumulado,
+  borderColor:"#22c55e",
+  backgroundColor:"rgba(34,197,94,.35)",
+  fill:true,
+  tension:.45,
+  pointRadius:4,
+  pointBackgroundColor:"#22c55e"
  }]},
  options:{
   maintainAspectRatio:false,
-  layout:{padding:{top:30,bottom:20}},
+  layout:{padding:{top:40,bottom:25,left:10,right:10}},
   scales:{
-   y:{beginAtZero:true,grace:"15%"},
+   y:{
+    suggestedMin:minY,
+    ticks:{padding:10}
+   },
    x:{grid:{display:false}}
   },
   plugins:{legend:{display:false}}
@@ -240,12 +230,25 @@ function renderCharts(labels,saldo,total){
  chartBar=new Chart(chartBarEl,{
  type:"bar",
  data:{labels:["Gain","Stop","0x0"],datasets:[{
-  data:[total.g,total.s,total.z],
+  data:[
+   acumulado.length?null:0
+  ],
   backgroundColor:["#22c55e","#ef4444","#facc15"],
-  borderRadius:8
+  borderRadius:10
  }]},
  options:{plugins:{legend:{display:false}}}
  });
+}
+
+function renderTabela(f){
+ tbody.innerHTML=f.map(d=>`
+ <tr>
+ <td>${d.dia}</td><td>${d.semana}</td><td>${d.pontos}</td>
+ <td>${d.trades}</td>
+ <td style="color:var(--green)">${d.gain}</td>
+ <td style="color:var(--red)">${d.stop}</td>
+ <td style="color:var(--yellow)">${d.zero}</td>
+ </tr>`).join("");
 }
 </script>
 </body>
