@@ -71,9 +71,7 @@ select{
   min-height:380px;
 }
 
-.card canvas{
-  height:300px!important;
-}
+.card canvas{height:300px!important}
 
 table{width:100%;border-collapse:collapse}
 th,td{
@@ -131,6 +129,9 @@ th{color:var(--muted)}
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+
+const chartLinhaEl=document.getElementById("chartLinha");
+const chartBarEl=document.getElementById("chartBar");
 
 let dados=[],chartLinha,chartBar;
 
@@ -190,53 +191,50 @@ function update(){
  let saldo=0;
  const acumulado=f.map(d=>saldo+=d.pontos);
 
- const minY=Math.min(...acumulado,0);
- const margem=Math.abs(minY)*0.15 || 50;
+ const min=Math.min(...acumulado,0);
+ const margem=Math.abs(min)*0.2 || 80;
 
- renderCharts(f.map(d=>d.dia),acumulado,minY-margem);
-
+ renderCharts(f.map(d=>d.dia),acumulado,min-margem,f);
  renderTabela(f);
 }
 
-function renderCharts(labels,acumulado,minY){
+function renderCharts(labels,acumulado,minY,f){
  if(chartLinha)chartLinha.destroy();
  if(chartBar)chartBar.destroy();
 
  chartLinha=new Chart(chartLinhaEl,{
- type:"line",
- data:{labels,datasets:[{
-  data:acumulado,
-  borderColor:"#22c55e",
-  backgroundColor:"rgba(34,197,94,.35)",
-  fill:true,
-  tension:.45,
-  pointRadius:4,
-  pointBackgroundColor:"#22c55e"
- }]},
- options:{
-  maintainAspectRatio:false,
-  layout:{padding:{top:40,bottom:25,left:10,right:10}},
-  scales:{
-   y:{
-    suggestedMin:minY,
-    ticks:{padding:10}
-   },
-   x:{grid:{display:false}}
-  },
-  plugins:{legend:{display:false}}
- }
+  type:"line",
+  data:{labels,datasets:[{
+   data:acumulado,
+   borderColor:"#22c55e",
+   backgroundColor:"rgba(34,197,94,.35)",
+   fill:true,
+   tension:.45,
+   pointRadius:4
+  }]},
+  options:{
+   maintainAspectRatio:false,
+   layout:{padding:{top:40,bottom:30}},
+   scales:{y:{suggestedMin:minY}},
+   plugins:{legend:{display:false}}
+  }
  });
 
+ const gains=f.reduce((s,d)=>s+d.gain,0);
+ const stops=f.reduce((s,d)=>s+d.stop,0);
+ const zero=f.reduce((s,d)=>s+d.zero,0);
+
  chartBar=new Chart(chartBarEl,{
- type:"bar",
- data:{labels:["Gain","Stop","0x0"],datasets:[{
-  data:[
-   acumulado.length?null:0
-  ],
-  backgroundColor:["#22c55e","#ef4444","#facc15"],
-  borderRadius:10
- }]},
- options:{plugins:{legend:{display:false}}}
+  type:"bar",
+  data:{
+   labels:["Gain","Stop","0x0"],
+   datasets:[{
+    data:[gains,stops,zero],
+    backgroundColor:["#22c55e","#ef4444","#facc15"],
+    borderRadius:10
+   }]
+  },
+  options:{plugins:{legend:{display:false}}}
  });
 }
 
