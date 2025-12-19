@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-:root {
+:root{
   --bg:#050b1a;
   --card:#0b1228;
   --border:rgba(255,255,255,.08);
@@ -17,7 +17,6 @@
   --green:#22c55e;
   --red:#ef4444;
   --yellow:#facc15;
-  --blue:#3b82f6;
 }
 
 *{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
@@ -31,7 +30,7 @@ body{
 .container{max-width:1400px;margin:auto;padding:24px}
 h1{margin:0 0 16px;font-size:26px}
 
-.filters{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.filters{display:flex;gap:12px;margin-bottom:18px}
 
 select{
   background:var(--card);
@@ -80,12 +79,7 @@ th,td{
   text-align:center;
   font-size:14px;
 }
-th{color:var(--muted);font-weight:500}
-
-tr.total{
-  background:rgba(34,197,94,.10);
-  font-weight:bold;
-}
+th{color:var(--muted)}
 </style>
 </head>
 
@@ -113,7 +107,6 @@ tr.total{
 </div>
 
 <div class="card">
-<h3>Tabela Operacional</h3>
 <table>
 <thead>
 <tr>
@@ -127,9 +120,9 @@ tr.total{
 </div>
 
 <script>
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
-const mesesNome = {
+const mesesNome={
  "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
  "05":"Maio","06":"Junho","07":"Julho","08":"Agosto",
  "09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"
@@ -137,16 +130,9 @@ const mesesNome = {
 
 let data=[],chartLinha,chartBar;
 
-const filtroMes=document.getElementById("filtroMes");
-const filtroSemana=document.getElementById("filtroSemana");
-
 async function loadCSV(){
  const res=await fetch(CSV_URL,{cache:"no-store"});
  const text=await res.text();
- parseCSV(text);
-}
-
-function parseCSV(text){
  const rows=text.trim().split(/\r?\n/);
  rows.shift();
 
@@ -176,13 +162,10 @@ function initFilters(){
  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
 
  filtroMes.onchange=()=>{
-   const semanas=[...new Set(
-     data.filter(d=>filtroMes.value==="ALL"||d.mes===filtroMes.value)
-         .map(d=>d.semana)
-   )];
-   filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
-     semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
-   atualizar();
+  const semanas=[...new Set(data.filter(d=>filtroMes.value==="ALL"||d.mes===filtroMes.value).map(d=>d.semana))];
+  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
+    semanas.map(s=>`<option>${s}</option>`).join("");
+  atualizar();
  };
 
  filtroSemana.onchange=atualizar;
@@ -194,11 +177,14 @@ function atualizar(){
   (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
  );
 
- const total=f.reduce((a,d)=>{
-  a.trades+=d.trades;a.pontos+=d.pontos;
-  a.gain+=d.gain;a.stop+=d.stop;a.zero+=d.zero;
-  return a;
- },{trades:0,pontos:0,gain:0,stop:0,zero:0});
+ let total={trades:0,pontos:0,gain:0,stop:0,zero:0};
+ f.forEach(d=>{
+  total.trades+=d.trades;
+  total.pontos+=d.pontos;
+  total.gain+=d.gain;
+  total.stop+=d.stop;
+  total.zero+=d.zero;
+ });
 
  kTrades.textContent=total.trades;
  kPontos.textContent=total.pontos;
@@ -208,22 +194,7 @@ function atualizar(){
  kAcc.textContent=(total.gain+total.stop)?
   ((total.gain/(total.gain+total.stop))*100).toFixed(1)+"%":"0%";
 
- renderTable(f,total);
  renderCharts(f,total);
-}
-
-function renderTable(f,total){
- tbody.innerHTML="";
- f.forEach(d=>{
-  tbody.innerHTML+=`
-   <tr>
-    <td>${d.dia}</td><td>${d.semana}</td><td>${d.pontos}</td>
-    <td>${d.trades}</td>
-    <td style="color:var(--green)">${d.gain}</td>
-    <td style="color:var(--red)">${d.stop}</td>
-    <td style="color:var(--yellow)">${d.zero}</td>
-   </tr>`;
- });
 }
 
 function renderCharts(f,total){
@@ -236,17 +207,26 @@ function renderCharts(f,total){
 
  chartLinha=new Chart(chartLinhaCtx,{
   type:"line",
-  data:{labels,datasets:[{
-    data:bal,
-    borderColor:"#22c55e",
-    backgroundColor:"rgba(34,197,94,.25)",
-    fill:true,
-    tension:.35,
-    borderWidth:2
-  }]},
+  data:{
+    labels,
+    datasets:[{
+      data:bal,
+      borderColor:"#22c55e",
+      backgroundColor:"rgba(34,197,94,.30)",
+      fill:true,
+      tension:.35,
+      pointRadius:4
+    }]
+  },
   options:{
+    layout:{padding:{top:25,bottom:10}},
     plugins:{legend:{display:false}},
-    scales:{y:{beginAtZero:true,grace:"15%"}}
+    scales:{
+      y:{
+        beginAtZero:true,
+        suggestedMax:Math.max(...bal)*1.25
+      }
+    }
   }
  });
 
@@ -257,17 +237,20 @@ function renderCharts(f,total){
     datasets:[{
       data:[total.gain,total.stop,total.zero],
       backgroundColor:["#22c55e","#ef4444","#facc15"],
-      borderRadius:6,
+      borderRadius:8,
       borderSkipped:false
     }]
   },
   options:{
+    layout:{padding:{top:20}},
     plugins:{legend:{display:false}},
-    scales:{y:{beginAtZero:true,grace:"25%"}}
+    scales:{y:{beginAtZero:true}}
   }
  });
 }
 
+const filtroMes=document.getElementById("filtroMes");
+const filtroSemana=document.getElementById("filtroSemana");
 const chartLinhaCtx=document.getElementById("chartLinha");
 const chartBarCtx=document.getElementById("chartBar");
 
