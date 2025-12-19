@@ -9,11 +9,12 @@
 
 <style>
 :root{
-  --bg:#020617;
-  --card:#020b23;
+  --bg1:#020617;
+  --bg2:#081a3a;
+  --card:#050f2a;
   --border:rgba(255,255,255,.08);
-  --text:#e5e7eb;
-  --muted:#9ca3af;
+  --txt:#e5e7eb;
+  --muted:#94a3b8;
   --green:#22c55e;
   --red:#ef4444;
   --yellow:#facc15;
@@ -23,64 +24,85 @@
 
 body{
   margin:0;
-  background:radial-gradient(circle at top,#0b1d4a,#020617 70%);
-  color:var(--text);
+  background:radial-gradient(circle at top,var(--bg2),var(--bg1) 70%);
+  color:var(--txt);
 }
 
 .container{max-width:1400px;margin:auto;padding:24px}
-h1{margin-bottom:16px}
 
-.filters{display:flex;gap:12px;margin-bottom:20px}
+h1{margin:0 0 18px;font-size:26px}
+
+.filters{
+  display:flex;
+  gap:12px;
+  margin-bottom:20px;
+}
 
 select{
   background:var(--card);
-  color:var(--text);
+  color:var(--txt);
   border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px 14px;
+  border-radius:14px;
+  padding:10px 16px;
 }
 
 .kpis{
   display:grid;
   grid-template-columns:repeat(6,1fr);
   gap:16px;
-  margin-bottom:24px
+  margin-bottom:26px;
 }
 
 .kpi{
-  background:linear-gradient(180deg,#050d2b,#020b23);
+  background:linear-gradient(180deg,#050f2a,#03081a);
   border:1px solid var(--border);
   border-radius:18px;
-  padding:18px
+  padding:18px;
 }
+
 .kpi span{font-size:13px;color:var(--muted)}
-.kpi strong{font-size:26px;display:block;margin-top:6px}
+.kpi strong{display:block;margin-top:8px;font-size:26px}
 
 .cards{
   display:grid;
   grid-template-columns:2fr 1fr;
   gap:16px;
-  margin-bottom:24px
+  margin-bottom:26px;
 }
 
 .card{
-  background:linear-gradient(180deg,#050d2b,#020b23);
+  background:linear-gradient(180deg,#040b22,#020617);
   border:1px solid var(--border);
   border-radius:22px;
   padding:18px;
-  min-height:380px;
+  min-height:320px;
 }
 
-.card canvas{height:300px!important}
+.card h3{
+  margin:0 0 10px;
+  font-size:15px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
 
-table{width:100%;border-collapse:collapse}
+canvas{
+  margin-top:22px; /* ↓ baixa o gráfico */
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
 th,td{
   padding:12px;
   border-bottom:1px solid var(--border);
   text-align:center;
-  font-size:14px
+  font-size:14px;
 }
-th{color:var(--muted)}
+
+th{color:var(--muted);font-weight:500}
 </style>
 </head>
 
@@ -104,164 +126,156 @@ th{color:var(--muted)}
 
 <div class="cards">
   <div class="card">
-    <strong>📈 Balanço de Pontos</strong>
+    <h3>📈 Balanço de Pontos</h3>
     <canvas id="chartLinha"></canvas>
   </div>
+
   <div class="card">
-    <strong>📊 Gains x Stops x 0x0</strong>
+    <h3>📊 Gains x Stops x 0x0</h3>
     <canvas id="chartBar"></canvas>
   </div>
 </div>
 
 <div class="card">
-<strong>Tabela Operacional</strong>
+<h3>Tabela Operacional</h3>
 <table>
 <thead>
 <tr>
-<th>Dia</th><th>Semana</th><th>Pontos</th>
-<th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th>
+<th>Dia</th><th>Semana</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
+
 </div>
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
-const chartLinhaEl=document.getElementById("chartLinha");
-const chartBarEl=document.getElementById("chartBar");
+const mesesNome={
+ "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho",
+ "07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"
+};
 
 let dados=[],chartLinha,chartBar;
 
-const filtroMes=document.getElementById("filtroMes");
-const filtroSemana=document.getElementById("filtroSemana");
+async function loadCSV(){
+ const res=await fetch(CSV_URL,{cache:"no-store"});
+ const txt=await res.text();
+ const rows=txt.trim().split(/\r?\n/);
+ rows.shift();
 
-fetch(CSV_URL,{cache:"no-store"})
-.then(r=>r.text())
-.then(t=>{
- const rows=t.trim().split(/\r?\n/).slice(1);
  dados=rows.map(r=>{
   const c=r.split(",");
   return{
-   dia:c[0],
-   semana:c[1],
-   mes:c[0].substring(3,5),
-   pontos:+c[3]||0,
-   trades:+c[4]||0,
-   gain:+c[5]||0,
-   stop:+c[6]||0,
-   zero:+c[7]||0
-  }
+    dia:c[0],
+    semana:c[1],
+    mes:c[0].substring(3,5),
+    pontos:+c[3]||0,
+    trades:+c[4]||0,
+    gain:+c[5]||0,
+    stop:+c[6]||0,
+    zero:+c[7]||0
+  };
  });
- init();
-});
 
-function init(){
+ initFiltros();
+ atualizar();
+}
+
+function initFiltros(){
  const meses=[...new Set(dados.map(d=>d.mes))];
  filtroMes.innerHTML='<option value="ALL">TODOS OS MESES</option>'+
- meses.map(m=>`<option value="${m}">${m}</option>`).join("");
+ meses.map(m=>`<option value="${m}">${mesesNome[m]}</option>`).join("");
+
+ filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
 
  filtroMes.onchange=()=>{
-   updateSemanas();
-   update();
+   filtroSemana.disabled=filtroMes.value==="ALL";
+   atualizar();
  };
- filtroSemana.onchange=update;
-
- updateSemanas();
- update();
+ filtroSemana.onchange=atualizar;
 }
 
-function updateSemanas(){
+function atualizar(){
  const m=filtroMes.value;
- const semanas=[...new Set(
-   dados.filter(d=>m==="ALL"||d.mes===m).map(d=>d.semana)
- )];
- filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
- semanas.map(s=>`<option>${s}</option>`).join("");
-}
+ let f=dados.filter(d=>m==="ALL"||d.mes===m);
 
-function update(){
- const f=dados.filter(d=>
-  (filtroMes.value==="ALL"||d.mes===filtroMes.value)&&
-  (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
- );
+ if(m!=="ALL"){
+  const semanas=[...new Set(f.map(d=>d.semana))];
+  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
+   semanas.map(s=>`<option>${s}</option>`).join("");
+ }
 
- // ✅ KPIs CORRIGIDOS
- const trades=f.reduce((s,d)=>s+d.trades,0);
- const pontos=f.reduce((s,d)=>s+d.pontos,0);
- const gains=f.reduce((s,d)=>s+d.gain,0);
- const stops=f.reduce((s,d)=>s+d.stop,0);
- const zero=f.reduce((s,d)=>s+d.zero,0);
- const acc=(gains/(gains+stops)||0)*100;
+ const s=filtroSemana.value;
+ if(s!=="ALL") f=f.filter(d=>d.semana===s);
 
- kTrades.textContent=trades;
- kPontos.textContent=pontos;
- kGains.textContent=gains;
- kStops.textContent=stops;
- kZero.textContent=zero;
- kAcc.textContent=acc.toFixed(2)+"%";
+ const t=f.reduce((a,d)=>{
+  a.tr+=d.trades;a.pt+=d.pontos;a.g+=d.gain;a.s+=d.stop;a.z+=d.zero;return a;
+ },{tr:0,pt:0,g:0,s:0,z:0});
 
- let saldo=0;
- const acumulado=f.map(d=>saldo+=d.pontos);
- const min=Math.min(...acumulado,0);
- const margem=Math.abs(min)*0.2 || 80;
+ kTrades.textContent=t.tr;
+ kPontos.textContent=t.pt;
+ kGains.textContent=t.g;
+ kStops.textContent=t.s;
+ kZero.textContent=t.z;
+ kAcc.textContent=(t.g+t.s)?((t.g/(t.g+t.s))*100).toFixed(2)+"%":"0%";
 
- renderCharts(f.map(d=>d.dia),acumulado,min-margem,f);
  renderTabela(f);
+ renderGraficos(f,t);
 }
 
-function renderCharts(labels,acumulado,minY,f){
+function renderTabela(f){
+ tbody.innerHTML="";
+ f.forEach(d=>{
+  tbody.innerHTML+=`
+  <tr>
+   <td>${d.dia}</td><td>${d.semana}</td><td>${d.pontos}</td>
+   <td>${d.trades}</td>
+   <td style="color:var(--green)">${d.gain}</td>
+   <td style="color:var(--red)">${d.stop}</td>
+   <td style="color:var(--yellow)">${d.zero}</td>
+  </tr>`;
+ });
+}
+
+function renderGraficos(f,t){
+ const labels=f.map(d=>d.dia);
+ let acc=0;
+ const saldo=f.map(d=>acc+=d.pontos);
+
  if(chartLinha)chartLinha.destroy();
  if(chartBar)chartBar.destroy();
 
- chartLinha=new Chart(chartLinhaEl,{
+ chartLinha=new Chart(chartLinhaCtx={
   type:"line",
   data:{labels,datasets:[{
-   data:acumulado,
+   data:saldo,
    borderColor:"#22c55e",
-   backgroundColor:"rgba(34,197,94,.35)",
+   backgroundColor:"rgba(34,197,94,.25)",
    fill:true,
-   tension:.45,
+   tension:.35,
    pointRadius:4
   }]},
-  options:{
-   maintainAspectRatio:false,
-   layout:{padding:{top:40,bottom:30}},
-   scales:{y:{suggestedMin:minY}},
-   plugins:{legend:{display:false}}
-  }
+  options:{plugins:{legend:{display:false}}}
  });
 
- chartBar=new Chart(chartBarEl,{
+ chartBar=new Chart(chartBarCtx={
   type:"bar",
-  data:{
-   labels:["Gain","Stop","0x0"],
-   datasets:[{
-    data:[
-     f.reduce((s,d)=>s+d.gain,0),
-     f.reduce((s,d)=>s+d.stop,0),
-     f.reduce((s,d)=>s+d.zero,0)
-    ],
-    backgroundColor:["#22c55e","#ef4444","#facc15"],
-    borderRadius:10
-   }]
-  },
+  data:{labels:["Gain","Stop","0x0"],datasets:[{
+   data:[t.g,t.s,t.z],
+   backgroundColor:["#22c55e","#ef4444","#facc15"],
+   borderRadius:12
+  }]},
   options:{plugins:{legend:{display:false}}}
  });
 }
 
-function renderTabela(f){
- tbody.innerHTML=f.map(d=>`
- <tr>
- <td>${d.dia}</td><td>${d.semana}</td><td>${d.pontos}</td>
- <td>${d.trades}</td>
- <td style="color:var(--green)">${d.gain}</td>
- <td style="color:var(--red)">${d.stop}</td>
- <td style="color:var(--yellow)">${d.zero}</td>
- </tr>`).join("");
-}
+const chartLinhaCtx=document.getElementById("chartLinha");
+const chartBarCtx=document.getElementById("chartBar");
+
+loadCSV();
 </script>
 </body>
 </html>
