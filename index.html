@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Dashboard NASDAQ PRO</title>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -20,88 +19,45 @@
 }
 
 *{box-sizing:border-box;font-family:Inter,Arial,sans-serif}
+body{margin:0;background:radial-gradient(circle at top,#0b1228,#020617 70%);color:var(--text)}
+.container{max-width:1400px;margin:auto;padding:24px}
+h1{margin-bottom:16px}
 
-body{
-  margin:0;
-  background:radial-gradient(circle at top,#0b1228,#020617 70%);
-  color:var(--text);
-}
-
-.container{
-  max-width:1400px;
-  margin:auto;
-  padding:24px;
-}
-
-h1{margin:0 0 16px}
-
-.filters{
-  display:flex;
-  gap:12px;
-  margin-bottom:20px;
-}
-
+.filters{display:flex;gap:12px;margin-bottom:20px}
 select{
-  background:var(--card);
-  color:var(--text);
+  background:var(--card);color:var(--text);
   border:1px solid var(--border);
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
+  padding:10px 14px;border-radius:10px
 }
 
 .kpis{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:16px;
-  margin-bottom:24px;
+  display:grid;grid-template-columns:repeat(6,1fr);
+  gap:16px;margin-bottom:24px
 }
-
 .kpi{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:16px
 }
-
-.kpi span{
-  font-size:13px;
-  color:var(--muted);
-}
-
-.kpi strong{
-  display:block;
-  font-size:26px;
-  margin-top:6px;
-}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi strong{display:block;font-size:26px;margin-top:6px}
 
 .cards{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:16px;
-  margin-bottom:24px;
+  display:grid;grid-template-columns:2fr 1fr;
+  gap:16px;margin-bottom:24px
 }
-
 .card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:18px;
   padding:16px;
-  min-height:320px;
+  min-height:320px
 }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
+table{width:100%;border-collapse:collapse}
 th,td{
-  padding:10px;
-  border-bottom:1px solid var(--border);
-  text-align:center;
-  font-size:14px;
+  padding:10px;border-bottom:1px solid var(--border);
+  text-align:center;font-size:14px
 }
-
 th{color:#93c5fd}
 </style>
 </head>
@@ -112,8 +68,8 @@ th{color:#93c5fd}
 <h1>Dashboard NASDAQ PRO</h1>
 
 <div class="filters">
-  <select id="filtroMes" onchange="trocarMes()"></select>
-  <select id="filtroSemana" onchange="atualizarDashboard()"></select>
+  <select id="filtroMes"></select>
+  <select id="filtroSemana"></select>
 </div>
 
 <div class="kpis">
@@ -145,133 +101,103 @@ th{color:#93c5fd}
 </div>
 
 <script>
-// ======= DADOS (CSV já tratado) =======
 const dados = [
  {dia:'01/12/2025',mes:'Dezembro',semana:'SEMANA 1',pontos:40,trades:2,gain:1,stop:0,zero:1},
  {dia:'02/12/2025',mes:'Dezembro',semana:'SEMANA 1',pontos:98,trades:2,gain:2,stop:0,zero:0},
  {dia:'03/12/2025',mes:'Dezembro',semana:'SEMANA 1',pontos:26,trades:2,gain:1,stop:1,zero:0},
  {dia:'04/12/2025',mes:'Dezembro',semana:'SEMANA 1',pontos:-25,trades:3,gain:1,stop:2,zero:0},
  {dia:'05/12/2025',mes:'Dezembro',semana:'SEMANA 1',pontos:89,trades:2,gain:2,stop:0,zero:0},
- {dia:'08/12/2025',mes:'Dezembro',semana:'SEMANA 2',pontos:45,trades:2,gain:1,stop:1,zero:0},
+ {dia:'08/12/2025',mes:'Dezembro',semana:'SEMANA 2',pontos:45,trades:2,gain:1,stop:1,zero:0}
 ];
 
-// ======= FILTROS =======
-const filtroMes = document.getElementById('filtroMes');
-const filtroSemana = document.getElementById('filtroSemana');
-
-// ======= GRÁFICOS =======
+const fMes = document.getElementById('filtroMes');
+const fSemana = document.getElementById('filtroSemana');
 let chartLinha, chartBarra;
 
-// ======= INIT =======
-initFiltros();
-atualizarDashboard();
+init();
 
-function initFiltros(){
+function init(){
   const meses = [...new Set(dados.map(d=>d.mes))];
+  fMes.innerHTML = `<option value="TODOS">TODOS OS MESES</option>`;
+  meses.forEach(m=>fMes.innerHTML+=`<option>${m}</option>`);
 
-  filtroMes.innerHTML = `<option value="TODOS">TODOS OS MESES</option>`;
-  meses.forEach(m=>filtroMes.innerHTML+=`<option value="${m}">${m}</option>`);
+  fMes.onchange = atualizarFiltros;
+  fSemana.onchange = atualizar;
 
-  atualizarFiltroSemanas('TODOS');
+  atualizarFiltros();
 }
 
-// ======= SEMANAS POR MÊS =======
-function atualizarFiltroSemanas(mes){
-  filtroSemana.innerHTML = `<option value="TODAS">TODAS AS SEMANAS</option>`;
+function atualizarFiltros(){
+  fSemana.innerHTML = `<option value="TODAS">TODAS AS SEMANAS</option>`;
 
-  if(mes === 'TODOS'){
-    filtroSemana.disabled = true;
-    return;
+  if(fMes.value==='TODOS'){
+    fSemana.disabled = true;
+  } else {
+    fSemana.disabled = false;
+    [...new Set(dados.filter(d=>d.mes===fMes.value).map(d=>d.semana))]
+      .forEach(s=>fSemana.innerHTML+=`<option>${s}</option>`);
   }
-
-  filtroSemana.disabled = false;
-
-  const semanas = [...new Set(
-    dados.filter(d=>d.mes===mes).map(d=>d.semana)
-  )];
-
-  semanas.forEach(s=>{
-    filtroSemana.innerHTML += `<option value="${s}">${s}</option>`;
-  });
+  atualizar();
 }
 
-// ======= TROCAR MÊS =======
-function trocarMes(){
-  atualizarFiltroSemanas(filtroMes.value);
-  atualizarDashboard();
+function atualizar(){
+  let d = [...dados];
+  if(fMes.value!=='TODOS') d=d.filter(x=>x.mes===fMes.value);
+  if(!fSemana.disabled && fSemana.value!=='TODAS') d=d.filter(x=>x.semana===fSemana.value);
+
+  renderKPIs(d);
+  renderTabela(d);
+  renderGraficos(d);
 }
 
-// ======= DASHBOARD =======
-function atualizarDashboard(){
-  let filtrado = [...dados];
-
-  if(filtroMes.value !== 'TODOS')
-    filtrado = filtrado.filter(d=>d.mes===filtroMes.value);
-
-  if(!filtroSemana.disabled && filtroSemana.value !== 'TODAS')
-    filtrado = filtrado.filter(d=>d.semana===filtroSemana.value);
-
-  renderKPIs(filtrado);
-  renderTabela(filtrado);
-  renderGraficos(filtrado);
-}
-
-// ======= KPIs =======
 function renderKPIs(d){
-  const sum = (k)=>d.reduce((a,b)=>a+(b[k]||0),0);
-
-  document.getElementById('kTrades').textContent = sum('trades');
-  document.getElementById('kPontos').textContent = sum('pontos');
-  document.getElementById('kGains').textContent = sum('gain');
-  document.getElementById('kStops').textContent = sum('stop');
-  document.getElementById('kZero').textContent = sum('zero');
-
-  const total = sum('gain') + sum('stop');
-  document.getElementById('kAssert').textContent =
-    total ? ((sum('gain')/total)*100).toFixed(1)+'%' : '0%';
+  const s=k=>d.reduce((a,b)=>a+(b[k]||0),0);
+  kTrades.textContent=s('trades');
+  kPontos.textContent=s('pontos');
+  kGains.textContent=s('gain');
+  kStops.textContent=s('stop');
+  kZero.textContent=s('zero');
+  const tot=s('gain')+s('stop');
+  kAssert.textContent=tot?((s('gain')/tot)*100).toFixed(1)+'%':'0%';
 }
 
-// ======= TABELA =======
 function renderTabela(d){
-  const tb = document.getElementById('tabela');
-  tb.innerHTML = '';
+  tabela.innerHTML='';
   d.forEach(r=>{
-    tb.innerHTML += `
+    tabela.innerHTML+=`
     <tr>
       <td>${r.dia}</td><td>${r.semana}</td><td>${r.pontos}</td>
-      <td>${r.trades}</td><td>${r.gain}</td>
-      <td>${r.stop}</td><td>${r.zero}</td>
+      <td>${r.trades}</td><td>${r.gain}</td><td>${r.stop}</td><td>${r.zero}</td>
     </tr>`;
   });
 }
 
-// ======= GRÁFICOS =======
 function renderGraficos(d){
-  const labels = d.map(x=>x.dia);
-  const pontos = d.map(x=>x.pontos);
+  let acumulado=0;
+  const labels=[], valores=[];
+  d.forEach(x=>{
+    acumulado+=x.pontos;
+    labels.push(x.dia);
+    valores.push(acumulado);
+  });
 
   if(chartLinha) chartLinha.destroy();
   if(chartBarra) chartBarra.destroy();
 
-  chartLinha = new Chart(graficoLinha,{
+  chartLinha=new Chart(graficoLinha,{
     type:'line',
-    data:{
-      labels,
-      datasets:[{
-        data:pontos,
-        borderColor:'#22c55e',
-        backgroundColor:'rgba(34,197,94,.25)',
-        fill:true,
-        tension:.35
-      }]
-    },
-    options:{
-      plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:'#9ca3af'}},y:{ticks:{color:'#9ca3af'}}}
-    }
+    data:{labels,datasets:[{
+      data:valores,
+      borderColor:'#22c55e',
+      backgroundColor:'rgba(34,197,94,.25)',
+      fill:true,
+      tension:.3,
+      pointRadius:4
+    }]},
+    options:{plugins:{legend:{display:false}}}
   });
 
-  chartBarra = new Chart(graficoBarra,{
+  chartBarra=new Chart(graficoBarra,{
     type:'bar',
     data:{
       labels:['Gains','Stops','0x0'],
