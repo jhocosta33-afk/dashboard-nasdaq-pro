@@ -68,8 +68,8 @@ select{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:16px;
-  padding:16px;
-  min-height:260px;
+  padding:20px;
+  min-height:320px; /* MAIS ALTURA REAL */
 }
 
 table{width:100%;border-collapse:collapse}
@@ -104,19 +104,6 @@ th{color:var(--muted)}
 <div class="cards">
   <div class="card"><canvas id="chartLinha"></canvas></div>
   <div class="card"><canvas id="chartBar"></canvas></div>
-</div>
-
-<div class="card">
-<table>
-<thead>
-<tr>
-  <th>Dia</th><th>Semana</th><th>Pontos</th>
-  <th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th>
-</tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
-</div>
 </div>
 
 <script>
@@ -219,12 +206,14 @@ function renderCharts(f,total){
     }]
   },
   options:{
-    layout:{padding:{top:25,bottom:10}},
+    maintainAspectRatio:false,
     plugins:{legend:{display:false}},
     scales:{
       y:{
         beginAtZero:true,
-        suggestedMax:Math.max(...bal)*1.25
+        suggestedMin:-Math.max(...bal)*0.15, /* DESCE DE VERDADE */
+        suggestedMax:Math.max(...bal)*1.35,
+        grace:"15%"
       }
     }
   }
@@ -242,9 +231,9 @@ function renderCharts(f,total){
     }]
   },
   options:{
-    layout:{padding:{top:20}},
+    maintainAspectRatio:false,
     plugins:{legend:{display:false}},
-    scales:{y:{beginAtZero:true}}
+    scales:{y:{beginAtZero:true,grace:"20%"}}
   }
  });
 }
