@@ -24,8 +24,8 @@ h1{margin:0 0 16px;font-size:26px}
 .filters{display:flex;gap:12px;margin-bottom:18px}
 select{
 background:var(--card);color:var(--text);
-border:1px solid var(--border);border-radius:10px;
-padding:8px 14px
+border:1px solid var(--border);
+border-radius:10px;padding:8px 14px
 }
 
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:24px}
@@ -103,6 +103,8 @@ const mesesNome={
 };
 
 let data=[],chartLinha,chartBar;
+let mesAtual="ALL";
+
 const filtroMes=document.getElementById("filtroMes");
 const filtroSemana=document.getElementById("filtroSemana");
 
@@ -120,23 +122,27 @@ pontos:+c[3]||0,trades:+c[4]||0,
 gain:+c[5]||0,stop:+c[6]||0,zero:+c[7]||0
 };
 });
-initFilters(); atualizar();
+initFilters();
+atualizar();
 }
 
 function initFilters(){
 const meses=[...new Set(data.map(d=>d.mes))];
 filtroMes.innerHTML='<option value="ALL">TODOS OS MESES</option>'+
 meses.map(m=>`<option value="${m}">${mesesNome[m]}</option>`).join("");
-filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
 
-filtroMes.onchange=atualizar;
+filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
+filtroSemana.disabled=true;
+
+filtroMes.onchange=onMesChange;
 filtroSemana.onchange=atualizar;
 }
 
-function atualizar(){
+function onMesChange(){
 const mes=filtroMes.value;
+mesAtual=mes;
 
-/* === SEMANAS DEPENDENTES DO MÊS === */
+/* só recria semanas quando o MÊS muda */
 if(mes==="ALL"){
 filtroSemana.disabled=true;
 filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
@@ -149,7 +155,12 @@ filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
 semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
 }
 
-/* === AGORA SIM LÊ O VALOR CORRETO === */
+filtroSemana.value="ALL";
+atualizar();
+}
+
+function atualizar(){
+const mes=filtroMes.value;
 const semana=filtroSemana.value;
 
 const filtrado=data.filter(d=>
@@ -193,13 +204,12 @@ tbody.innerHTML+=`<tr class="total">
 
 function renderCharts(f,total){
 const labels=f.map(d=>d.dia);
-let acc=0;
-const bal=f.map(d=>acc+=d.pontos);
+let acc=0;const bal=f.map(d=>acc+=d.pontos);
 
 if(chartLinha)chartLinha.destroy();
 if(chartBar)chartBar.destroy();
 
-chartLinha=new Chart(document.getElementById("chartLinha"),{
+chartLinha=new Chart(chartLinhaCtx,{
 type:"line",
 data:{labels,datasets:[{
 data:bal,
@@ -207,13 +217,11 @@ borderColor:"#22c55e",
 backgroundColor:"rgba(34,197,94,.25)",
 fill:true,tension:.35,pointRadius:4
 }]},
-options:{
-plugins:{legend:{display:false}},
-scales:{y:{beginAtZero:false,grace:"15%"}}
-}
+options:{plugins:{legend:{display:false}},
+scales:{y:{grace:"15%"}}}
 });
 
-chartBar=new Chart(document.getElementById("chartBar"),{
+chartBar=new Chart(chartBarCtx,{
 type:"bar",
 data:{
 labels:["Gain","Stop","0x0"],
@@ -225,6 +233,9 @@ backgroundColor:["#22c55e","#ef4444","#facc15"]
 options:{plugins:{legend:{display:false}}}
 });
 }
+
+const chartLinhaCtx=document.getElementById("chartLinha");
+const chartBarCtx=document.getElementById("chartBar");
 
 loadCSV();
 </script>
