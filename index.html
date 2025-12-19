@@ -69,7 +69,7 @@ select{
   border:1px solid var(--border);
   border-radius:16px;
   padding:20px;
-  min-height:320px; /* MAIS ALTURA REAL */
+  min-height:320px;
 }
 
 table{width:100%;border-collapse:collapse}
@@ -80,6 +80,10 @@ th,td{
   font-size:14px;
 }
 th{color:var(--muted)}
+tr.total{
+  background:rgba(34,197,94,.12);
+  font-weight:bold;
+}
 </style>
 </head>
 
@@ -106,6 +110,20 @@ th{color:var(--muted)}
   <div class="card"><canvas id="chartBar"></canvas></div>
 </div>
 
+<div class="card">
+  <h3>Tabela Operacional</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Dia</th><th>Semana</th><th>Pontos</th>
+        <th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+</div>
+
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
@@ -116,6 +134,10 @@ const mesesNome={
 };
 
 let data=[],chartLinha,chartBar;
+
+const filtroMes=document.getElementById("filtroMes");
+const filtroSemana=document.getElementById("filtroSemana");
+const tbody=document.getElementById("tbody");
 
 async function loadCSV(){
  const res=await fetch(CSV_URL,{cache:"no-store"});
@@ -149,7 +171,10 @@ function initFilters(){
  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
 
  filtroMes.onchange=()=>{
-  const semanas=[...new Set(data.filter(d=>filtroMes.value==="ALL"||d.mes===filtroMes.value).map(d=>d.semana))];
+  const semanas=[...new Set(
+    data.filter(d=>filtroMes.value==="ALL"||d.mes===filtroMes.value)
+        .map(d=>d.semana)
+  )];
   filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
     semanas.map(s=>`<option>${s}</option>`).join("");
   atualizar();
@@ -181,7 +206,35 @@ function atualizar(){
  kAcc.textContent=(total.gain+total.stop)?
   ((total.gain/(total.gain+total.stop))*100).toFixed(1)+"%":"0%";
 
+ renderTable(f,total);
  renderCharts(f,total);
+}
+
+function renderTable(f,total){
+ tbody.innerHTML="";
+ f.forEach(d=>{
+  tbody.innerHTML+=`
+   <tr>
+    <td>${d.dia}</td>
+    <td>${d.semana}</td>
+    <td>${d.pontos}</td>
+    <td>${d.trades}</td>
+    <td style="color:var(--green)">${d.gain}</td>
+    <td style="color:var(--red)">${d.stop}</td>
+    <td style="color:var(--yellow)">${d.zero}</td>
+   </tr>`;
+ });
+
+ tbody.innerHTML+=`
+  <tr class="total">
+   <td>TOTAL</td>
+   <td>${filtroSemana.value==="ALL"?"GERAL":filtroSemana.value}</td>
+   <td>${total.pontos}</td>
+   <td>${total.trades}</td>
+   <td>${total.gain}</td>
+   <td>${total.stop}</td>
+   <td>${total.zero}</td>
+  </tr>`;
 }
 
 function renderCharts(f,total){
@@ -211,7 +264,7 @@ function renderCharts(f,total){
     scales:{
       y:{
         beginAtZero:true,
-        suggestedMin:-Math.max(...bal)*0.15, /* DESCE DE VERDADE */
+        suggestedMin:-Math.max(...bal)*0.15,
         suggestedMax:Math.max(...bal)*1.35,
         grace:"15%"
       }
@@ -238,8 +291,6 @@ function renderCharts(f,total){
  });
 }
 
-const filtroMes=document.getElementById("filtroMes");
-const filtroSemana=document.getElementById("filtroSemana");
 const chartLinhaCtx=document.getElementById("chartLinha");
 const chartBarCtx=document.getElementById("chartBar");
 
