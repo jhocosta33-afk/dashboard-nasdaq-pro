@@ -188,9 +188,23 @@ function update(){
   (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
  );
 
+ // ✅ KPIs CORRIGIDOS
+ const trades=f.reduce((s,d)=>s+d.trades,0);
+ const pontos=f.reduce((s,d)=>s+d.pontos,0);
+ const gains=f.reduce((s,d)=>s+d.gain,0);
+ const stops=f.reduce((s,d)=>s+d.stop,0);
+ const zero=f.reduce((s,d)=>s+d.zero,0);
+ const acc=(gains/(gains+stops)||0)*100;
+
+ kTrades.textContent=trades;
+ kPontos.textContent=pontos;
+ kGains.textContent=gains;
+ kStops.textContent=stops;
+ kZero.textContent=zero;
+ kAcc.textContent=acc.toFixed(2)+"%";
+
  let saldo=0;
  const acumulado=f.map(d=>saldo+=d.pontos);
-
  const min=Math.min(...acumulado,0);
  const margem=Math.abs(min)*0.2 || 80;
 
@@ -220,16 +234,16 @@ function renderCharts(labels,acumulado,minY,f){
   }
  });
 
- const gains=f.reduce((s,d)=>s+d.gain,0);
- const stops=f.reduce((s,d)=>s+d.stop,0);
- const zero=f.reduce((s,d)=>s+d.zero,0);
-
  chartBar=new Chart(chartBarEl,{
   type:"bar",
   data:{
    labels:["Gain","Stop","0x0"],
    datasets:[{
-    data:[gains,stops,zero],
+    data:[
+     f.reduce((s,d)=>s+d.gain,0),
+     f.reduce((s,d)=>s+d.stop,0),
+     f.reduce((s,d)=>s+d.zero,0)
+    ],
     backgroundColor:["#22c55e","#ef4444","#facc15"],
     borderRadius:10
    }]
