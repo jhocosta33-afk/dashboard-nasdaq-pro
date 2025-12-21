@@ -116,13 +116,8 @@ canvas{
 }
 
 /* ===== TABELA ===== */
-.table-wrap{
- overflow-x:auto;
-}
-
 table{
  width:100%;
- min-width:760px;
  border-collapse:collapse;
 }
 
@@ -139,7 +134,6 @@ th{
  border-bottom:1px solid var(--border);
  text-align:center;
  text-transform:uppercase;
- white-space:nowrap;
 }
 
 td{
@@ -147,7 +141,6 @@ td{
  border-bottom:1px solid var(--border);
  font-size:16px;
  text-align:center;
- white-space:nowrap;
 }
 
 tbody tr:hover{
@@ -213,12 +206,21 @@ tr.total td{
   height:360px;
  }
 
+ /* 🔽 AJUSTE DA TABELA PARA CABER NA TELA */
+ table{
+  font-size:14px;
+ }
+
  th{
   font-size:15px;
+  padding:12px 6px;
+  white-space:normal;
  }
 
  td{
   font-size:14px;
+  padding:10px 6px;
+  white-space:normal;
  }
 }
 </style>
@@ -260,7 +262,6 @@ tr.total td{
 
 <div class="card" style="height:auto">
 <h3>Tabela Operacional</h3>
-<div class="table-wrap">
 <table>
 <thead>
 <tr>
@@ -275,7 +276,6 @@ tr.total td{
 </thead>
 <tbody id="tbody"></tbody>
 </table>
-</div>
 </div>
 </div>
 
