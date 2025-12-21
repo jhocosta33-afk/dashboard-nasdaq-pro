@@ -28,14 +28,22 @@ body{
 }
 
 .container{max-width:1400px;margin:auto;padding:24px}
-h1{margin-bottom:18px}
 
+/* 🔥 TÍTULO PRINCIPAL */
+h1{
+ margin-bottom:22px;
+ font-size:32px;
+ letter-spacing:.5px;
+}
+
+/* 🔹 FILTROS */
 select{
  background:var(--card);
  color:var(--text);
  border:1px solid var(--border);
- border-radius:12px;
- padding:10px 14px;
+ border-radius:14px;
+ padding:12px 16px;
+ font-size:15px;
 }
 
 select:disabled{
@@ -43,62 +51,104 @@ select:disabled{
  cursor:not-allowed;
 }
 
-.filters{display:flex;gap:12px;margin-bottom:20px}
+.filters{
+ display:flex;
+ gap:14px;
+ margin-bottom:24px
+}
 
+/* 🔥 KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(6,1fr);
- gap:16px;
- margin-bottom:24px
+ gap:18px;
+ margin-bottom:28px
 }
 
 .kpi{
  background:var(--card);
  border:1px solid var(--border);
- border-radius:18px;
- padding:16px
+ border-radius:20px;
+ padding:20px;
 }
 
-.kpi span{color:var(--muted);font-size:13px}
-.kpi strong{display:block;margin-top:6px;font-size:24px}
+.kpi span{
+ color:var(--muted);
+ font-size:15px;
+ letter-spacing:.4px;
+}
 
+.kpi strong{
+ display:block;
+ margin-top:10px;
+ font-size:34px;
+ font-weight:600;
+}
+
+/* 🔹 CARDS DOS GRÁFICOS */
 .cards{
  display:grid;
  grid-template-columns:1fr 1fr;
- gap:16px;
- margin-bottom:24px
+ gap:18px;
+ margin-bottom:26px
 }
 
 .card{
  background:var(--card);
  border:1px solid var(--border);
- border-radius:22px;
- padding:18px;
+ border-radius:24px;
+ padding:20px;
  height:420px;
  display:flex;
  flex-direction:column
 }
 
-.card strong{margin-bottom:12px}
+.card strong{
+ margin-bottom:14px;
+ font-size:18px;
+ font-weight:600;
+ letter-spacing:.3px;
+}
 
-.chart-wrap{flex:1;position:relative}
+.chart-wrap{
+ flex:1;
+ position:relative
+}
 
 canvas{
  width:100%!important;
  height:100%!important;
 }
 
-table{width:100%;border-collapse:collapse}
-th,td{
- padding:10px;
+/* 🔹 TABELA */
+table{
+ width:100%;
+ border-collapse:collapse
+}
+
+th{
+ padding:12px;
  border-bottom:1px solid var(--border);
  text-align:center;
- font-size:14px
+ font-size:15px;
+ color:var(--muted);
 }
-th{color:var(--muted)}
+
+td{
+ padding:12px;
+ border-bottom:1px solid var(--border);
+ text-align:center;
+ font-size:15px;
+}
 
 tr.total{
  border-top:2px solid rgba(255,255,255,.25);
+ font-weight:600;
+}
+
+h3{
+ margin:0 0 14px;
+ font-size:20px;
  font-weight:600;
 }
 </style>
