@@ -31,13 +31,22 @@ body{
 .container{max-width:1400px;margin:auto;padding:24px}
 h1{margin-bottom:18px;font-size:30px}
 
+/* ===== FILTROS ===== */
+.filters{
+ display:flex;
+ gap:12px;
+ margin-bottom:24px;
+ flex-wrap:wrap;
+}
+
 select{
  background:var(--card);
  color:var(--text);
  border:1px solid var(--border);
  border-radius:12px;
  padding:12px 16px;
- font-size:15px
+ font-size:15px;
+ width:220px;
 }
 
 select:disabled{
@@ -45,8 +54,7 @@ select:disabled{
  cursor:not-allowed
 }
 
-.filters{display:flex;gap:12px;margin-bottom:24px}
-
+/* ===== KPIs ===== */
 .kpis{
  display:grid;
  grid-template-columns:repeat(6,1fr);
@@ -64,7 +72,8 @@ select:disabled{
 .kpi span{
  color:var(--muted);
  font-size:14px;
- letter-spacing:.6px
+ letter-spacing:.6px;
+ text-transform:uppercase;
 }
 
 .kpi strong{
@@ -73,6 +82,7 @@ select:disabled{
  font-size:28px
 }
 
+/* ===== GRÁFICOS ===== */
 .cards{
  display:grid;
  grid-template-columns:1fr 1fr;
@@ -106,8 +116,13 @@ canvas{
 }
 
 /* ===== TABELA ===== */
+.table-wrap{
+ overflow-x:auto;
+}
+
 table{
  width:100%;
+ min-width:760px;
  border-collapse:collapse;
 }
 
@@ -124,13 +139,15 @@ th{
  border-bottom:1px solid var(--border);
  text-align:center;
  text-transform:uppercase;
+ white-space:nowrap;
 }
 
 td{
  padding:15px 12px;
  border-bottom:1px solid var(--border);
- font-size:16px;   /* 🔹 AUMENTADO (menor que o cabeçalho) */
+ font-size:16px;
  text-align:center;
+ white-space:nowrap;
 }
 
 tbody tr:hover{
@@ -143,7 +160,6 @@ tbody td:first-child{
  padding-left:18px;
 }
 
-/* ===== LINHA TOTAL ===== */
 tr.total{
  background:rgba(34,197,94,.08);
  font-weight:700;
@@ -151,6 +167,59 @@ tr.total{
 
 tr.total td{
  border-top:2px solid rgba(34,197,94,.35);
+}
+
+/* ========================= */
+/* ===== RESPONSIVO ======== */
+/* ========================= */
+
+@media (max-width: 900px){
+ .kpis{
+  grid-template-columns:repeat(3,1fr);
+ }
+}
+
+@media (max-width: 600px){
+
+ .container{
+  padding:16px;
+ }
+
+ h1{
+  font-size:24px;
+ }
+
+ .filters{
+  flex-direction:column;
+ }
+
+ select{
+  width:100%;
+ }
+
+ .kpis{
+  grid-template-columns:repeat(2,1fr);
+ }
+
+ .kpi strong{
+  font-size:24px;
+ }
+
+ .cards{
+  grid-template-columns:1fr;
+ }
+
+ .card{
+  height:360px;
+ }
+
+ th{
+  font-size:15px;
+ }
+
+ td{
+  font-size:14px;
+ }
 }
 </style>
 </head>
@@ -165,12 +234,12 @@ tr.total td{
 </div>
 
 <div class="kpis">
- <div class="kpi"><span>TRADES</span><strong id="kTrades">0</strong></div>
- <div class="kpi"><span>PONTOS</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>GAINS</span><strong id="kGains" style="color:var(--green)">0</strong></div>
- <div class="kpi"><span>STOPS</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+ <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
+ <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
+ <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+ <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
  <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
- <div class="kpi"><span>ASSERTIVIDADE</span><strong id="kAcc">0%</strong></div>
+ <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
 <div class="cards">
@@ -191,6 +260,7 @@ tr.total td{
 
 <div class="card" style="height:auto">
 <h3>Tabela Operacional</h3>
+<div class="table-wrap">
 <table>
 <thead>
 <tr>
@@ -207,6 +277,7 @@ tr.total td{
 </table>
 </div>
 </div>
+</div>
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
@@ -217,7 +288,7 @@ const nomesMeses={
  "09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"
 };
 
-let data=[], chartLinha, chartBar;
+let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
@@ -356,7 +427,7 @@ function renderGraficos(f,tot){
    backgroundColor:"rgba(34,197,94,.25)",
    fill:true,
    tension:.35,
-   pointRadius:4
+   pointRadius:3
   }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
