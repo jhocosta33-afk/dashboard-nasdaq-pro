@@ -183,7 +183,7 @@ function parseCSV(t){
 
 function initFiltros(){
  const meses=[...new Set(data.map(d=>d.mes))];
- filtroMes.innerHTML=
+ filtroMes.innerHTML =
   '<option value="ALL">TODOS OS MESES</option>'+
   meses.map(m=>`<option value="${m}">${MESES[m]}</option>`).join("");
 
@@ -194,10 +194,22 @@ function initFiltros(){
 
 function atualizar(){
  const m=filtroMes.value;
- const semanas=[...new Set(data.filter(d=>m==="ALL"||d.mes===m).map(d=>d.semana))];
- filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+semanas.map(s=>`<option>${s}</option>`).join("");
+ const semanaSelecionada = filtroSemana.value;
+
+ const semanas=[...new Set(
+  data.filter(d=>m==="ALL"||d.mes===m).map(d=>d.semana)
+ )];
+
+ filtroSemana.innerHTML =
+  '<option value="ALL">TODAS AS SEMANAS</option>'+
+  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+
+ if(semanas.includes(semanaSelecionada)){
+  filtroSemana.value = semanaSelecionada;
+ }
 
  const s=filtroSemana.value;
+
  const f=data.filter(d=>
   (m==="ALL"||d.mes===m)&&
   (s==="ALL"||d.semana===s)
