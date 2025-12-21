@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Dashboard NASDAQ PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -19,25 +18,16 @@
   --red:#ef4444;
   --yellow:#facc15;
 }
-
 *{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
-
 body{
   margin:0;
   background:radial-gradient(circle at top,var(--bg2),var(--bg1) 70%);
   color:var(--txt);
 }
-
 .container{max-width:1400px;margin:auto;padding:24px}
-
 h1{margin:0 0 18px;font-size:26px}
 
-.filters{
-  display:flex;
-  gap:12px;
-  margin-bottom:20px;
-}
-
+.filters{display:flex;gap:12px;margin-bottom:20px}
 select{
   background:var(--card);
   color:var(--txt);
@@ -52,14 +42,12 @@ select{
   gap:16px;
   margin-bottom:26px;
 }
-
 .kpi{
   background:linear-gradient(180deg,#050f2a,#03081a);
   border:1px solid var(--border);
   border-radius:18px;
   padding:18px;
 }
-
 .kpi span{font-size:13px;color:var(--muted)}
 .kpi strong{display:block;margin-top:8px;font-size:26px}
 
@@ -69,7 +57,6 @@ select{
   gap:16px;
   margin-bottom:26px;
 }
-
 .card{
   background:linear-gradient(180deg,#040b22,#020617);
   border:1px solid var(--border);
@@ -77,32 +64,16 @@ select{
   padding:18px;
   min-height:320px;
 }
+canvas{margin-top:20px}
 
-.card h3{
-  margin:0 0 10px;
-  font-size:15px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-canvas{
-  margin-top:22px; /* ↓ baixa o gráfico */
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
+table{width:100%;border-collapse:collapse}
 th,td{
   padding:12px;
   border-bottom:1px solid var(--border);
   text-align:center;
   font-size:14px;
 }
-
-th{color:var(--muted);font-weight:500}
+th{color:var(--muted)}
 </style>
 </head>
 
@@ -112,7 +83,7 @@ th{color:var(--muted);font-weight:500}
 
 <div class="filters">
   <select id="filtroMes"></select>
-  <select id="filtroSemana"></select>
+  <select id="filtroSemana" disabled></select>
 </div>
 
 <div class="kpis">
@@ -129,7 +100,6 @@ th{color:var(--muted);font-weight:500}
     <h3>📈 Balanço de Pontos</h3>
     <canvas id="chartLinha"></canvas>
   </div>
-
   <div class="card">
     <h3>📊 Gains x Stops x 0x0</h3>
     <canvas id="chartBar"></canvas>
@@ -147,7 +117,6 @@ th{color:var(--muted);font-weight:500}
 <tbody id="tbody"></tbody>
 </table>
 </div>
-
 </div>
 
 <script>
@@ -159,6 +128,9 @@ const mesesNome={
 };
 
 let dados=[],chartLinha,chartBar;
+
+const ctxLinha=document.getElementById("chartLinha");
+const ctxBar=document.getElementById("chartBar");
 
 async function loadCSV(){
  const res=await fetch(CSV_URL,{cache:"no-store"});
@@ -181,6 +153,7 @@ async function loadCSV(){
  });
 
  initFiltros();
+ criarGraficos();
  atualizar();
 }
 
@@ -192,24 +165,26 @@ function initFiltros(){
  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
 
  filtroMes.onchange=()=>{
-   filtroSemana.disabled=filtroMes.value==="ALL";
-   atualizar();
+  filtroSemana.disabled=filtroMes.value==="ALL";
+  carregarSemanas();
+  atualizar();
  };
  filtroSemana.onchange=atualizar;
 }
 
+function carregarSemanas(){
+ filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
+ if(filtroMes.value==="ALL") return;
+
+ const semanas=[...new Set(dados.filter(d=>d.mes===filtroMes.value).map(d=>d.semana))];
+ semanas.forEach(s=>{
+  filtroSemana.innerHTML+=`<option value="${s}">${s}</option>`;
+ });
+}
+
 function atualizar(){
- const m=filtroMes.value;
- let f=dados.filter(d=>m==="ALL"||d.mes===m);
-
- if(m!=="ALL"){
-  const semanas=[...new Set(f.map(d=>d.semana))];
-  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
-   semanas.map(s=>`<option>${s}</option>`).join("");
- }
-
- const s=filtroSemana.value;
- if(s!=="ALL") f=f.filter(d=>d.semana===s);
+ let f=dados.filter(d=>filtroMes.value==="ALL"||d.mes===filtroMes.value);
+ if(filtroSemana.value!=="ALL") f=f.filter(d=>d.semana===filtroSemana.value);
 
  const t=f.reduce((a,d)=>{
   a.tr+=d.trades;a.pt+=d.pontos;a.g+=d.gain;a.s+=d.stop;a.z+=d.zero;return a;
@@ -222,11 +197,46 @@ function atualizar(){
  kZero.textContent=t.z;
  kAcc.textContent=(t.g+t.s)?((t.g/(t.g+t.s))*100).toFixed(2)+"%":"0%";
 
- renderTabela(f);
- renderGraficos(f,t);
+ atualizarTabela(f);
+ atualizarGraficos(f,t);
 }
 
-function renderTabela(f){
+function criarGraficos(){
+ chartLinha=new Chart(ctxLinha,{
+  type:"line",
+  data:{labels:[],datasets:[{
+    data:[],
+    borderColor:"#22c55e",
+    backgroundColor:"rgba(34,197,94,.25)",
+    fill:true,
+    tension:.35,
+    pointRadius:4
+  }]},
+  options:{plugins:{legend:{display:false}}}
+ });
+
+ chartBar=new Chart(ctxBar,{
+  type:"bar",
+  data:{labels:["Gain","Stop","0x0"],datasets:[{
+    data:[0,0,0],
+    backgroundColor:["#22c55e","#ef4444","#facc15"],
+    borderRadius:12
+  }]},
+  options:{plugins:{legend:{display:false}}}
+ });
+}
+
+function atualizarGraficos(f,t){
+ let acc=0;
+ chartLinha.data.labels=f.map(d=>d.dia);
+ chartLinha.data.datasets[0].data=f.map(d=>acc+=d.pontos);
+ chartLinha.update();
+
+ chartBar.data.datasets[0].data=[t.g,t.s,t.z];
+ chartBar.update();
+}
+
+function atualizarTabela(f){
  tbody.innerHTML="";
  f.forEach(d=>{
   tbody.innerHTML+=`
@@ -239,41 +249,6 @@ function renderTabela(f){
   </tr>`;
  });
 }
-
-function renderGraficos(f,t){
- const labels=f.map(d=>d.dia);
- let acc=0;
- const saldo=f.map(d=>acc+=d.pontos);
-
- if(chartLinha)chartLinha.destroy();
- if(chartBar)chartBar.destroy();
-
- chartLinha=new Chart(chartLinhaCtx={
-  type:"line",
-  data:{labels,datasets:[{
-   data:saldo,
-   borderColor:"#22c55e",
-   backgroundColor:"rgba(34,197,94,.25)",
-   fill:true,
-   tension:.35,
-   pointRadius:4
-  }]},
-  options:{plugins:{legend:{display:false}}}
- });
-
- chartBar=new Chart(chartBarCtx={
-  type:"bar",
-  data:{labels:["Gain","Stop","0x0"],datasets:[{
-   data:[t.g,t.s,t.z],
-   backgroundColor:["#22c55e","#ef4444","#facc15"],
-   borderRadius:12
-  }]},
-  options:{plugins:{legend:{display:false}}}
- });
-}
-
-const chartLinhaCtx=document.getElementById("chartLinha");
-const chartBarCtx=document.getElementById("chartBar");
 
 loadCSV();
 </script>
