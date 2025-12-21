@@ -42,7 +42,7 @@ select{
 
 .kpis{
  display:grid;
- grid-template-columns:repeat(6,1fr);
+ grid-template-columns:repeat(7,1fr);
  gap:16px;
  margin-bottom:24px
 }
@@ -59,7 +59,7 @@ select{
 
 .cards{
  display:grid;
- grid-template-columns:1fr 1fr; /* 🔥 MESMO TAMANHO */
+ grid-template-columns:1fr 1fr;
  gap:16px;
  margin-bottom:24px
 }
@@ -69,19 +69,14 @@ select{
  border:1px solid var(--border);
  border-radius:22px;
  padding:18px;
- height:420px;              /* 🔥 ALTURA IGUAL */
+ height:420px;
  display:flex;
  flex-direction:column
 }
 
-.card strong{
- margin-bottom:12px;
-}
+.card strong{margin-bottom:12px}
 
-.chart-wrap{
- flex:1;
- position:relative;
-}
+.chart-wrap{flex:1;position:relative}
 
 canvas{
  width:100%!important;
@@ -115,6 +110,7 @@ th{color:var(--muted)}
  <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
  <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+ <div class="kpi"><span>Drawdown Máx</span><strong id="kDD" style="color:var(--red)">0</strong></div>
 </div>
 
 <div class="cards">
@@ -149,6 +145,12 @@ th{color:var(--muted)}
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
+const MESES={
+ "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
+ "05":"Maio","06":"Junho","07":"Julho","08":"Agosto",
+ "09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"
+};
+
 let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
@@ -162,10 +164,12 @@ function parseCSV(t){
  rows.shift();
  data=rows.map(r=>{
   const c=r.split(",");
+  const mes=c[0].substring(3,5);
   return{
    dia:c[0],
    semana:c[1],
-   mes:c[0].substring(3,5),
+   mes,
+   mesNome:MESES[mes],
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
@@ -179,7 +183,10 @@ function parseCSV(t){
 
 function initFiltros(){
  const meses=[...new Set(data.map(d=>d.mes))];
- filtroMes.innerHTML='<option value="ALL">TODOS OS MESES</option>'+meses.map(m=>`<option value="${m}">${m}</option>`).join("");
+ filtroMes.innerHTML=
+  '<option value="ALL">TODOS OS MESES</option>'+
+  meses.map(m=>`<option value="${m}">${MESES[m]}</option>`).join("");
+
  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
  filtroMes.onchange=atualizar;
  filtroSemana.onchange=atualizar;
@@ -197,12 +204,18 @@ function atualizar(){
  );
 
  let tot={trades:0,pontos:0,gain:0,stop:0,zero:0};
+ let saldo=0,topo=0,dd=0;
+
  f.forEach(d=>{
   tot.trades+=d.trades;
   tot.pontos+=d.pontos;
   tot.gain+=d.gain;
   tot.stop+=d.stop;
   tot.zero+=d.zero;
+
+  saldo+=d.pontos;
+  topo=Math.max(topo,saldo);
+  dd=Math.min(dd,saldo-topo);
  });
 
  kTrades.textContent=tot.trades;
@@ -211,6 +224,7 @@ function atualizar(){
  kStops.textContent=tot.stop;
  kZero.textContent=tot.zero;
  kAcc.textContent=(tot.gain+tot.stop)?((tot.gain/(tot.gain+tot.stop))*100).toFixed(2)+"%":"0%";
+ kDD.textContent=dd;
 
  renderTabela(f);
  renderGraficos(f,tot);
