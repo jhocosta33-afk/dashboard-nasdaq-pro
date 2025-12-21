@@ -96,6 +96,11 @@ th,td{
  font-size:14px
 }
 th{color:var(--muted)}
+
+tr.total{
+ border-top:2px solid rgba(255,255,255,.25);
+ font-weight:600;
+}
 </style>
 </head>
 
@@ -251,12 +256,13 @@ function atualizar(){
  kAcc.textContent=(tot.gain+tot.stop)?((tot.gain/(tot.gain+tot.stop))*100).toFixed(2)+"%":"0%";
  kDD.textContent=dd;
 
- renderTabela(f);
+ renderTabela(f,tot);
  renderGraficos(f,tot);
 }
 
-function renderTabela(f){
+function renderTabela(f,tot){
  tbody.innerHTML="";
+
  f.forEach(d=>{
   tbody.innerHTML+=`
   <tr>
@@ -269,6 +275,16 @@ function renderTabela(f){
    <td style="color:var(--yellow)">${d.zero}</td>
   </tr>`;
  });
+
+ tbody.innerHTML+=`
+ <tr class="total">
+  <td colspan="2">TOTAL</td>
+  <td>${tot.pontos}</td>
+  <td>${tot.trades}</td>
+  <td style="color:var(--green)">${tot.gain}</td>
+  <td style="color:var(--red)">${tot.stop}</td>
+  <td style="color:var(--yellow)">${tot.zero}</td>
+ </tr>`;
 }
 
 function renderGraficos(f,tot){
