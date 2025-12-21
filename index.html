@@ -47,7 +47,7 @@ select:disabled{
 
 .kpis{
  display:grid;
- grid-template-columns:repeat(7,1fr);
+ grid-template-columns:repeat(6,1fr);
  gap:16px;
  margin-bottom:24px
 }
@@ -120,7 +120,6 @@ tr.total{
  <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
  <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
- <div class="kpi"><span>Drawdown Máx</span><strong id="kDD" style="color:var(--red)">0</strong></div>
 </div>
 
 <div class="cards">
@@ -234,7 +233,6 @@ function atualizar(){
  );
 
  let tot={trades:0,pontos:0,gain:0,stop:0,zero:0};
- let saldo=0,topo=0,dd=0;
 
  f.forEach(d=>{
   tot.trades+=d.trades;
@@ -242,10 +240,6 @@ function atualizar(){
   tot.gain+=d.gain;
   tot.stop+=d.stop;
   tot.zero+=d.zero;
-
-  saldo+=d.pontos;
-  topo=Math.max(topo,saldo);
-  dd=Math.min(dd,saldo-topo);
  });
 
  kTrades.textContent=tot.trades;
@@ -254,7 +248,6 @@ function atualizar(){
  kStops.textContent=tot.stop;
  kZero.textContent=tot.zero;
  kAcc.textContent=(tot.gain+tot.stop)?((tot.gain/(tot.gain+tot.stop))*100).toFixed(2)+"%":"0%";
- kDD.textContent=dd;
 
  renderTabela(f,tot);
  renderGraficos(f,tot);
