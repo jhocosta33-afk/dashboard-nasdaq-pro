@@ -38,6 +38,11 @@ select{
  padding:10px 14px;
 }
 
+select:disabled{
+ opacity:.45;
+ cursor:not-allowed;
+}
+
 .filters{display:flex;gap:12px;margin-bottom:20px}
 
 .kpis{
@@ -169,7 +174,6 @@ function parseCSV(t){
    dia:c[0],
    semana:c[1],
    mes,
-   mesNome:MESES[mes],
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
@@ -194,18 +198,27 @@ function initFiltros(){
 
 function atualizar(){
  const m=filtroMes.value;
- const semanaSelecionada = filtroSemana.value;
 
- const semanas=[...new Set(
-  data.filter(d=>m==="ALL"||d.mes===m).map(d=>d.semana)
- )];
+ if(m==="ALL"){
+  filtroSemana.disabled=true;
+  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
+  filtroSemana.value="ALL";
+ }else{
+  filtroSemana.disabled=false;
 
- filtroSemana.innerHTML =
-  '<option value="ALL">TODAS AS SEMANAS</option>'+
-  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+  const semanaSelecionada=filtroSemana.value;
 
- if(semanas.includes(semanaSelecionada)){
-  filtroSemana.value = semanaSelecionada;
+  const semanas=[...new Set(
+   data.filter(d=>d.mes===m).map(d=>d.semana)
+  )];
+
+  filtroSemana.innerHTML =
+   '<option value="ALL">TODAS AS SEMANAS</option>'+
+   semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+
+  if(semanas.includes(semanaSelecionada)){
+   filtroSemana.value=semanaSelecionada;
+  }
  }
 
  const s=filtroSemana.value;
