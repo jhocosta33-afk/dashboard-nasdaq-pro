@@ -11,6 +11,7 @@
 :root{
  --bg:#020617;
  --card:#050b1a;
+ --card-strong:#08122c;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
@@ -29,14 +30,12 @@ body{
 
 .container{max-width:1400px;margin:auto;padding:24px}
 
-/* 🔥 TÍTULO PRINCIPAL */
 h1{
  margin-bottom:24px;
  font-size:34px;
  letter-spacing:.6px;
 }
 
-/* 🔹 FILTROS */
 select{
  background:var(--card);
  color:var(--text);
@@ -57,7 +56,7 @@ select:disabled{
  margin-bottom:26px
 }
 
-/* 🔥 KPIs */
+/* KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(6,1fr);
@@ -74,7 +73,7 @@ select:disabled{
 
 .kpi span{
  color:var(--muted);
- font-size:18px;          /* 🔥 MAIOR */
+ font-size:18px;
  font-weight:500;
  letter-spacing:.6px;
  text-transform:uppercase;
@@ -87,7 +86,7 @@ select:disabled{
  font-weight:600;
 }
 
-/* 🔹 CARDS DOS GRÁFICOS */
+/* CARDS */
 .cards{
  display:grid;
  grid-template-columns:1fr 1fr;
@@ -107,7 +106,7 @@ select:disabled{
 
 .card strong{
  margin-bottom:16px;
- font-size:22px;          /* 🔥 MAIOR */
+ font-size:22px;
  font-weight:600;
  letter-spacing:.4px;
 }
@@ -122,35 +121,53 @@ canvas{
  height:100%!important;
 }
 
-/* 🔹 TABELA */
+/* 🔥 TABELA OPERACIONAL – MELHORADA */
 table{
  width:100%;
- border-collapse:collapse
+ border-collapse:collapse;
+ margin-top:10px;
 }
 
-th{
- padding:14px;
- border-bottom:1px solid var(--border);
- text-align:center;
+thead{
+ background:linear-gradient(180deg,#0d1b3d,#08122c);
+}
+
+thead th{
+ padding:16px 12px;
  font-size:16px;
- color:var(--muted);
+ font-weight:600;
+ letter-spacing:.6px;
+ text-transform:uppercase;
+ color:#c7d2fe;
+ border-bottom:1px solid rgba(255,255,255,.15);
 }
 
-td{
- padding:14px;
+tbody td{
+ padding:14px 12px;
+ font-size:17px;                 /* 🔥 MAIOR */
  border-bottom:1px solid var(--border);
- text-align:center;
- font-size:16px;
 }
 
+tbody tr:hover{
+ background:rgba(255,255,255,.04);
+}
+
+/* 🔥 LINHA TOTAL */
 tr.total{
- border-top:2px solid rgba(255,255,255,.25);
+ background:rgba(34,197,94,.08);
+ font-size:18px;
  font-weight:600;
 }
 
+tr.total td{
+ padding:16px 12px;
+ border-top:2px solid rgba(255,255,255,.25);
+}
+
+/* TÍTULO DA TABELA */
 h3{
  margin:0 0 16px;
- font-size:22px;          /* 🔥 MAIOR */
+ font-size:22px;
  font-weight:600;
 }
 </style>
@@ -195,7 +212,13 @@ h3{
 <table>
 <thead>
 <tr>
-<th>Dia</th><th>Semana</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th>
+<th>Dia</th>
+<th>Semana</th>
+<th>Pontos</th>
+<th>Trades</th>
+<th>Gain</th>
+<th>Stop</th>
+<th>0x0</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -215,7 +238,7 @@ const MESES={
 
 let data=[],chartLinha,chartBar;
 
-/* resto do JS permanece exatamente igual */
+/* TODO O JS permanece exatamente igual ao anterior */
 </script>
 </body>
 </html>
