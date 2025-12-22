@@ -122,7 +122,7 @@ canvas{
 
 table{
  width:100%;
- min-width:760px;
+ min-width:900px;
  border-collapse:collapse;
 }
 
@@ -170,19 +170,27 @@ tr.total td{
 }
 
 /* ===== RESPONSIVO ===== */
+
 @media (max-width: 900px){
- .kpis{grid-template-columns:repeat(3,1fr)}
+ .kpis{
+  grid-template-columns:repeat(3,1fr);
+ }
 }
 
 @media (max-width: 600px){
+
  .container{padding:16px}
  h1{font-size:24px}
+
  .filters{flex-direction:column}
  select{width:100%}
+
  .kpis{grid-template-columns:repeat(2,1fr)}
  .kpi strong{font-size:24px}
+
  .cards{grid-template-columns:1fr}
  .card{height:360px}
+
  th{font-size:15px}
  td{font-size:14px}
 }
@@ -210,16 +218,12 @@ tr.total td{
 <div class="cards">
  <div class="card">
   <strong>📈 Balanço de Pontos</strong>
-  <div class="chart-wrap">
-   <canvas id="chartLinha"></canvas>
-  </div>
+  <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
  </div>
 
  <div class="card">
   <strong>📊 Gains x Stops x 0x0</strong>
-  <div class="chart-wrap">
-   <canvas id="chartBar"></canvas>
-  </div>
+  <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
  </div>
 </div>
 
@@ -231,6 +235,7 @@ tr.total td{
 <tr>
 <th>Dia</th>
 <th>Semana</th>
+<th>Ativo</th>
 <th>Pontos</th>
 <th>Trades</th>
 <th>Gain</th>
@@ -269,6 +274,7 @@ function parseCSV(t){
   return{
    dia:c[0],
    semana:c[1],
+   ativo:c[2],
    mes:c[0].substring(3,5),
    pontos:+c[3]||0,
    trades:+c[4]||0,
@@ -289,11 +295,7 @@ function initFiltros(){
 
  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
 
- filtroMes.onchange=()=>{
-  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
-  atualizar();
- };
-
+ filtroMes.onchange=()=>{ atualizar(); };
  filtroSemana.onchange=atualizar;
 }
 
@@ -310,16 +312,18 @@ function atualizar(){
   filtroSemana.innerHTML=
    '<option value="ALL">TODAS AS SEMANAS</option>'+
    semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
-  if(semanas.includes(sAnterior))filtroSemana.value=sAnterior;
+  if(semanas.includes(sAnterior)) filtroSemana.value=sAnterior;
  }
 
  const s=filtroSemana.value;
+
  const f=data.filter(d=>
   (m==="ALL"||d.mes===m)&&
   (s==="ALL"||d.semana===s)
  );
 
  let tot={trades:0,pontos:0,gain:0,stop:0,zero:0};
+
  f.forEach(d=>{
   tot.trades+=d.trades;
   tot.pontos+=d.pontos;
@@ -333,9 +337,7 @@ function atualizar(){
  kGains.textContent=tot.gain;
  kStops.textContent=tot.stop;
  kZero.textContent=tot.zero;
- kAcc.textContent=(tot.gain+tot.stop)
-  ?((tot.gain/(tot.gain+tot.stop))*100).toFixed(2)+"%"
-  :"0%";
+ kAcc.textContent=(tot.gain+tot.stop)?((tot.gain/(tot.gain+tot.stop))*100).toFixed(2)+"%":"0%";
 
  renderTabela(f,tot);
  renderGraficos(f,tot);
@@ -348,6 +350,7 @@ function renderTabela(f,tot){
   <tr>
    <td>${d.dia}</td>
    <td>${d.semana}</td>
+   <td>${d.ativo}</td>
    <td>${d.pontos}</td>
    <td>${d.trades}</td>
    <td style="color:var(--green)">${d.gain}</td>
@@ -355,9 +358,10 @@ function renderTabela(f,tot){
    <td style="color:var(--yellow)">${d.zero}</td>
   </tr>`;
  });
+
  tbody.innerHTML+=`
  <tr class="total">
-  <td colspan="2">TOTAL</td>
+  <td colspan="3">TOTAL</td>
   <td>${tot.pontos}</td>
   <td>${tot.trades}</td>
   <td style="color:var(--green)">${tot.gain}</td>
@@ -382,25 +386,9 @@ function renderGraficos(f,tot){
    backgroundColor:"rgba(34,197,94,.25)",
    fill:true,
    tension:.35,
-   pointRadius:4,
-   pointHoverRadius:7
+   pointRadius:3
   }]},
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   interaction:{mode:"index",intersect:false},
-   plugins:{
-    legend:{display:false},
-    tooltip:{
-     backgroundColor:"#020617",
-     borderColor:"#22c55e",
-     borderWidth:1,
-     titleColor:"#fff",
-     bodyColor:"#e5e7eb",
-     padding:12
-    }
-   }
-  }
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
  chartBar=new Chart(chartBarEl,{
@@ -413,20 +401,7 @@ function renderGraficos(f,tot){
     borderRadius:12
    }]
   },
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   interaction:{mode:"nearest",intersect:false},
-   plugins:{
-    legend:{display:false},
-    tooltip:{
-     backgroundColor:"#020617",
-     titleColor:"#fff",
-     bodyColor:"#e5e7eb",
-     padding:12
-    }
-   }
-  }
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 }
 
