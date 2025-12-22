@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Dashboard NASDAQ PRO</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -30,122 +29,65 @@ body{
 .container{max-width:1400px;margin:auto;padding:24px}
 h1{margin-bottom:18px;font-size:30px}
 
-/* ===== FILTROS ===== */
-.filters{
- display:flex;
- gap:12px;
- margin-bottom:24px;
- flex-wrap:wrap;
-}
-
+/* FILTROS */
+.filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
 select{
  background:var(--card);
  color:var(--text);
  border:1px solid var(--border);
  border-radius:12px;
- padding:14px 16px;
+ padding:12px 16px;
  font-size:15px;
  width:220px;
 }
+select:disabled{opacity:.5;cursor:not-allowed}
 
-/* ===== KPIs ===== */
-.kpis{
- display:grid;
- grid-template-columns:repeat(6,1fr);
- gap:16px;
- margin-bottom:28px
-}
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:28px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px}
+.kpi span{color:var(--muted);font-size:14px;text-transform:uppercase}
+.kpi strong{display:block;margin-top:8px;font-size:28px}
 
-.kpi{
- background:var(--card);
- border:1px solid var(--border);
- border-radius:18px;
- padding:18px
-}
-
-.kpi span{
- color:var(--muted);
- font-size:14px;
- text-transform:uppercase;
-}
-
-.kpi strong{
- display:block;
- margin-top:8px;
- font-size:28px
-}
-
-/* ===== GRÁFICOS ===== */
-.cards{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:16px;
- margin-bottom:24px
-}
-
-.card{
- background:var(--card);
- border:1px solid var(--border);
- border-radius:22px;
- padding:18px;
- height:420px;
- display:flex;
- flex-direction:column
-}
-
+/* GRÁFICOS */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:18px;height:420px;display:flex;flex-direction:column}
+.card strong{margin-bottom:12px;font-size:18px}
 .chart-wrap{flex:1;position:relative}
 canvas{width:100%!important;height:100%!important}
 
-/* ===== TABELA ===== */
-.table-wrap{
- overflow-x:auto;
- -webkit-overflow-scrolling:touch;
-}
-
-table{
- width:100%;
- min-width:820px;
- border-collapse:collapse;
-}
-
+/* TABELA */
+.table-wrap{overflow-x:auto}
+table{width:100%;min-width:900px;border-collapse:collapse}
+thead{background:linear-gradient(180deg,#020b2a,#020617)}
 th{
  color:#93c5fd;
+ font-weight:700;
  font-size:18px;
+ letter-spacing:.8px;
  padding:18px 12px;
- border-bottom:1px solid var(--border);
+ text-align:center;
  text-transform:uppercase;
- white-space:nowrap;
 }
-
 td{
  padding:15px 12px;
  border-bottom:1px solid var(--border);
  font-size:16px;
  text-align:center;
- white-space:nowrap;
 }
+tbody tr:hover{background:rgba(255,255,255,.03)}
+thead th:first-child,tbody td:first-child{text-align:left;padding-left:18px}
+tr.total{background:rgba(34,197,94,.08);font-weight:700}
 
-tr.total{
- background:rgba(34,197,94,.08);
- font-weight:700;
-}
-
-/* ===== MOBILE ===== */
-@media (max-width: 900px){
+/* MOBILE */
+@media(max-width:900px){
  .kpis{grid-template-columns:repeat(3,1fr)}
 }
-
-@media (max-width: 600px){
- .container{padding:16px}
- h1{font-size:24px}
+@media(max-width:600px){
  .filters{flex-direction:column}
- select{width:100%;font-size:16px}
+ select{width:100%}
  .kpis{grid-template-columns:repeat(2,1fr)}
- .kpi strong{font-size:26px}
  .cards{grid-template-columns:1fr}
- .card{height:380px}
- th{font-size:15px}
- td{font-size:14px}
+ .card{height:360px}
 }
 </style>
 </head>
@@ -157,7 +99,9 @@ tr.total{
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
- <select id="filtroSemana"></select>
+ <select id="filtroSemana" disabled>
+  <option>Semanas do mês</option>
+ </select>
 </div>
 
 <div class="kpis">
@@ -174,7 +118,6 @@ tr.total{
   <strong>📈 Balanço de Pontos</strong>
   <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
  </div>
-
  <div class="card">
   <strong>📊 Gains x Stops x 0x0</strong>
   <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
@@ -205,11 +148,15 @@ tr.total{
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-const nomesMeses=["","Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const STORAGE_KEY="dashboardFiltros";
+
+const nomesMeses={
+ "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
+ "05":"Maio","06":"Junho","07":"Julho","08":"Agosto",
+ "09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"
+};
 
 let data=[],chartLinha,chartBar;
-
-const STORAGE_KEY="dashboardFiltros";
 
 function salvarFiltros(){
  localStorage.setItem(STORAGE_KEY,JSON.stringify({
@@ -220,120 +167,99 @@ function salvarFiltros(){
 }
 
 function carregarFiltros(){
- try{
-  return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};
- }catch{ return {}; }
+ const raw=localStorage.getItem(STORAGE_KEY);
+ if(!raw) return {firstAccess:true};
+ try{return {...JSON.parse(raw),firstAccess:false}}catch{return{firstAccess:true}}
 }
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
+ parseCSV(t);
+}
+
+function parseCSV(t){
  const rows=t.trim().split(/\r?\n/);
  rows.shift();
-
  data=rows.map(r=>{
   const c=r.split(",");
-  const [d,m,a]=c[0].split("/");
   return{
-   dia:c[0],ano:a,mes:m,
-   semana:c[1],ativo:c[2],
-   pontos:+c[3]||0,trades:+c[4]||0,
-   gain:+c[5]||0,stop:+c[6]||0,zero:+c[7]||0
+   dia:c[0],
+   semana:c[1],
+   ativo:c[2],
+   ano:c[0].substring(6,10),
+   mes:c[0].substring(3,5),
+   pontos:+c[3]||0,
+   trades:+c[4]||0,
+   gain:+c[5]||0,
+   stop:+c[6]||0,
+   zero:+c[7]||0
   }
  });
  initFiltros();
+ atualizar();
 }
 
 function initFiltros(){
- const saved=carregarFiltros();
  const anos=[...new Set(data.map(d=>d.ano))].sort();
+ const saved=carregarFiltros();
+ const anoAtual=new Date().getFullYear().toString();
 
- filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
- filtroAno.value=saved.ano||anos.at(-1);
+ filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+ filtroAno.value=saved.firstAccess?(anos.includes(anoAtual)?anoAtual:anos.at(-1)):saved.ano;
 
  filtroAno.onchange=()=>{
-  salvarFiltros();
-  initMeses(true);
- };
-
- initMeses(false);
-}
-
-function initMeses(resetSemana){
- const saved=carregarFiltros();
- const ano=filtroAno.value;
-
- const meses=[...new Set(data.filter(d=>d.ano===ano).map(d=>d.mes))].sort();
- filtroMes.innerHTML=meses.map(m=>`<option value="${m}">${nomesMeses[+m]}</option>`).join("");
-
- filtroMes.value=(saved.mes&&meses.includes(saved.mes))?saved.mes:meses.at(-1);
-
- filtroMes.onchange=()=>{
-  salvarFiltros();
-  initSemanas(true);
- };
-
- initSemanas(resetSemana);
-}
-
-function initSemanas(reset){
- const saved=carregarFiltros();
- const a=filtroAno.value,m=filtroMes.value;
- const semanas=[...new Set(data.filter(d=>d.ano===a&&d.mes===m).map(d=>d.semana))];
-
- filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
-  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
-
- filtroSemana.value=(reset||!semanas.includes(saved.semana))?"ALL":saved.semana||"ALL";
-
- filtroSemana.onchange=()=>{
+  filtroMes.value="ALL";
+  filtroSemana.disabled=true;
+  filtroSemana.innerHTML="<option>Semanas do mês</option>";
   salvarFiltros();
   atualizar();
  };
 
- atualizar();
+ initMeses();
+}
+
+function initMeses(){
+ const saved=carregarFiltros();
+ const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
+ const meses=[...new Set(data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
+
+ filtroMes.innerHTML=meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+ filtroMes.value=saved.firstAccess?(meses.includes(mesAtual)?mesAtual:meses.at(-1)):saved.mes;
+
+ filtroMes.onchange=()=>{
+  filtroSemana.disabled=true;
+  filtroSemana.innerHTML="<option>Semanas do mês</option>";
+  salvarFiltros();
+  atualizar();
+ };
 }
 
 function atualizar(){
- const a=filtroAno.value,m=filtroMes.value,s=filtroSemana.value;
- const f=data.filter(d=>d.ano===a&&d.mes===m&&(s==="ALL"||d.semana===s));
-
- let tot={trades:0,pontos:0,gain:0,stop:0,zero:0};
- f.forEach(d=>{
-  tot.trades+=d.trades;
-  tot.pontos+=d.pontos;
-  tot.gain+=d.gain;
-  tot.stop+=d.stop;
-  tot.zero+=d.zero;
- });
-
- kTrades.textContent=tot.trades;
- kPontos.textContent=tot.pontos;
- kGains.textContent=tot.gain;
- kStops.textContent=tot.stop;
- kZero.textContent=tot.zero;
- kAcc.textContent=(tot.gain+tot.stop)?((tot.gain/(tot.gain+tot.stop))*100).toFixed(2)+"%":"0%";
-
- renderTabela(f,tot);
- renderGraficos(f,tot);
+ salvarFiltros();
+ const f=data.filter(d=>d.ano===filtroAno.value&&d.mes===filtroMes.value);
+ renderTabela(f);
+ renderGraficos(f);
 }
 
-function renderTabela(f,tot){
+function renderTabela(f){
  tbody.innerHTML="";
+ let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
  f.forEach(d=>{
+  tot.pontos+=d.pontos;tot.trades+=d.trades;
+  tot.gain+=d.gain;tot.stop+=d.stop;tot.zero+=d.zero;
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
-   <td style="color:${d.pontos<0?'#ef4444':'#22c55e'}">${d.pontos}</td>
+   <td style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
    <td>${d.trades}</td>
-   <td style="color:#22c55e">${d.gain}</td>
-   <td style="color:#ef4444">${d.stop}</td>
-   <td style="color:#facc15">${d.zero}</td>
+   <td style="color:var(--green)">${d.gain}</td>
+   <td style="color:var(--red)">${d.stop}</td>
+   <td style="color:var(--yellow)">${d.zero}</td>
    <td>${d.ativo}</td>
    <td>${d.semana}</td>
   </tr>`;
  });
-
  tbody.innerHTML+=`
  <tr class="total">
   <td>TOTAL</td>
@@ -346,11 +272,12 @@ function renderTabela(f,tot){
  </tr>`;
 }
 
-function renderGraficos(f,tot){
- const labels=f.map(d=>d.dia);
- let acc=0,saldo=[],cores=[];
+function renderGraficos(f){
+ let acc=0;
+ const labels=[],saldo=[],cores=[];
  f.forEach(d=>{
   acc+=d.pontos;
+  labels.push(d.dia);
   saldo.push(acc);
   cores.push(d.pontos<0?"#ef4444":"#22c55e");
  });
@@ -362,14 +289,12 @@ function renderGraficos(f,tot){
   type:"line",
   data:{labels,datasets:[{
    data:saldo,
-   borderColor:cores,
-   backgroundColor:"rgba(34,197,94,.18)",
-   fill:true,
-   tension:.35,
+   borderColor:"#22c55e",
+   pointBackgroundColor:cores,
    pointRadius:5,
-   pointHoverRadius:9,
-   hitRadius:20,
-   pointBackgroundColor:cores
+   tension:.35,
+   fill:true,
+   backgroundColor:"rgba(34,197,94,.18)"
   }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
@@ -377,7 +302,7 @@ function renderGraficos(f,tot){
  chartBar=new Chart(chartBarEl,{
   type:"bar",
   data:{labels:["Gain","Stop","0x0"],datasets:[{
-   data:[tot.gain,tot.stop,tot.zero],
+   data:[f.reduce((a,b)=>a+b.gain,0),f.reduce((a,b)=>a+b.stop,0),f.reduce((a,b)=>a+b.zero,0)],
    backgroundColor:["#22c55e","#ef4444","#facc15"],
    borderRadius:12
   }]},
