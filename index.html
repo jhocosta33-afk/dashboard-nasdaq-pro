@@ -17,18 +17,16 @@
  --red:#ef4444;
  --yellow:#facc15;
 }
-
 *{box-sizing:border-box;font-family:Inter,system-ui}
-
 body{
  margin:0;
  background:radial-gradient(circle at top,#0b1f4d,#020617 70%);
  color:var(--text)
 }
-
 .container{max-width:1400px;margin:auto;padding:24px}
 h1{margin-bottom:18px;font-size:30px}
 
+/* FILTROS */
 .filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
 select{
  background:var(--card);
@@ -39,18 +37,22 @@ select{
  font-size:15px;
  width:220px;
 }
+select:disabled{opacity:.5;cursor:not-allowed}
 
+/* KPIs */
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:28px}
 .kpi{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px}
 .kpi span{color:var(--muted);font-size:14px;text-transform:uppercase}
 .kpi strong{display:block;margin-top:8px;font-size:28px}
 
+/* GRÁFICOS */
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:18px;height:420px;display:flex;flex-direction:column}
 .card strong{margin-bottom:12px;font-size:18px}
 .chart-wrap{flex:1;position:relative}
 canvas{width:100%!important;height:100%!important}
 
+/* TABELA */
 .table-wrap{overflow-x:auto}
 table{width:100%;min-width:900px;border-collapse:collapse}
 thead{background:linear-gradient(180deg,#020b2a,#020617)}
@@ -73,10 +75,16 @@ tbody tr:hover{background:rgba(255,255,255,.03)}
 thead th:first-child,tbody td:first-child{text-align:left;padding-left:18px}
 tr.total{background:rgba(34,197,94,.08);font-weight:700}
 
+/* MOBILE */
+@media(max-width:900px){
+ .kpis{grid-template-columns:repeat(3,1fr)}
+}
 @media(max-width:600px){
  .filters{flex-direction:column}
  select{width:100%}
+ .kpis{grid-template-columns:repeat(2,1fr)}
  .cards{grid-template-columns:1fr}
+ .card{height:360px}
 }
 </style>
 </head>
@@ -135,6 +143,7 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const STORAGE_KEY="dashboardFiltros";
 
 const nomesMeses={
  "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
@@ -144,12 +153,29 @@ const nomesMeses={
 
 let data=[],chartLinha,chartBar;
 
+function salvarFiltros(){
+ localStorage.setItem(STORAGE_KEY,JSON.stringify({
+  ano:filtroAno.value,
+  mes:filtroMes.value,
+  semana:filtroSemana.value
+ }));
+}
+
+function carregarFiltros(){
+ const raw=localStorage.getItem(STORAGE_KEY);
+ if(!raw) return {firstAccess:true};
+ try{return {...JSON.parse(raw),firstAccess:false}}catch{return{firstAccess:true}}
+}
+
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
+ parseCSV(t);
+}
+
+function parseCSV(t){
  const rows=t.trim().split(/\r?\n/);
  rows.shift();
-
  data=rows.map(r=>{
   const c=r.split(",");
   return{
@@ -165,26 +191,43 @@ async function loadCSV(){
    zero:+c[7]||0
   }
  });
-
  initFiltros();
  atualizar();
 }
 
 function initFiltros(){
- const anos=[...new Set(data.map(d=>d.ano))];
- filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
- filtroAno.value=new Date().getFullYear();
+ const anos=[...new Set(data.map(d=>d.ano))].sort();
+ const saved=carregarFiltros();
+ const anoAtual=new Date().getFullYear().toString();
 
- filtroAno.onchange=()=>{filtroMes.value="ALL";filtroSemana.value="ALL";atualizar()};
+ filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+ filtroAno.value=saved.firstAccess?(anos.includes(anoAtual)?anoAtual:anos.at(-1)):saved.ano;
+
+ filtroAno.onchange=()=>{salvarFiltros();atualizar()};
  initMeses();
 }
 
 function initMeses(){
- const meses=[...new Set(data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
- filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
+ const saved=carregarFiltros();
+ const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
+
+ const meses=[...new Set(
+  data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes)
+ )];
+
+ filtroMes.innerHTML=
+  `<option value="ALL">Todos os meses</option>`+
   meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value=new Date().getMonth()+1;
- filtroMes.onchange=()=>{filtroSemana.value="ALL";atualizar()};
+
+ filtroMes.value=saved.firstAccess
+  ?(meses.includes(mesAtual)?mesAtual:"ALL")
+  :(saved.mes||"ALL");
+
+ filtroMes.onchange=()=>{
+  filtroSemana.value="ALL";
+  salvarFiltros();
+  atualizar();
+ };
  initSemanas();
 }
 
@@ -194,12 +237,23 @@ function initSemanas(){
   filtroSemana.disabled=true;
   return;
  }
+
  filtroSemana.disabled=false;
- const semanas=[...new Set(data.filter(d=>d.mes===filtroMes.value).map(d=>d.semana))];
- filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
-  semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.value="ALL";
- filtroSemana.onchange=atualizar;
+ const saved=carregarFiltros();
+
+ const semanas=[...new Set(
+  data.filter(d=>
+   d.ano===filtroAno.value &&
+   d.mes===filtroMes.value
+  ).map(d=>d.semana)
+ )];
+
+ filtroSemana.innerHTML=
+  '<option value="ALL">Todas as semanas</option>'+
+  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+
+ filtroSemana.value = semanas.includes(saved.semana) ? saved.semana : "ALL";
+ filtroSemana.onchange=()=>{salvarFiltros();atualizar()};
 }
 
 function atualizar(){
@@ -253,14 +307,14 @@ function renderTabela(f){
 }
 
 function renderGraficos(f){
- const labels=f.map(d=>d.dia);
  let acc=0;
- const saldo=[],colors=[];
+ const labels=[],saldo=[],cores=[];
 
  f.forEach(d=>{
   acc+=d.pontos;
+  labels.push(d.dia);
   saldo.push(acc);
-  colors.push(d.pontos<0?"#ef4444":"#22c55e");
+  cores.push(d.pontos<0?"#ef4444":"#22c55e");
  });
 
  if(chartLinha)chartLinha.destroy();
@@ -270,28 +324,27 @@ function renderGraficos(f){
   type:"line",
   data:{labels,datasets:[{
    data:saldo,
-   borderColor:colors,
-   pointBackgroundColor:colors,
+   borderColor:"#22c55e",
+   pointBackgroundColor:cores,
+   pointRadius:5,
+   tension:.35,
    fill:true,
-   tension:.35
+   backgroundColor:"rgba(34,197,94,.18)"
   }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
  chartBar=new Chart(chartBarEl,{
   type:"bar",
-  data:{
-   labels:["Gain","Stop","0x0"],
-   datasets:[{
-    data:[
-     f.reduce((a,b)=>a+b.gain,0),
-     f.reduce((a,b)=>a+b.stop,0),
-     f.reduce((a,b)=>a+b.zero,0)
-    ],
-    backgroundColor:["#22c55e","#ef4444","#facc15"],
-    borderRadius:12
-   }]
-  },
+  data:{labels:["Gain","Stop","0x0"],datasets:[{
+   data:[
+    f.reduce((a,b)=>a+b.gain,0),
+    f.reduce((a,b)=>a+b.stop,0),
+    f.reduce((a,b)=>a+b.zero,0)
+   ],
+   backgroundColor:["#22c55e","#ef4444","#facc15"],
+   borderRadius:12
+  }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 }
