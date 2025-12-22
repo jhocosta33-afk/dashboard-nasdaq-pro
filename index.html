@@ -97,7 +97,7 @@ select:disabled{opacity:.5;cursor:not-allowed}
  padding:18px;
  display:flex;
  flex-direction:column;
- aspect-ratio: 16 / 9;
+ aspect-ratio:16/9;
 }
 
 .card strong{
@@ -105,15 +105,9 @@ select:disabled{opacity:.5;cursor:not-allowed}
  font-size:18px;
 }
 
-.chart-wrap{
- flex:1;
- position:relative;
-}
+.chart-wrap{flex:1;position:relative}
 
-canvas{
- width:100%!important;
- height:100%!important;
-}
+canvas{width:100%!important;height:100%!important}
 
 /* TABELA */
 .table-wrap{overflow-x:auto}
@@ -356,11 +350,12 @@ function renderTabela(f){
 
 function renderGraficos(f){
  let acc=0;
- const labels=[],saldo=[],cores=[];
+ const labels=[],saldo=[],cores=[],pontosDia=[];
  f.forEach(d=>{
   acc+=d.pontos;
   labels.push(d.dia);
   saldo.push(acc);
+  pontosDia.push(d.pontos);
   cores.push(d.pontos<0?"#ef4444":"#22c55e");
  });
 
@@ -383,7 +378,16 @@ function renderGraficos(f){
    maintainAspectRatio:false,
    resizeDelay:150,
    interaction:{mode:"index",intersect:false},
-   plugins:{legend:{display:false}}
+   plugins:{
+    legend:{display:false},
+    tooltip:{
+     callbacks:{
+      title:(items)=>`${pontosDia[items[0].dataIndex]} pontos no dia`,
+      label:(item)=>`Total acumulado: ${item.formattedValue}`,
+      afterLabel:(item)=>`Data: ${labels[item.dataIndex]}`
+     }
+    }
+   }
   }
  });
 
@@ -398,12 +402,7 @@ function renderGraficos(f){
    backgroundColor:["#22c55e","#ef4444","#facc15"],
    borderRadius:12
   }]},
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   resizeDelay:150,
-   plugins:{legend:{display:false}}
-  }
+  options:{responsive:true,maintainAspectRatio:false,resizeDelay:150,plugins:{legend:{display:false}}}
  });
 }
 
