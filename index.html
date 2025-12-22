@@ -17,12 +17,15 @@
  --red:#ef4444;
  --yellow:#facc15;
 }
+
 *{box-sizing:border-box;font-family:Inter,system-ui}
+
 body{
  margin:0;
  background:radial-gradient(circle at top,#0b1f4d,#020617 70%);
  color:var(--text)
 }
+
 .container{max-width:1400px;margin:auto;padding:24px}
 h1{margin-bottom:18px;font-size:30px}
 
@@ -143,7 +146,6 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-const STORAGE_KEY="dashboardFiltros";
 
 const nomesMeses={
  "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
@@ -152,20 +154,6 @@ const nomesMeses={
 };
 
 let data=[],chartLinha,chartBar;
-
-function salvarFiltros(){
- localStorage.setItem(STORAGE_KEY,JSON.stringify({
-  ano:filtroAno.value,
-  mes:filtroMes.value,
-  semana:filtroSemana.value
- }));
-}
-
-function carregarFiltros(){
- const raw=localStorage.getItem(STORAGE_KEY);
- if(!raw) return {firstAccess:true};
- try{return {...JSON.parse(raw),firstAccess:false}}catch{return{firstAccess:true}}
-}
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
@@ -197,37 +185,21 @@ function parseCSV(t){
 
 function initFiltros(){
  const anos=[...new Set(data.map(d=>d.ano))].sort();
- const saved=carregarFiltros();
- const anoAtual=new Date().getFullYear().toString();
-
  filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
- filtroAno.value=saved.firstAccess?(anos.includes(anoAtual)?anoAtual:anos.at(-1)):saved.ano;
-
- filtroAno.onchange=()=>{salvarFiltros();atualizar()};
+ filtroAno.value=anos.at(-1);
+ filtroAno.onchange=atualizar;
  initMeses();
 }
 
 function initMeses(){
- const saved=carregarFiltros();
- const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
-
  const meses=[...new Set(
   data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes)
  )];
-
  filtroMes.innerHTML=
   `<option value="ALL">Todos os meses</option>`+
   meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
-
- filtroMes.value=saved.firstAccess
-  ?(meses.includes(mesAtual)?mesAtual:"ALL")
-  :(saved.mes||"ALL");
-
- filtroMes.onchange=()=>{
-  filtroSemana.value="ALL";
-  salvarFiltros();
-  atualizar();
- };
+ filtroMes.value="ALL";
+ filtroMes.onchange=atualizar;
  initSemanas();
 }
 
@@ -237,23 +209,15 @@ function initSemanas(){
   filtroSemana.disabled=true;
   return;
  }
-
  filtroSemana.disabled=false;
- const saved=carregarFiltros();
-
  const semanas=[...new Set(
-  data.filter(d=>
-   d.ano===filtroAno.value &&
-   d.mes===filtroMes.value
-  ).map(d=>d.semana)
+  data.filter(d=>d.ano===filtroAno.value&&d.mes===filtroMes.value).map(d=>d.semana)
  )];
-
  filtroSemana.innerHTML=
   '<option value="ALL">Todas as semanas</option>'+
   semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
-
- filtroSemana.value = semanas.includes(saved.semana) ? saved.semana : "ALL";
- filtroSemana.onchange=()=>{salvarFiltros();atualizar()};
+ filtroSemana.value="ALL";
+ filtroSemana.onchange=atualizar;
 }
 
 function atualizar(){
@@ -266,8 +230,33 @@ function atualizar(){
   (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
  );
 
+ renderKPIs(f);
  renderTabela(f);
  renderGraficos(f);
+}
+
+/* ✅ KPIs CORRIGIDOS */
+function renderKPIs(f){
+ const tot={
+  trades:0,pontos:0,gain:0,stop:0,zero:0
+ };
+ f.forEach(d=>{
+  tot.trades+=d.trades;
+  tot.pontos+=d.pontos;
+  tot.gain+=d.gain;
+  tot.stop+=d.stop;
+  tot.zero+=d.zero;
+ });
+
+ const ops=tot.gain+tot.stop;
+ const acc=ops?Math.round((tot.gain/ops)*100):0;
+
+ kTrades.textContent=tot.trades;
+ kPontos.textContent=tot.pontos;
+ kGains.textContent=tot.gain;
+ kStops.textContent=tot.stop;
+ kZero.textContent=tot.zero;
+ kAcc.textContent=acc+"%";
 }
 
 function renderTabela(f){
@@ -309,7 +298,6 @@ function renderTabela(f){
 function renderGraficos(f){
  let acc=0;
  const labels=[],saldo=[],cores=[];
-
  f.forEach(d=>{
   acc+=d.pontos;
   labels.push(d.dia);
