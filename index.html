@@ -85,7 +85,7 @@ select:disabled{opacity:.5;cursor:not-allowed}
 /* GRÁFICOS */
 .cards{
  display:grid;
- grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+ grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
  gap:16px;
  margin-bottom:24px;
 }
@@ -95,9 +95,9 @@ select:disabled{opacity:.5;cursor:not-allowed}
  border:1px solid var(--border);
  border-radius:22px;
  padding:18px;
- height:clamp(320px,38vw,440px);
  display:flex;
  flex-direction:column;
+ aspect-ratio: 16 / 9;
 }
 
 .card strong{
@@ -105,9 +105,15 @@ select:disabled{opacity:.5;cursor:not-allowed}
  font-size:18px;
 }
 
-.chart-wrap{flex:1;position:relative}
+.chart-wrap{
+ flex:1;
+ position:relative;
+}
 
-canvas{width:100%!important;height:100%!important}
+canvas{
+ width:100%!important;
+ height:100%!important;
+}
 
 /* TABELA */
 .table-wrap{overflow-x:auto}
@@ -152,9 +158,10 @@ tr.total{
  font-weight:700;
 }
 
-/* TELAS MENORES */
+/* RESPONSIVO */
 @media(max-width:900px){
  .cards{grid-template-columns:1fr}
+ .card{aspect-ratio:auto;min-height:300px}
 }
 
 @media(max-width:600px){
@@ -193,7 +200,7 @@ tr.total{
  </div>
 </div>
 
-<div class="card" style="height:auto">
+<div class="card" style="aspect-ratio:auto">
 <h3>Tabela Operacional</h3>
 <div class="table-wrap">
 <table>
@@ -258,28 +265,16 @@ function initFiltros(){
  const anos=[...new Set(data.map(d=>d.ano))].sort();
  filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
  filtroAno.value=anos.at(-1);
-
- filtroAno.onchange=()=>{
-  initMeses();
-  atualizar();
- };
+ filtroAno.onchange=()=>{initMeses();atualizar()};
  initMeses();
 }
 
 function initMeses(){
  const meses=[...new Set(data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
-
- filtroMes.innerHTML=
-  `<option value="ALL">Todos os meses</option>`+
-  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
-
+ filtroMes.innerHTML=`<option value="ALL">Todos os meses</option>`+
+ meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
  filtroMes.value="ALL";
-
- filtroMes.onchange=()=>{
-  filtroSemana.value="ALL";
-  initSemanas();
-  atualizar();
- };
+ filtroMes.onchange=()=>{initSemanas();atualizar()};
  initSemanas();
 }
 
@@ -289,17 +284,10 @@ function initSemanas(){
   filtroSemana.disabled=true;
   return;
  }
-
  filtroSemana.disabled=false;
- const semanas=[...new Set(
-  data.filter(d=>d.ano===filtroAno.value && d.mes===filtroMes.value)
-      .map(d=>d.semana)
- )];
-
- filtroSemana.innerHTML=
-  '<option value="ALL">Todas as semanas</option>'+
-  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
-
+ const semanas=[...new Set(data.filter(d=>d.ano===filtroAno.value && d.mes===filtroMes.value).map(d=>d.semana))];
+ filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
+ semanas.map(s=>`<option>${s}</option>`).join("");
  filtroSemana.value="ALL";
  filtroSemana.onchange=atualizar;
 }
@@ -310,7 +298,6 @@ function atualizar(){
   (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
   (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
  );
-
  renderKPIs(f);
  renderTabela(f);
  renderGraficos(f);
@@ -337,14 +324,12 @@ function renderKPIs(f){
 function renderTabela(f){
  tbody.innerHTML="";
  let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
-
  f.forEach(d=>{
   tot.pontos+=d.pontos;
   tot.trades+=d.trades;
   tot.gain+=d.gain;
   tot.stop+=d.stop;
   tot.zero+=d.zero;
-
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
@@ -357,7 +342,6 @@ function renderTabela(f){
    <td>${d.semana}</td>
   </tr>`;
  });
-
  tbody.innerHTML+=`
  <tr class="total">
   <td>TOTAL</td>
@@ -394,7 +378,13 @@ function renderGraficos(f){
    fill:true,
    backgroundColor:"rgba(34,197,94,.18)"
   }]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  options:{
+   responsive:true,
+   maintainAspectRatio:false,
+   resizeDelay:150,
+   interaction:{mode:"index",intersect:false},
+   plugins:{legend:{display:false}}
+  }
  });
 
  chartBar=new Chart(chartBarEl,{
@@ -408,7 +398,12 @@ function renderGraficos(f){
    backgroundColor:["#22c55e","#ef4444","#facc15"],
    borderRadius:12
   }]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  options:{
+   responsive:true,
+   maintainAspectRatio:false,
+   resizeDelay:150,
+   plugins:{legend:{display:false}}
+  }
  });
 }
 
