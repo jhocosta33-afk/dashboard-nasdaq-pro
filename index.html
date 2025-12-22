@@ -99,9 +99,7 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
- <select id="filtroSemana" disabled>
-  <option>Semanas do mês</option>
- </select>
+ <select id="filtroSemana"></select>
 </div>
 
 <div class="kpis">
@@ -208,36 +206,65 @@ function initFiltros(){
  filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
  filtroAno.value=saved.firstAccess?(anos.includes(anoAtual)?anoAtual:anos.at(-1)):saved.ano;
 
- filtroAno.onchange=()=>{
-  filtroMes.value="ALL";
-  filtroSemana.disabled=true;
-  filtroSemana.innerHTML="<option>Semanas do mês</option>";
-  salvarFiltros();
-  atualizar();
- };
-
+ filtroAno.onchange=()=>{salvarFiltros();atualizar()};
  initMeses();
 }
 
 function initMeses(){
  const saved=carregarFiltros();
  const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
- const meses=[...new Set(data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
 
- filtroMes.innerHTML=meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value=saved.firstAccess?(meses.includes(mesAtual)?mesAtual:meses.at(-1)):saved.mes;
+ const meses=[...new Set(
+  data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes)
+ )];
 
- filtroMes.onchange=()=>{
+ filtroMes.innerHTML=
+  `<option value="ALL">Todos os meses</option>`+
+  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+
+ filtroMes.value=saved.firstAccess
+  ?(meses.includes(mesAtual)?mesAtual:"ALL")
+  :(saved.mes||"ALL");
+
+ filtroMes.onchange=()=>{salvarFiltros();atualizar()};
+ initSemanas();
+}
+
+function initSemanas(){
+ if(filtroMes.value==="ALL"){
+  filtroSemana.innerHTML='<option>Todas as semanas</option>';
   filtroSemana.disabled=true;
-  filtroSemana.innerHTML="<option>Semanas do mês</option>";
-  salvarFiltros();
-  atualizar();
- };
+  return;
+ }
+
+ filtroSemana.disabled=false;
+ const saved=carregarFiltros();
+
+ const semanas=[...new Set(
+  data.filter(d=>
+   d.ano===filtroAno.value &&
+   d.mes===filtroMes.value
+  ).map(d=>d.semana)
+ )];
+
+ filtroSemana.innerHTML=
+  '<option value="ALL">Todas as semanas</option>'+
+  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+
+ filtroSemana.value=saved.semana||"ALL";
+ filtroSemana.onchange=()=>{salvarFiltros();atualizar()};
 }
 
 function atualizar(){
- salvarFiltros();
- const f=data.filter(d=>d.ano===filtroAno.value&&d.mes===filtroMes.value);
+ initMeses();
+ initSemanas();
+
+ const f=data.filter(d=>
+  d.ano===filtroAno.value &&
+  (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
+  (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
+ );
+
  renderTabela(f);
  renderGraficos(f);
 }
@@ -245,9 +272,14 @@ function atualizar(){
 function renderTabela(f){
  tbody.innerHTML="";
  let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
+
  f.forEach(d=>{
-  tot.pontos+=d.pontos;tot.trades+=d.trades;
-  tot.gain+=d.gain;tot.stop+=d.stop;tot.zero+=d.zero;
+  tot.pontos+=d.pontos;
+  tot.trades+=d.trades;
+  tot.gain+=d.gain;
+  tot.stop+=d.stop;
+  tot.zero+=d.zero;
+
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
@@ -260,6 +292,7 @@ function renderTabela(f){
    <td>${d.semana}</td>
   </tr>`;
  });
+
  tbody.innerHTML+=`
  <tr class="total">
   <td>TOTAL</td>
@@ -275,6 +308,7 @@ function renderTabela(f){
 function renderGraficos(f){
  let acc=0;
  const labels=[],saldo=[],cores=[];
+
  f.forEach(d=>{
   acc+=d.pontos;
   labels.push(d.dia);
@@ -302,7 +336,11 @@ function renderGraficos(f){
  chartBar=new Chart(chartBarEl,{
   type:"bar",
   data:{labels:["Gain","Stop","0x0"],datasets:[{
-   data:[f.reduce((a,b)=>a+b.gain,0),f.reduce((a,b)=>a+b.stop,0),f.reduce((a,b)=>a+b.zero,0)],
+   data:[
+    f.reduce((a,b)=>a+b.gain,0),
+    f.reduce((a,b)=>a+b.stop,0),
+    f.reduce((a,b)=>a+b.zero,0)
+   ],
    backgroundColor:["#22c55e","#ef4444","#facc15"],
    borderRadius:12
   }]},
