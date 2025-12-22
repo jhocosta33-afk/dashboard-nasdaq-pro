@@ -17,15 +17,12 @@
  --red:#ef4444;
  --yellow:#facc15;
 }
-
 *{box-sizing:border-box;font-family:Inter,system-ui}
-
 body{
  margin:0;
  background:radial-gradient(circle at top,#0b1f4d,#020617 70%);
  color:var(--text)
 }
-
 .container{max-width:1400px;margin:auto;padding:24px}
 h1{margin-bottom:18px;font-size:30px}
 
@@ -77,18 +74,6 @@ td{
 tbody tr:hover{background:rgba(255,255,255,.03)}
 thead th:first-child,tbody td:first-child{text-align:left;padding-left:18px}
 tr.total{background:rgba(34,197,94,.08);font-weight:700}
-
-/* MOBILE */
-@media(max-width:900px){
- .kpis{grid-template-columns:repeat(3,1fr)}
-}
-@media(max-width:600px){
- .filters{flex-direction:column}
- select{width:100%}
- .kpis{grid-template-columns:repeat(2,1fr)}
- .cards{grid-template-columns:1fr}
- .card{height:360px}
-}
 </style>
 </head>
 
@@ -187,7 +172,12 @@ function initFiltros(){
  const anos=[...new Set(data.map(d=>d.ano))].sort();
  filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
  filtroAno.value=anos.at(-1);
- filtroAno.onchange=atualizar;
+
+ filtroAno.onchange=()=>{
+  initMeses();
+  atualizar();
+ };
+
  initMeses();
 }
 
@@ -195,11 +185,19 @@ function initMeses(){
  const meses=[...new Set(
   data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes)
  )];
+
  filtroMes.innerHTML=
   `<option value="ALL">Todos os meses</option>`+
   meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+
  filtroMes.value="ALL";
- filtroMes.onchange=atualizar;
+
+ filtroMes.onchange=()=>{
+  filtroSemana.value="ALL";
+  initSemanas();
+  atualizar();
+ };
+
  initSemanas();
 }
 
@@ -209,21 +207,24 @@ function initSemanas(){
   filtroSemana.disabled=true;
   return;
  }
+
  filtroSemana.disabled=false;
+
  const semanas=[...new Set(
-  data.filter(d=>d.ano===filtroAno.value&&d.mes===filtroMes.value).map(d=>d.semana)
+  data.filter(d=>d.ano===filtroAno.value && d.mes===filtroMes.value)
+      .map(d=>d.semana)
  )];
+
  filtroSemana.innerHTML=
   '<option value="ALL">Todas as semanas</option>'+
   semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+
  filtroSemana.value="ALL";
+
  filtroSemana.onchange=atualizar;
 }
 
 function atualizar(){
- initMeses();
- initSemanas();
-
  const f=data.filter(d=>
   d.ano===filtroAno.value &&
   (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
@@ -235,34 +236,27 @@ function atualizar(){
  renderGraficos(f);
 }
 
-/* ✅ KPIs CORRIGIDOS */
 function renderKPIs(f){
- const tot={
-  trades:0,pontos:0,gain:0,stop:0,zero:0
- };
+ let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
  f.forEach(d=>{
-  tot.trades+=d.trades;
-  tot.pontos+=d.pontos;
-  tot.gain+=d.gain;
-  tot.stop+=d.stop;
-  tot.zero+=d.zero;
+  t.trades+=d.trades;
+  t.pontos+=d.pontos;
+  t.gain+=d.gain;
+  t.stop+=d.stop;
+  t.zero+=d.zero;
  });
-
- const ops=tot.gain+tot.stop;
- const acc=ops?Math.round((tot.gain/ops)*100):0;
-
- kTrades.textContent=tot.trades;
- kPontos.textContent=tot.pontos;
- kGains.textContent=tot.gain;
- kStops.textContent=tot.stop;
- kZero.textContent=tot.zero;
- kAcc.textContent=acc+"%";
+ const ops=t.gain+t.stop;
+ kTrades.textContent=t.trades;
+ kPontos.textContent=t.pontos;
+ kGains.textContent=t.gain;
+ kStops.textContent=t.stop;
+ kZero.textContent=t.zero;
+ kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
 }
 
 function renderTabela(f){
  tbody.innerHTML="";
  let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
-
  f.forEach(d=>{
   tot.pontos+=d.pontos;
   tot.trades+=d.trades;
