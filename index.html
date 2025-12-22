@@ -122,7 +122,7 @@ canvas{
 
 table{
  width:100%;
- min-width:900px;
+ min-width:950px;
  border-collapse:collapse;
 }
 
@@ -234,9 +234,9 @@ tr.total td{
 <thead>
 <tr>
 <th>Dia</th>
+<th>Pontos</th>
 <th>Semana</th>
 <th>Ativo</th>
-<th>Pontos</th>
 <th>Trades</th>
 <th>Gain</th>
 <th>Stop</th>
@@ -349,9 +349,9 @@ function renderTabela(f,tot){
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
+   <td>${d.pontos}</td>
    <td>${d.semana}</td>
    <td>${d.ativo}</td>
-   <td>${d.pontos}</td>
    <td>${d.trades}</td>
    <td style="color:var(--green)">${d.gain}</td>
    <td style="color:var(--red)">${d.stop}</td>
@@ -361,8 +361,9 @@ function renderTabela(f,tot){
 
  tbody.innerHTML+=`
  <tr class="total">
-  <td colspan="3">TOTAL</td>
-  <td>${tot.pontos}</td>
+  <td colspan="2">TOTAL</td>
+  <td></td>
+  <td></td>
   <td>${tot.trades}</td>
   <td style="color:var(--green)">${tot.gain}</td>
   <td style="color:var(--red)">${tot.stop}</td>
