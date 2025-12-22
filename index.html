@@ -30,7 +30,6 @@ body{
 .container{max-width:1400px;margin:auto;padding:24px}
 h1{margin-bottom:18px;font-size:30px}
 
-/* ===== FILTROS ===== */
 .filters{
  display:flex;
  gap:12px;
@@ -48,7 +47,7 @@ select{
  width:220px;
 }
 
-/* ===== KPIs ===== */
+/* KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(6,1fr);
@@ -66,7 +65,6 @@ select{
 .kpi span{
  color:var(--muted);
  font-size:14px;
- letter-spacing:.6px;
  text-transform:uppercase;
 }
 
@@ -76,7 +74,7 @@ select{
  font-size:28px
 }
 
-/* ===== GRÁFICOS ===== */
+/* Gráficos */
 .cards{
  display:grid;
  grid-template-columns:1fr 1fr;
@@ -94,15 +92,10 @@ select{
  flex-direction:column
 }
 
-.card strong{
- margin-bottom:12px;
- font-size:18px
-}
-
 .chart-wrap{flex:1;position:relative}
 canvas{width:100%!important;height:100%!important}
 
-/* ===== TABELA ===== */
+/* Tabela */
 .table-wrap{overflow-x:auto}
 
 table{
@@ -111,23 +104,19 @@ table{
  border-collapse:collapse;
 }
 
-thead{
- background:linear-gradient(180deg,#020b2a,#020617);
-}
-
 th{
  color:#93c5fd;
- font-weight:700;
  font-size:18px;
  padding:18px 12px;
+ border-bottom:1px solid var(--border);
  text-transform:uppercase;
 }
 
 td{
  padding:15px 12px;
+ border-bottom:1px solid var(--border);
  font-size:16px;
  text-align:center;
- border-bottom:1px solid var(--border);
 }
 
 tr.total{
@@ -193,81 +182,79 @@ tr.total{
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
-const nomesMeses={
- "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
- "05":"Maio","06":"Junho","07":"Julho","08":"Agosto",
- "09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"
-};
+const nomesMeses=["","Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
- parseCSV(t);
-}
-
-function parseCSV(t){
  const rows=t.trim().split(/\r?\n/);
  rows.shift();
+
  data=rows.map(r=>{
   const c=r.split(",");
+  const [d,m,a]=c[0].split("/");
   return{
    dia:c[0],
+   ano:a,
+   mes:m,
+   mesNome:nomesMeses[+m],
    semana:c[1],
    ativo:c[2],
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
    stop:+c[6]||0,
-   zero:+c[7]||0,
-   mes:c[0].substring(3,5),
-   ano:c[0].substring(6,10)
+   zero:+c[7]||0
   }
  });
+
  initFiltros();
- atualizar();
 }
 
 function initFiltros(){
  const anos=[...new Set(data.map(d=>d.ano))].sort();
- const anoAtual=new Date().getFullYear().toString();
+ filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
 
- filtroAno.innerHTML=anos.map(a=>`<option ${a===anoAtual?'selected':''}>${a}</option>`).join("");
- filtroAno.onchange=atualizar;
+ const hoje=new Date();
+ filtroAno.value=hoje.getFullYear().toString();
 
- atualizarMeses();
+ filtroAno.onchange=initMeses;
+ initMeses();
 }
 
-function atualizarMeses(){
+function initMeses(){
  const ano=filtroAno.value;
- const meses=[...new Set(data.filter(d=>d.ano===ano).map(d=>d.mes))];
+ const meses=[...new Set(data.filter(d=>d.ano===ano).map(d=>d.mes))].sort();
 
- const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
+ filtroMes.innerHTML=meses.map(m=>`<option value="${m}">${nomesMeses[+m]}</option>`).join("");
 
- filtroMes.innerHTML=meses.map(m=>
-  `<option value="${m}" ${m===mesAtual?'selected':''}>${nomesMeses[m]}</option>`
- ).join("");
+ const hoje=new Date();
+ const mesAtual=String(hoje.getMonth()+1).padStart(2,"0");
+ if(meses.includes(mesAtual)) filtroMes.value=mesAtual;
 
- filtroMes.onchange=atualizar;
+ filtroMes.onchange=initSemanas;
+ initSemanas();
+}
+
+function initSemanas(){
+ const {value:ano}=filtroAno;
+ const {value:mes}=filtroMes;
+
+ const semanas=[...new Set(data.filter(d=>d.ano===ano && d.mes===mes).map(d=>d.semana))];
+
+ filtroSemana.innerHTML='<option value="ALL">Todas</option>'+
+  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+
+ filtroSemana.onchange=atualizar;
+ atualizar();
 }
 
 function atualizar(){
- atualizarMeses();
-
- const ano=filtroAno.value;
- const mes=filtroMes.value;
-
- const semanas=[...new Set(data.filter(d=>d.ano===ano && d.mes===mes).map(d=>d.semana))];
- filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.onchange=atualizar;
-
- const s=filtroSemana.value;
-
+ const a=filtroAno.value,m=filtroMes.value,s=filtroSemana.value;
  const f=data.filter(d=>
-  d.ano===ano &&
-  d.mes===mes &&
-  (s==="ALL"||d.semana===s)
+  d.ano===a && d.mes===m && (s==="ALL"||d.semana===s)
  );
 
  let tot={trades:0,pontos:0,gain:0,stop:0,zero:0};
@@ -296,11 +283,11 @@ function renderTabela(f,tot){
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
-   <td style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
+   <td style="color:${d.pontos<0?'#ef4444':'#22c55e'}">${d.pontos}</td>
    <td>${d.trades}</td>
-   <td style="color:var(--green)">${d.gain}</td>
-   <td style="color:var(--red)">${d.stop}</td>
-   <td style="color:var(--yellow)">${d.zero}</td>
+   <td style="color:#22c55e">${d.gain}</td>
+   <td style="color:#ef4444">${d.stop}</td>
+   <td style="color:#facc15">${d.zero}</td>
    <td>${d.ativo}</td>
    <td>${d.semana}</td>
   </tr>`;
@@ -311,22 +298,20 @@ function renderTabela(f,tot){
   <td>TOTAL</td>
   <td>${tot.pontos}</td>
   <td>${tot.trades}</td>
-  <td style="color:var(--green)">${tot.gain}</td>
-  <td style="color:var(--red)">${tot.stop}</td>
-  <td style="color:var(--yellow)">${tot.zero}</td>
+  <td>${tot.gain}</td>
+  <td>${tot.stop}</td>
+  <td>${tot.zero}</td>
   <td colspan="2"></td>
  </tr>`;
 }
 
 function renderGraficos(f,tot){
  const labels=f.map(d=>d.dia);
- let acc=0;
- const saldo=[],colors=[];
-
+ let acc=0, saldo=[], cores=[];
  f.forEach(d=>{
   acc+=d.pontos;
   saldo.push(acc);
-  colors.push(d.pontos<0?"#ef4444":"#22c55e");
+  cores.push(d.pontos<0?"#ef4444":"#22c55e");
  });
 
  if(chartLinha)chartLinha.destroy();
@@ -334,13 +319,25 @@ function renderGraficos(f,tot){
 
  chartLinha=new Chart(chartLinhaEl,{
   type:"line",
-  data:{labels,datasets:[{data:saldo,borderColor:colors,pointBackgroundColor:colors,fill:true}]},
+  data:{labels,datasets:[{
+   data:saldo,
+   borderColor:cores,
+   backgroundColor:"rgba(34,197,94,.18)",
+   fill:true,
+   tension:.35,
+   pointRadius:5,
+   pointBackgroundColor:cores
+  }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
  chartBar=new Chart(chartBarEl,{
   type:"bar",
-  data:{labels:["Gain","Stop","0x0"],datasets:[{data:[tot.gain,tot.stop,tot.zero],backgroundColor:["#22c55e","#ef4444","#facc15"]}]},
+  data:{labels:["Gain","Stop","0x0"],datasets:[{
+   data:[tot.gain,tot.stop,tot.zero],
+   backgroundColor:["#22c55e","#ef4444","#facc15"],
+   borderRadius:12
+  }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 }
