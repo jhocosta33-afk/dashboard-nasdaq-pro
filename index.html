@@ -31,13 +31,8 @@ body{
 .container{max-width:1400px;margin:auto;padding:24px}
 h1{margin-bottom:18px;font-size:30px}
 
-/* ===== FILTROS ===== */
-.filters{
- display:flex;
- gap:12px;
- margin-bottom:24px;
- flex-wrap:wrap;
-}
+/* FILTROS */
+.filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
 
 select{
  background:var(--card);
@@ -49,12 +44,9 @@ select{
  width:220px;
 }
 
-select:disabled{
- opacity:.5;
- cursor:not-allowed
-}
+select:disabled{opacity:.5;cursor:not-allowed}
 
-/* ===== KPIs ===== */
+/* KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(6,1fr);
@@ -82,7 +74,7 @@ select:disabled{
  font-size:28px
 }
 
-/* ===== GRÁFICOS ===== */
+/* GRÁFICOS */
 .cards{
  display:grid;
  grid-template-columns:1fr 1fr;
@@ -100,35 +92,22 @@ select:disabled{
  flex-direction:column
 }
 
-.card strong{
- margin-bottom:12px;
- font-size:18px
-}
+.card strong{margin-bottom:12px;font-size:18px}
 
-.chart-wrap{
- flex:1;
- position:relative;
-}
+.chart-wrap{flex:1;position:relative}
 
-canvas{
- width:100%!important;
- height:100%!important;
-}
+canvas{width:100%!important;height:100%!important}
 
-/* ===== TABELA ===== */
-.table-wrap{
- overflow-x:auto;
-}
+/* TABELA */
+.table-wrap{overflow-x:auto}
 
 table{
  width:100%;
- min-width:950px;
+ min-width:980px;
  border-collapse:collapse;
 }
 
-thead{
- background:linear-gradient(180deg,#020b2a,#020617);
-}
+thead{background:linear-gradient(180deg,#020b2a,#020617)}
 
 th{
  color:#93c5fd;
@@ -150,9 +129,7 @@ td{
  white-space:nowrap;
 }
 
-tbody tr:hover{
- background:rgba(255,255,255,.03);
-}
+tbody tr:hover{background:rgba(255,255,255,.03)}
 
 thead th:first-child,
 tbody td:first-child{
@@ -169,28 +146,20 @@ tr.total td{
  border-top:2px solid rgba(34,197,94,.35);
 }
 
-/* ===== RESPONSIVO ===== */
-
-@media (max-width: 900px){
- .kpis{
-  grid-template-columns:repeat(3,1fr);
- }
+/* RESPONSIVO */
+@media (max-width:900px){
+ .kpis{grid-template-columns:repeat(3,1fr)}
 }
 
-@media (max-width: 600px){
-
+@media (max-width:600px){
  .container{padding:16px}
  h1{font-size:24px}
-
  .filters{flex-direction:column}
  select{width:100%}
-
  .kpis{grid-template-columns:repeat(2,1fr)}
  .kpi strong{font-size:24px}
-
  .cards{grid-template-columns:1fr}
  .card{height:360px}
-
  th{font-size:15px}
  td{font-size:14px}
 }
@@ -233,14 +202,14 @@ tr.total td{
 <table>
 <thead>
 <tr>
-<th>Dia</th>
-<th>Pontos</th>
-<th>Semana</th>
-<th>Ativo</th>
-<th>Trades</th>
-<th>Gain</th>
-<th>Stop</th>
-<th>0x0</th>
+ <th>Dia</th>
+ <th>Pontos</th>
+ <th>Trades</th>
+ <th>Gain</th>
+ <th>Stop</th>
+ <th>0x0</th>
+ <th>Ativo</th>
+ <th>Semana</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -289,13 +258,10 @@ function parseCSV(t){
 
 function initFiltros(){
  const meses=[...new Set(data.map(d=>d.mes))];
- filtroMes.innerHTML =
-  '<option value="ALL">TODOS OS MESES</option>'+
+ filtroMes.innerHTML='<option value="ALL">TODOS OS MESES</option>'+
   meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
-
  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>';
-
- filtroMes.onchange=()=>{ atualizar(); };
+ filtroMes.onchange=atualizar;
  filtroSemana.onchange=atualizar;
 }
 
@@ -309,21 +275,18 @@ function atualizar(){
  }else{
   filtroSemana.disabled=false;
   const semanas=[...new Set(data.filter(d=>d.mes===m).map(d=>d.semana))];
-  filtroSemana.innerHTML=
-   '<option value="ALL">TODAS AS SEMANAS</option>'+
+  filtroSemana.innerHTML='<option value="ALL">TODAS AS SEMANAS</option>'+
    semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
   if(semanas.includes(sAnterior)) filtroSemana.value=sAnterior;
  }
 
  const s=filtroSemana.value;
-
  const f=data.filter(d=>
   (m==="ALL"||d.mes===m)&&
   (s==="ALL"||d.semana===s)
  );
 
  let tot={trades:0,pontos:0,gain:0,stop:0,zero:0};
-
  f.forEach(d=>{
   tot.trades+=d.trades;
   tot.pontos+=d.pontos;
@@ -350,24 +313,25 @@ function renderTabela(f,tot){
   <tr>
    <td>${d.dia}</td>
    <td>${d.pontos}</td>
-   <td>${d.semana}</td>
-   <td>${d.ativo}</td>
    <td>${d.trades}</td>
    <td style="color:var(--green)">${d.gain}</td>
    <td style="color:var(--red)">${d.stop}</td>
    <td style="color:var(--yellow)">${d.zero}</td>
+   <td>${d.ativo}</td>
+   <td>${d.semana}</td>
   </tr>`;
  });
 
  tbody.innerHTML+=`
  <tr class="total">
-  <td colspan="2">TOTAL</td>
-  <td></td>
-  <td></td>
+  <td>TOTAL</td>
+  <td>${tot.pontos}</td>
   <td>${tot.trades}</td>
   <td style="color:var(--green)">${tot.gain}</td>
   <td style="color:var(--red)">${tot.stop}</td>
   <td style="color:var(--yellow)">${tot.zero}</td>
+  <td></td>
+  <td></td>
  </tr>`;
 }
 
