@@ -209,6 +209,22 @@ const nomesMeses=["","Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julh
 
 let data=[],chartLinha,chartBar;
 
+const STORAGE_KEY="dashboardFiltros";
+
+function salvarFiltros(){
+ localStorage.setItem(STORAGE_KEY,JSON.stringify({
+  ano:filtroAno.value,
+  mes:filtroMes.value,
+  semana:filtroSemana.value
+ }));
+}
+
+function carregarFiltros(){
+ try{
+  return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};
+ }catch{ return {}; }
+}
+
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
@@ -229,42 +245,75 @@ async function loadCSV(){
 }
 
 function initFiltros(){
+ const saved=carregarFiltros();
  const anos=[...new Set(data.map(d=>d.ano))].sort();
+
  filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
- filtroAno.value=new Date().getFullYear();
- filtroAno.onchange=initMeses;
- initMeses();
+ filtroAno.value=saved.ano||anos.at(-1);
+
+ filtroAno.onchange=()=>{
+  salvarFiltros();
+  initMeses(true);
+ };
+
+ initMeses(false);
 }
 
-function initMeses(){
+function initMeses(resetSemana){
+ const saved=carregarFiltros();
  const ano=filtroAno.value;
+
  const meses=[...new Set(data.filter(d=>d.ano===ano).map(d=>d.mes))].sort();
  filtroMes.innerHTML=meses.map(m=>`<option value="${m}">${nomesMeses[+m]}</option>`).join("");
- filtroMes.value=String(new Date().getMonth()+1).padStart(2,"0");
- filtroMes.onchange=initSemanas;
- initSemanas();
+
+ filtroMes.value=(saved.mes&&meses.includes(saved.mes))?saved.mes:meses.at(-1);
+
+ filtroMes.onchange=()=>{
+  salvarFiltros();
+  initSemanas(true);
+ };
+
+ initSemanas(resetSemana);
 }
 
-function initSemanas(){
+function initSemanas(reset){
+ const saved=carregarFiltros();
  const a=filtroAno.value,m=filtroMes.value;
  const semanas=[...new Set(data.filter(d=>d.ano===a&&d.mes===m).map(d=>d.semana))];
+
  filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
   semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
- filtroSemana.onchange=atualizar;
+
+ filtroSemana.value=(reset||!semanas.includes(saved.semana))?"ALL":saved.semana||"ALL";
+
+ filtroSemana.onchange=()=>{
+  salvarFiltros();
+  atualizar();
+ };
+
  atualizar();
 }
 
 function atualizar(){
  const a=filtroAno.value,m=filtroMes.value,s=filtroSemana.value;
  const f=data.filter(d=>d.ano===a&&d.mes===m&&(s==="ALL"||d.semana===s));
+
  let tot={trades:0,pontos:0,gain:0,stop:0,zero:0};
- f.forEach(d=>{tot.trades+=d.trades;tot.pontos+=d.pontos;tot.gain+=d.gain;tot.stop+=d.stop;tot.zero+=d.zero});
+ f.forEach(d=>{
+  tot.trades+=d.trades;
+  tot.pontos+=d.pontos;
+  tot.gain+=d.gain;
+  tot.stop+=d.stop;
+  tot.zero+=d.zero;
+ });
+
  kTrades.textContent=tot.trades;
  kPontos.textContent=tot.pontos;
  kGains.textContent=tot.gain;
  kStops.textContent=tot.stop;
  kZero.textContent=tot.zero;
  kAcc.textContent=(tot.gain+tot.stop)?((tot.gain/(tot.gain+tot.stop))*100).toFixed(2)+"%":"0%";
+
  renderTabela(f,tot);
  renderGraficos(f,tot);
 }
@@ -284,10 +333,15 @@ function renderTabela(f,tot){
    <td>${d.semana}</td>
   </tr>`;
  });
+
  tbody.innerHTML+=`
  <tr class="total">
-  <td>TOTAL</td><td>${tot.pontos}</td><td>${tot.trades}</td>
-  <td>${tot.gain}</td><td>${tot.stop}</td><td>${tot.zero}</td>
+  <td>TOTAL</td>
+  <td>${tot.pontos}</td>
+  <td>${tot.trades}</td>
+  <td>${tot.gain}</td>
+  <td>${tot.stop}</td>
+  <td>${tot.zero}</td>
   <td colspan="2"></td>
  </tr>`;
 }
@@ -295,7 +349,11 @@ function renderTabela(f,tot){
 function renderGraficos(f,tot){
  const labels=f.map(d=>d.dia);
  let acc=0,saldo=[],cores=[];
- f.forEach(d=>{acc+=d.pontos;saldo.push(acc);cores.push(d.pontos<0?"#ef4444":"#22c55e")});
+ f.forEach(d=>{
+  acc+=d.pontos;
+  saldo.push(acc);
+  cores.push(d.pontos<0?"#ef4444":"#22c55e");
+ });
 
  if(chartLinha)chartLinha.destroy();
  if(chartBar)chartBar.destroy();
@@ -329,6 +387,7 @@ function renderGraficos(f,tot){
 
 const chartLinhaEl=document.getElementById("chartLinha");
 const chartBarEl=document.getElementById("chartBar");
+
 loadCSV();
 </script>
 </body>
