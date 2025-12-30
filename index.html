@@ -13,12 +13,10 @@
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
-
  --green:#22c55e;
  --red:#ef4444;
  --yellow:#facc15;
  --blue:#60a5fa;
- --purple:#a78bfa;
 }
 
 *{
@@ -36,45 +34,34 @@ body{
  max-width:1600px;
  margin:auto;
  padding:clamp(16px,2vw,28px);
- animation:fadePage .6s ease;
-}
-
-/* ANIMAÇÕES */
-@keyframes fadeUp{
- from{opacity:0; transform:translateY(16px)}
- to{opacity:1; transform:translateY(0)}
-}
-@keyframes fadePage{
- from{opacity:0}
- to{opacity:1}
 }
 
 /* HEADER */
 .header{
- margin-bottom:28px;
- animation:fadeUp .6s ease;
+ display:flex;
+ flex-direction:column;
+ align-items:flex-start;
+ margin-bottom:36px;
 }
 
 .header img{
- height:72px;
+ height:84px;
 }
 
 .dashboard-title{
- margin-top:12px;
- font-size:18px;
+ margin-top:20px;
+ font-size:22px;
  letter-spacing:4px;
- font-weight:800;
+ font-weight:900;
  color:var(--blue);
- opacity:.9;
 }
 
 /* FILTROS */
 .filters{
  display:flex;
  gap:12px;
- margin-bottom:22px;
+ margin-bottom:24px;
  flex-wrap:wrap;
- animation:fadeUp .7s ease;
 }
 
 select{
@@ -90,38 +77,35 @@ select{
 /* KPIs */
 .kpis{
  display:grid;
- grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+ grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
  gap:16px;
- margin-bottom:26px;
+ margin-bottom:28px;
 }
 
 .kpi{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
- border-radius:20px;
+ border-radius:18px;
  padding:18px;
- animation:fadeUp .8s ease;
 }
 
 .kpi span{
  color:var(--muted);
- font-size:12px;
+ font-size:13px;
  text-transform:uppercase;
- letter-spacing:.08em;
 }
 
 .kpi strong{
  display:block;
- margin-top:10px;
- font-size:30px;
- font-weight:800;
+ margin-top:8px;
+ font-size:28px;
 }
 
 /* GRÁFICOS */
 .cards{
  display:grid;
- grid-template-columns:2fr 1fr;
- gap:18px;
+ grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+ gap:16px;
  margin-bottom:24px;
 }
 
@@ -133,22 +117,20 @@ select{
  height:420px;
  display:flex;
  flex-direction:column;
- animation:fadeUp .9s ease;
-}
-
-.card strong{
- margin-bottom:12px;
- font-size:17px;
 }
 
 .chart-wrap{
  flex:1;
+ position:relative;
+}
+
+canvas{
+ width:100%!important;
+ height:100%!important;
 }
 
 /* TABELA */
-.table-wrap{
- overflow-x:auto;
-}
+.table-wrap{overflow-x:auto}
 
 table{
  width:100%;
@@ -156,42 +138,17 @@ table{
  border-collapse:collapse;
 }
 
-thead{
- background:linear-gradient(180deg,#020b2a,#020617);
-}
-
-th{
- color:var(--blue);
- font-weight:700;
- font-size:15px;
- padding:16px 12px;
- text-align:center;
-}
-
-td{
- padding:14px 12px;
+th,td{
+ padding:14px;
  border-bottom:1px solid var(--border);
- font-size:14px;
  text-align:center;
 }
 
-thead th:first-child,
-tbody td:first-child{
- text-align:left;
- padding-left:18px;
-}
+th{color:var(--blue)}
 
 tr.total{
  background:rgba(34,197,94,.08);
  font-weight:700;
-}
-
-@media(max-width:1100px){
- .cards{grid-template-columns:1fr}
-}
-
-@media(max-width:600px){
- select{width:100%}
 }
 </style>
 </head>
@@ -199,13 +156,11 @@ tr.total{
 <body>
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
  <img src="logo.png">
- <div class="dashboard-title">DASHBOARD</div>
+ <span class="dashboard-title">DASHBOARD</span>
 </div>
 
-<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
@@ -214,16 +169,15 @@ tr.total{
 
 <!-- KPIs -->
 <div class="kpis">
- <div class="kpi"><span>Dias Operados</span><strong id="kDias" style="color:var(--purple)">0</strong></div>
+ <div class="kpi"><span>Dias Operados</span><strong id="kDias" style="color:var(--blue)">0</strong></div>
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
- <div class="kpi"><span>Pontos</span><strong id="kPontos" style="color:var(--blue)">0</strong></div>
+ <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
  <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
  <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
  <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
-<!-- GRÁFICOS -->
 <div class="cards">
  <div class="card">
   <strong>📈 Balanço de Pontos</strong>
@@ -235,21 +189,13 @@ tr.total{
  </div>
 </div>
 
-<!-- TABELA -->
 <div class="card" style="height:auto">
  <strong>Tabela Operacional</strong>
  <div class="table-wrap">
   <table>
    <thead>
     <tr>
-     <th>Dia</th>
-     <th>Pontos</th>
-     <th>Trades</th>
-     <th>Gain</th>
-     <th>Stop</th>
-     <th>0x0</th>
-     <th>Ativo</th>
-     <th>Semana</th>
+     <th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th>
     </tr>
    </thead>
    <tbody id="tbody"></tbody>
@@ -283,88 +229,61 @@ function parseCSV(t){
  initFiltros();
 }
 
-function atualizar(){
- const f=data.filter(d=>
-  d.ano==filtroAno.value &&
-  (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
-  (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
- );
+function initFiltros(){
+ const anos=[...new Set(data.map(d=>d.ano))];
+ filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+ filtroAno.onchange=atualizar;
+ filtroMes.innerHTML='<option value="ALL">Todos</option>';
+ filtroSemana.innerHTML='<option value="ALL">Todas</option>';
+ atualizar();
+}
 
- renderKPIs(f);
- renderTabela(f);
- renderGraficos(f);
+function atualizar(){
+ const f=data.filter(d=>d.ano==filtroAno.value||!filtroAno.value);
+ renderKPIs(f); renderTabela(f); renderGraficos(f);
 }
 
 function renderKPIs(f){
- const dias=new Set(f.map(d=>d.dia)).size;
+ const diasUnicos=new Set(f.map(d=>d.dia)).size;
  let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
-
  f.forEach(d=>{
-  t.trades+=d.trades;
-  t.pontos+=d.pontos;
-  t.gain+=d.gain;
-  t.stop+=d.stop;
-  t.zero+=d.zero;
+  t.trades+=d.trades; t.pontos+=d.pontos;
+  t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
  });
-
- kDias.textContent=dias;
+ kDias.textContent=diasUnicos;
  kTrades.textContent=t.trades;
  kPontos.textContent=t.pontos;
  kGains.textContent=t.gain;
  kStops.textContent=t.stop;
  kZero.textContent=t.zero;
- kAcc.textContent=(t.gain+t.stop)?Math.round(t.gain/(t.gain+t.stop)*100)+"%":"0%";
+ kAcc.textContent=t.gain+t.stop?Math.round(t.gain/(t.gain+t.stop)*100)+"%":"0%";
+}
+
+function renderTabela(f){
+ tbody.innerHTML=f.map(d=>`
+ <tr>
+  <td>${d.dia}</td>
+  <td>${d.pontos}</td>
+  <td>${d.trades}</td>
+  <td>${d.gain}</td>
+  <td>${d.stop}</td>
+  <td>${d.zero}</td>
+  <td>${d.ativo}</td>
+  <td>${d.semana}</td>
+ </tr>`).join("");
 }
 
 function renderGraficos(f){
  let acc=0,labels=[],saldo=[];
- f.forEach(d=>{ acc+=d.pontos; labels.push(d.dia); saldo.push(acc); });
-
+ f.forEach(d=>{acc+=d.pontos;labels.push(d.dia);saldo.push(acc);});
  if(chartLinha)chartLinha.destroy();
- if(chartBar)chartBar.destroy();
-
- chartLinha=new Chart(chartLinhaEl,{
-  type:"line",
-  data:{labels,datasets:[{
-   data:saldo,
-   borderColor:"#60a5fa",
-   borderWidth:3,
-   tension:.35,
-   fill:true,
-   backgroundColor:"rgba(96,165,250,.18)"
-  }]},
-  options:{
-   plugins:{legend:{display:false}},
-   scales:{x:{grid:{display:false}},y:{grid:{color:"rgba(255,255,255,.05)"}}}
-  }
- });
-
- chartBar=new Chart(chartBarEl,{
-  type:"bar",
-  data:{labels:["Gain","Stop","0x0"],datasets:[{
-   data:[
-    f.reduce((a,b)=>a+b.gain,0),
-    f.reduce((a,b)=>a+b.stop,0),
-    f.reduce((a,b)=>a+b.zero,0)
-   ],
-   backgroundColor:["#22c55e","#ef4444","#facc15"],
-   borderRadius:14
-  }]},
-  options:{plugins:{legend:{display:false}}}
- });
+ chartLinha=new Chart(chartLinhaEl,{type:"line",
+ data:{labels,datasets:[{data:saldo,borderColor:"#60a5fa",fill:true}]},
+ options:{maintainAspectRatio:false}});
 }
 
 const chartLinhaEl=document.getElementById("chartLinha");
 const chartBarEl=document.getElementById("chartBar");
-
-function initFiltros(){
- const anos=[...new Set(data.map(d=>d.ano))];
- filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
- filtroAno.value=new Date().getFullYear();
- filtroAno.onchange=atualizar;
- atualizar();
-}
-
 loadCSV();
 </script>
 </body>
