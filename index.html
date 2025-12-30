@@ -13,6 +13,7 @@
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
+
  --green:#22c55e;
  --red:#ef4444;
  --yellow:#facc15;
@@ -35,31 +36,45 @@ body{
  max-width:1600px;
  margin:auto;
  padding:clamp(16px,2vw,28px);
+ animation:fadePage .6s ease;
+}
+
+/* ANIMAÇÕES */
+@keyframes fadeUp{
+ from{opacity:0; transform:translateY(16px)}
+ to{opacity:1; transform:translateY(0)}
+}
+@keyframes fadePage{
+ from{opacity:0}
+ to{opacity:1}
 }
 
 /* HEADER */
 .header{
- display:flex;
- flex-direction:column;
- margin-bottom:32px;
+ margin-bottom:28px;
+ animation:fadeUp .6s ease;
 }
 
-.header img{height:64px}
+.header img{
+ height:72px;
+}
 
 .dashboard-title{
  margin-top:12px;
  font-size:18px;
- letter-spacing:3px;
+ letter-spacing:4px;
  font-weight:800;
  color:var(--blue);
+ opacity:.9;
 }
 
 /* FILTROS */
 .filters{
  display:flex;
  gap:12px;
- margin-bottom:24px;
+ margin-bottom:22px;
  flex-wrap:wrap;
+ animation:fadeUp .7s ease;
 }
 
 select{
@@ -75,38 +90,38 @@ select{
 /* KPIs */
 .kpis{
  display:grid;
- grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+ grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
  gap:16px;
- margin-bottom:28px;
+ margin-bottom:26px;
 }
 
 .kpi{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
- border-radius:18px;
+ border-radius:20px;
  padding:18px;
- transition:.3s;
+ animation:fadeUp .8s ease;
 }
-
-.kpi:hover{transform:translateY(-4px)}
 
 .kpi span{
  color:var(--muted);
- font-size:13px;
+ font-size:12px;
  text-transform:uppercase;
+ letter-spacing:.08em;
 }
 
 .kpi strong{
  display:block;
- margin-top:8px;
- font-size:28px;
+ margin-top:10px;
+ font-size:30px;
+ font-weight:800;
 }
 
 /* GRÁFICOS */
 .cards{
  display:grid;
- grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
- gap:16px;
+ grid-template-columns:2fr 1fr;
+ gap:18px;
  margin-bottom:24px;
 }
 
@@ -118,28 +133,65 @@ select{
  height:420px;
  display:flex;
  flex-direction:column;
+ animation:fadeUp .9s ease;
 }
 
-.chart-wrap{flex:1}
+.card strong{
+ margin-bottom:12px;
+ font-size:17px;
+}
+
+.chart-wrap{
+ flex:1;
+}
 
 /* TABELA */
+.table-wrap{
+ overflow-x:auto;
+}
+
 table{
  width:100%;
  min-width:900px;
  border-collapse:collapse;
 }
 
-th,td{
- padding:14px;
- border-bottom:1px solid var(--border);
+thead{
+ background:linear-gradient(180deg,#020b2a,#020617);
+}
+
+th{
+ color:var(--blue);
+ font-weight:700;
+ font-size:15px;
+ padding:16px 12px;
  text-align:center;
 }
 
-th{color:var(--blue)}
+td{
+ padding:14px 12px;
+ border-bottom:1px solid var(--border);
+ font-size:14px;
+ text-align:center;
+}
+
+thead th:first-child,
+tbody td:first-child{
+ text-align:left;
+ padding-left:18px;
+}
 
 tr.total{
- background:rgba(34,197,94,.1);
+ background:rgba(34,197,94,.08);
  font-weight:700;
+}
+
+@media(max-width:1100px){
+ .cards{grid-template-columns:1fr}
+}
+
+@media(max-width:600px){
+ select{width:100%}
 }
 </style>
 </head>
@@ -147,17 +199,20 @@ tr.total{
 <body>
 <div class="container">
 
+<!-- HEADER -->
 <div class="header">
  <img src="logo.png">
- <span class="dashboard-title">DASHBOARD</span>
+ <div class="dashboard-title">DASHBOARD</div>
 </div>
 
+<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
  <select id="filtroSemana"></select>
 </div>
 
+<!-- KPIs -->
 <div class="kpis">
  <div class="kpi"><span>Dias Operados</span><strong id="kDias" style="color:var(--purple)">0</strong></div>
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
@@ -168,6 +223,7 @@ tr.total{
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
+<!-- GRÁFICOS -->
 <div class="cards">
  <div class="card">
   <strong>📈 Balanço de Pontos</strong>
@@ -179,16 +235,26 @@ tr.total{
  </div>
 </div>
 
+<!-- TABELA -->
 <div class="card" style="height:auto">
  <strong>Tabela Operacional</strong>
- <table>
-  <thead>
-   <tr>
-    <th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th>
-   </tr>
-  </thead>
-  <tbody id="tbody"></tbody>
- </table>
+ <div class="table-wrap">
+  <table>
+   <thead>
+    <tr>
+     <th>Dia</th>
+     <th>Pontos</th>
+     <th>Trades</th>
+     <th>Gain</th>
+     <th>Stop</th>
+     <th>0x0</th>
+     <th>Ativo</th>
+     <th>Semana</th>
+    </tr>
+   </thead>
+   <tbody id="tbody"></tbody>
+  </table>
+ </div>
 </div>
 
 </div>
@@ -197,7 +263,13 @@ tr.total{
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 let data=[],chartLinha,chartBar;
 
-fetch(CSV_URL).then(r=>r.text()).then(t=>{
+async function loadCSV(){
+ const r=await fetch(CSV_URL,{cache:"no-store"});
+ const t=await r.text();
+ parseCSV(t);
+}
+
+function parseCSV(t){
  const rows=t.trim().split(/\r?\n/); rows.shift();
  data=rows.map(r=>{
   const c=r.split(",");
@@ -208,82 +280,92 @@ fetch(CSV_URL).then(r=>r.text()).then(t=>{
    gain:+c[5]||0, stop:+c[6]||0, zero:+c[7]||0
   }
  });
- init();
-});
-
-function init(){
- const anos=[...new Set(data.map(d=>d.ano))];
- filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
- filtroAno.onchange=update;
- filtroMes.innerHTML='<option value="ALL">Todos</option>';
- filtroSemana.innerHTML='<option value="ALL">Todas</option>';
- update();
+ initFiltros();
 }
 
-function update(){
- const f=data.filter(d=>d.ano==filtroAno.value||true);
+function atualizar(){
+ const f=data.filter(d=>
+  d.ano==filtroAno.value &&
+  (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
+  (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
+ );
 
- const diasOperados=new Set(f.map(d=>d.dia)).size;
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
+}
+
+function renderKPIs(f){
+ const dias=new Set(f.map(d=>d.dia)).size;
  let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
 
  f.forEach(d=>{
-  t.trades+=d.trades; t.pontos+=d.pontos;
-  t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
+  t.trades+=d.trades;
+  t.pontos+=d.pontos;
+  t.gain+=d.gain;
+  t.stop+=d.stop;
+  t.zero+=d.zero;
  });
 
- kDias.textContent=diasOperados;
+ kDias.textContent=dias;
  kTrades.textContent=t.trades;
  kPontos.textContent=t.pontos;
  kGains.textContent=t.gain;
  kStops.textContent=t.stop;
  kZero.textContent=t.zero;
- kAcc.textContent=t.gain+t.stop?Math.round(t.gain/(t.gain+t.stop)*100)+"%":"0%";
-
- renderTabela(f);
- renderGraficos(f);
-}
-
-function renderTabela(f){
- tbody.innerHTML="";
- f.forEach(d=>{
-  tbody.innerHTML+=`
-  <tr>
-   <td>${d.dia}</td>
-   <td style="color:${d.pontos<0?'var(--red)':'var(--blue)'}">${d.pontos}</td>
-   <td>${d.trades}</td>
-   <td style="color:var(--green)">${d.gain}</td>
-   <td style="color:var(--red)">${d.stop}</td>
-   <td style="color:var(--yellow)">${d.zero}</td>
-   <td>${d.ativo}</td>
-   <td>${d.semana}</td>
-  </tr>`;
- });
+ kAcc.textContent=(t.gain+t.stop)?Math.round(t.gain/(t.gain+t.stop)*100)+"%":"0%";
 }
 
 function renderGraficos(f){
  let acc=0,labels=[],saldo=[];
- f.forEach(d=>{acc+=d.pontos;labels.push(d.dia);saldo.push(acc);});
+ f.forEach(d=>{ acc+=d.pontos; labels.push(d.dia); saldo.push(acc); });
 
  if(chartLinha)chartLinha.destroy();
- chartLinha=new Chart(chartLinhaEl,{type:"line",
- data:{labels,datasets:[{data:saldo,borderColor:"#60a5fa",fill:true}]},
- options:{responsive:true,plugins:{legend:{display:false}}}
+ if(chartBar)chartBar.destroy();
+
+ chartLinha=new Chart(chartLinhaEl,{
+  type:"line",
+  data:{labels,datasets:[{
+   data:saldo,
+   borderColor:"#60a5fa",
+   borderWidth:3,
+   tension:.35,
+   fill:true,
+   backgroundColor:"rgba(96,165,250,.18)"
+  }]},
+  options:{
+   plugins:{legend:{display:false}},
+   scales:{x:{grid:{display:false}},y:{grid:{color:"rgba(255,255,255,.05)"}}}
+  }
  });
 
- if(chartBar)chartBar.destroy();
- chartBar=new Chart(chartBarEl,{type:"bar",
- data:{labels:["Gain","Stop","0x0"],
- datasets:[{data:[tGain=f.reduce((a,b)=>a+b.gain,0),
- f.reduce((a,b)=>a+b.stop,0),
- f.reduce((a,b)=>a+b.zero,0)],
- backgroundColor:["#22c55e","#ef4444","#facc15"]}]},
- options:{plugins:{legend:{display:false}}}
+ chartBar=new Chart(chartBarEl,{
+  type:"bar",
+  data:{labels:["Gain","Stop","0x0"],datasets:[{
+   data:[
+    f.reduce((a,b)=>a+b.gain,0),
+    f.reduce((a,b)=>a+b.stop,0),
+    f.reduce((a,b)=>a+b.zero,0)
+   ],
+   backgroundColor:["#22c55e","#ef4444","#facc15"],
+   borderRadius:14
+  }]},
+  options:{plugins:{legend:{display:false}}}
  });
 }
 
 const chartLinhaEl=document.getElementById("chartLinha");
 const chartBarEl=document.getElementById("chartBar");
-</script>
 
+function initFiltros(){
+ const anos=[...new Set(data.map(d=>d.ano))];
+ filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+ filtroAno.value=new Date().getFullYear();
+ filtroAno.onchange=atualizar;
+ atualizar();
+}
+
+loadCSV();
+</script>
 </body>
 </html>
