@@ -46,7 +46,6 @@ body{
 
 .header img{
  height:84px;
- max-width:100%;
 }
 
 .dashboard-title{
@@ -55,7 +54,6 @@ body{
  letter-spacing:4px;
  font-weight:900;
  color:var(--blue);
- opacity:.95;
 }
 
 /* FILTROS */
@@ -75,8 +73,6 @@ select{
  font-size:15px;
  width:220px;
 }
-
-select:disabled{opacity:.5}
 
 /* KPIs */
 .kpis{
@@ -178,37 +174,24 @@ tr.total{
  background:rgba(34,197,94,.08);
  font-weight:700;
 }
-
-/* RESPONSIVO */
-@media(max-width:900px){
- .cards{grid-template-columns:1fr}
-}
-
-@media(max-width:600px){
- select{width:100%}
-}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
- <img src="logo.png" alt="Mentoria NasdaqPro">
+ <img src="logo.png">
  <span class="dashboard-title">DASHBOARD</span>
 </div>
 
-<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
  <select id="filtroSemana"></select>
 </div>
 
-<!-- KPIs -->
 <div class="kpis">
- <div class="kpi"><span>Dias Operados</span><strong id="kDias">0</strong></div>
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
  <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
@@ -217,7 +200,6 @@ tr.total{
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
-<!-- GRÁFICOS -->
 <div class="cards">
  <div class="card">
   <strong>📈 Balanço de Pontos</strong>
@@ -229,7 +211,6 @@ tr.total{
  </div>
 </div>
 
-<!-- TABELA -->
 <div class="card" style="height:auto">
  <strong>Tabela Operacional</strong>
  <div class="table-wrap">
@@ -260,8 +241,7 @@ let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- parseCSV(t);
+ parseCSV(await r.text());
 }
 
 function parseCSV(t){
@@ -307,7 +287,6 @@ function initSemanas(){
  const semanas=[...new Set(data.filter(d=>d.ano==filtroAno.value && d.mes==filtroMes.value).map(d=>d.semana))];
  filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
  semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.value="ALL";
  filtroSemana.onchange=atualizar;
  atualizar();
 }
@@ -323,19 +302,11 @@ function atualizar(){
 
 function renderKPIs(f){
  let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
- const diasOperados = new Set(f.map(d=>d.dia)).size;
-
  f.forEach(d=>{
-  t.trades+=d.trades;
-  t.pontos+=d.pontos;
-  t.gain+=d.gain;
-  t.stop+=d.stop;
-  t.zero+=d.zero;
+  t.trades+=d.trades; t.pontos+=d.pontos;
+  t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
  });
-
  const ops=t.gain+t.stop;
-
- kDias.textContent=diasOperados;
  kTrades.textContent=t.trades;
  kPontos.textContent=t.pontos;
  kGains.textContent=t.gain;
@@ -375,23 +346,46 @@ function renderTabela(f){
 }
 
 function renderGraficos(f){
- let acc=0; const labels=[],saldo=[];
- f.forEach(d=>{ acc+=d.pontos; labels.push(d.dia); saldo.push(acc); });
+
+ // 🔧 CORREÇÃO AQUI
+ const ordenado=[...f].sort((a,b)=>{
+  const da=a.dia.split("/").reverse().join("");
+  const db=b.dia.split("/").reverse().join("");
+  return da.localeCompare(db);
+ });
+
+ let acc=0,labels=[],saldo=[];
+ ordenado.forEach(d=>{
+  acc+=d.pontos;
+  labels.push(d.dia);
+  saldo.push(acc);
+ });
 
  if(chartLinha)chartLinha.destroy();
  if(chartBar)chartBar.destroy();
 
  chartLinha=new Chart(chartLinhaEl,{
   type:"line",
-  data:{labels,datasets:[{data:saldo,borderColor:"#22c55e",tension:.35,fill:true,backgroundColor:"rgba(34,197,94,.18)"}]},
+  data:{labels,datasets:[{
+   data:saldo,
+   borderColor:"#22c55e",
+   backgroundColor:"rgba(34,197,94,.18)",
+   tension:.35,
+   fill:true
+  }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
  chartBar=new Chart(chartBarEl,{
   type:"bar",
   data:{labels:["Gain","Stop","0x0"],datasets:[{
-   data:[f.reduce((a,b)=>a+b.gain,0),f.reduce((a,b)=>a+b.stop,0),f.reduce((a,b)=>a+b.zero,0)],
-   backgroundColor:["#22c55e","#ef4444","#facc15"],borderRadius:12
+   data:[
+    f.reduce((a,b)=>a+b.gain,0),
+    f.reduce((a,b)=>a+b.stop,0),
+    f.reduce((a,b)=>a+b.zero,0)
+   ],
+   backgroundColor:["#22c55e","#ef4444","#facc15"],
+   borderRadius:12
   }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
