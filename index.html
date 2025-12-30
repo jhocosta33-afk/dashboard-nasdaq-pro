@@ -33,7 +33,6 @@ body{
  padding:clamp(16px,2vw,28px);
 }
 
-/* HEADER */
 .header{margin-bottom:36px}
 .header img{height:84px}
 .dashboard-title{
@@ -44,7 +43,6 @@ body{
  color:var(--blue);
 }
 
-/* FILTROS */
 .filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
 select{
  background:var(--card);
@@ -56,13 +54,13 @@ select{
  width:220px;
 }
 
-/* KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
  gap:16px;
  margin-bottom:28px;
 }
+
 .kpi{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
@@ -72,13 +70,13 @@ select{
 .kpi span{color:var(--muted);font-size:13px}
 .kpi strong{display:block;margin-top:8px;font-size:28px}
 
-/* CARDS */
 .cards{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
  gap:16px;
  margin-bottom:24px;
 }
+
 .card{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
@@ -88,11 +86,10 @@ select{
  display:flex;
  flex-direction:column;
 }
-.card strong{margin-bottom:12px}
+
 .chart-wrap{flex:1}
 canvas{width:100%!important;height:100%!important}
 
-/* TABELA */
 .table-wrap{overflow-x:auto}
 table{width:100%;min-width:900px;border-collapse:collapse}
 thead{background:#020617}
@@ -141,7 +138,7 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 
 <div class="cards">
  <div class="card">
-  <strong>📈 Balanço de Pontos (Semanal)</strong>
+  <strong>📈 Balanço de Pontos</strong>
   <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
  </div>
 
@@ -186,8 +183,7 @@ function parseCSV(t){
   const c=r.split(",");
   return{
    dia:c[0], semana:c[1], ativo:c[2],
-   ano:c[0].substring(6,10),
-   mes:c[0].substring(3,5),
+   ano:c[0].substring(6,10), mes:c[0].substring(3,5),
    pontos:+c[3]||0, trades:+c[4]||0,
    gain:+c[5]||0, stop:+c[6]||0, zero:+c[7]||0
   }
@@ -196,37 +192,33 @@ function parseCSV(t){
 }
 
 function initFiltros(){
- const anos=[...new Set(data.map(d=>d.ano))].sort();
+ const anos=[...new Set(data.map(d=>d.ano))];
  filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
  filtroAno.value=new Date().getFullYear();
- filtroAno.onchange=()=>initMeses();
+ filtroAno.onchange=()=>{initMeses();atualizar();}
  initMeses();
 }
 
 function initMeses(){
- const meses=[...new Set(
-  data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes)
- )].sort();
-
+ const meses=[...new Set(data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))];
  filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
-  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
-
+ meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
  filtroMes.value="ALL";
- filtroMes.onchange=()=>initSemanas();
+ filtroMes.onchange=()=>{initSemanas();atualizar();}
  initSemanas();
 }
 
 function initSemanas(){
- const semanas=[...new Set(
-  data.filter(d=>
-   d.ano==filtroAno.value &&
-   (filtroMes.value==="ALL"||d.mes==filtroMes.value)
-  ).map(d=>d.semana)
- )];
-
+ if(filtroMes.value==="ALL"){
+  filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>';
+  filtroSemana.disabled=true;
+  atualizar();
+  return;
+ }
+ filtroSemana.disabled=false;
+ const semanas=[...new Set(data.filter(d=>d.ano==filtroAno.value && d.mes==filtroMes.value).map(d=>d.semana))];
  filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
-  semanas.map(s=>`<option>${s}</option>`).join("");
-
+ semanas.map(s=>`<option>${s}</option>`).join("");
  filtroSemana.value="ALL";
  filtroSemana.onchange=atualizar;
  atualizar();
@@ -238,20 +230,15 @@ function atualizar(){
   (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
   (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
  );
- renderKPIs(f);
- renderTabela(f);
- renderGraficos(f);
+ renderKPIs(f); renderTabela(f); renderGraficos(f);
 }
 
 function renderKPIs(f){
- const dias=new Set(f.map(d=>d.dia)).size;
  let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
+ const dias=new Set(f.map(d=>d.dia)).size;
  f.forEach(d=>{
-  t.trades+=d.trades;
-  t.pontos+=d.pontos;
-  t.gain+=d.gain;
-  t.stop+=d.stop;
-  t.zero+=d.zero;
+  t.trades+=d.trades; t.pontos+=d.pontos;
+  t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
  });
  kDias.textContent=dias;
  kTrades.textContent=t.trades;
@@ -265,14 +252,9 @@ function renderKPIs(f){
 function renderTabela(f){
  tbody.innerHTML="";
  let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
-
  f.forEach(d=>{
-  tot.pontos+=d.pontos;
-  tot.trades+=d.trades;
-  tot.gain+=d.gain;
-  tot.stop+=d.stop;
-  tot.zero+=d.zero;
-
+  tot.pontos+=d.pontos; tot.trades+=d.trades;
+  tot.gain+=d.gain; tot.stop+=d.stop; tot.zero+=d.zero;
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
@@ -285,7 +267,6 @@ function renderTabela(f){
    <td>${d.semana}</td>
   </tr>`;
  });
-
  tbody.innerHTML+=`
  <tr class="total">
   <td>TOTAL</td>
@@ -299,20 +280,29 @@ function renderTabela(f){
 }
 
 function renderGraficos(f){
- const semanas={};
- f.forEach(d=>{
-  if(!semanas[d.semana]) semanas[d.semana]=0;
-  semanas[d.semana]+=d.pontos;
- });
+ if(chartLinha)chartLinha.destroy();
+ if(chartBar)chartBar.destroy();
 
- const labels=Object.keys(semanas);
- let acc=0;
- const valores=labels.map(s=>{
-  acc+=semanas[s];
-  return acc;
- });
+ let labels=[],valores=[],acc=0;
 
- if(chartLinha) chartLinha.destroy();
+ if(filtroSemana.value==="ALL"){
+  const porSemana={};
+  f.forEach(d=>{
+   porSemana[d.semana]=(porSemana[d.semana]||0)+d.pontos;
+  });
+  Object.keys(porSemana).forEach(s=>{
+   acc+=porSemana[s];
+   labels.push(s);
+   valores.push(acc);
+  });
+ }else{
+  f.forEach(d=>{
+   acc+=d.pontos;
+   labels.push(d.dia);
+   valores.push(acc);
+  });
+ }
+
  chartLinha=new Chart(chartLinhaEl,{
   type:"line",
   data:{labels,datasets:[{
@@ -325,7 +315,6 @@ function renderGraficos(f){
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
- if(chartBar) chartBar.destroy();
  chartBar=new Chart(chartBarEl,{
   type:"bar",
   data:{labels:["Gain","Stop","0x0"],datasets:[{
