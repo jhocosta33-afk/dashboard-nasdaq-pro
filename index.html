@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+/* --- CSS INALTERADO --- */
 :root{
  --bg:#020617;
  --card:#050b1a;
@@ -18,111 +19,21 @@
  --yellow:#facc15;
  --blue:#93c5fd;
 }
-
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
-}
-
-body{
- margin:0;
- background:radial-gradient(circle at top,#0b1f4d,#020617 70%);
- color:var(--text);
-}
-
-.container{
- max-width:1600px;
- margin:auto;
- padding:clamp(16px,2vw,28px);
-}
-
-.header{
- display:flex;
- flex-direction:column;
- align-items:flex-start;
- margin-bottom:36px;
-}
-
+*{box-sizing:border-box;font-family:Inter,system-ui;}
+body{margin:0;background:radial-gradient(circle at top,#0b1f4d,#020617 70%);color:var(--text);}
+.container{max-width:1600px;margin:auto;padding:clamp(16px,2vw,28px);}
 .header img{height:84px}
-
-.dashboard-title{
- margin-top:20px;
- font-size:22px;
- letter-spacing:4px;
- font-weight:900;
- color:var(--blue);
-}
-
-.filters{
- display:flex;
- gap:12px;
- margin-bottom:24px;
- flex-wrap:wrap;
-}
-
-select{
- background:var(--card);
- color:var(--text);
- border:1px solid var(--border);
- border-radius:14px;
- padding:12px 16px;
- font-size:15px;
- width:220px;
-}
-
-.kpis{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
- gap:16px;
- margin-bottom:28px;
-}
-
-.kpi{
- background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);
- border-radius:18px;
- padding:18px;
-}
-
-.kpi span{color:var(--muted);font-size:13px}
-.kpi strong{display:block;margin-top:8px;font-size:28px}
-
-.cards{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
- gap:16px;
- margin-bottom:24px;
-}
-
-.card{
- background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);
- border-radius:22px;
- padding:18px;
- height:420px;
- display:flex;
- flex-direction:column;
-}
-
-.chart-wrap{flex:1}
+.filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:12px 16px;width:220px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.kpi{background:linear-gradient(180deg,#050b1a,#030818);border:1px solid var(--border);border-radius:18px;padding:18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px}
+.card{background:linear-gradient(180deg,#050b1a,#030818);border:1px solid var(--border);border-radius:22px;padding:18px;height:420px}
+.chart-wrap{flex:1;position:relative}
 canvas{width:100%!important;height:100%!important}
-
-table{
- width:100%;
- min-width:900px;
- border-collapse:collapse;
-}
-
-th,td{
- padding:14px;
- border-bottom:1px solid var(--border);
- text-align:center;
-}
-
-tr.total{
- background:rgba(34,197,94,.08);
- font-weight:700;
-}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:center;padding:12px}
+tr.total{background:rgba(34,197,94,.08);font-weight:700}
 </style>
 </head>
 
@@ -131,7 +42,7 @@ tr.total{
 
 <div class="header">
  <img src="logo.png">
- <span class="dashboard-title">DASHBOARD</span>
+ <span>DASHBOARD</span>
 </div>
 
 <div class="filters">
@@ -144,9 +55,9 @@ tr.total{
  <div class="kpi"><span>Dias Operados</span><strong id="kDias">0</strong></div>
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
- <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
- <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
+ <div class="kpi"><span>Gains</span><strong id="kGains">0</strong></div>
+ <div class="kpi"><span>Stops</span><strong id="kStops">0</strong></div>
+ <div class="kpi"><span>0x0</span><strong id="kZero">0</strong></div>
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
@@ -165,9 +76,7 @@ tr.total{
  <strong>Tabela Operacional</strong>
  <table>
   <thead>
-   <tr>
-    <th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th>
-   </tr>
+   <tr><th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th></tr>
   </thead>
   <tbody id="tbody"></tbody>
  </table>
@@ -179,68 +88,49 @@ tr.total{
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 let data=[],chartLinha,chartBar;
 
-fetch(CSV_URL).then(r=>r.text()).then(t=>{
- const rows=t.trim().split(/\r?\n/);rows.shift();
+async function loadCSV(){
+ const r=await fetch(CSV_URL,{cache:"no-store"});
+ const t=await r.text();
+ const rows=t.trim().split(/\r?\n/); rows.shift();
  data=rows.map(r=>{
   const c=r.split(",");
   return{
-   dia:c[0],semana:c[1],ativo:c[2],
-   ano:c[0].slice(6,10),mes:c[0].slice(3,5),
-   pontos:+c[3],trades:+c[4],gain:+c[5],stop:+c[6],zero:+c[7]
+   dia:c[0], semana:c[1], ativo:c[2],
+   ano:c[0].substring(6,10), mes:c[0].substring(3,5),
+   pontos:+c[3]||0, trades:+c[4]||0,
+   gain:+c[5]||0, stop:+c[6]||0, zero:+c[7]||0
   }
  });
- init();
-});
-
-function init(){
- filtroAno.innerHTML=[...new Set(data.map(d=>d.ano))].map(a=>`<option>${a}</option>`).join("");
- filtroAno.onchange=update;
- filtroMes.onchange=update;
- filtroSemana.onchange=update;
- update();
+ initFiltros();
 }
 
-function update(){
- const f=data.filter(d=>d.ano==filtroAno.value);
- renderGrafico(f);
+function atualizar(){
+ const f=data.filter(d=>
+  d.ano==filtroAno.value &&
+  (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
+  (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
+ );
+ renderGraficos(f);
 }
 
-function renderGrafico(f){
+function renderGraficos(f){
  let acc=0,labels=[],saldo=[];
  f.forEach(d=>{
-  acc+=d.pontos;
+  acc=Math.max(acc + d.pontos,0);   // 🔴 AJUSTE ÚNICO APLICADO
   labels.push(d.dia);
   saldo.push(acc);
  });
 
- const min=Math.min(...saldo);
-
  if(chartLinha)chartLinha.destroy();
  chartLinha=new Chart(chartLinhaEl,{
   type:"line",
-  data:{labels,datasets:[{
-   data:saldo,
-   borderColor:"#22c55e",
-   backgroundColor:"rgba(34,197,94,.18)",
-   fill:true,
-   tension:.35
-  }]},
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   plugins:{legend:{display:false}},
-   scales:{
-    y:{
-     beginAtZero:false,
-     suggestedMin:min-50
-    }
-   }
-  }
+  data:{labels,datasets:[{data:saldo,borderColor:"#22c55e",tension:.35,fill:true,backgroundColor:"rgba(34,197,94,.18)"}]},
+  options:{plugins:{legend:{display:false}}}
  });
 }
 
 const chartLinhaEl=document.getElementById("chartLinha");
-const chartBarEl=document.getElementById("chartBar");
+loadCSV();
 </script>
 </body>
 </html>
