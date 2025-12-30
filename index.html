@@ -19,10 +19,7 @@
  --blue:#93c5fd;
 }
 
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
-}
+*{box-sizing:border-box;font-family:Inter,system-ui}
 
 body{
  margin:0;
@@ -34,27 +31,10 @@ body{
  max-width:1600px;
  margin:auto;
  padding:clamp(16px,2vw,28px);
- animation:fadePage .6s ease;
-}
-
-@keyframes fadeUp{
- from{opacity:0; transform:translateY(14px)}
- to{opacity:1; transform:translateY(0)}
-}
-@keyframes fadePage{
- from{opacity:0}
- to{opacity:1}
 }
 
 /* HEADER */
-.header{
- display:flex;
- flex-direction:column;
- align-items:flex-start;
- margin-bottom:36px;
- animation:fadeUp .8s ease;
-}
-
+.header{margin-bottom:36px}
 .header img{height:84px}
 .dashboard-title{
  margin-top:20px;
@@ -65,14 +45,7 @@ body{
 }
 
 /* FILTROS */
-.filters{
- display:flex;
- gap:12px;
- margin-bottom:24px;
- flex-wrap:wrap;
- animation:fadeUp .9s ease;
-}
-
+.filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
 select{
  background:var(--card);
  color:var(--text);
@@ -89,27 +62,15 @@ select{
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
  gap:16px;
  margin-bottom:28px;
- animation:fadeUp 1s ease;
 }
-
 .kpi{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
  border-radius:18px;
  padding:18px;
 }
-
-.kpi span{
- color:var(--muted);
- font-size:13px;
- text-transform:uppercase;
-}
-
-.kpi strong{
- display:block;
- margin-top:8px;
- font-size:28px;
-}
+.kpi span{color:var(--muted);font-size:13px}
+.kpi strong{display:block;margin-top:8px;font-size:28px}
 
 /* CARDS */
 .cards{
@@ -117,27 +78,24 @@ select{
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
  gap:16px;
  margin-bottom:24px;
- animation:fadeUp 1.1s ease;
 }
-
 .card{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
  border-radius:22px;
  padding:18px;
- height:clamp(320px,38vw,440px);
+ height:420px;
  display:flex;
  flex-direction:column;
 }
-
-.card strong{margin-bottom:12px;font-size:18px}
-.chart-wrap{flex:1;position:relative}
+.card strong{margin-bottom:12px}
+.chart-wrap{flex:1}
 canvas{width:100%!important;height:100%!important}
 
 /* TABELA */
 .table-wrap{overflow-x:auto}
 table{width:100%;min-width:900px;border-collapse:collapse}
-thead{background:linear-gradient(180deg,#020b2a,#020617)}
+thead{background:#020617}
 th{
  color:var(--blue);
  font-weight:700;
@@ -213,7 +171,6 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
 let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
@@ -240,22 +197,9 @@ function initFiltros(){
  const anos=[...new Set(data.map(d=>d.ano))];
  filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
  filtroAno.value=new Date().getFullYear();
- filtroAno.onchange=()=>{initMeses();atualizar();}
- initMeses();
-}
-
-function initMeses(){
- const meses=[...new Set(data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))];
- filtroMes.innerHTML=`<option value="ALL">Todos</option>`+
- meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.onchange=()=>{initSemanas();atualizar();}
- initSemanas();
-}
-
-function initSemanas(){
- filtroSemana.innerHTML='<option value="ALL">Todas</option>'+
- [...new Set(data.map(d=>d.semana))].map(s=>`<option>${s}</option>`).join("");
- filtroSemana.onchange=atualizar;
+ filtroAno.onchange=()=>atualizar();
+ filtroMes.innerHTML='<option value="ALL">Todos</option>';
+ filtroSemana.innerHTML='<option value="ALL">Todas</option>';
  atualizar();
 }
 
@@ -265,15 +209,20 @@ function atualizar(){
   (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
   (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
  );
- renderKPIs(f); renderTabela(f); renderGraficos(f);
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
 }
 
 function renderKPIs(f){
  const dias=new Set(f.map(d=>d.dia)).size;
  let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
  f.forEach(d=>{
-  t.trades+=d.trades; t.pontos+=d.pontos;
-  t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
+  t.trades+=d.trades;
+  t.pontos+=d.pontos;
+  t.gain+=d.gain;
+  t.stop+=d.stop;
+  t.zero+=d.zero;
  });
  kDias.textContent=dias;
  kTrades.textContent=t.trades;
@@ -286,7 +235,15 @@ function renderKPIs(f){
 
 function renderTabela(f){
  tbody.innerHTML="";
+ let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
+
  f.forEach(d=>{
+  tot.pontos+=d.pontos;
+  tot.trades+=d.trades;
+  tot.gain+=d.gain;
+  tot.stop+=d.stop;
+  tot.zero+=d.zero;
+
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
@@ -299,51 +256,47 @@ function renderTabela(f){
    <td>${d.semana}</td>
   </tr>`;
  });
+
+ tbody.innerHTML+=`
+ <tr class="total">
+  <td>TOTAL</td>
+  <td>${tot.pontos}</td>
+  <td>${tot.trades}</td>
+  <td>${tot.gain}</td>
+  <td>${tot.stop}</td>
+  <td>${tot.zero}</td>
+  <td colspan="2"></td>
+ </tr>`;
 }
 
 function renderGraficos(f){
  const semanas={};
  f.forEach(d=>{
-  if(!semanas[d.semana]) semanas[d.semana]={total:0,dias:[]};
-  semanas[d.semana].total+=d.pontos;
-  semanas[d.semana].dias.push(`${d.dia}: ${d.pontos}`);
+  if(!semanas[d.semana]) semanas[d.semana]=0;
+  semanas[d.semana]+=d.pontos;
  });
 
  const labels=Object.keys(semanas);
  let acc=0;
  const valores=labels.map(s=>{
-  acc+=semanas[s].total;
+  acc+=semanas[s];
   return acc;
  });
 
- if(chartLinha)chartLinha.destroy();
+ if(chartLinha) chartLinha.destroy();
  chartLinha=new Chart(chartLinhaEl,{
   type:"line",
   data:{labels,datasets:[{
    data:valores,
    borderColor:"#22c55e",
-   tension:.35,
+   backgroundColor:"rgba(34,197,94,.18)",
    fill:true,
-   backgroundColor:"rgba(34,197,94,.18)"
+   tension:.35
   }]},
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   plugins:{
-    legend:{display:false},
-    tooltip:{
-     callbacks:{
-      label:(ctx)=>{
-       const s=labels[ctx.dataIndex];
-       return [`Total Semana: ${semanas[s].total}`, ...semanas[s].dias];
-      }
-     }
-    }
-   }
-  }
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
- if(chartBar)chartBar.destroy();
+ if(chartBar) chartBar.destroy();
  chartBar=new Chart(chartBarEl,{
   type:"bar",
   data:{labels:["Gain","Stop","0x0"],datasets:[{
