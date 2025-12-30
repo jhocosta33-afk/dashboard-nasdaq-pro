@@ -2,131 +2,164 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard NASDAQ PRO</title>
+<title>Dashboard - Balanço de Pontos</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
- --bg:#020617;
- --card:#050b1a;
- --border:rgba(255,255,255,.08);
- --text:#e5e7eb;
- --muted:#9ca3af;
- --green:#22c55e;
- --red:#ef4444;
- --yellow:#facc15;
- --blue:#93c5fd;
+  --bg:#020617;
+  --card:#050b1a;
+  --border:rgba(255,255,255,.08);
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --green:#22c55e;
 }
-*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system}
+
+*{
+  box-sizing:border-box;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
 body{
- margin:0;
- background:radial-gradient(circle at top,#0b1f4d,#020617 70%);
- color:var(--text);
+  margin:0;
+  background:radial-gradient(circle at top,#0b1f4d,#020617 70%);
+  color:var(--text);
 }
+
 .container{
- max-width:1600px;
- margin:auto;
- padding:clamp(16px,2vw,28px);
+  max-width:1400px;
+  margin:auto;
+  padding:24px;
 }
+
 .card{
- background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);
- border-radius:22px;
- padding:18px;
- height:420px;
+  background:linear-gradient(180deg,#050b1a,#030818);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:18px;
+  height:420px;
 }
-.chart-wrap{height:100%}
-canvas{width:100%!important;height:100%!important}
+
+.card-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:600;
+  margin-bottom:12px;
+}
+
+.chart-wrap{
+  height:calc(100% - 32px);
+}
+
+canvas{
+  width:100%!important;
+  height:100%!important;
+}
 </style>
 </head>
 
 <body>
 <div class="container">
- <div class="card">
-  <strong>📈 Balanço de Pontos</strong>
-  <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
- </div>
+  <div class="card">
+    <div class="card-title">📈 Balanço de Pontos</div>
+    <div class="chart-wrap">
+      <canvas id="balancoPontos"></canvas>
+    </div>
+  </div>
 </div>
 
 <script>
-const chartLinhaEl = document.getElementById("chartLinha");
-
 const labels = ["29/12/2025","30/12/2025"];
 const pontosDia = [100,-28];
 
-// saldo acumulado
-let acc = 0;
-const saldo = pontosDia.map(p => acc += p);
+// cálculo do saldo acumulado
+let acumulado = 0;
+const saldo = pontosDia.map(v => acumulado += v);
 
-// máximo com folga
+// limites do eixo Y
 const maxSaldo = Math.max(...saldo);
 const maxY = Math.ceil(maxSaldo * 1.15);
 
-// gradiente
-const ctx = chartLinhaEl.getContext("2d");
-const grad = ctx.createLinearGradient(0,0,0,300);
-grad.addColorStop(0,"rgba(34,197,94,.35)");
-grad.addColorStop(1,"rgba(34,197,94,.05)");
+const canvas = document.getElementById("balancoPontos");
+const ctx = canvas.getContext("2d");
 
-new Chart(chartLinhaEl,{
- type:"line",
- data:{
-  labels,
-  datasets:[{
-   data:saldo,
-   borderColor:"#22c55e",
-   borderWidth:3,
-   tension:.4,
-   fill:true,
-   backgroundColor:grad,
-   pointRadius:0,
-   pointHoverRadius:7,
-   pointHoverBackgroundColor:"#22c55e"
-  }]
- },
- options:{
-  responsive:true,
-  maintainAspectRatio:false,
-  interaction:{
-   mode:"index",
-   intersect:false
+// gradiente de preenchimento
+const gradient = ctx.createLinearGradient(0,0,0,300);
+gradient.addColorStop(0,"rgba(34,197,94,.35)");
+gradient.addColorStop(1,"rgba(34,197,94,.05)");
+
+new Chart(ctx,{
+  type:"line",
+  data:{
+    labels,
+    datasets:[{
+      data:saldo,
+      borderColor:"#22c55e",
+      borderWidth:3,
+      tension:0.4,
+      fill:true,
+      backgroundColor:gradient,
+      pointRadius:0,
+      pointHoverRadius:7,
+      pointHoverBackgroundColor:"#22c55e",
+      pointHoverBorderWidth:2,
+      pointHoverBorderColor:"#020617"
+    }]
   },
-  plugins:{
-   legend:{display:false},
-   tooltip:{
-    backgroundColor:"rgba(2,6,23,.95)",
-    borderColor:"rgba(255,255,255,.1)",
-    borderWidth:1,
-    padding:12,
-    displayColors:false,
-    callbacks:{
-     title:(ctx)=>`📅 ${ctx[0].label}`,
-     label:(ctx)=>{
-      const i = ctx.dataIndex;
-      const dia = pontosDia[i];
-      const sinal = dia >= 0 ? "+" : "";
-      return [
-       `Saldo: ${ctx.parsed.y} pts`,
-       `Dia: ${sinal}${dia} pts`
-      ];
-     }
+  options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    interaction:{
+      mode:"index",
+      intersect:false
+    },
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:"rgba(2,6,23,.95)",
+        borderColor:"rgba(255,255,255,.1)",
+        borderWidth:1,
+        padding:12,
+        displayColors:false,
+        callbacks:{
+          title:(items)=>`📅 ${items[0].label}`,
+          label:(item)=>{
+            const i = item.dataIndex;
+            const dia = pontosDia[i];
+            const sinal = dia >= 0 ? "+" : "";
+            return [
+              `Saldo: ${item.parsed.y} pts`,
+              `Dia: ${sinal}${dia} pts`
+            ];
+          }
+        }
+      }
+    },
+    scales:{
+      y:{
+        min:0,
+        max:maxY,
+        grid:{
+          color:"rgba(255,255,255,.05)",
+          borderDash:[4,4]
+        },
+        ticks:{
+          color:"#9ca3af",
+          font:{size:11}
+        }
+      },
+      x:{
+        grid:{display:false},
+        ticks:{
+          color:"#9ca3af",
+          font:{size:11}
+        }
+      }
     }
-   }
-  },
-  scales:{
-   y:{
-    min:0,
-    max:maxY,
-    grid:{color:"rgba(255,255,255,.05)",borderDash:[4,4]},
-    ticks:{color:"#9ca3af",font:{size:11}}
-   },
-   x:{
-    grid:{display:false},
-    ticks:{color:"#9ca3af",font:{size:11}}
-   }
   }
- }
 });
 </script>
 </body>
