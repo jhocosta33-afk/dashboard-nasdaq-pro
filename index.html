@@ -37,7 +37,6 @@ body{
  animation:fadePage .6s ease;
 }
 
-/* ANIMAÇÕES */
 @keyframes fadeUp{
  from{opacity:0; transform:translateY(14px)}
  to{opacity:1; transform:translateY(0)}
@@ -57,13 +56,13 @@ body{
 }
 
 .header img{
- height:84px;                 /* LOGO MAIOR */
+ height:84px;
  max-width:100%;
 }
 
 .dashboard-title{
- margin-top:20px;             /* MAIS ABAIXO */
- font-size:22px;              /* TEXTO MAIOR */
+ margin-top:20px;
+ font-size:22px;
  letter-spacing:4px;
  font-weight:900;
  color:var(--blue);
@@ -223,6 +222,7 @@ tr.total{
 
 <!-- KPIs -->
 <div class="kpis">
+ <div class="kpi"><span>Dias Operados</span><strong id="kDias">0</strong></div>
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
  <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
@@ -337,11 +337,20 @@ function atualizar(){
 
 function renderKPIs(f){
  let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
+ const diasUnicos=new Set();
+
  f.forEach(d=>{
-  t.trades+=d.trades; t.pontos+=d.pontos;
-  t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
+  t.trades+=d.trades;
+  t.pontos+=d.pontos;
+  t.gain+=d.gain;
+  t.stop+=d.stop;
+  t.zero+=d.zero;
+  diasUnicos.add(d.dia);
  });
+
  const ops=t.gain+t.stop;
+
+ kDias.textContent=diasUnicos.size;
  kTrades.textContent=t.trades;
  kPontos.textContent=t.pontos;
  kGains.textContent=t.gain;
