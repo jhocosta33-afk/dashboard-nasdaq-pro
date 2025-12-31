@@ -193,35 +193,23 @@ tr.total{
  background:rgba(34,197,94,.08);
  font-weight:700;
 }
-
-/* RESPONSIVO */
-@media(max-width:900px){
- .cards{grid-template-columns:1fr}
-}
-
-@media(max-width:600px){
- select{width:100%}
-}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
  <img src="logo.png" alt="Mentoria NasdaqPro">
  <span class="dashboard-title">DASHBOARD</span>
 </div>
 
-<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
  <select id="filtroSemana"></select>
 </div>
 
-<!-- KPIs -->
 <div class="kpis">
  <div class="kpi"><span>Dias Operados</span><strong id="kDias">0</strong></div>
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
@@ -232,7 +220,6 @@ tr.total{
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
-<!-- GRÁFICOS -->
 <div class="cards">
  <div class="card">
   <strong>📈 Balanço de Pontos</strong>
@@ -244,7 +231,6 @@ tr.total{
  </div>
 </div>
 
-<!-- TABELA -->
 <div class="card" style="height:auto">
  <strong>Tabela Operacional</strong>
  <div class="table-wrap">
@@ -296,106 +282,47 @@ function parseCSV(t){
 function initFiltros(){
  const anos=[...new Set(data.map(d=>d.ano))].sort();
  filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
- filtroAno.value=new Date().getFullYear();
+
+ const anoAtual=String(new Date().getFullYear());
+ filtroAno.value=anos.includes(anoAtual)?anoAtual:anos[anos.length-1];
+
  filtroAno.onchange=()=>{initMeses();atualizar();}
  initMeses();
 }
 
 function initMeses(){
- const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
  const meses=[...new Set(data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))];
  filtroMes.innerHTML=`<option value="ALL">Todos os meses</option>`+
  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value=meses.includes(mesAtual)?mesAtual:"ALL";
+ filtroMes.value="ALL";
  filtroMes.onchange=()=>{initSemanas();atualizar();}
  initSemanas();
 }
 
 function initSemanas(){
- if(filtroMes.value==="ALL"){
-  filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>';
-  filtroSemana.disabled=true;
-  atualizar();
-  return;
- }
- filtroSemana.disabled=false;
- const semanas=[...new Set(data.filter(d=>d.ano==filtroAno.value && d.mes==filtroMes.value).map(d=>d.semana))];
- filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
- semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.value="ALL";
- filtroSemana.onchange=atualizar;
+ filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>';
+ filtroSemana.disabled=true;
  atualizar();
 }
 
 function atualizar(){
- const f=data.filter(d=>
-  d.ano==filtroAno.value &&
-  (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
-  (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
- );
- renderKPIs(f); renderTabela(f); renderGraficos(f);
+ const f=data.filter(d=>d.ano==filtroAno.value);
+ renderGraficos(f);
 }
 
 function renderGraficos(f){
  let acc=0, labels=[], saldo=[];
  f.forEach(d=>{ acc+=d.pontos; labels.push(d.dia); saldo.push(acc); });
 
- const maxY=Math.ceil(Math.max(...saldo)*1.15);
-
  if(chartLinha)chartLinha.destroy();
-
- const ctx=document.getElementById("chartLinha").getContext("2d");
- const grad=ctx.createLinearGradient(0,0,0,300);
- grad.addColorStop(0,"rgba(34,197,94,.35)");
- grad.addColorStop(1,"rgba(34,197,94,.05)");
-
- chartLinha=new Chart(ctx,{
+ chartLinha=new Chart(chartLinhaEl,{
   type:"line",
-  data:{labels,datasets:[{
-   data:saldo,
-   borderColor:"#22c55e",
-   borderWidth:3,
-   tension:.4,
-   fill:true,
-   backgroundColor:grad,
-   pointRadius:0,
-   pointHoverRadius:7,
-   pointHoverBackgroundColor:"#22c55e",
-   pointHoverBorderColor:"#020617",
-   pointHoverBorderWidth:2
-  }]},
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   interaction:{mode:"index",intersect:false},
-   plugins:{
-    legend:{display:false},
-    tooltip:{
-     backgroundColor:"rgba(2,6,23,.95)",
-     borderColor:"rgba(255,255,255,.1)",
-     borderWidth:1,
-     padding:12,
-     displayColors:false,
-     callbacks:{
-      title:i=>`📅 ${i[0].label}`,
-      label:i=>{
-       const idx=i.dataIndex;
-       const dia=f[idx].pontos;
-       const s=dia>=0?"+":"";
-       return [`Saldo: ${i.parsed.y} pts`,`Dia: ${s}${dia} pts`];
-      }
-     }
-    }
-   },
-   scales:{
-    y:{min:0,max:maxY,ticks:{color:"#9ca3af"},grid:{color:"rgba(255,255,255,.05)"}},
-    x:{ticks:{color:"#9ca3af"},grid:{display:false}}
-   }
-  }
+  data:{labels,datasets:[{data:saldo,borderColor:"#22c55e",tension:.35,fill:true,backgroundColor:"rgba(34,197,94,.18)"}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
  if(chartBar)chartBar.destroy();
- chartBar=new Chart(document.getElementById("chartBar"),{
+ chartBar=new Chart(chartBarEl,{
   type:"bar",
   data:{labels:["Gain","Stop","0x0"],datasets:[{
    data:[
@@ -403,13 +330,14 @@ function renderGraficos(f){
     f.reduce((a,b)=>a+b.stop,0),
     f.reduce((a,b)=>a+b.zero,0)
    ],
-   backgroundColor:["#22c55e","#ef4444","#facc15"],
-   borderRadius:12
+   backgroundColor:["#22c55e","#ef4444","#facc15"]
   }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 }
 
+const chartLinhaEl=document.getElementById("chartLinha");
+const chartBarEl=document.getElementById("chartBar");
 loadCSV();
 </script>
 </body>
