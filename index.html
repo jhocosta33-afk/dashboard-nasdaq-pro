@@ -8,149 +8,150 @@
 
 <style>
 :root{
- /* FUNDO */
- --bg-1:#1e293b;
- --bg-2:#020617;
+  --bg-main: radial-gradient(circle at top,
+    #2a3f6e 0%,
+    #1b2b4f 35%,
+    #0b1220 75%,
+    #050812 100%
+  );
 
- /* CARDS */
- --card:#0b1220;
- --border:rgba(255,255,255,.08);
+  --card-bg: linear-gradient(180deg,#0f1b34,#070d1c);
+  --card-border: rgba(255,255,255,.06);
 
- /* TEXTO */
- --white:#f9fafb;
- --muted:#9ca3af;
+  --text-main:#f8fafc;
+  --text-muted:#9aa4b2;
 
- /* CORES SEMÂNTICAS (IGUAL IMAGEM) */
- --blue:#3b82f6;
- --green:#22c55e;
- --red:#ef4444;
- --yellow:#facc15;
+  --blue:#5b8efc;
+  --green:#4ade80;
+  --red:#f87171;
+  --yellow:#facc15;
 }
 
 *{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system;
+  box-sizing:border-box;
+  font-family: Inter, system-ui, -apple-system;
 }
 
 body{
- margin:0;
- background:radial-gradient(circle at top,#243b6b 0%,#020617 65%);
- color:var(--white);
+  margin:0;
+  background:var(--bg-main);
+  color:var(--text-main);
 }
 
 .container{
- max-width:1600px;
- margin:auto;
- padding:32px;
+  max-width:1600px;
+  margin:auto;
+  padding:34px;
 }
 
 /* HEADER */
 .header{
- display:flex;
- gap:18px;
- align-items:center;
- margin-bottom:32px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-bottom:30px;
 }
 .logo{
- width:64px;
- height:64px;
- background:white;
- color:#020617;
- font-size:36px;
- font-weight:900;
- display:flex;
- align-items:center;
- justify-content:center;
- border-radius:14px;
+  width:62px;
+  height:62px;
+  background:#ffffff;
+  color:#0b1220;
+  font-size:34px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:16px;
 }
 .header h1{
- margin:0;
- font-size:30px;
+  margin:0;
+  font-size:28px;
 }
 .header span{
- color:var(--blue);
- letter-spacing:3px;
- font-size:14px;
+  color:#7aa2ff;
+  font-size:13px;
+  letter-spacing:3px;
 }
 
-/* FILTROS */
+/* FILTERS */
 .filters{
- display:grid;
- grid-template-columns:repeat(3,240px);
- gap:16px;
- margin-bottom:28px;
+  display:grid;
+  grid-template-columns:repeat(3,240px);
+  gap:16px;
+  margin-bottom:26px;
 }
 select{
- background:linear-gradient(180deg,#111827,#020617);
- border:1px solid var(--border);
- color:white;
- padding:12px 16px;
- border-radius:12px;
+  background:linear-gradient(180deg,#0f1b34,#070d1c);
+  border:1px solid var(--card-border);
+  color:white;
+  padding:12px 16px;
+  border-radius:14px;
 }
 
-/* KPI */
+/* KPIs */
 .kpis{
- display:grid;
- grid-template-columns:repeat(6,1fr);
- gap:18px;
- margin-bottom:32px;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:18px;
+  margin-bottom:32px;
 }
 .kpi{
- background:linear-gradient(180deg,#0b1220,#020617);
- border:1px solid var(--border);
- border-radius:18px;
- padding:18px;
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:20px;
+  padding:18px;
 }
 .kpi span{
- font-size:13px;
- color:var(--muted);
+  font-size:13px;
+  color:var(--text-muted);
 }
 .kpi strong{
- display:block;
- margin-top:6px;
- font-size:30px;
+  display:block;
+  margin-top:8px;
+  font-size:28px;
+  font-weight:600;
 }
 
 /* GRÁFICOS */
 .cards{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:22px;
- margin-bottom:34px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+  margin-bottom:34px;
 }
 .card{
- background:linear-gradient(180deg,#0b1220,#020617);
- border:1px solid var(--border);
- border-radius:22px;
- padding:20px;
- height:400px;
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:22px;
+  padding:20px;
+  height:380px;
 }
 .card strong{
- display:block;
- margin-bottom:14px;
+  display:block;
+  margin-bottom:12px;
 }
 
-/* TABELA (NEUTRA) */
+/* TABELA */
 .table-title{
- margin-bottom:10px;
- font-weight:600;
+  margin-bottom:10px;
+  font-weight:600;
 }
 table{
- width:100%;
- border-collapse:collapse;
- background:white;
- color:#020617;
- border-radius:14px;
- overflow:hidden;
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  color:#0b1220;
+  border-radius:14px;
+  overflow:hidden;
 }
 thead{
- background:#f3f4f6;
+  background:#f3f4f6;
 }
 th,td{
- padding:12px;
- border-bottom:1px solid #e5e7eb;
- font-size:14px;
- text-align:left;
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:14px;
+  text-align:left;
 }
 </style>
 </head>
@@ -160,86 +161,98 @@ th,td{
 
 <!-- HEADER -->
 <div class="header">
- <div class="logo">N</div>
- <div>
-  <h1>Mentoria NasdaqPro</h1>
-  <span>DASHBOARD</span>
- </div>
+  <div class="logo">N</div>
+  <div>
+    <h1>Mentoria NasdaqPro</h1>
+    <span>DASHBOARD</span>
+  </div>
 </div>
 
-<!-- FILTROS -->
+<!-- FILTERS -->
 <div class="filters">
- <select><option>Filtro Ano</option></select>
- <select><option>Filtro Mês</option></select>
- <select><option>Filtro Semana</option></select>
+  <select><option>Filtro Ano</option></select>
+  <select><option>Filtro Mês</option></select>
+  <select><option>Filtro Semana</option></select>
 </div>
 
 <!-- KPIs -->
 <div class="kpis">
- <div class="kpi"><span>TRADES</span><strong>82</strong></div>
- <div class="kpi"><span>PONTOS</span><strong style="color:var(--blue)">320</strong></div>
- <div class="kpi"><span>GAINS</span><strong style="color:var(--green)">44</strong></div>
- <div class="kpi"><span>STOPS</span><strong style="color:var(--red)">29</strong></div>
- <div class="kpi"><span>0x0</span><strong style="color:var(--yellow)">20</strong></div>
- <div class="kpi"><span>ASSERTIVIDADE</span><strong style="color:var(--green)">60%</strong></div>
+  <div class="kpi"><span>TRADES</span><strong>82</strong></div>
+  <div class="kpi"><span>PONTOS</span><strong style="color:var(--blue)">320</strong></div>
+  <div class="kpi"><span>GAINS</span><strong style="color:var(--green)">44</strong></div>
+  <div class="kpi"><span>STOPS</span><strong style="color:var(--red)">29</strong></div>
+  <div class="kpi"><span>0x0</span><strong style="color:var(--yellow)">20</strong></div>
+  <div class="kpi"><span>ASSERTIVIDADE</span><strong style="color:var(--green)">60%</strong></div>
 </div>
 
 <!-- GRÁFICOS -->
 <div class="cards">
- <div class="card">
-  <strong>📈 Balanço de Pontos</strong>
-  <canvas id="line"></canvas>
- </div>
- <div class="card">
-  <strong>📊 Gains x Stops x 0x0</strong>
-  <canvas id="bar"></canvas>
- </div>
+  <div class="card">
+    <strong>📈 Balanço de Pontos</strong>
+    <canvas id="line"></canvas>
+  </div>
+  <div class="card">
+    <strong>📊 Gains x Stops x 0x0</strong>
+    <canvas id="bar"></canvas>
+  </div>
 </div>
 
 <!-- TABELA -->
 <div class="table-title">📋 Tabela Operacional</div>
 <table>
- <thead>
-  <tr>
-   <th>Dia</th><th>Pontos</th><th>Trades</th>
-   <th>Gain</th><th>Stop</th><th>Ativo</th><th>Semana</th>
-  </tr>
- </thead>
- <tbody>
-  <tr><td>01</td><td>80</td><td>20</td><td>18</td><td>2</td><td>NASDAQ</td><td>1</td></tr>
-  <tr><td>02</td><td>89</td><td>27</td><td>26</td><td>1</td><td>NASDAQ</td><td>1</td></tr>
- </tbody>
+<thead>
+<tr>
+<th>Dia</th><th>Pontos</th><th>Trades</th>
+<th>Gain</th><th>Stop</th><th>Ativo</th><th>Semana</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>01</td><td>80</td><td>20</td><td>18</td><td>2</td><td>NASDAQ</td><td>1</td></tr>
+<tr><td>02</td><td>89</td><td>27</td><td>26</td><td>1</td><td>NASDAQ</td><td>1</td></tr>
+</tbody>
 </table>
 
 </div>
 
 <script>
 new Chart(line,{
- type:'line',
- data:{
-  labels:['200','202','204','206','208'],
-  datasets:[{
-   data:[40,75,30,90,80],
-   borderColor:'#22c55e',
-   backgroundColor:'rgba(34,197,94,.25)',
-   tension:.4,
-   fill:true
-  }]
- },
- options:{plugins:{legend:{display:false}}}
+  type:'line',
+  data:{
+    labels:['200','202','204','206','208'],
+    datasets:[{
+      data:[40,75,30,90,80],
+      borderColor:'#4ade80',
+      backgroundColor:'rgba(74,222,128,.18)',
+      borderWidth:2,
+      tension:.45,
+      fill:true
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,.05)'}},
+      y:{grid:{color:'rgba(255,255,255,.05)'}}
+    }
+  }
 });
 
 new Chart(bar,{
- type:'bar',
- data:{
-  labels:['Gain','Stop','0x0'],
-  datasets:[{
-   data:[44,29,20],
-   backgroundColor:['#3b82f6','#22c55e','#ef4444'],
-   borderRadius:10
-  }]
- },
- options:{plugins:{legend:{display:false}}}
+  type:'bar',
+  data:{
+    labels:['Gain','Stop','0x0'],
+    datasets:[{
+      data:[44,29,20],
+      backgroundColor:['#5b8efc','#4ade80','#f87171'],
+      borderRadius:8
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{
+      y:{grid:{color:'rgba(255,255,255,.05)'}}
+    }
+  }
 });
 </script>
 
