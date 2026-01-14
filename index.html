@@ -21,7 +21,7 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+ font-family:Inter,system-ui,-apple-system;
 }
 
 body{
@@ -33,32 +33,16 @@ body{
 .container{
  max-width:1600px;
  margin:auto;
- padding:clamp(16px,2vw,28px);
- animation:fadePage .6s ease;
-}
-
-/* ANIMAÇÕES */
-@keyframes fadeUp{
- from{opacity:0; transform:translateY(14px)}
- to{opacity:1; transform:translateY(0)}
-}
-@keyframes fadePage{
- from{opacity:0}
- to{opacity:1}
+ padding:24px;
 }
 
 /* HEADER */
 .header{
- display:flex;
- flex-direction:column;
- align-items:flex-start;
- margin-bottom:36px;
- animation:fadeUp .8s ease;
+ margin-bottom:32px;
 }
 
 .header img{
  height:84px;
- max-width:100%;
 }
 
 .dashboard-title{
@@ -67,16 +51,14 @@ body{
  letter-spacing:4px;
  font-weight:900;
  color:var(--blue);
- opacity:.95;
 }
 
 /* FILTROS */
 .filters{
  display:flex;
  gap:12px;
- margin-bottom:24px;
  flex-wrap:wrap;
- animation:fadeUp .9s ease;
+ margin-bottom:24px;
 }
 
 select{
@@ -85,11 +67,8 @@ select{
  border:1px solid var(--border);
  border-radius:14px;
  padding:12px 16px;
- font-size:15px;
  width:220px;
 }
-
-select:disabled{opacity:.5}
 
 /* KPIs */
 .kpis{
@@ -97,7 +76,6 @@ select:disabled{opacity:.5}
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
  gap:16px;
  margin-bottom:28px;
- animation:fadeUp 1s ease;
 }
 
 .kpi{
@@ -110,13 +88,12 @@ select:disabled{opacity:.5}
 .kpi span{
  color:var(--muted);
  font-size:13px;
- text-transform:uppercase;
 }
 
 .kpi strong{
  display:block;
- margin-top:8px;
  font-size:28px;
+ margin-top:8px;
 }
 
 /* GRÁFICOS */
@@ -125,7 +102,6 @@ select:disabled{opacity:.5}
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
  gap:16px;
  margin-bottom:24px;
- animation:fadeUp 1.1s ease;
 }
 
 .card{
@@ -133,19 +109,13 @@ select:disabled{opacity:.5}
  border:1px solid var(--border);
  border-radius:22px;
  padding:18px;
- height:clamp(320px,38vw,440px);
+ height:420px;
  display:flex;
  flex-direction:column;
 }
 
-.card strong{
- margin-bottom:12px;
- font-size:18px;
-}
-
 .chart-wrap{
  flex:1;
- position:relative;
 }
 
 canvas{
@@ -153,10 +123,7 @@ canvas{
  height:100%!important;
 }
 
-/* =========================
-   TABELA
-   ========================= */
-
+/* TABELA */
 .table-wrap{
  overflow-x:auto;
 }
@@ -167,29 +134,14 @@ table{
  border-collapse:collapse;
 }
 
-thead{
- background:linear-gradient(180deg,#020b2a,#020617);
+th,td{
+ padding:14px;
+ text-align:center;
+ border-bottom:1px solid var(--border);
 }
 
 th{
  color:var(--blue);
- font-weight:700;
- font-size:17px;
- padding:18px 12px;
- text-align:center;
-}
-
-td{
- padding:15px 12px;
- border-bottom:1px solid var(--border);
- font-size:15px;
- text-align:center;
-}
-
-thead th:first-child,
-tbody td:first-child{
- text-align:left;
- padding-left:18px;
 }
 
 tr.total{
@@ -197,41 +149,33 @@ tr.total{
  font-weight:700;
 }
 
-/* 🔽 AJUSTE RESPONSIVO REAL (MOBILE) */
+/* MOBILE TABLE */
 @media(max-width:768px){
- table, thead, tbody, th, td, tr{
+ table,thead,tbody,tr,td{
   display:block;
  }
 
  thead{display:none}
 
- table{
-  min-width:100%;
- }
-
  tr{
   margin-bottom:14px;
+  padding:14px;
   border:1px solid var(--border);
   border-radius:14px;
-  padding:14px;
-  background:linear-gradient(180deg,#050b1a,#030818);
  }
 
  td{
   display:flex;
   justify-content:space-between;
-  padding:6px 0;
   border:none;
  }
 
  td::before{
   content:attr(data-label);
   color:var(--muted);
-  font-weight:600;
  }
 }
 
-/* RESPONSIVO GERAL */
 @media(max-width:900px){
  .cards{grid-template-columns:1fr}
 }
@@ -243,7 +187,138 @@ tr.total{
 </head>
 
 <body>
-<!-- O RESTO DO SEU HTML + JS PERMANECE 100% IGUAL -->
-<!-- (não alterado, exatamente como você enviou) -->
+<div class="container">
+
+<div class="header">
+ <img src="logo.png">
+ <div class="dashboard-title">DASHBOARD</div>
+</div>
+
+<div class="filters">
+ <select id="filtroAno"></select>
+ <select id="filtroMes"></select>
+ <select id="filtroSemana"></select>
+</div>
+
+<div class="kpis">
+ <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
+ <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
+ <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+ <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+ <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
+ <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+</div>
+
+<div class="cards">
+ <div class="card">
+  <strong>📈 Balanço de Pontos</strong>
+  <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
+ </div>
+ <div class="card">
+  <strong>📊 Gains x Stops x 0x0</strong>
+  <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
+ </div>
+</div>
+
+<div class="card" style="height:auto">
+ <strong>Tabela Operacional</strong>
+ <div class="table-wrap">
+  <table>
+   <thead>
+    <tr>
+     <th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th>
+     <th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th>
+    </tr>
+   </thead>
+   <tbody id="tbody"></tbody>
+  </table>
+ </div>
+</div>
+
+</div>
+
+<script>
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+let data=[],chartLinha,chartBar;
+
+async function loadCSV(){
+ const r=await fetch(CSV_URL,{cache:"no-store"});
+ const t=await r.text();
+ const rows=t.trim().split(/\r?\n/); rows.shift();
+ data=rows.map(r=>{
+  const c=r.split(",");
+  return{
+   dia:c[0], semana:c[1], ativo:c[2],
+   pontos:+c[3]||0,trades:+c[4]||0,
+   gain:+c[5]||0,stop:+c[6]||0,zero:+c[7]||0
+  }
+ });
+ atualizar();
+}
+
+function atualizar(){
+ renderKPIs(data);
+ renderTabela(data);
+ renderGraficos(data);
+}
+
+function renderKPIs(f){
+ let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
+ f.forEach(d=>{
+  t.trades+=d.trades;t.pontos+=d.pontos;
+  t.gain+=d.gain;t.stop+=d.stop;t.zero+=d.zero;
+ });
+ kTrades.textContent=t.trades;
+ kPontos.textContent=t.pontos;
+ kGains.textContent=t.gain;
+ kStops.textContent=t.stop;
+ kZero.textContent=t.zero;
+ kAcc.textContent=t.gain+t.stop?Math.round(t.gain/(t.gain+t.stop)*100)+"%":"0%";
+}
+
+function renderTabela(f){
+ tbody.innerHTML="";
+ f.forEach(d=>{
+  tbody.innerHTML+=`
+  <tr>
+   <td data-label="Dia">${d.dia}</td>
+   <td data-label="Pontos">${d.pontos}</td>
+   <td data-label="Trades">${d.trades}</td>
+   <td data-label="Gain">${d.gain}</td>
+   <td data-label="Stop">${d.stop}</td>
+   <td data-label="0x0">${d.zero}</td>
+   <td data-label="Ativo">${d.ativo}</td>
+   <td data-label="Semana">${d.semana}</td>
+  </tr>`;
+ });
+}
+
+function renderGraficos(f){
+ let labels=[],saldo=[],acc=0;
+ f.forEach(d=>{acc+=d.pontos;labels.push(d.dia);saldo.push(acc);});
+
+ if(chartLinha)chartLinha.destroy();
+ if(chartBar)chartBar.destroy();
+
+ chartLinha=new Chart(
+  document.getElementById("chartLinha").getContext("2d"),
+  {type:"line",data:{labels,datasets:[{data:saldo,borderColor:"#22c55e",fill:true}]},
+   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}
+ );
+
+ chartBar=new Chart(
+  document.getElementById("chartBar").getContext("2d"),
+  {type:"bar",data:{labels:["Gain","Stop","0x0"],
+   datasets:[{data:[
+    f.reduce((a,b)=>a+b.gain,0),
+    f.reduce((a,b)=>a+b.stop,0),
+    f.reduce((a,b)=>a+b.zero,0)
+   ],backgroundColor:["#22c55e","#ef4444","#facc15"]}]},
+   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}
+ );
+}
+
+loadCSV();
+</script>
 </body>
 </html>
