@@ -103,7 +103,7 @@ select:disabled{opacity:.5}
  font-size:28px;
 }
 
-/* GRÁFICOS */
+/* CARDS / GRÁFICOS */
 .cards{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
@@ -133,6 +133,18 @@ select:disabled{opacity:.5}
 canvas{
  width:100%!important;
  height:100%!important;
+}
+
+/* ALTURA CONTROLADA DOS GRÁFICOS */
+.chart-card{
+ height:420px;
+}
+
+@media(max-width:900px){
+ .chart-card{
+  height:auto;
+  min-height:320px;
+ }
 }
 
 /* ===== TABELA ===== */
@@ -176,7 +188,7 @@ tr.total{
  font-weight:700;
 }
 
-/* ===== RESPONSIVO DA TABELA ===== */
+/* ===== TABELA RESPONSIVA ===== */
 @media(max-width:900px){
 
  table{
@@ -244,11 +256,11 @@ tr.total{
 </div>
 
 <div class="cards">
- <div class="card" style="height:420px">
+ <div class="card chart-card">
   <strong>📈 Balanço de Pontos</strong>
   <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
  </div>
- <div class="card" style="height:420px">
+ <div class="card chart-card">
   <strong>📊 Gains x Stops x 0x0</strong>
   <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
  </div>
