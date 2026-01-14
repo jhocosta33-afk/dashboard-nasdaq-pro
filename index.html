@@ -33,8 +33,6 @@ body{
  padding:24px;
 }
 
-/* HEADER */
-.header{margin-bottom:32px}
 .header img{height:80px}
 .dashboard-title{
  margin-top:16px;
@@ -44,7 +42,6 @@ body{
  color:var(--blue);
 }
 
-/* FILTROS */
 .filters{
  display:flex;
  gap:12px;
@@ -61,7 +58,6 @@ select{
  width:220px;
 }
 
-/* KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -77,7 +73,6 @@ select{
 .kpi span{color:var(--muted);font-size:13px}
 .kpi strong{display:block;margin-top:6px;font-size:28px}
 
-/* CARDS */
 .cards{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
@@ -93,11 +88,9 @@ select{
  display:flex;
  flex-direction:column;
 }
-.card strong{margin-bottom:12px}
 .chart-wrap{flex:1;position:relative}
 canvas{width:100%!important;height:100%!important}
 
-/* TABELA */
 .table-wrap{overflow-x:auto}
 table{width:100%;min-width:900px;border-collapse:collapse}
 th,td{padding:14px;border-bottom:1px solid var(--border);text-align:center}
@@ -139,7 +132,6 @@ td:first-child,th:first-child{text-align:left}
   <strong>📈 Balanço de Pontos</strong>
   <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
  </div>
-
  <div class="card">
   <strong>📊 Gains x Stops x 0x0</strong>
   <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
@@ -208,13 +200,17 @@ function renderKPIs(f){
   t.stop+=d.stop;
   t.zero+=d.zero;
  });
- const ops=t.gain+t.stop;
- kTrades.textContent=t.trades;
- kPontos.textContent=t.pontos;
- kGains.textContent=t.gain;
- kStops.textContent=t.stop;
- kZero.textContent=t.zero;
- kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
+
+ const ops = t.gain + t.stop;
+
+ kTrades.textContent = t.trades;
+ kPontos.textContent = t.pontos;
+ kGains.textContent = t.gain;
+ kStops.textContent = t.stop;
+ kZero.textContent  = t.zero;
+
+ // ✅ ASSERTIVIDADE PROFISSIONAL
+ kAcc.textContent = ops ? ((t.gain / ops) * 100).toFixed(1) + "%" : "0.0%";
 }
 
 function renderTabela(f){
