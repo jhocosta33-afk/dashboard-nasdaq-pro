@@ -8,184 +8,73 @@
 
 <style>
 :root{
-  --bg-main: radial-gradient(circle at top,
-    #2a3f6e 0%,
-    #1b2b4f 35%,
-    #0b1220 75%,
-    #050812 100%
-  );
-
+  --bg-main: radial-gradient(circle at top,#2a3f6e 0%,#1b2b4f 35%,#0b1220 75%,#050812 100%);
   --card-bg: linear-gradient(180deg,#0f1b34,#070d1c);
   --card-border: rgba(255,255,255,.06);
-
   --text-main:#f8fafc;
   --text-muted:#9aa4b2;
-
   --blue:#5b8efc;
   --green:#4ade80;
   --red:#f87171;
   --yellow:#facc15;
 }
 
-*{
-  box-sizing:border-box;
-  font-family: Inter, system-ui, -apple-system;
-}
+*{box-sizing:border-box;font-family:Inter,system-ui}
+body{margin:0;background:var(--bg-main);color:var(--text-main)}
+.container{max-width:1600px;margin:auto;padding:34px}
 
-body{
-  margin:0;
-  background:var(--bg-main);
-  color:var(--text-main);
-}
+.header{display:flex;align-items:center;gap:18px;margin-bottom:30px}
+.logo{width:62px;height:62px;background:#fff;color:#0b1220;font-size:34px;font-weight:900;
+display:flex;align-items:center;justify-content:center;border-radius:16px}
 
-.container{
-  max-width:1600px;
-  margin:auto;
-  padding:34px;
-}
+.filters{display:grid;grid-template-columns:repeat(4,240px);gap:16px;margin-bottom:26px}
+select,input[type=file]{
+background:linear-gradient(180deg,#0f1b34,#070d1c);
+border:1px solid var(--card-border);color:white;padding:12px 16px;border-radius:14px}
 
-/* HEADER */
-.header{
-  display:flex;
-  align-items:center;
-  gap:18px;
-  margin-bottom:30px;
-}
-.logo{
-  width:62px;
-  height:62px;
-  background:#ffffff;
-  color:#0b1220;
-  font-size:34px;
-  font-weight:900;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:16px;
-}
-.header h1{
-  margin:0;
-  font-size:28px;
-}
-.header span{
-  color:#7aa2ff;
-  font-size:13px;
-  letter-spacing:3px;
-}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;margin-bottom:32px}
+.kpi{background:var(--card-bg);border:1px solid var(--card-border);
+border-radius:20px;padding:18px}
+.kpi span{font-size:13px;color:var(--text-muted)}
+.kpi strong{display:block;margin-top:8px;font-size:28px;font-weight:600}
 
-/* FILTERS */
-.filters{
-  display:grid;
-  grid-template-columns:repeat(3,240px);
-  gap:16px;
-  margin-bottom:26px;
-}
-select{
-  background:linear-gradient(180deg,#0f1b34,#070d1c);
-  border:1px solid var(--card-border);
-  color:white;
-  padding:12px 16px;
-  border-radius:14px;
-}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:34px}
+.card{background:var(--card-bg);border:1px solid var(--card-border);
+border-radius:22px;padding:20px;height:380px}
 
-/* KPIs */
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:18px;
-  margin-bottom:32px;
-}
-.kpi{
-  background:var(--card-bg);
-  border:1px solid var(--card-border);
-  border-radius:20px;
-  padding:18px;
-}
-.kpi span{
-  font-size:13px;
-  color:var(--text-muted);
-}
-.kpi strong{
-  display:block;
-  margin-top:8px;
-  font-size:28px;
-  font-weight:600;
-}
-
-/* GRÁFICOS */
-.cards{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:22px;
-  margin-bottom:34px;
-}
-.card{
-  background:var(--card-bg);
-  border:1px solid var(--card-border);
-  border-radius:22px;
-  padding:20px;
-  height:380px;
-}
-.card strong{
-  display:block;
-  margin-bottom:12px;
-}
-
-/* TABELA */
-.table-title{
-  margin-bottom:10px;
-  font-weight:600;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:white;
-  color:#0b1220;
-  border-radius:14px;
-  overflow:hidden;
-}
-thead{
-  background:#f3f4f6;
-}
-th,td{
-  padding:12px;
-  border-bottom:1px solid #e5e7eb;
-  font-size:14px;
-  text-align:left;
-}
+table{width:100%;border-collapse:collapse;background:white;color:#0b1220;border-radius:14px;overflow:hidden}
+thead{background:#f3f4f6}
+th,td{padding:12px;border-bottom:1px solid #e5e7eb;font-size:14px}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
   <div class="logo">N</div>
   <div>
     <h1>Mentoria NasdaqPro</h1>
-    <span>DASHBOARD</span>
+    <span style="color:#7aa2ff;letter-spacing:3px;font-size:13px">DASHBOARD</span>
   </div>
 </div>
 
-<!-- FILTERS -->
 <div class="filters">
+  <input type="file" id="csvFile" accept=".csv">
   <select><option>Filtro Ano</option></select>
   <select><option>Filtro Mês</option></select>
   <select><option>Filtro Semana</option></select>
 </div>
 
-<!-- KPIs -->
 <div class="kpis">
-  <div class="kpi"><span>TRADES</span><strong>82</strong></div>
-  <div class="kpi"><span>PONTOS</span><strong style="color:var(--blue)">320</strong></div>
-  <div class="kpi"><span>GAINS</span><strong style="color:var(--green)">44</strong></div>
-  <div class="kpi"><span>STOPS</span><strong style="color:var(--red)">29</strong></div>
-  <div class="kpi"><span>0x0</span><strong style="color:var(--yellow)">20</strong></div>
-  <div class="kpi"><span>ASSERTIVIDADE</span><strong style="color:var(--green)">60%</strong></div>
+  <div class="kpi"><span>TRADES</span><strong id="kTrades">0</strong></div>
+  <div class="kpi"><span>PONTOS</span><strong id="kPontos" style="color:var(--blue)">0</strong></div>
+  <div class="kpi"><span>GAINS</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+  <div class="kpi"><span>STOPS</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+  <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
+  <div class="kpi"><span>ASSERTIVIDADE</span><strong id="kAssert" style="color:var(--green)">0%</strong></div>
 </div>
 
-<!-- GRÁFICOS -->
 <div class="cards">
   <div class="card">
     <strong>📈 Balanço de Pontos</strong>
@@ -197,63 +86,86 @@ th,td{
   </div>
 </div>
 
-<!-- TABELA -->
-<div class="table-title">📋 Tabela Operacional</div>
 <table>
 <thead>
-<tr>
-<th>Dia</th><th>Pontos</th><th>Trades</th>
-<th>Gain</th><th>Stop</th><th>Ativo</th><th>Semana</th>
-</tr>
+<tr><th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>Ativo</th><th>Semana</th></tr>
 </thead>
-<tbody>
-<tr><td>01</td><td>80</td><td>20</td><td>18</td><td>2</td><td>NASDAQ</td><td>1</td></tr>
-<tr><td>02</td><td>89</td><td>27</td><td>26</td><td>1</td><td>NASDAQ</td><td>1</td></tr>
-</tbody>
+<tbody id="tableBody"></tbody>
 </table>
 
 </div>
 
 <script>
-new Chart(line,{
-  type:'line',
-  data:{
-    labels:['200','202','204','206','208'],
-    datasets:[{
-      data:[40,75,30,90,80],
-      borderColor:'#4ade80',
-      backgroundColor:'rgba(74,222,128,.18)',
-      borderWidth:2,
-      tension:.45,
-      fill:true
-    }]
-  },
-  options:{
-    plugins:{legend:{display:false}},
-    scales:{
-      x:{grid:{color:'rgba(255,255,255,.05)'}},
-      y:{grid:{color:'rgba(255,255,255,.05)'}}
-    }
-  }
+let lineChart, barChart;
+
+document.getElementById('csvFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = evt => processCSV(evt.target.result);
+  reader.readAsText(file);
 });
 
-new Chart(bar,{
-  type:'bar',
-  data:{
-    labels:['Gain','Stop','0x0'],
-    datasets:[{
-      data:[44,29,20],
-      backgroundColor:['#5b8efc','#4ade80','#f87171'],
-      borderRadius:8
-    }]
-  },
-  options:{
-    plugins:{legend:{display:false}},
-    scales:{
-      y:{grid:{color:'rgba(255,255,255,.05)'}}
-    }
-  }
-});
+function processCSV(csv){
+  const rows = csv.trim().split('\n').map(r=>r.split(','));
+  const headers = rows.shift().map(h=>h.trim());
+  const data = rows.map(r=>{
+    let obj={};
+    r.forEach((v,i)=>obj[headers[i]]=v.trim());
+    return obj;
+  });
+
+  let pontos=[], labels=[];
+  let trades=0, gains=0, stops=0, zero=0;
+
+  document.getElementById('tableBody').innerHTML='';
+  data.forEach(d=>{
+    pontos.push(+d.pontos);
+    labels.push(d.dia);
+    trades += +d.trades;
+    gains += +d.gain;
+    stops += +d.stop;
+    zero += (+d.trades - (+d.gain + +d.stop));
+    document.getElementById('tableBody').innerHTML +=
+      `<tr><td>${d.dia}</td><td>${d.pontos}</td><td>${d.trades}</td>
+       <td>${d.gain}</td><td>${d.stop}</td><td>${d.ativo}</td><td>${d.semana}</td></tr>`;
+  });
+
+  document.getElementById('kTrades').innerText = trades;
+  document.getElementById('kPontos').innerText = pontos.reduce((a,b)=>a+b,0);
+  document.getElementById('kGains').innerText = gains;
+  document.getElementById('kStops').innerText = stops;
+  document.getElementById('kZero').innerText = zero;
+  document.getElementById('kAssert').innerText =
+    Math.round((gains/(gains+stops))*100)+'%';
+
+  if(lineChart) lineChart.destroy();
+  if(barChart) barChart.destroy();
+
+  lineChart = new Chart(line,{
+    type:'line',
+    data:{labels,datasets:[{
+      data:pontos,
+      borderColor:'#4ade80',
+      backgroundColor:'rgba(74,222,128,.18)',
+      tension:.4,
+      fill:true
+    }]},
+    options:{plugins:{legend:{display:false}}}
+  });
+
+  barChart = new Chart(bar,{
+    type:'bar',
+    data:{
+      labels:['Gain','Stop','0x0'],
+      datasets:[{
+        data:[gains,stops,zero],
+        backgroundColor:['#5b8efc','#4ade80','#f87171'],
+        borderRadius:8
+      }]
+    },
+    options:{plugins:{legend:{display:false}}}
+  });
+}
 </script>
 
 </body>
