@@ -34,24 +34,12 @@ body{
  max-width:1600px;
  margin:auto;
  padding:clamp(16px,2vw,28px);
- animation:fadePage .6s ease;
-}
-
-@keyframes fadeUp{
- from{opacity:0; transform:translateY(14px)}
- to{opacity:1; transform:translateY(0)}
-}
-@keyframes fadePage{
- from{opacity:0}
- to{opacity:1}
 }
 
 .header{
  display:flex;
  flex-direction:column;
- align-items:flex-start;
  margin-bottom:36px;
- animation:fadeUp .8s ease;
 }
 
 .header img{
@@ -71,7 +59,6 @@ body{
  gap:12px;
  margin-bottom:24px;
  flex-wrap:wrap;
- animation:fadeUp .9s ease;
 }
 
 select{
@@ -91,7 +78,6 @@ select:disabled{opacity:.5}
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
  gap:16px;
  margin-bottom:28px;
- animation:fadeUp 1s ease;
 }
 
 .kpi{
@@ -118,7 +104,6 @@ select:disabled{opacity:.5}
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
  gap:16px;
  margin-bottom:24px;
- animation:fadeUp 1.1s ease;
 }
 
 .card{
@@ -189,7 +174,6 @@ tr.total{
 @media(max-width:900px){
  .cards{grid-template-columns:1fr}
 }
-
 @media(max-width:600px){
  select{width:100%}
 }
@@ -200,7 +184,7 @@ tr.total{
 <div class="container">
 
 <div class="header">
- <img src="logo.png" alt="Mentoria NasdaqPro">
+ <img src="logo.png">
  <span class="dashboard-title">DASHBOARD</span>
 </div>
 
@@ -256,6 +240,7 @@ tr.total{
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
+
 let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
@@ -287,11 +272,9 @@ function initFiltros(){
 }
 
 function initMeses(){
- const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
  const meses=[...new Set(data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))];
- filtroMes.innerHTML=`<option value="ALL">Todos os meses</option>`+
+ filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value=meses.includes(mesAtual)?mesAtual:"ALL";
  filtroMes.onchange=()=>{initSemanas();atualizar();}
  initSemanas();
 }
@@ -307,7 +290,6 @@ function initSemanas(){
  const semanas=[...new Set(data.filter(d=>d.ano==filtroAno.value && d.mes==filtroMes.value).map(d=>d.semana))];
  filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
  semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.value="ALL";
  filtroSemana.onchange=atualizar;
  atualizar();
 }
@@ -318,14 +300,19 @@ function atualizar(){
   (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
   (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
  );
- renderKPIs(f); renderTabela(f); renderGraficos(f);
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
 }
 
 function renderKPIs(f){
  let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
  f.forEach(d=>{
-  t.trades+=d.trades; t.pontos+=d.pontos;
-  t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
+  t.trades+=d.trades;
+  t.pontos+=d.pontos;
+  t.gain+=d.gain;
+  t.stop+=d.stop;
+  t.zero+=d.zero;
  });
  const ops=t.gain+t.stop;
  kTrades.textContent=t.trades;
@@ -340,8 +327,11 @@ function renderTabela(f){
  tbody.innerHTML="";
  let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
  f.forEach(d=>{
-  tot.pontos+=d.pontos; tot.trades+=d.trades;
-  tot.gain+=d.gain; tot.stop+=d.stop; tot.zero+=d.zero;
+  tot.pontos+=d.pontos;
+  tot.trades+=d.trades;
+  tot.gain+=d.gain;
+  tot.stop+=d.stop;
+  tot.zero+=d.zero;
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
@@ -366,22 +356,30 @@ function renderTabela(f){
  </tr>`;
 }
 
-/* 🔥 CORREÇÃO PRINCIPAL AQUI */
+/* 🔥 GRÁFICO CORRIGIDO */
 function renderGraficos(f){
  let labels=[], saldo=[], acc=0;
 
- const ordenado=[...f].sort((a,b)=>{
+ const todos=[...data].sort((a,b)=>{
   const da=a.dia.split("/").reverse().join("");
   const db=b.dia.split("/").reverse().join("");
   return da.localeCompare(db);
  });
 
- ordenado.forEach((d,i)=>{
-  const resultadoDia = i===0
-   ? d.pontos
-   : d.pontos - ordenado[i-1].pontos;
+ const idx={};
+ todos.forEach((d,i)=>idx[d.dia]=i);
 
-  acc+=resultadoDia;
+ const filtrado=[...f].sort((a,b)=>{
+  const da=a.dia.split("/").reverse().join("");
+  const db=b.dia.split("/").reverse().join("");
+  return da.localeCompare(db);
+ });
+
+ filtrado.forEach(d=>{
+  const i=idx[d.dia];
+  const ant=todos[i-1];
+  const resultado=ant?d.pontos-ant.pontos:0;
+  acc+=resultado;
   labels.push(d.dia);
   saldo.push(acc);
  });
@@ -389,19 +387,19 @@ function renderGraficos(f){
  if(chartLinha)chartLinha.destroy();
  if(chartBar)chartBar.destroy();
 
- chartLinha=new Chart(chartLinhaEl,{
+ chartLinha=new Chart(chartLinha,{
   type:"line",
   data:{labels,datasets:[{
    data:saldo,
    borderColor:"#22c55e",
-   tension:.35,
    fill:true,
+   tension:.35,
    backgroundColor:"rgba(34,197,94,.18)"
   }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
- chartBar=new Chart(chartBarEl,{
+ chartBar=new Chart(chartBar,{
   type:"bar",
   data:{labels:["Gain","Stop","0x0"],datasets:[{
    data:[
@@ -416,8 +414,6 @@ function renderGraficos(f){
  });
 }
 
-const chartLinhaEl=document.getElementById("chartLinha");
-const chartBarEl=document.getElementById("chartBar");
 loadCSV();
 </script>
 </body>
