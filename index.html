@@ -1,444 +1,76 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Dashboard NASDAQ PRO</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-:root{
- --bg:#020617;
- --card:#050b1a;
- --border:rgba(255,255,255,.08);
- --text:#e5e7eb;
- --muted:#9ca3af;
- --green:#22c55e;
- --red:#ef4444;
- --yellow:#facc15;
- --blue:#93c5fd;
-}
-
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
-}
-
-body{
- margin:0;
- background:radial-gradient(circle at top,#0b1f4d,#020617 70%);
- color:var(--text);
-}
-
-.container{
- max-width:1600px;
- margin:auto;
- padding:clamp(16px,2vw,28px);
-}
-
-/* HEADER */
-.header{
- display:flex;
- flex-direction:column;
- align-items:flex-start;
- margin-bottom:36px;
-}
-
-.header img{
- height:84px;
-}
-
-.dashboard-title{
- margin-top:20px;
- font-size:22px;
- letter-spacing:4px;
- font-weight:900;
- color:var(--blue);
-}
-
-/* FILTROS */
-.filters{
- display:flex;
- gap:12px;
- margin-bottom:24px;
- flex-wrap:wrap;
-}
-
-select{
- background:var(--card);
- color:var(--text);
- border:1px solid var(--border);
- border-radius:14px;
- padding:12px 16px;
- font-size:15px;
- width:220px;
-}
-
-select:disabled{opacity:.5}
-
-/* KPIs */
-.kpis{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
- gap:16px;
- margin-bottom:28px;
-}
-
-.kpi{
- background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);
- border-radius:18px;
- padding:18px;
-}
-
-.kpi span{
- color:var(--muted);
- font-size:13px;
- text-transform:uppercase;
-}
-
-.kpi strong{
- display:block;
- margin-top:8px;
- font-size:28px;
-}
-
-/* CARDS / GRÁFICOS */
-.cards{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
- gap:16px;
- margin-bottom:24px;
-}
-
-.card{
- background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);
- border-radius:22px;
- padding:18px;
- display:flex;
- flex-direction:column;
-}
-
-.card strong{
- margin-bottom:12px;
- font-size:18px;
-}
-
-.chart-wrap{
- flex:1;
- position:relative;
-}
-
-canvas{
- width:100%!important;
- height:100%!important;
-}
-
-/* ALTURA CONTROLADA DOS GRÁFICOS */
-.chart-card{
- height:420px;
-}
-
-@media(max-width:900px){
- .chart-card{
-  height:auto;
-  min-height:320px;
- }
-}
-
-/* ===== TABELA ===== */
-.table-wrap{
- overflow:auto;
-}
-
-table{
- width:100%;
- min-width:900px;
- border-collapse:collapse;
-}
-
-thead{
- background:linear-gradient(180deg,#020b2a,#020617);
-}
-
-th{
- color:var(--blue);
- font-weight:700;
- font-size:16px;
- padding:16px 12px;
- text-align:center;
-}
-
-td{
- padding:14px 12px;
- border-bottom:1px solid var(--border);
- font-size:15px;
- text-align:center;
-}
-
-thead th:first-child,
-tbody td:first-child{
- text-align:left;
- padding-left:18px;
-}
-
-tr.total{
- background:rgba(34,197,94,.12);
- font-weight:700;
-}
-
-/* ===== TABELA RESPONSIVA ===== */
-@media(max-width:900px){
-
- table{
-  min-width:100%;
- }
-
- thead{
-  display:none;
- }
-
- tbody tr{
-  display:block;
-  margin-bottom:14px;
-  background:linear-gradient(180deg,#050b1a,#030818);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:12px;
- }
-
- tbody td{
-  display:flex;
-  justify-content:space-between;
-  padding:10px 6px;
-  border:none;
- }
-
- tbody td::before{
-  content:attr(data-label);
-  font-weight:600;
-  color:var(--muted);
- }
-
- tr.total{
-  background:linear-gradient(90deg,rgba(34,197,94,.25),rgba(34,197,94,.08));
- }
-}
-
-@media(max-width:600px){
- select{width:100%}
-}
-</style>
-</head>
-
-<body>
-<div class="container">
-
-<div class="header">
- <img src="logo.png" alt="Mentoria NasdaqPro">
- <span class="dashboard-title">DASHBOARD</span>
-</div>
-
-<div class="filters">
- <select id="filtroAno"></select>
- <select id="filtroMes"></select>
- <select id="filtroSemana"></select>
-</div>
-
-<div class="kpis">
- <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
- <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
- <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
- <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
- <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
-</div>
-
-<div class="cards">
- <div class="card chart-card">
-  <strong>📈 Balanço de Pontos</strong>
-  <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
- </div>
- <div class="card chart-card">
-  <strong>📊 Gains x Stops x 0x0</strong>
-  <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
- </div>
-</div>
-
-<div class="card">
- <strong>📋 Tabela Operacional</strong>
- <div class="table-wrap">
-  <table>
-   <thead>
-    <tr>
-     <th>Dia</th>
-     <th>Pontos</th>
-     <th>Trades</th>
-     <th>Gain</th>
-     <th>Stop</th>
-     <th>0x0</th>
-     <th>Ativo</th>
-     <th>Semana</th>
-    </tr>
-   </thead>
-   <tbody id="tbody"></tbody>
-  </table>
- </div>
-</div>
-
-</div>
-
 <script>
-const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
-let data=[],chartLinha,chartBar;
+function renderGraficos(f){
 
-async function loadCSV(){
- const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- parseCSV(t);
-}
+ // 🔹 ordenar cronologicamente
+ const ordenado = [...f].sort((a,b)=>{
+  const da = new Date(a.dia.split("/").reverse().join("-"));
+  const db = new Date(b.dia.split("/").reverse().join("-"));
+  return da - db;
+ });
 
-function parseCSV(t){
- const rows=t.trim().split(/\r?\n/);
- rows.shift();
- data=rows.map(r=>{
-  const c=r.split(",");
-  return{
-   dia:c[0], semana:c[1], ativo:c[2],
-   ano:c[0].substring(6,10), mes:c[0].substring(3,5),
-   pontos:+c[3]||0, trades:+c[4]||0,
-   gain:+c[5]||0, stop:+c[6]||0, zero:+c[7]||0
+ let acc = 0;
+ let labels = [];
+ let saldo = [];
+
+ ordenado.forEach(d=>{
+  acc += d.pontos;
+  labels.push(d.dia);
+  saldo.push(acc);
+ });
+
+ if(chartLinha) chartLinha.destroy();
+ if(chartBar) chartBar.destroy();
+
+ chartLinha = new Chart(chartLinhaEl,{
+  type:"line",
+  data:{
+   labels,
+   datasets:[{
+    data:saldo,
+    borderColor:"#22c55e",
+    backgroundColor:"rgba(34,197,94,.18)",
+    tension:0.35,
+    fill:true,
+    pointRadius:4,
+    pointHoverRadius:6
+   }]
+  },
+  options:{
+   responsive:true,
+   maintainAspectRatio:false,
+   plugins:{legend:{display:false}},
+   scales:{
+    y:{
+     grid:{color:"rgba(255,255,255,.06)"},
+     ticks:{color:"#9ca3af"}
+    },
+    x:{
+     grid:{display:false},
+     ticks:{color:"#9ca3af"}
+    }
+   }
   }
  });
- initFiltros();
-}
 
-function initFiltros(){
- const anos=[...new Set(data.map(d=>d.ano))].sort();
- filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
- filtroAno.value=new Date().getFullYear();
- filtroAno.onchange=()=>{initMeses();atualizar();}
- initMeses();
-}
-
-function initMeses(){
- const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
- const meses=[...new Set(data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))];
- filtroMes.innerHTML=`<option value="ALL">Todos os meses</option>`+
- meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value=meses.includes(mesAtual)?mesAtual:"ALL";
- filtroMes.onchange=()=>{initSemanas();atualizar();}
- initSemanas();
-}
-
-function initSemanas(){
- if(filtroMes.value==="ALL"){
-  filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>';
-  filtroSemana.disabled=true;
-  atualizar();
-  return;
- }
- filtroSemana.disabled=false;
- const semanas=[...new Set(data.filter(d=>d.ano==filtroAno.value && d.mes==filtroMes.value).map(d=>d.semana))];
- filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
- semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.value="ALL";
- filtroSemana.onchange=atualizar;
- atualizar();
-}
-
-function atualizar(){
- const f=data.filter(d=>
-  d.ano==filtroAno.value &&
-  (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
-  (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
- );
- renderKPIs(f); renderTabela(f); renderGraficos(f);
-}
-
-function renderKPIs(f){
- let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
- f.forEach(d=>{
-  t.trades+=d.trades;
-  t.pontos+=d.pontos;
-  t.gain+=d.gain;
-  t.stop+=d.stop;
-  t.zero+=d.zero;
- });
- const ops=t.gain+t.stop;
- kTrades.textContent=t.trades;
- kPontos.textContent=t.pontos;
- kGains.textContent=t.gain;
- kStops.textContent=t.stop;
- kZero.textContent=t.zero;
- kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
-}
-
-function renderTabela(f){
- tbody.innerHTML="";
- let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
-
- f.forEach(d=>{
-  tot.pontos+=d.pontos;
-  tot.trades+=d.trades;
-  tot.gain+=d.gain;
-  tot.stop+=d.stop;
-  tot.zero+=d.zero;
-
-  tbody.innerHTML+=`
-  <tr>
-   <td data-label="Dia">${d.dia}</td>
-   <td data-label="Pontos" style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
-   <td data-label="Trades">${d.trades}</td>
-   <td data-label="Gain" style="color:var(--green)">${d.gain}</td>
-   <td data-label="Stop" style="color:var(--red)">${d.stop}</td>
-   <td data-label="0x0" style="color:var(--yellow)">${d.zero}</td>
-   <td data-label="Ativo">${d.ativo}</td>
-   <td data-label="Semana">${d.semana}</td>
-  </tr>`;
- });
-
- tbody.innerHTML+=`
- <tr class="total">
-  <td data-label="Resumo">TOTAL</td>
-  <td data-label="Pontos">${tot.pontos}</td>
-  <td data-label="Trades">${tot.trades}</td>
-  <td data-label="Gain">${tot.gain}</td>
-  <td data-label="Stop">${tot.stop}</td>
-  <td data-label="0x0">${tot.zero}</td>
-  <td data-label=""></td>
-  <td data-label=""></td>
- </tr>`;
-}
-
-function renderGraficos(f){
- let acc=0,labels=[],saldo=[];
- f.forEach(d=>{acc+=d.pontos;labels.push(d.dia);saldo.push(acc);});
-
- if(chartLinha)chartLinha.destroy();
- if(chartBar)chartBar.destroy();
-
- chartLinha=new Chart(chartLinhaEl,{
-  type:"line",
-  data:{labels,datasets:[{data:saldo,borderColor:"#22c55e",tension:.35,fill:true,backgroundColor:"rgba(34,197,94,.18)"}]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
- });
-
- chartBar=new Chart(chartBarEl,{
+ chartBar = new Chart(chartBarEl,{
   type:"bar",
-  data:{labels:["Gain","Stop","0x0"],datasets:[{
-   data:[f.reduce((a,b)=>a+b.gain,0),f.reduce((a,b)=>a+b.stop,0),f.reduce((a,b)=>a+b.zero,0)],
-   backgroundColor:["#22c55e","#ef4444","#facc15"],borderRadius:12
-  }]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  data:{
+   labels:["Gain","Stop","0x0"],
+   datasets:[{
+    data:[
+     f.reduce((a,b)=>a+b.gain,0),
+     f.reduce((a,b)=>a+b.stop,0),
+     f.reduce((a,b)=>a+b.zero,0)
+    ],
+    backgroundColor:["#22c55e","#ef4444","#facc15"],
+    borderRadius:12
+   }]
+  },
+  options:{
+   responsive:true,
+   maintainAspectRatio:false,
+   plugins:{legend:{display:false}}
+  }
  });
 }
-
-const chartLinhaEl=document.getElementById("chartLinha");
-const chartBarEl=document.getElementById("chartBar");
-loadCSV();
 </script>
-</body>
-</html>
