@@ -18,46 +18,19 @@
  --yellow:#facc15;
  --blue:#93c5fd;
 }
-
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
-}
-
+*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system}
 body{
  margin:0;
  background:radial-gradient(circle at top,#0b1f4d,#020617 70%);
  color:var(--text);
 }
-
 .container{
  max-width:1600px;
  margin:auto;
  padding:clamp(16px,2vw,28px);
- animation:fadePage .6s ease;
 }
-
-@keyframes fadeUp{
- from{opacity:0; transform:translateY(14px)}
- to{opacity:1; transform:translateY(0)}
-}
-@keyframes fadePage{
- from{opacity:0}
- to{opacity:1}
-}
-
-.header{
- display:flex;
- flex-direction:column;
- align-items:flex-start;
- margin-bottom:36px;
- animation:fadeUp .8s ease;
-}
-
-.header img{
- height:84px;
-}
-
+.header{margin-bottom:36px}
+.header img{height:84px}
 .dashboard-title{
  margin-top:20px;
  font-size:22px;
@@ -65,15 +38,7 @@ body{
  font-weight:900;
  color:var(--blue);
 }
-
-.filters{
- display:flex;
- gap:12px;
- margin-bottom:24px;
- flex-wrap:wrap;
- animation:fadeUp .9s ease;
-}
-
+.filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
 select{
  background:var(--card);
  color:var(--text);
@@ -83,44 +48,27 @@ select{
  font-size:15px;
  width:220px;
 }
-
 select:disabled{opacity:.5}
-
 .kpis{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
  gap:16px;
  margin-bottom:28px;
- animation:fadeUp 1s ease;
 }
-
 .kpi{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
  border-radius:18px;
  padding:18px;
 }
-
-.kpi span{
- color:var(--muted);
- font-size:13px;
- text-transform:uppercase;
-}
-
-.kpi strong{
- display:block;
- margin-top:8px;
- font-size:28px;
-}
-
+.kpi span{color:var(--muted);font-size:13px;text-transform:uppercase}
+.kpi strong{display:block;margin-top:8px;font-size:28px}
 .cards{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
  gap:16px;
  margin-bottom:24px;
- animation:fadeUp 1.1s ease;
 }
-
 .card{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
@@ -130,36 +78,12 @@ select:disabled{opacity:.5}
  display:flex;
  flex-direction:column;
 }
-
-.card strong{
- margin-bottom:12px;
- font-size:18px;
-}
-
-.chart-wrap{
- flex:1;
- position:relative;
-}
-
-canvas{
- width:100%!important;
- height:100%!important;
-}
-
-.table-wrap{
- overflow-x:auto;
-}
-
-table{
- width:100%;
- min-width:900px;
- border-collapse:collapse;
-}
-
-thead{
- background:linear-gradient(180deg,#020b2a,#020617);
-}
-
+.card strong{margin-bottom:12px;font-size:18px}
+.chart-wrap{flex:1;position:relative}
+canvas{width:100%!important;height:100%!important}
+.table-wrap{overflow-x:auto}
+table{width:100%;min-width:900px;border-collapse:collapse}
+thead{background:linear-gradient(180deg,#020b2a,#020617)}
 th{
  color:var(--blue);
  font-weight:700;
@@ -167,31 +91,20 @@ th{
  padding:18px 12px;
  text-align:center;
 }
-
 td{
  padding:15px 12px;
  border-bottom:1px solid var(--border);
  font-size:15px;
  text-align:center;
 }
-
 thead th:first-child,
 tbody td:first-child{
  text-align:left;
  padding-left:18px;
 }
-
 tr.total{
  background:rgba(34,197,94,.08);
  font-weight:700;
-}
-
-@media(max-width:900px){
- .cards{grid-template-columns:1fr}
-}
-
-@media(max-width:600px){
- select{width:100%}
 }
 </style>
 </head>
@@ -200,7 +113,7 @@ tr.total{
 <div class="container">
 
 <div class="header">
- <img src="logo.png" alt="Mentoria NasdaqPro">
+ <img src="logo.png">
  <span class="dashboard-title">DASHBOARD</span>
 </div>
 
@@ -210,7 +123,6 @@ tr.total{
  <select id="filtroSemana"></select>
 </div>
 
-<!-- KPIs -->
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
@@ -222,7 +134,7 @@ tr.total{
 
 <div class="cards">
  <div class="card">
-  <strong>📈 Balanço de Pontos</strong>
+  <strong>📈 Balanço de Pontos (Período)</strong>
   <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
  </div>
  <div class="card">
@@ -261,8 +173,7 @@ let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- parseCSV(t);
+ parseCSV(await r.text());
 }
 
 function parseCSV(t){
@@ -288,11 +199,9 @@ function initFiltros(){
 }
 
 function initMeses(){
- const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
  const meses=[...new Set(data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))];
  filtroMes.innerHTML=`<option value="ALL">Todos os meses</option>`+
  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value=meses.includes(mesAtual)?mesAtual:"ALL";
  filtroMes.onchange=()=>{initSemanas();atualizar();}
  initSemanas();
 }
@@ -308,7 +217,6 @@ function initSemanas(){
  const semanas=[...new Set(data.filter(d=>d.ano==filtroAno.value && d.mes==filtroMes.value).map(d=>d.semana))];
  filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
  semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.value="ALL";
  filtroSemana.onchange=atualizar;
  atualizar();
 }
@@ -319,7 +227,9 @@ function atualizar(){
   (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
   (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
  );
- renderKPIs(f); renderTabela(f); renderGraficos(f);
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
 }
 
 function renderKPIs(f){
@@ -331,9 +241,7 @@ function renderKPIs(f){
   t.stop+=d.stop;
   t.zero+=d.zero;
  });
-
  const ops=t.gain+t.stop;
-
  kTrades.textContent=t.trades;
  kPontos.textContent=t.pontos;
  kGains.textContent=t.gain;
@@ -345,14 +253,12 @@ function renderKPIs(f){
 function renderTabela(f){
  tbody.innerHTML="";
  let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
-
  f.forEach(d=>{
   tot.pontos+=d.pontos;
   tot.trades+=d.trades;
   tot.gain+=d.gain;
   tot.stop+=d.stop;
   tot.zero+=d.zero;
-
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
@@ -365,7 +271,6 @@ function renderTabela(f){
    <td>${d.semana}</td>
   </tr>`;
  });
-
  tbody.innerHTML+=`
  <tr class="total">
   <td>TOTAL</td>
@@ -381,17 +286,22 @@ function renderTabela(f){
 function renderGraficos(f){
  let acc=0,labels=[],saldo=[];
  f.forEach(d=>{
-  acc+=d.pontos;
+  acc+=d.pontos;          // começa em ZERO no período
   labels.push(d.dia);
   saldo.push(acc);
  });
-
  if(chartLinha)chartLinha.destroy();
  if(chartBar)chartBar.destroy();
 
  chartLinha=new Chart(chartLinhaEl,{
   type:"line",
-  data:{labels,datasets:[{data:saldo,borderColor:"#22c55e",tension:.35,fill:true,backgroundColor:"rgba(34,197,94,.18)"}]},
+  data:{labels,datasets:[{
+   data:saldo,
+   borderColor:"#22c55e",
+   tension:.35,
+   fill:true,
+   backgroundColor:"rgba(34,197,94,.18)"
+  }]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
  });
 
