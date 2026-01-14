@@ -110,7 +110,7 @@ select:disabled{opacity:.5}
 .kpi strong{
  display:block;
  margin-top:8px;
- font-size:26px;
+ font-size:28px;
 }
 
 .cards{
@@ -218,9 +218,6 @@ tr.total{
  <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
  <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
- <div class="kpi"><span>Médio / Trade</span><strong id="kMediaTrade">0</strong></div>
- <div class="kpi"><span>Pontos / Dia</span><strong id="kPontosDia">0</strong></div>
- <div class="kpi"><span>Máx. Drawdown</span><strong id="kDrawdown" style="color:var(--red)">0</strong></div>
 </div>
 
 <div class="cards">
@@ -327,23 +324,14 @@ function atualizar(){
 
 function renderKPIs(f){
  let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
- let saldo=0,pico=0,maxDD=0;
-
  f.forEach(d=>{
   t.trades+=d.trades;
   t.pontos+=d.pontos;
   t.gain+=d.gain;
   t.stop+=d.stop;
   t.zero+=d.zero;
-
-  saldo+=d.pontos;
-  if(saldo>pico)pico=saldo;
-  maxDD=Math.max(maxDD,pico-saldo);
  });
 
- const diasOperados=new Set(f.map(d=>d.dia)).size;
- const mediaTrade=t.trades?(t.pontos/t.trades).toFixed(2):0;
- const pontosDia=diasOperados?(t.pontos/diasOperados).toFixed(1):0;
  const ops=t.gain+t.stop;
 
  kTrades.textContent=t.trades;
@@ -352,9 +340,6 @@ function renderKPIs(f){
  kStops.textContent=t.stop;
  kZero.textContent=t.zero;
  kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
- kMediaTrade.textContent=mediaTrade;
- kPontosDia.textContent=pontosDia;
- kDrawdown.textContent=`-${maxDD}`;
 }
 
 function renderTabela(f){
@@ -395,7 +380,6 @@ function renderTabela(f){
 
 function renderGraficos(f){
  let acc=0,labels=[],saldo=[];
-
  f.forEach(d=>{
   acc+=d.pontos;
   labels.push(d.dia);
