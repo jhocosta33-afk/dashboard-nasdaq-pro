@@ -33,6 +33,7 @@ body{
  padding:24px;
 }
 
+/* HEADER */
 .header img{height:80px}
 .dashboard-title{
  margin-top:16px;
@@ -42,6 +43,7 @@ body{
  color:var(--blue);
 }
 
+/* FILTROS */
 .filters{
  display:flex;
  gap:12px;
@@ -57,7 +59,11 @@ select{
  font-size:15px;
  width:220px;
 }
+select option[value=""]{
+ color:var(--muted);
+}
 
+/* KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -73,6 +79,7 @@ select{
 .kpi span{color:var(--muted);font-size:13px}
 .kpi strong{display:block;margin-top:6px;font-size:28px}
 
+/* CARDS */
 .cards{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
@@ -91,6 +98,7 @@ select{
 .chart-wrap{flex:1;position:relative}
 canvas{width:100%!important;height:100%!important}
 
+/* TABELA */
 .table-wrap{overflow-x:auto}
 table{width:100%;min-width:900px;border-collapse:collapse}
 th,td{padding:14px;border-bottom:1px solid var(--border);text-align:center}
@@ -112,21 +120,24 @@ td:first-child,th:first-child{text-align:left}
  <div class="dashboard-title">DASHBOARD</div>
 </div>
 
+<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
  <select id="filtroSemana"></select>
 </div>
 
+<!-- KPIs -->
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
  <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
  <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
  <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
- <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+ <div class="kpi"><span>Assertividade</span><strong id="kAcc">0.0%</strong></div>
 </div>
 
+<!-- GRÁFICOS -->
 <div class="cards">
  <div class="card">
   <strong>📈 Balanço de Pontos</strong>
@@ -138,6 +149,7 @@ td:first-child,th:first-child{text-align:left}
  </div>
 </div>
 
+<!-- TABELA -->
 <div class="card" style="height:auto">
  <strong>Tabela Operacional</strong>
  <div class="table-wrap">
@@ -158,6 +170,8 @@ td:first-child,th:first-child{text-align:left}
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
+
 let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
@@ -182,13 +196,77 @@ async function loadCSV(){
   }
  });
 
+ initFiltros();
+}
+
+/* ================= FILTROS ================= */
+
+function initFiltros(){
+ const anos=[...new Set(data.map(d=>d.ano))].sort();
+ filtroAno.innerHTML='<option value="">Ano</option>' +
+  anos.map(a=>`<option value="${a}">${a}</option>`).join("");
+
+ filtroAno.onchange=()=>{
+  initMeses();
+  atualizar();
+ };
+
+ initMeses();
+}
+
+function initMeses(){
+ if(!filtroAno.value){
+  filtroMes.innerHTML='<option value="">Mês</option>';
+  filtroSemana.innerHTML='<option value="">Semana</option>';
+  return;
+ }
+
+ const meses=[...new Set(
+  data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes)
+ )];
+
+ filtroMes.innerHTML='<option value="">Todos os meses</option>' +
+  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+
+ filtroMes.onchange=()=>{
+  initSemanas();
+  atualizar();
+ };
+
+ initSemanas();
+}
+
+function initSemanas(){
+ if(!filtroMes.value){
+  filtroSemana.innerHTML='<option value="">Todas as semanas</option>';
+  atualizar();
+  return;
+ }
+
+ const semanas=[...new Set(
+  data.filter(d=>d.ano==filtroAno.value && d.mes==filtroMes.value)
+      .map(d=>d.semana)
+ )];
+
+ filtroSemana.innerHTML='<option value="">Todas as semanas</option>' +
+  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+
+ filtroSemana.onchange=atualizar;
  atualizar();
 }
 
+/* ================= DASHBOARD ================= */
+
 function atualizar(){
- renderKPIs(data);
- renderTabela(data);
- renderGraficos(data);
+ const f=data.filter(d=>
+  (!filtroAno.value || d.ano==filtroAno.value) &&
+  (!filtroMes.value || d.mes==filtroMes.value) &&
+  (!filtroSemana.value || d.semana==filtroSemana.value)
+ );
+
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
 }
 
 function renderKPIs(f){
@@ -201,16 +279,14 @@ function renderKPIs(f){
   t.zero+=d.zero;
  });
 
- const ops = t.gain + t.stop;
+ const ops=t.gain+t.stop;
 
- kTrades.textContent = t.trades;
- kPontos.textContent = t.pontos;
- kGains.textContent = t.gain;
- kStops.textContent = t.stop;
- kZero.textContent  = t.zero;
-
- // ✅ ASSERTIVIDADE PROFISSIONAL
- kAcc.textContent = ops ? ((t.gain / ops) * 100).toFixed(1) + "%" : "0.0%";
+ kTrades.textContent=t.trades;
+ kPontos.textContent=t.pontos;
+ kGains.textContent=t.gain;
+ kStops.textContent=t.stop;
+ kZero.textContent=t.zero;
+ kAcc.textContent=ops?((t.gain/ops)*100).toFixed(1)+"%":"0.0%";
 }
 
 function renderTabela(f){
@@ -231,13 +307,13 @@ function renderTabela(f){
 }
 
 function renderGraficos(f){
- const ordenado=[...f].sort((a,b)=>{
+ const ord=[...f].sort((a,b)=>{
   return new Date(a.dia.split("/").reverse().join("-")) -
          new Date(b.dia.split("/").reverse().join("-"));
  });
 
  let acc=0,labels=[],saldo=[];
- ordenado.forEach(d=>{
+ ord.forEach(d=>{
   acc+=d.pontos;
   labels.push(d.dia);
   saldo.push(acc);
@@ -246,7 +322,7 @@ function renderGraficos(f){
  if(chartLinha)chartLinha.destroy();
  if(chartBar)chartBar.destroy();
 
- chartLinha=new Chart(document.getElementById("chartLinha"),{
+ chartLinha=new Chart(chartLinhaEl,{
   type:"line",
   data:{labels,datasets:[{
    data:saldo,
@@ -258,7 +334,7 @@ function renderGraficos(f){
   options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:false}
  });
 
- chartBar=new Chart(document.getElementById("chartBar"),{
+ chartBar=new Chart(chartBarEl,{
   type:"bar",
   data:{labels:["Gain","Stop","0x0"],datasets:[{
    data:[
@@ -272,6 +348,9 @@ function renderGraficos(f){
   options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:false}
  });
 }
+
+const chartLinhaEl=document.getElementById("chartLinha");
+const chartBarEl=document.getElementById("chartBar");
 
 loadCSV();
 </script>
