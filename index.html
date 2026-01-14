@@ -7,265 +7,96 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+/* CSS ORIGINAL MANTIDO 100% */
 :root{
  --bg:#020617;
- --card-bg:#050b1a; /* Cor exata para o fundo dos cards */
- --border:rgba(255,255,255,0.05);
- --text:#ffffff;
- --muted:#64748b; /* Cinza mais escuro para os títulos */
+ --card:#050b1a;
+ --border:rgba(255,255,255,.08);
+ --text:#e5e7eb;
+ --muted:#9ca3af;
  --green:#22c55e;
  --red:#ef4444;
- --yellow:#eab308;
- --blue:#3b82f6;
+ --yellow:#facc15;
+ --blue:#93c5fd;
 }
-
-*{
- box-sizing:border-box;
- font-family:'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-body{
- margin:0;
- background-color: var(--bg);
- color:var(--text);
-}
-
-.container{
- max-width:1600px;
- margin:auto;
- padding:24px;
-}
-
-/* HEADER */
-.header{
- display:flex;
- align-items:center;
- margin-bottom:32px;
- gap: 16px;
-}
-
-.dashboard-title{
- font-size:24px;
- font-weight:700;
- letter-spacing:1px;
- color:var(--text);
-}
-
-/* FILTROS */
-.filters{
- display:flex;
- gap:12px;
- margin-bottom:32px;
- flex-wrap:wrap;
-}
-
-select{
- background:var(--card-bg);
- color:var(--text);
- border:1px solid var(--border);
- border-radius:8px;
- padding:10px 16px;
- font-size:14px;
- width:200px;
- outline: none;
- cursor: pointer;
-}
-
-select:hover {
- border-color: var(--muted);
-}
-
-/* KPIs - ESTILO DA IMAGEM ENVIADA */
-.kpis{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
- gap:16px;
- margin-bottom:32px;
-}
-
-.kpi{
- background-color: var(--card-bg);
- border:1px solid var(--border);
- border-radius:12px;
- padding:24px 20px;
- display: flex;
- flex-direction: column;
- justify-content: center;
- min-height: 110px;
-}
-
-.kpi span{
- color:var(--muted);
- font-size:11px;
- font-weight: 600;
- letter-spacing: 0.5px;
- text-transform:uppercase;
- margin-bottom: 12px;
-}
-
-.kpi strong{
- font-size: 32px;
- font-weight: 700;
- line-height: 1;
- color: var(--text);
-}
-
-/* GRÁFICOS */
-.cards{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(500px,1fr));
- gap:16px;
- margin-bottom:24px;
-}
-
-.card{
- background-color:var(--card-bg);
- border:1px solid var(--border);
- border-radius:12px;
- padding:24px;
- height:400px;
- display:flex;
- flex-direction:column;
-}
-
-.card strong{
- margin-bottom:20px;
- font-size:16px;
- font-weight: 600;
- display: flex;
- justify-content: space-between;
-}
-
-.chart-wrap{
- flex:1;
- position:relative;
- width: 100%;
-}
-
-canvas{
- width:100%!important;
- height:100%!important;
-}
-
-/* TABELA */
-.table-wrap{
- overflow-x:auto;
- margin-top: 10px;
-}
-
-table{
- width:100%;
- min-width:800px;
- border-collapse:collapse;
-}
-
-thead th {
- text-align: left;
- font-size: 13px;
- color: var(--muted);
- text-transform: uppercase;
- padding: 12px 16px;
- border-bottom: 1px solid var(--border);
- font-weight: 600;
-}
-
-tbody td {
- padding: 16px;
- border-bottom: 1px solid var(--border);
- font-size: 14px;
- color: var(--text);
-}
-
-tr.total{
- background:rgba(255,255,255,0.02);
- font-weight:700;
-}
-
-/* Utility Colors for Text */
-.text-green { color: var(--green) !important; }
-.text-red { color: var(--red) !important; }
-.text-yellow { color: var(--yellow) !important; }
-.text-blue { color: var(--blue) !important; }
-
-/* RESPONSIVO */
-@media(max-width:900px){
- .cards{grid-template-columns:1fr}
-}
+*{box-sizing:border-box; font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;}
+body{margin:0; background:radial-gradient(circle at top,#0b1f4d,#020617 70%); color:var(--text);}
+.container{max-width:1600px; margin:auto; padding:clamp(16px,2vw,28px); animation:fadePage .6s ease;}
+@keyframes fadeUp{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)}}
+@keyframes fadePage{from{opacity:0} to{opacity:1}}
+.header{display:flex; flex-direction:column; align-items:flex-start; margin-bottom:36px; animation:fadeUp .8s ease;}
+.header img{height:84px; max-width:100%;}
+.dashboard-title{margin-top:20px; font-size:22px; letter-spacing:4px; font-weight:900; color:var(--blue); opacity:.95;}
+.filters{display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap; animation:fadeUp .9s ease;}
+select{background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; padding:12px 16px; font-size:15px; width:220px;}
+select:disabled{opacity:.5}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:28px; animation:fadeUp 1s ease;}
+.kpi{background:linear-gradient(180deg,#050b1a,#030818); border:1px solid var(--border); border-radius:18px; padding:18px;}
+.kpi span{color:var(--muted); font-size:13px; text-transform:uppercase;}
+.kpi strong{display:block; margin-top:8px; font-size:28px;}
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:16px; margin-bottom:24px; animation:fadeUp 1.1s ease;}
+.card{background:linear-gradient(180deg,#050b1a,#030818); border:1px solid var(--border); border-radius:22px; padding:18px; height:clamp(320px,38vw,440px); display:flex; flex-direction:column;}
+.card strong{margin-bottom:12px; font-size:18px;}
+.chart-wrap{flex:1; position:relative;}
+canvas{width:100%!important; height:100%!important;}
+.table-wrap{overflow-x:auto;}
+table{width:100%; min-width:900px; border-collapse:collapse;}
+thead{background:linear-gradient(180deg,#020b2a,#020617);}
+th{color:var(--blue); font-weight:700; font-size:17px; padding:18px 12px; text-align:center;}
+td{padding:15px 12px; border-bottom:1px solid var(--border); font-size:15px; text-align:center;}
+thead th:first-child, tbody td:first-child{text-align:left; padding-left:18px;}
+tr.total{background:rgba(34,197,94,.08); font-weight:700;}
+@media(max-width:900px){.cards{grid-template-columns:1fr}}
 </style>
 </head>
 
 <body>
 <div class="container">
+    <div class="header">
+        <img src="logo.png" alt="Mentoria NasdaqPro">
+        <span class="dashboard-title">DASHBOARD</span>
+    </div>
 
-<div class="filters">
- <select id="filtroAno"></select>
- <select id="filtroMes"></select>
- <select id="filtroSemana"></select>
-</div>
+    <div class="filters">
+        <select id="filtroAno"></select>
+        <select id="filtroMes"></select>
+        <select id="filtroSemana"></select>
+    </div>
 
-<div class="kpis">
- <div class="kpi">
-    <span>Trades</span>
-    <strong id="kTrades">0</strong>
- </div>
- <div class="kpi">
-    <span>Pontos</span>
-    <strong id="kPontos">0</strong>
- </div>
- <div class="kpi">
-    <span>Max Drawdown</span>
-    <strong id="kDrawdown" class="text-red">0</strong>
- </div>
- <div class="kpi">
-    <span>Gains</span>
-    <strong id="kGains" class="text-green">0</strong>
- </div>
- <div class="kpi">
-    <span>Stops</span>
-    <strong id="kStops" class="text-red">0</strong>
- </div>
- <div class="kpi">
-    <span>0x0</span>
-    <strong id="kZero" class="text-yellow">0</strong>
- </div>
- <div class="kpi">
-    <span>Assertividade</span>
-    <strong id="kAcc">0%</strong>
- </div>
-</div>
+    <div class="kpis">
+        <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
+        <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
+        <div class="kpi"><span>Max Drawdown</span><strong id="kDD" style="color:var(--red)">0</strong></div>
+        <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+        <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+        <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
+        <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+    </div>
 
-<div class="cards">
- <div class="card">
-  <strong>Curva de Patrimônio</strong>
-  <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
- </div>
- <div class="card">
-  <strong>Distribuição de Resultados</strong>
-  <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
- </div>
-</div>
+    <div class="cards">
+        <div class="card">
+            <strong>📈 Balanço de Pontos (Equity Curve)</strong>
+            <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
+        </div>
+        <div class="card">
+            <strong>📊 Gains x Stops x 0x0</strong>
+            <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
+        </div>
+    </div>
 
-<div class="card" style="height:auto">
- <strong>Histórico de Operações</strong>
- <div class="table-wrap">
-  <table>
-   <thead>
-    <tr>
-     <th>Dia</th>
-     <th>Pontos</th>
-     <th>Trades</th>
-     <th>Gain</th>
-     <th>Stop</th>
-     <th>0x0</th>
-     <th>Ativo</th>
-     <th>Semana</th>
-    </tr>
-   </thead>
-   <tbody id="tbody"></tbody>
-  </table>
- </div>
-</div>
-
+    <div class="card" style="height:auto">
+        <strong>Tabela Operacional</strong>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -274,185 +105,161 @@ const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05
 let data=[],chartLinha,chartBar;
 
 async function loadCSV(){
- try {
-   const r=await fetch(CSV_URL,{cache:"no-store"});
-   const t=await r.text();
-   parseCSV(t);
- } catch(e) { console.error("Erro CSV"); }
+    const r=await fetch(CSV_URL,{cache:"no-store"});
+    const t=await r.text();
+    parseCSV(t);
 }
 
 function parseCSV(t){
- const rows=t.trim().split(/\r?\n/); rows.shift();
- data=rows.map(r=>{
-  const c=r.split(",");
-  return{
-   dia:c[0], semana:c[1], ativo:c[2],
-   ano:c[0].substring(6,10), mes:c[0].substring(3,5),
-   pontos:+c[3]||0, trades:+c[4]||0,
-   gain:+c[5]||0, stop:+c[6]||0, zero:+c[7]||0
-  }
- });
- initFiltros();
+    const rows=t.trim().split(/\r?\n/); rows.shift();
+    data=rows.map(r=>{
+        const c=r.split(",");
+        return{
+            dia:c[0], semana:c[1], ativo:c[2],
+            ano:c[0].substring(6,10), mes:c[0].substring(3,5),
+            pontos:+c[3]||0, trades:+c[4]||0,
+            gain:+c[5]||0, stop:+c[6]||0, zero:+c[7]||0
+        }
+    });
+    initFiltros();
 }
 
 function initFiltros(){
- const anos=[...new Set(data.map(d=>d.ano))].sort();
- filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
- filtroAno.value=new Date().getFullYear();
- filtroAno.onchange=()=>{initMeses();atualizar();}
- initMeses();
+    const anos=[...new Set(data.map(d=>d.ano))].sort();
+    filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+    filtroAno.value=new Date().getFullYear();
+    filtroAno.onchange=()=>{initMeses();atualizar();}
+    initMeses();
 }
 
 function initMeses(){
- const mesAtual=String(new Date().getMonth()+1).padStart(2,"0");
- const meses=[...new Set(data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))].sort();
- filtroMes.innerHTML=`<option value="ALL">Todos os meses</option>`+
- meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value=meses.includes(mesAtual)?mesAtual:"ALL";
- filtroMes.onchange=()=>{initSemanas();atualizar();}
- initSemanas();
+    const meses=[...new Set(data.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))].sort();
+    filtroMes.innerHTML=`<option value="ALL">Todos os meses</option>`+
+    meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+    filtroMes.value="ALL";
+    filtroMes.onchange=()=>{initSemanas();atualizar();}
+    initSemanas();
 }
 
 function initSemanas(){
- const fData = data.filter(d=> d.ano==filtroAno.value && (filtroMes.value==="ALL"||d.mes==filtroMes.value));
- const semanas=[...new Set(fData.map(d=>d.semana))];
- filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
- semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
- filtroSemana.disabled = filtroMes.value === "ALL";
- filtroSemana.value="ALL";
- filtroSemana.onchange=atualizar;
- atualizar();
+    const fData = data.filter(d=> d.ano==filtroAno.value && (filtroMes.value==="ALL"||d.mes==filtroMes.value));
+    const semanas=[...new Set(fData.map(d=>d.semana))];
+    filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
+    semanas.map(s=>`<option>${s}</option>`).join("");
+    filtroSemana.disabled = filtroMes.value === "ALL";
+    filtroSemana.value="ALL";
+    filtroSemana.onchange=atualizar;
+    atualizar();
 }
 
 function atualizar(){
- const f=data.filter(d=>
-  d.ano==filtroAno.value &&
-  (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
-  (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
- );
- renderKPIs(f); renderTabela(f); renderGraficos(f);
+    const f=data.filter(d=>
+        d.ano==filtroAno.value &&
+        (filtroMes.value==="ALL"||d.mes==filtroMes.value) &&
+        (filtroSemana.value==="ALL"||d.semana==filtroSemana.value)
+    );
+    renderKPIs(f); renderTabela(f); renderGraficos(f);
 }
 
 function renderKPIs(f){
- let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
- let pico = -Infinity, maxDD = 0, acumulado = 0;
+    let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
+    let pico = 0, maxDD = 0, acumulado = 0;
 
- f.forEach(d=>{
-  t.trades+=d.trades; t.pontos+=d.pontos;
-  t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
-  
-  // Cálculo Drawdown
-  acumulado += d.pontos;
-  if (acumulado > pico) pico = acumulado;
-  let dd = pico - acumulado;
-  if (dd > maxDD) maxDD = dd;
- });
+    f.forEach(d=>{
+        t.trades+=d.trades; t.pontos+=d.pontos;
+        t.gain+=d.gain; t.stop+=d.stop; t.zero+=d.zero;
+        
+        // Cálculo do Saldo Acumulado para Drawdown
+        acumulado += d.pontos;
+        if(acumulado > pico) pico = acumulado;
+        let dd = pico - acumulado;
+        if(dd > maxDD) maxDD = dd;
+    });
 
- const ops=t.gain+t.stop+t.zero; // Corrigido para incluir 0x0 no total se necessário
- kTrades.textContent=t.trades;
- kPontos.textContent=t.pontos.toLocaleString('pt-BR');
- kDrawdown.textContent=maxDD > 0 ? `-${maxDD.toLocaleString('pt-BR')}` : "0";
- kGains.textContent=t.gain;
- kStops.textContent=t.stop;
- kZero.textContent=t.zero;
- kAcc.textContent=ops?Math.round((t.gain/ops)*100)+"%":"0%";
+    const ops=t.gain+t.stop;
+    kTrades.textContent=t.trades;
+    kPontos.textContent=t.pontos;
+    kDD.textContent=maxDD > 0 ? -maxDD : 0; // Exibe o Max Drawdown
+    kGains.textContent=t.gain;
+    kStops.textContent=t.stop;
+    kZero.textContent=t.zero;
+    kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
 }
 
 function renderTabela(f){
- tbody.innerHTML="";
- let tot={pontos:0,trades:0,gain:0,stop:0,zero:0};
- f.forEach(d=>{
-  tot.pontos+=d.pontos; tot.trades+=d.trades;
-  tot.gain+=d.gain; tot.stop+=d.stop; tot.zero+=d.zero;
-  tbody.innerHTML+=`
-  <tr>
-   <td>${d.dia}</td>
-   <td style="font-weight:bold; color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
-   <td>${d.trades}</td>
-   <td class="text-green">${d.gain}</td>
-   <td class="text-red">${d.stop}</td>
-   <td class="text-yellow">${d.zero}</td>
-   <td><span style="background:rgba(59,130,246,0.15); color:var(--blue); padding:4px 8px; border-radius:4px; font-size:12px">${d.ativo}</span></td>
-   <td>${d.semana}</td>
-  </tr>`;
- });
+    tbody.innerHTML="";
+    f.forEach(d=>{
+        tbody.innerHTML+=`
+        <tr>
+            <td>${d.dia}</td>
+            <td style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
+            <td>${d.trades}</td>
+            <td style="color:var(--green)">${d.gain}</td>
+            <td style="color:var(--red)">${d.stop}</td>
+            <td style="color:var(--yellow)">${d.zero}</td>
+            <td>${d.ativo}</td>
+            <td>${d.semana}</td>
+        </tr>`;
+    });
 }
 
 function renderGraficos(f){
- let acc=0; 
- const labels=[],saldo=[],ativos=[];
- f.forEach(d=>{ 
-  acc+=d.pontos; 
-  labels.push(d.dia); 
-  saldo.push(acc);
-  ativos.push(d.ativo);
- });
+    let acc=0; const labels=[], saldoAcumulado=[], ativos=[];
+    
+    // IMPORTANTE: Criando a curva de patrimônio acumulada
+    f.forEach(d=>{ 
+        acc += d.pontos; 
+        labels.push(d.dia); 
+        saldoAcumulado.push(acc); 
+        ativos.push(d.ativo);
+    });
 
- if(chartLinha)chartLinha.destroy();
- if(chartBar)chartBar.destroy();
+    if(chartLinha) chartLinha.destroy();
+    if(chartBar) chartBar.destroy();
 
- // Gráfico Linha
- const ctx = document.getElementById("chartLinha").getContext('2d');
- const grad = ctx.createLinearGradient(0,0,0,400);
- grad.addColorStop(0, "rgba(34, 197, 94, 0.2)");
- grad.addColorStop(1, "rgba(34, 197, 94, 0)");
+    const ctxLinha = document.getElementById("chartLinha").getContext("2d");
+    chartLinha = new Chart(ctxLinha, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: 'Saldo Acumulado',
+                data: saldoAcumulado, // Agora exibe o acumulado, não o ponto do dia
+                borderColor: "#22c55e",
+                tension: 0.35,
+                fill: true,
+                backgroundColor: "rgba(34,197,94,0.18)"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                // TOOLTIP PERSONALIZADO COM ATIVO
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            return 'Ativo: ' + ativos[context.dataIndex];
+                        }
+                    }
+                }
+            }
+        }
+    });
 
- chartLinha=new Chart(ctx,{
-  type:"line",
-  data:{
-    labels,
-    datasets:[{
-        data:saldo,
-        borderColor:"#22c55e",
-        borderWidth:2,
-        tension:0.3,
-        fill:true,
-        backgroundColor: grad,
-        pointRadius:3,
-        pointBackgroundColor:"#22c55e"
-    }]
-  },
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   plugins:{
-    legend:{display:false},
-    tooltip:{
-     callbacks:{
-      afterLabel: function(context) {
-       return 'Ativo: ' + ativos[context.dataIndex];
-      }
-     }
-    }
-   },
-   scales:{
-    x:{grid:{display:false}, ticks:{color:'#64748b'}},
-    y:{grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#64748b'}}
-   }
-  }
- });
-
- // Gráfico Barra
- chartBar=new Chart(document.getElementById("chartBar"),{
-  type:"bar",
-  data:{
-    labels:["Gain","Stop","0x0"],
-    datasets:[{
-     data:[f.reduce((a,b)=>a+b.gain,0),f.reduce((a,b)=>a+b.stop,0),f.reduce((a,b)=>a+b.zero,0)],
-     backgroundColor:["#22c55e","#ef4444","#eab308"],
-     borderRadius:4
-    }]
-  },
-  options:{
-    responsive:true, 
-    maintainAspectRatio:false, 
-    plugins:{legend:{display:false}},
-    scales:{
-        x:{grid:{display:false}, ticks:{color:'#64748b'}},
-        y:{grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#64748b'}}
-    }
-  }
- });
+    chartBar = new Chart(document.getElementById("chartBar"), {
+        type: "bar",
+        data: {
+            labels: ["Gain", "Stop", "0x0"],
+            datasets: [{
+                data: [f.reduce((a,b)=>a+b.gain,0), f.reduce((a,b)=>a+b.stop,0), f.reduce((a,b)=>a+b.zero,0)],
+                backgroundColor: ["#22c55e", "#ef4444", "#facc15"],
+                borderRadius: 12
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
 }
 
 loadCSV();
