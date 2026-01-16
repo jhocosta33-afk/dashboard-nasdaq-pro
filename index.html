@@ -253,6 +253,10 @@ const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05
 
 let data=[],chartAcumulado,chartBar;
 
+const hoje = new Date();
+const anoAtual = String(hoje.getFullYear());
+const mesAtual = String(hoje.getMonth()+1).padStart(2,"0");
+
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
@@ -283,7 +287,7 @@ function parseCSV(t){
 function initFiltros(){
  const anos=[...new Set(data.map(d=>d.ano))].sort();
  filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
- filtroAno.value=anos[0];
+ filtroAno.value = anos.includes(anoAtual) ? anoAtual : anos[anos.length-1];
  filtroAno.onchange=()=>{initMeses();atualizar();}
  initMeses();
 }
@@ -292,7 +296,7 @@ function initMeses(){
  const meses=[...new Set(data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
  filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
   meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value="ALL";
+ filtroMes.value = meses.includes(mesAtual) ? mesAtual : "ALL";
  filtroMes.onchange=()=>{initSemanas();atualizar();}
  initSemanas();
 }
