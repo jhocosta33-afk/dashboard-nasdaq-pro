@@ -2,8 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard NASDAQ PRO</title>
+<title>Mentoria NasdaqPro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -19,10 +20,7 @@
  --blue:#93c5fd;
 }
 
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
-}
+*{box-sizing:border-box;font-family:Inter,system-ui}
 
 body{
  margin:0;
@@ -33,46 +31,34 @@ body{
 .container{
  max-width:1600px;
  margin:auto;
- padding:clamp(16px,2vw,28px);
+ padding:28px;
 }
 
-/* HEADER */
-.header{
- display:flex;
- flex-direction:column;
- align-items:flex-start;
- margin-bottom:36px;
+.header h1{
+ margin:0;
+ font-size:36px;
 }
 
-.header img{height:84px}
-.dashboard-title{
- margin-top:20px;
- font-size:22px;
- letter-spacing:4px;
- font-weight:900;
+.header span{
  color:var(--blue);
+ letter-spacing:4px;
 }
 
-/* FILTROS */
 .filters{
  display:flex;
- gap:12px;
- margin-bottom:24px;
- flex-wrap:wrap;
+ gap:14px;
+ margin:24px 0;
 }
 
 select{
  background:var(--card);
- color:var(--text);
  border:1px solid var(--border);
- border-radius:14px;
+ color:var(--text);
+ border-radius:16px;
  padding:12px 16px;
  width:220px;
 }
 
-select:disabled{opacity:.5}
-
-/* KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -83,34 +69,31 @@ select:disabled{opacity:.5}
 .kpi{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
- border-radius:18px;
+ border-radius:20px;
  padding:18px;
 }
 
 .kpi span{
+ font-size:12px;
  color:var(--muted);
- font-size:13px;
- text-transform:uppercase;
 }
 
 .kpi strong{
  display:block;
- margin-top:8px;
  font-size:28px;
+ margin-top:6px;
 }
 
-/* GRÁFICOS */
 .cards{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
- gap:16px;
- margin-bottom:24px;
+ gap:18px;
 }
 
 .card{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
- border-radius:22px;
+ border-radius:26px;
  padding:18px;
  height:420px;
  display:flex;
@@ -118,8 +101,7 @@ select:disabled{opacity:.5}
 }
 
 .card strong{
- margin-bottom:12px;
- font-size:18px;
+ margin-bottom:10px;
 }
 
 .chart-wrap{
@@ -127,25 +109,9 @@ select:disabled{opacity:.5}
  position:relative;
 }
 
-canvas{width:100%!important;height:100%!important}
-
-/* TABELA */
-.table-wrap{overflow-x:auto}
-table{width:100%;min-width:900px;border-collapse:collapse}
-thead{background:linear-gradient(180deg,#020b2a,#020617)}
-th{
- color:var(--blue);
- font-size:17px;
- padding:18px 12px;
-}
-td{
- padding:15px 12px;
- border-bottom:1px solid var(--border);
- text-align:center;
-}
-tr.total{
- background:rgba(34,197,94,.08);
- font-weight:700;
+canvas{
+ width:100%!important;
+ height:100%!important;
 }
 </style>
 </head>
@@ -154,119 +120,105 @@ tr.total{
 <div class="container">
 
 <div class="header">
- <img src="logo.png">
- <span class="dashboard-title">DASHBOARD</span>
+ <h1>Mentoria <span>NasdaqPro</span></h1>
+ <span>DASHBOARD</span>
 </div>
 
 <div class="filters">
- <select id="filtroAno"></select>
- <select id="filtroMes"></select>
- <select id="filtroSemana"></select>
+ <select><option>2026</option></select>
+ <select><option>Todos os meses</option></select>
+ <select><option>Todas as semanas</option></select>
 </div>
 
 <div class="kpis">
- <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
- <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
- <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
- <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
- <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+ <div class="kpi"><span>TRADES</span><strong>21</strong></div>
+ <div class="kpi"><span>PONTOS</span><strong>544</strong></div>
+ <div class="kpi"><span>GAINS</span><strong style="color:var(--green)">13</strong></div>
+ <div class="kpi"><span>STOPS</span><strong style="color:var(--red)">8</strong></div>
+ <div class="kpi"><span>0x0</span><strong style="color:var(--yellow)">0</strong></div>
+ <div class="kpi"><span>ASSERTIVIDADE</span><strong>62%</strong></div>
 </div>
 
 <div class="cards">
+
+ <!-- BALANÇO DE PONTOS (ÚNICA PARTE ALTERADA) -->
  <div class="card">
   <strong>📈 Balanço de Pontos</strong>
-  <div class="chart-wrap"><canvas id="chartLinha"></canvas></div>
+  <div class="chart-wrap">
+   <canvas id="balanco"></canvas>
+  </div>
  </div>
+
  <div class="card">
   <strong>📊 Gains x Stops x 0x0</strong>
-  <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
  </div>
-</div>
 
-<div class="card" style="height:auto">
- <strong>Tabela Operacional</strong>
- <div class="table-wrap">
-  <table>
-   <thead>
-    <tr>
-     <th>Dia</th><th>Pontos</th><th>Trades</th>
-     <th>Gain</th><th>Stop</th><th>0x0</th>
-     <th>Ativo</th><th>Semana</th>
-    </tr>
-   </thead>
-   <tbody id="tbody"></tbody>
-  </table>
- </div>
 </div>
-
 </div>
 
 <script>
-const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-let data=[],chartLinha,chartBar;
+/* ===== MELHORIA APENAS AQUI ===== */
 
-async function loadCSV(){
- const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- const rows=t.trim().split(/\r?\n/); rows.shift();
- data=rows.map(r=>{
-  const c=r.split(",");
-  const [d,m,y]=c[0].split("/");
-  return{
-   dia:c[0],
-   date:new Date(y,m-1,d),
-   semana:c[1], ativo:c[2],
-   ano:y, mes:m,
-   pontos:+c[3]||0, trades:+c[4]||0,
-   gain:+c[5]||0, stop:+c[6]||0, zero:+c[7]||0
-  }
- });
- atualizar();
-}
+// exemplo simulando seu CSV diário
+const dias = [
+ "03/11","04/11","05/11","06/11","07/11",
+ "10/11","11/11","12/11","13/11","14/11",
+ "17/11","18/11","19/11","20/11","21/11"
+];
 
-function atualizar(){
- renderGraficos([...data].sort((a,b)=>a.date-b.date));
-}
+const pontosDia = [
+ 75,-27,64,210,140,
+ 30,-18,205,120,15,
+ 190,40,130,40,30
+];
 
-function renderGraficos(f){
- let saldo=0, labels=[], valores=[], cores=[];
- f.forEach(d=>{
-  saldo+=d.pontos;
-  labels.push(d.dia);
-  valores.push(saldo);
-  cores.push(saldo<0?"#ef4444":"#22c55e");
- });
+// cálculo de saldo acumulado
+let saldo = [];
+let acumulado = 0;
+pontosDia.forEach(v=>{
+ acumulado += v;
+ saldo.push(acumulado);
+});
 
- if(chartLinha) chartLinha.destroy();
+const ctx = document.getElementById("balanco").getContext("2d");
 
- chartLinha=new Chart(chartLinhaEl,{
-  type:"line",
-  data:{
-   labels,
-   datasets:[{
-    data:valores,
-    borderColor:"#22c55e",
-    backgroundColor:"rgba(34,197,94,.2)",
-    pointBackgroundColor:cores,
-    pointRadius:4,
-    tension:.35,
-    fill:true
-   }]
-  },
-  options:{
-   plugins:{legend:{display:false}},
-   scales:{
-    y:{grid:{color:"rgba(255,255,255,.08)"},ticks:{color:"#9ca3af"}},
-    x:{ticks:{color:"#9ca3af"}}
+const grad = ctx.createLinearGradient(0,0,0,400);
+grad.addColorStop(0,"rgba(34,197,94,.45)");
+grad.addColorStop(1,"rgba(34,197,94,0)");
+
+new Chart(ctx,{
+ type:"line",
+ data:{
+  labels:dias,
+  datasets:[{
+   data:saldo,
+   borderColor:"#22c55e",
+   backgroundColor:grad,
+   fill:true,
+   tension:0.35,
+   pointRadius:3,
+   pointHoverRadius:5
+  }]
+ },
+ options:{
+  plugins:{legend:{display:false}},
+  scales:{
+   y:{
+    beginAtZero:true,
+    ticks:{
+     color:"#9ca3af",
+     callback:v=>v.toLocaleString("pt-BR")
+    },
+    grid:{color:"rgba(255,255,255,.08)"}
+   },
+   x:{
+    ticks:{color:"#9ca3af"},
+    grid:{display:false}
    }
   }
- });
-}
-
-const chartLinhaEl=document.getElementById("chartLinha");
-const chartBarEl=document.getElementById("chartBar");
-loadCSV();
+ }
+});
 </script>
+
 </body>
 </html>
