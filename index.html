@@ -19,7 +19,7 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+ font-family:Inter,system-ui,-apple-system;
 }
 
 body{
@@ -54,11 +54,16 @@ body{
  background:rgba(255,255,255,.02);
  border:1px solid var(--border);
  border-radius:16px;
- min-height:130px;
+ min-height:135px;
  padding:10px;
  display:flex;
  flex-direction:column;
  transition:.2s;
+ cursor:pointer;
+}
+
+.day:hover{
+ transform:translateY(-2px);
 }
 
 .day.today{
@@ -97,9 +102,33 @@ body{
  line-height:1.4;
 }
 
+/* TOOLTIP */
+.tooltip{
+ position:absolute;
+ bottom:110%;
+ left:50%;
+ transform:translateX(-50%);
+ background:#020617;
+ border:1px solid var(--border);
+ padding:8px 12px;
+ border-radius:10px;
+ font-size:12px;
+ color:var(--text);
+ white-space:nowrap;
+ opacity:0;
+ pointer-events:none;
+ transition:.2s;
+ box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+.day:hover .tooltip{
+ opacity:1;
+}
+
 .empty{
  background:transparent;
  border:none;
+ cursor:default;
 }
 </style>
 </head>
@@ -136,6 +165,7 @@ function parseCSV(t){
   const [d,m,a]=c[0].split("/");
   return{
    data:new Date(a,m-1,d),
+   ativo:c[1] || "—",
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
@@ -143,6 +173,11 @@ function parseCSV(t){
    zero:+c[7]||0
   };
  });
+}
+
+function semanaDoMes(data){
+ const primeiro=new Date(data.getFullYear(),data.getMonth(),1);
+ return Math.ceil((data.getDate()+primeiro.getDay())/7);
 }
 
 function montarCalendario(){
@@ -156,7 +191,6 @@ function montarCalendario(){
  const grid=document.getElementById("calendar");
  grid.innerHTML="";
 
- // vazios antes do primeiro dia
  for(let i=0;i<primeiroDia.getDay();i++){
   grid.innerHTML+=`<div class="day empty"></div>`;
  }
@@ -166,8 +200,9 @@ function montarCalendario(){
   const registro=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
 
   let classe="day";
-  let pontos=0;
+  let pontos="";
   let info="";
+  let tooltip="";
 
   if(registro){
    pontos=registro.pontos;
@@ -178,6 +213,13 @@ function montarCalendario(){
     Trades: ${registro.trades}<br>
     Gain: ${registro.gain} | Stop: ${registro.stop} | 0x0: ${registro.zero}
    `;
+
+   tooltip=`
+    <div class="tooltip">
+     SEMANA ${semanaDoMes(dataAtual)}<br>
+     ATIVO: ${registro.ativo}
+    </div>
+   `;
   }
 
   if(dataAtual.toDateString()===hoje.toDateString()){
@@ -186,9 +228,10 @@ function montarCalendario(){
 
   grid.innerHTML+=`
    <div class="${classe}">
+    ${tooltip}
     <div class="day-number">${dia}</div>
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
-     ${registro ? pontos : ""}
+     ${pontos}
     </div>
     <div class="day-info">${info}</div>
    </div>
