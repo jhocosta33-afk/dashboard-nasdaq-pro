@@ -94,19 +94,18 @@ select{
  position:relative;
  background:rgba(255,255,255,.02);
  border:1px solid var(--border);
- border-radius:14px;
- min-height:100px;
+ border-radius:16px;
+ min-height:120px;
  padding:10px;
- cursor:default;
 }
 
 .day.inactive{
- opacity:.3;
+ opacity:.25;
 }
 
 .day.today{
  border:2px solid var(--blue);
- box-shadow:0 0 0 1px rgba(96,165,250,.4);
+ box-shadow:0 0 0 1px rgba(96,165,250,.35);
 }
 
 .day-number{
@@ -115,7 +114,7 @@ select{
 }
 
 .day-points{
- margin-top:18px;
+ margin-top:12px;
  font-size:20px;
  font-weight:700;
 }
@@ -123,6 +122,18 @@ select{
 .positive{color:var(--green)}
 .negative{color:var(--red)}
 .zero{color:var(--yellow)}
+
+/* INFO INTERNA */
+.day-info{
+ margin-top:8px;
+ font-size:12px;
+ line-height:1.4;
+ color:var(--muted);
+}
+
+.day-info span{
+ display:block;
+}
 
 /* TOOLTIP */
 .tooltip{
@@ -235,14 +246,22 @@ function renderCalendar(){
   calendarDays.innerHTML+=`
   <div class="day ${isToday?"today":""}">
    <div class="day-number">${d}</div>
-   <div class="day-points ${cls}">${info? (pontos>0?`+${pontos}`:pontos):""}</div>
    ${info?`
+   <div class="day-points ${cls}">
+    ${pontos>0?`+${pontos}`:pontos}
+   </div>
+   <div class="day-info">
+    <span>Trades: ${info.trades}</span>
+    <span>Gain: ${info.gain} | Stop: ${info.stop}</span>
+    <span>0x0: ${info.zero}</span>
+   </div>
    <div class="tooltip">
     ${d}/${mes+1}/${ano}<br>
     Pontos: ${pontos}<br>
     Trades: ${info.trades}<br>
     Gain: ${info.gain} | Stop: ${info.stop} | 0x0: ${info.zero}
-   </div>`:""}
+   </div>
+   `:""}
   </div>`;
  }
 }
