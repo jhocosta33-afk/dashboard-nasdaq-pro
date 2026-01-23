@@ -61,7 +61,7 @@ body{
  transition:.2s;
 }
 
-/* ===== TOOLTIP ===== */
+/* TOOLTIP */
 .day[data-tooltip]::after{
  content:attr(data-tooltip);
  position:absolute;
@@ -160,8 +160,8 @@ function parseCSV(t){
   const [d,m,a]=c[0].split("/");
   return{
    data:new Date(a,m-1,d),
-   semana:c[1],        // <- semana vem do CSV
-   ativo:c[2],         // <- ativo vem do CSV
+   semana:c[1],   // já vem "SEMANA 4"
+   ativo:c[2],
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
@@ -205,7 +205,7 @@ function montarCalendario(){
     Gain: ${registro.gain} | Stop: ${registro.stop} | 0x0: ${registro.zero}
    `;
 
-   tooltip=`SEMANA ${registro.semana} | ATIVO: ${registro.ativo}`;
+   tooltip = `${registro.semana} | ATIVO: ${registro.ativo}`;
   }
 
   if(dataAtual.toDateString()===hoje.toDateString()){
