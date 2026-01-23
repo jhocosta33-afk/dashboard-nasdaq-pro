@@ -7,8 +7,8 @@
 
 <style>
 :root{
- --bg:#020617;
- --card:#050b1a;
+ --bg:#0b1220;
+ --card:#0f172a;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
@@ -19,122 +19,124 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui;
+ font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
 }
 
 body{
  margin:0;
- background:radial-gradient(circle at center,#0b2a5a,#020617 70%);
+ background:linear-gradient(180deg,#0b1220,#020617);
  color:var(--text);
+ padding:24px;
 }
 
-.container{
+.calendar{
  max-width:1400px;
  margin:auto;
- padding:32px;
 }
 
-h1{
- margin-bottom:20px;
-}
-
-/* CABEÇALHO DIAS */
-.weekdays{
+.calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- margin-bottom:12px;
- color:var(--blue);
+ margin-bottom:10px;
  text-align:center;
+ color:var(--muted);
+ font-size:14px;
 }
 
-/* CALENDÁRIO */
-.calendar{
+.calendar-grid{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- gap:14px;
+ gap:12px;
 }
 
 .day{
- background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);
- border-radius:18px;
- height:150px;
- padding:12px;
  position:relative;
+ background:rgba(255,255,255,.02);
+ border:1px solid var(--border);
+ border-radius:16px;
+ min-height:130px;
+ padding:10px;
+ display:flex;
+ flex-direction:column;
  transition:.2s;
 }
 
-.day:hover{
- border-color:var(--blue);
-}
-
-/* DIA ATUAL */
-.day.today{
- outline:2px solid var(--blue);
-}
-
-/* NÚMERO DO DIA */
-.day-number{
+/* ===== TOOLTIP ===== */
+.day[data-tooltip]::after{
+ content:attr(data-tooltip);
  position:absolute;
- top:10px;
- right:12px;
- font-size:14px;
- color:var(--muted);
-}
-
-/* PONTOS */
-.day-points{
- margin-top:36px;
- text-align:center;
- font-size:26px;
- font-weight:800;
-}
-
-/* INFO */
-.day-info{
- margin-top:10px;
- font-size:12px;
- text-align:center;
- color:var(--muted);
-}
-
-/* CORES */
-.positive .day-points{color:var(--green)}
-.negative .day-points{color:var(--red)}
-
-/* TOOLTIP */
-.tooltip{
- position:absolute;
- bottom:8px;
+ bottom:110%;
  left:50%;
  transform:translateX(-50%);
  background:#020617;
  border:1px solid var(--border);
- border-radius:10px;
  padding:6px 10px;
- font-size:11px;
+ border-radius:8px;
+ font-size:12px;
+ color:#e5e7eb;
+ white-space:nowrap;
  opacity:0;
  pointer-events:none;
- white-space:nowrap;
  transition:.2s;
+ z-index:10;
 }
 
-.day:hover .tooltip{
+.day:hover::after{
  opacity:1;
+}
+
+.day.today{
+ border-color:var(--blue);
+ box-shadow:0 0 0 1px rgba(96,165,250,.4);
+}
+
+.day.positive{
+ background:linear-gradient(180deg,rgba(34,197,94,.15),rgba(34,197,94,.02));
+}
+
+.day.negative{
+ background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(239,68,68,.02));
+}
+
+.day-number{
+ position:absolute;
+ top:8px;
+ left:10px;
+ font-size:13px;
+ color:var(--muted);
+}
+
+.day-points{
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:28px;
+ font-weight:800;
+}
+
+.day-info{
+ font-size:12px;
+ color:var(--muted);
+ line-height:1.4;
+}
+
+.empty{
+ background:transparent;
+ border:none;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
-<h1>Calendário Operacional</h1>
 
-<div class="weekdays">
- <div>Dom</div><div>Seg</div><div>Ter</div>
- <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-</div>
+<div class="calendar">
+ <div class="calendar-header">
+  <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
+  <div>Qui</div><div>Sex</div><div>Sáb</div>
+ </div>
 
-<div class="calendar" id="calendar"></div>
+ <div class="calendar-grid" id="calendar"></div>
 </div>
 
 <script>
@@ -146,7 +148,7 @@ async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
  parseCSV(t);
- renderCalendar();
+ montarCalendario();
 }
 
 function parseCSV(t){
@@ -158,66 +160,72 @@ function parseCSV(t){
   const [d,m,a]=c[0].split("/");
   return{
    data:new Date(a,m-1,d),
+   semana:c[1],        // <- semana vem do CSV
+   ativo:c[2],         // <- ativo vem do CSV
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
    stop:+c[6]||0,
-   zero:+c[7]||0,
-   ativo:c[2],
-   semana:c[1]
+   zero:+c[7]||0
   };
  });
 }
 
-function renderCalendar(){
- const cal=document.getElementById("calendar");
- cal.innerHTML="";
-
+function montarCalendario(){
  const hoje=new Date();
  const ano=hoje.getFullYear();
  const mes=hoje.getMonth();
 
- const primeiroDia=new Date(ano,mes,1).getDay();
- const totalDias=new Date(ano,mes+1,0).getDate();
+ const primeiroDia=new Date(ano,mes,1);
+ const ultimoDia=new Date(ano,mes+1,0);
 
- // espaços vazios
- for(let i=0;i<primeiroDia;i++){
-  cal.innerHTML+=`<div></div>`;
+ const grid=document.getElementById("calendar");
+ grid.innerHTML="";
+
+ for(let i=0;i<primeiroDia.getDay();i++){
+  grid.innerHTML+=`<div class="day empty"></div>`;
  }
 
- for(let d=1;d<=totalDias;d++){
-  const data=new Date(ano,mes,d);
-  const r=dados.find(x=>x.data.toDateString()===data.toDateString());
+ for(let dia=1;dia<=ultimoDia.getDate();dia++){
+  const dataAtual=new Date(ano,mes,dia);
+  const registro=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
 
-  let cls="day";
-  let pontos="",info="",tooltip="";
+  let classe="day";
+  let pontos=0;
+  let info="";
+  let tooltip="";
 
-  if(r){
-   cls+=" "+(r.pontos>=0?"positive":"negative");
-   pontos=`<div class="day-points">${r.pontos>0?'+':''}${r.pontos}</div>`;
+  if(registro){
+   pontos=registro.pontos;
+   if(pontos>0) classe+=" positive";
+   if(pontos<0) classe+=" negative";
+
    info=`
-    <div class="day-info">
-     Trades: ${r.trades}<br>
-     Gain: ${r.gain} | Stop: ${r.stop} | 0x0: ${r.zero}
-    </div>`;
-   tooltip=`<div class="tooltip">${r.semana}<br>ATIVO: ${r.ativo}</div>`;
+    Trades: ${registro.trades}<br>
+    Gain: ${registro.gain} | Stop: ${registro.stop} | 0x0: ${registro.zero}
+   `;
+
+   tooltip=`SEMANA ${registro.semana} | ATIVO: ${registro.ativo}`;
   }
 
-  if(data.toDateString()===hoje.toDateString()){
-   cls+=" today";
+  if(dataAtual.toDateString()===hoje.toDateString()){
+   classe+=" today";
   }
 
-  cal.innerHTML+=`
-   <div class="${cls}">
-    ${tooltip}
-    <div class="day-number">${d}</div>
-    ${pontos}
-    ${info}
-   </div>`;
+  grid.innerHTML+=`
+   <div class="${classe}" ${tooltip ? `data-tooltip="${tooltip}"` : ""}>
+    <div class="day-number">${dia}</div>
+    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
+     ${registro ? pontos : ""}
+    </div>
+    <div class="day-info">${info}</div>
+   </div>
+  `;
  }
 }
 
 loadCSV();
 </script>
+
 </body>
 </html>
