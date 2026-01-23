@@ -19,7 +19,7 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system;
+ font-family:Inter,system-ui;
 }
 
 body{
@@ -59,11 +59,6 @@ body{
  display:flex;
  flex-direction:column;
  transition:.2s;
- cursor:pointer;
-}
-
-.day:hover{
- transform:translateY(-2px);
 }
 
 .day.today{
@@ -92,7 +87,7 @@ body{
  display:flex;
  align-items:center;
  justify-content:center;
- font-size:28px;
+ font-size:30px;
  font-weight:800;
 }
 
@@ -102,7 +97,7 @@ body{
  line-height:1.4;
 }
 
-/* TOOLTIP */
+/* Tooltip */
 .tooltip{
  position:absolute;
  bottom:110%;
@@ -113,7 +108,6 @@ body{
  padding:8px 12px;
  border-radius:10px;
  font-size:12px;
- color:var(--text);
  white-space:nowrap;
  opacity:0;
  pointer-events:none;
@@ -128,7 +122,6 @@ body{
 .empty{
  background:transparent;
  border:none;
- cursor:default;
 }
 </style>
 </head>
@@ -137,16 +130,15 @@ body{
 
 <div class="calendar">
  <div class="calendar-header">
-  <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
-  <div>Qui</div><div>Sex</div><div>Sáb</div>
+  <div>Dom</div><div>Seg</div><div>Ter</div>
+  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
  </div>
 
  <div class="calendar-grid" id="calendar"></div>
 </div>
 
 <script>
-const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-
+const CSV_URL="SEU_LINK_DO_CSV_AQUI";
 let dados=[];
 
 async function loadCSV(){
@@ -156,28 +148,24 @@ async function loadCSV(){
  montarCalendario();
 }
 
-function parseCSV(t){
- const rows=t.trim().split(/\r?\n/);
- rows.shift();
+function parseCSV(texto){
+ const linhas=texto.trim().split(/\r?\n/);
+ linhas.shift();
 
- dados=rows.map(r=>{
-  const c=r.split(",");
+ dados=linhas.map(l=>{
+  const c=l.split(",");
   const [d,m,a]=c[0].split("/");
   return{
    data:new Date(a,m-1,d),
-   ativo:c[1] || "—",
-   pontos:+c[3]||0,
-   trades:+c[4]||0,
-   gain:+c[5]||0,
-   stop:+c[6]||0,
-   zero:+c[7]||0
+   ativo:c[1],
+   semana:c[2],
+   pontos:+c[3],
+   trades:+c[4],
+   gain:+c[5],
+   stop:+c[6],
+   zero:+c[7]
   };
  });
-}
-
-function semanaDoMes(data){
- const primeiro=new Date(data.getFullYear(),data.getMonth(),1);
- return Math.ceil((data.getDate()+primeiro.getDay())/7);
 }
 
 function montarCalendario(){
@@ -185,39 +173,39 @@ function montarCalendario(){
  const ano=hoje.getFullYear();
  const mes=hoje.getMonth();
 
- const primeiroDia=new Date(ano,mes,1);
- const ultimoDia=new Date(ano,mes+1,0);
+ const primeiro=new Date(ano,mes,1);
+ const ultimo=new Date(ano,mes+1,0);
 
  const grid=document.getElementById("calendar");
  grid.innerHTML="";
 
- for(let i=0;i<primeiroDia.getDay();i++){
+ for(let i=0;i<primeiro.getDay();i++){
   grid.innerHTML+=`<div class="day empty"></div>`;
  }
 
- for(let dia=1;dia<=ultimoDia.getDate();dia++){
-  const dataAtual=new Date(ano,mes,dia);
-  const registro=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
+ for(let d=1;d<=ultimo.getDate();d++){
+  const dataAtual=new Date(ano,mes,d);
+  const r=dados.find(x=>x.data.toDateString()===dataAtual.toDateString());
 
   let classe="day";
   let pontos="";
   let info="";
   let tooltip="";
 
-  if(registro){
-   pontos=registro.pontos;
+  if(r){
+   pontos=r.pontos;
    if(pontos>0) classe+=" positive";
    if(pontos<0) classe+=" negative";
 
    info=`
-    Trades: ${registro.trades}<br>
-    Gain: ${registro.gain} | Stop: ${registro.stop} | 0x0: ${registro.zero}
+    Trades: ${r.trades}<br>
+    Gain: ${r.gain} | Stop: ${r.stop} | 0x0: ${r.zero}
    `;
 
    tooltip=`
     <div class="tooltip">
-     SEMANA ${semanaDoMes(dataAtual)}<br>
-     ATIVO: ${registro.ativo}
+     SEMANA ${r.semana}<br>
+     ATIVO: ${r.ativo}
     </div>
    `;
   }
@@ -229,7 +217,7 @@ function montarCalendario(){
   grid.innerHTML+=`
    <div class="${classe}">
     ${tooltip}
-    <div class="day-number">${dia}</div>
+    <div class="day-number">${d}</div>
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
      ${pontos}
     </div>
