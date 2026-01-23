@@ -7,14 +7,15 @@
 
 <style>
 :root{
- --bg:#0b1220;
- --card:#0f172a;
+ --bg:#0b1224;
+ --card:#111a33;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
- --muted:#94a3b8;
+ --muted:#9ca3af;
  --green:#22c55e;
  --red:#ef4444;
- --accent:#38bdf8;
+ --yellow:#facc15;
+ --blue:#60a5fa;
 }
 
 *{
@@ -24,12 +25,12 @@
 
 body{
  margin:0;
- background:radial-gradient(circle at top,#162447,#0b1220 70%);
+ background:radial-gradient(circle at top,#1e3a8a,#0b1224 70%);
  color:var(--text);
 }
 
 .container{
- max-width:1200px;
+ max-width:1100px;
  margin:auto;
  padding:24px;
 }
@@ -45,70 +46,104 @@ body{
 .header strong{
  font-size:20px;
  letter-spacing:2px;
- color:var(--accent);
+ color:var(--blue);
 }
 
-.header span{
- color:var(--muted);
+.controls{
+ display:flex;
+ gap:12px;
+}
+
+select{
+ background:var(--card);
+ color:var(--text);
+ border:1px solid var(--border);
+ border-radius:12px;
+ padding:10px 14px;
+ font-size:14px;
 }
 
 /* CALENDÁRIO */
 .calendar{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- gap:14px;
+ background:linear-gradient(180deg,#111a33,#0b1224);
+ border:1px solid var(--border);
+ border-radius:22px;
+ padding:18px;
 }
 
-.weekday{
+.weekdays{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ margin-bottom:10px;
+}
+
+.weekdays div{
  text-align:center;
  color:var(--muted);
- font-weight:600;
- letter-spacing:1px;
- padding-bottom:6px;
+ font-size:13px;
+ padding-bottom:8px;
+}
+
+.days{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ gap:10px;
 }
 
 .day{
- background:linear-gradient(180deg,#0f172a,#020617);
+ position:relative;
+ background:rgba(255,255,255,.02);
  border:1px solid var(--border);
- border-radius:16px;
- min-height:120px;
- padding:12px;
- display:flex;
- flex-direction:column;
- justify-content:space-between;
- transition:.25s;
-}
-
-.day:hover{
- transform:translateY(-3px);
- box-shadow:0 0 0 1px rgba(56,189,248,.25);
+ border-radius:14px;
+ min-height:100px;
+ padding:10px;
+ cursor:default;
 }
 
 .day.inactive{
- opacity:.25;
+ opacity:.3;
 }
 
-.day .num{
- font-size:14px;
+.day.today{
+ border:2px solid var(--blue);
+ box-shadow:0 0 0 1px rgba(96,165,250,.4);
+}
+
+.day-number{
+ font-size:13px;
  color:var(--muted);
 }
 
-.points{
- font-size:22px;
- font-weight:800;
+.day-points{
+ margin-top:18px;
+ font-size:20px;
+ font-weight:700;
 }
 
-.points.positive{
- color:var(--green);
+.positive{color:var(--green)}
+.negative{color:var(--red)}
+.zero{color:var(--yellow)}
+
+/* TOOLTIP */
+.tooltip{
+ position:absolute;
+ bottom:110%;
+ left:50%;
+ transform:translateX(-50%);
+ background:#020617;
+ border:1px solid var(--border);
+ border-radius:12px;
+ padding:10px 12px;
+ font-size:13px;
+ white-space:nowrap;
+ opacity:0;
+ pointer-events:none;
+ transition:.2s;
+ z-index:10;
 }
 
-.points.negative{
- color:var(--red);
-}
-
-.sub{
- font-size:12px;
- color:var(--muted);
+.day:hover .tooltip{
+ opacity:1;
 }
 </style>
 </head>
@@ -118,11 +153,18 @@ body{
 
 <div class="header">
  <strong>CALENDÁRIO OPERACIONAL</strong>
- <span id="mesAno"></span>
+ <div class="controls">
+  <select id="mesSelect"></select>
+  <select id="anoSelect"></select>
+ </div>
 </div>
 
-<div class="calendar" id="calendar">
- <!-- dias -->
+<div class="calendar">
+ <div class="weekdays">
+  <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
+  <div>Qui</div><div>Sex</div><div>Sáb</div>
+ </div>
+ <div class="days" id="calendarDays"></div>
 </div>
 
 </div>
@@ -130,72 +172,78 @@ body{
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
-const calendarEl=document.getElementById("calendar");
-const mesAnoEl=document.getElementById("mesAno");
-
-const diasSemana=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const meses=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-
-let dados=[];
+let data=[];
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
- parseCSV(t);
- gerarCalendario();
-}
-
-function parseCSV(t){
  const rows=t.trim().split(/\r?\n/);
  rows.shift();
- dados=rows.map(r=>{
+ data=rows.map(r=>{
   const c=r.split(",");
   const [d,m,a]=c[0].split("/");
   return{
    dia:+d,
-   mes:+m,
+   mes:+m-1,
    ano:+a,
    pontos:+c[3]||0,
-   trades:+c[4]||0
-  };
+   trades:+c[4]||0,
+   gain:+c[5]||0,
+   stop:+c[6]||0,
+   zero:+c[7]||0
+  }
  });
+ initControls();
 }
 
-function gerarCalendario(){
+function initControls(){
+ const anos=[...new Set(data.map(d=>d.ano))].sort();
+ anoSelect.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+ meses.forEach((m,i)=>mesSelect.innerHTML+=`<option value="${i}">${m}</option>`);
+
  const hoje=new Date();
- const ano=hoje.getFullYear();
- const mes=hoje.getMonth()+1;
+ anoSelect.value=hoje.getFullYear();
+ mesSelect.value=hoje.getMonth();
 
- mesAnoEl.textContent=`${meses[mes-1]} / ${ano}`;
+ anoSelect.onchange=renderCalendar;
+ mesSelect.onchange=renderCalendar;
 
- calendarEl.innerHTML="";
+ renderCalendar();
+}
 
- diasSemana.forEach(d=>{
-  calendarEl.innerHTML+=`<div class="weekday">${d}</div>`;
- });
+function renderCalendar(){
+ const mes=+mesSelect.value;
+ const ano=+anoSelect.value;
+ const firstDay=new Date(ano,mes,1).getDay();
+ const totalDays=new Date(ano,mes+1,0).getDate();
+ const today=new Date();
 
- const primeiroDia=new Date(ano,mes-1,1).getDay();
- const totalDias=new Date(ano,mes,0).getDate();
+ calendarDays.innerHTML="";
 
- for(let i=0;i<primeiroDia;i++){
-  calendarEl.innerHTML+=`<div class="day inactive"></div>`;
+ for(let i=0;i<firstDay;i++){
+  calendarDays.innerHTML+=`<div class="day inactive"></div>`;
  }
 
- for(let d=1;d<=totalDias;d++){
-  const info=dados.find(x=>x.dia===d && x.mes===mes && x.ano===ano);
+ for(let d=1;d<=totalDays;d++){
+  const info=data.find(x=>x.dia===d && x.mes===mes && x.ano===ano);
   const pontos=info?info.pontos:0;
 
-  calendarEl.innerHTML+=`
-   <div class="day">
-    <div class="num">${d}</div>
-    ${info?`
-     <div class="points ${pontos>=0?'positive':'negative'}">
-      ${pontos>0?'+':''}${pontos}
-     </div>
-     <div class="sub">${info.trades} trades</div>
-    `:`<div class="sub">—</div>`}
-   </div>
-  `;
+  const cls=pontos>0?"positive":pontos<0?"negative":"zero";
+  const isToday=d===today.getDate() && mes===today.getMonth() && ano===today.getFullYear();
+
+  calendarDays.innerHTML+=`
+  <div class="day ${isToday?"today":""}">
+   <div class="day-number">${d}</div>
+   <div class="day-points ${cls}">${info? (pontos>0?`+${pontos}`:pontos):""}</div>
+   ${info?`
+   <div class="tooltip">
+    ${d}/${mes+1}/${ano}<br>
+    Pontos: ${pontos}<br>
+    Trades: ${info.trades}<br>
+    Gain: ${info.gain} | Stop: ${info.stop} | 0x0: ${info.zero}
+   </div>`:""}
+  </div>`;
  }
 }
 
