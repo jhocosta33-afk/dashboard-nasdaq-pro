@@ -1,234 +1,108 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Calendário Operacional</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-:root{
- --bg:#0b1220;
- --card:#0f172a;
- --border:rgba(255,255,255,.08);
- --text:#e5e7eb;
- --muted:#9ca3af;
- --green:#22c55e;
- --red:#ef4444;
- --blue:#60a5fa;
-}
-
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui;
-}
-
-body{
- margin:0;
- background:linear-gradient(180deg,#0b1220,#020617);
- color:var(--text);
- padding:24px;
-}
-
-.calendar{
- max-width:1400px;
- margin:auto;
-}
-
-.calendar-header{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
- text-align:center;
- color:var(--muted);
- font-size:14px;
-}
-
-.calendar-grid{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- gap:12px;
-}
-
-.day{
- position:relative;
- background:rgba(255,255,255,.02);
- border:1px solid var(--border);
- border-radius:16px;
- min-height:135px;
- padding:10px;
- display:flex;
- flex-direction:column;
- transition:.2s;
-}
-
-.day.today{
- border-color:var(--blue);
- box-shadow:0 0 0 1px rgba(96,165,250,.4);
-}
-
-.day.positive{
- background:linear-gradient(180deg,rgba(34,197,94,.15),rgba(34,197,94,.02));
-}
-
-.day.negative{
- background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(239,68,68,.02));
-}
-
-.day-number{
- position:absolute;
- top:8px;
- left:10px;
- font-size:13px;
- color:var(--muted);
-}
-
-.day-points{
- flex:1;
- display:flex;
- align-items:center;
- justify-content:center;
- font-size:30px;
- font-weight:800;
-}
-
-.day-info{
- font-size:12px;
- color:var(--muted);
- line-height:1.4;
-}
-
-/* Tooltip */
-.tooltip{
- position:absolute;
- bottom:110%;
- left:50%;
- transform:translateX(-50%);
- background:#020617;
- border:1px solid var(--border);
- padding:8px 12px;
- border-radius:10px;
- font-size:12px;
- white-space:nowrap;
- opacity:0;
- pointer-events:none;
- transition:.2s;
- box-shadow:0 10px 25px rgba(0,0,0,.4);
-}
-
-.day:hover .tooltip{
- opacity:1;
-}
-
-.empty{
- background:transparent;
- border:none;
-}
-</style>
-</head>
-
-<body>
-
-<div class="calendar">
- <div class="calendar-header">
-  <div>Dom</div><div>Seg</div><div>Ter</div>
-  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
- </div>
-
- <div class="calendar-grid" id="calendar"></div>
-</div>
-
 <script>
-const CSV_URL="SEU_LINK_DO_CSV_AQUI";
-let dados=[];
+const CSV_URL = "SEU_LINK_DO_CSV_AQUI";
+let dados = [];
+let anoAtual, mesAtual;
 
-async function loadCSV(){
- const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- parseCSV(t);
- montarCalendario();
+async function loadCSV() {
+  const r = await fetch(CSV_URL, { cache: "no-store" });
+  const t = await r.text();
+  parseCSV(t);
+  definirMesInicial();
+  montarCalendario();
 }
 
-function parseCSV(texto){
- const linhas=texto.trim().split(/\r?\n/);
- linhas.shift();
+function parseCSV(texto) {
+  const linhas = texto.trim().split(/\r?\n/);
+  linhas.shift();
 
- dados=linhas.map(l=>{
-  const c=l.split(",");
-  const [d,m,a]=c[0].split("/");
-  return{
-   data:new Date(a,m-1,d),
-   ativo:c[1],
-   semana:c[2],
-   pontos:+c[3],
-   trades:+c[4],
-   gain:+c[5],
-   stop:+c[6],
-   zero:+c[7]
-  };
- });
+  dados = linhas.map(l => {
+    const c = l.split(",");
+    const [d, m, a] = c[0].split("/");
+    return {
+      data: new Date(a, m - 1, d),
+      ativo: c[1],
+      semana: c[2],
+      pontos: +c[3],
+      trades: +c[4],
+      gain: +c[5],
+      stop: +c[6],
+      zero: +c[7]
+    };
+  });
 }
 
-function montarCalendario(){
- const hoje=new Date();
- const ano=hoje.getFullYear();
- const mes=hoje.getMonth();
+function definirMesInicial() {
+  // pega a data mais recente do CSV
+  const ultimaData = dados.reduce((a, b) =>
+    b.data > a.data ? b : a
+  ).data;
 
- const primeiro=new Date(ano,mes,1);
- const ultimo=new Date(ano,mes+1,0);
+  anoAtual = ultimaData.getFullYear();
+  mesAtual = ultimaData.getMonth();
+}
 
- const grid=document.getElementById("calendar");
- grid.innerHTML="";
+function montarCalendario() {
+  const hoje = new Date();
+  const primeiro = new Date(anoAtual, mesAtual, 1);
+  const ultimo = new Date(anoAtual, mesAtual + 1, 0);
 
- for(let i=0;i<primeiro.getDay();i++){
-  grid.innerHTML+=`<div class="day empty"></div>`;
- }
+  const grid = document.getElementById("calendar");
+  grid.innerHTML = "";
 
- for(let d=1;d<=ultimo.getDate();d++){
-  const dataAtual=new Date(ano,mes,d);
-  const r=dados.find(x=>x.data.toDateString()===dataAtual.toDateString());
-
-  let classe="day";
-  let pontos="";
-  let info="";
-  let tooltip="";
-
-  if(r){
-   pontos=r.pontos;
-   if(pontos>0) classe+=" positive";
-   if(pontos<0) classe+=" negative";
-
-   info=`
-    Trades: ${r.trades}<br>
-    Gain: ${r.gain} | Stop: ${r.stop} | 0x0: ${r.zero}
-   `;
-
-   tooltip=`
-    <div class="tooltip">
-     SEMANA ${r.semana}<br>
-     ATIVO: ${r.ativo}
-    </div>
-   `;
+  for (let i = 0; i < primeiro.getDay(); i++) {
+    grid.innerHTML += `<div class="day empty"></div>`;
   }
 
-  if(dataAtual.toDateString()===hoje.toDateString()){
-   classe+=" today";
-  }
+  for (let d = 1; d <= ultimo.getDate(); d++) {
+    const dataAtual = new Date(anoAtual, mesAtual, d);
+    const r = dados.find(x =>
+      x.data.toDateString() === dataAtual.toDateString()
+    );
 
-  grid.innerHTML+=`
-   <div class="${classe}">
-    ${tooltip}
-    <div class="day-number">${d}</div>
-    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
-     ${pontos}
-    </div>
-    <div class="day-info">${info}</div>
-   </div>
-  `;
- }
+    let classe = "day";
+    let pontos = "";
+    let info = "";
+    let tooltip = "";
+
+    if (r) {
+      pontos = r.pontos;
+      if (pontos > 0) classe += " positive";
+      if (pontos < 0) classe += " negative";
+
+      info = `
+        Trades: ${r.trades}<br>
+        Gain: ${r.gain} | Stop: ${r.stop} | 0x0: ${r.zero}
+      `;
+
+      tooltip = `
+        <div class="tooltip">
+          SEMANA ${r.semana}<br>
+          ATIVO: ${r.ativo}
+        </div>
+      `;
+    }
+
+    if (
+      dataAtual.toDateString() === hoje.toDateString() &&
+      hoje.getMonth() === mesAtual &&
+      hoje.getFullYear() === anoAtual
+    ) {
+      classe += " today";
+    }
+
+    grid.innerHTML += `
+      <div class="${classe}">
+        ${tooltip}
+        <div class="day-number">${d}</div>
+        <div class="day-points"
+          style="color:${pontos < 0 ? 'var(--red)' : 'var(--green)'}">
+          ${pontos}
+        </div>
+        <div class="day-info">${info}</div>
+      </div>
+    `;
+  }
 }
 
 loadCSV();
 </script>
-
-</body>
-</html>
