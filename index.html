@@ -2,343 +2,205 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Calendário Operacional</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Calendário Trader</title>
 <style>
-:root{
- --bg:#0b1220;
- --border:rgba(255,255,255,.08);
- --text:#e5e7eb;
- --muted:#9ca3af;
- --green:#22c55e;
- --red:#ef4444;
- --blue:#60a5fa;
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    margin: 0;
+    padding: 20px;
 }
 
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui;
+/* CALENDÁRIO */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    max-width: 900px;
 }
 
-body{
- margin:0;
- background:linear-gradient(180deg,#0b1220,#020617);
- color:var(--text);
- overflow-x:hidden;
+.day {
+    background: #020617;
+    border-radius: 10px;
+    padding: 8px;
+    height: 120px;
+    cursor: pointer;
+    position: relative;
 }
 
-.calendar{
- max-width:1300px;
- margin:auto;
- padding:20px;
+.day:hover {
+    outline: 1px solid #334155;
 }
 
-.calendar-header{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- margin-bottom:8px;
- text-align:center;
- color:var(--muted);
- font-size:13px;
+.day-number {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 6px;
 }
 
-.calendar-grid{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- gap:10px;
+/* PAINEL LATERAL */
+.side-panel {
+    position: fixed;
+    top: 0;
+    right: -380px;
+    width: 360px;
+    height: 100%;
+    background: #020617;
+    border-left: 1px solid #1e293b;
+    padding: 20px;
+    transition: right 0.3s ease;
+    overflow-y: auto;
 }
 
-.day{
- position:relative;
- background:rgba(255,255,255,.02);
- border:1px solid var(--border);
- border-radius:14px;
- min-height:120px;
- padding:10px;
- display:flex;
- flex-direction:column;
- cursor:pointer;
- transition:.2s;
+.side-panel.open {
+    right: 0;
 }
 
-.day:hover{
- border-color:rgba(96,165,250,.6);
+.close-btn {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
 }
 
-.day.today{
- border-color:var(--blue);
- box-shadow:0 0 0 1px rgba(96,165,250,.35);
+/* PAINEL CONTEÚDO */
+.panel-title {
+    font-size: 22px;
+    margin-bottom: 10px;
 }
 
-.day.positive{
- background:linear-gradient(180deg,rgba(34,197,94,.18),rgba(34,197,94,.03));
+.highlight {
+    font-size: 32px;
+    font-weight: bold;
+    margin: 10px 0;
 }
 
-.day.negative{
- background:linear-gradient(180deg,rgba(239,68,68,.22),rgba(239,68,68,.03));
+.row {
+    display: flex;
+    gap: 10px;
+    margin: 8px 0;
 }
 
-.day-number{
- font-size:16px;
- color:var(--muted);
- margin-bottom:4px;
+.badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 14px;
 }
 
-.day-points{
- flex:1;
- display:flex;
- align-items:center;
- justify-content:center;
- font-size:30px;
- font-weight:800;
+.gain { background: #065f46; }
+.stop { background: #7f1d1d; }
+.zero { background: #374151; }
+
+.section {
+    margin-top: 15px;
+    border-top: 1px solid #1e293b;
+    padding-top: 10px;
 }
 
-.day-info{
- font-size:12px;
- color:var(--muted);
- line-height:1.4;
- text-align:center;
-}
-
-.info-row{
- display:flex;
- justify-content:center;
- gap:12px;
-}
-
-.tooltip{
- position:absolute;
- left:50%;
- bottom:8px;
- transform:translateX(-50%);
- background:#020617;
- border:1px solid var(--border);
- border-radius:10px;
- padding:6px 10px;
- font-size:11px;
- white-space:nowrap;
- opacity:0;
- pointer-events:none;
- transition:.2s;
-}
-
-.day:hover .tooltip{
- opacity:1;
-}
-
-.empty{
- background:transparent;
- border:none;
- cursor:default;
-}
-
-/* ===== PAINEL LATERAL ===== */
-
-.overlay{
- position:fixed;
- inset:0;
- background:rgba(2,6,23,.55);
- opacity:0;
- pointer-events:none;
- transition:.25s;
-}
-
-.overlay.active{
- opacity:1;
- pointer-events:auto;
-}
-
-.panel{
- position:fixed;
- top:0;
- right:-380px;
- width:360px;
- height:100vh;
- background:#020617;
- border-left:1px solid var(--border);
- padding:20px;
- transition:.35s;
- z-index:10;
-}
-
-.panel.active{
- right:0;
-}
-
-.panel-header{
- display:flex;
- justify-content:space-between;
- align-items:center;
- margin-bottom:16px;
-}
-
-.panel-header h2{
- margin:0;
- font-size:18px;
-}
-
-.close-btn{
- cursor:pointer;
- font-size:20px;
- color:var(--muted);
-}
-
-.panel-content{
- font-size:14px;
- line-height:1.6;
-}
-
-.panel-content div{
- margin-bottom:6px;
+.label {
+    color: #94a3b8;
+    font-size: 13px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="calendar">
- <div class="calendar-header">
-  <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
-  <div>Qui</div><div>Sex</div><div>Sáb</div>
- </div>
+<h2>Calendário Trader</h2>
 
- <div class="calendar-grid" id="calendar"></div>
+<div class="calendar">
+    <div class="day" data-info='{
+        "date":"10/01/2026",
+        "points":"+120",
+        "trades":4,
+        "gain":3,
+        "stop":1,
+        "zero":0,
+        "assertividade":"75%",
+        "obs":"Segui o plano perfeitamente"
+    }'>
+        <div class="day-number">10</div>
+    </div>
+
+    <div class="day" data-info='{
+        "date":"11/01/2026",
+        "points":"-40",
+        "trades":2,
+        "gain":0,
+        "stop":2,
+        "zero":0,
+        "assertividade":"0%",
+        "obs":"Entrei fora do contexto"
+    }'>
+        <div class="day-number">11</div>
+    </div>
+
+    <div class="day" data-info='{}'>
+        <div class="day-number">12</div>
+    </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="fecharPainel()"></div>
-
-<div class="panel" id="panel">
- <div class="panel-header">
-  <h2 id="panelTitle">Detalhes</h2>
-  <div class="close-btn" onclick="fecharPainel()">✕</div>
- </div>
- <div class="panel-content" id="panelContent"></div>
+<!-- PAINEL -->
+<div class="side-panel" id="panel">
+    <span class="close-btn" onclick="closePanel()">✖</span>
+    <div id="panelContent"></div>
 </div>
 
 <script>
-const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const panel = document.getElementById("panel");
+const panelContent = document.getElementById("panelContent");
 
-let dados=[];
+document.querySelectorAll(".day").forEach(day => {
+    day.addEventListener("click", () => {
+        const data = JSON.parse(day.dataset.info || "{}");
+        if (Object.keys(data).length === 0) return;
 
-async function loadCSV(){
- const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- parseCSV(t);
- montarCalendario();
+        let html = `
+            <div class="panel-title">${data.date}</div>
+        `;
+
+        if (data.points) {
+            html += `<div class="highlight">${data.points} pts</div>`;
+        }
+
+        if (data.trades) {
+            html += `<div class="label">Trades: ${data.trades}</div>`;
+        }
+
+        if (data.gain || data.stop || data.zero) {
+            html += `<div class="row">`;
+            if (data.gain) html += `<div class="badge gain">Gain: ${data.gain}</div>`;
+            if (data.stop) html += `<div class="badge stop">Stop: ${data.stop}</div>`;
+            if (data.zero) html += `<div class="badge zero">0x0: ${data.zero}</div>`;
+            html += `</div>`;
+        }
+
+        if (data.assertividade) {
+            html += `
+                <div class="section">
+                    <div class="label">Assertividade</div>
+                    <div>${data.assertividade}</div>
+                </div>
+            `;
+        }
+
+        if (data.obs) {
+            html += `
+                <div class="section">
+                    <div class="label">Observação</div>
+                    <div>${data.obs}</div>
+                </div>
+            `;
+        }
+
+        panelContent.innerHTML = html;
+        panel.classList.add("open");
+    });
+});
+
+function closePanel() {
+    panel.classList.remove("open");
 }
-
-function parseCSV(t){
- const rows=t.trim().split(/\r?\n/);
- rows.shift();
-
- dados=rows.map(r=>{
-  const c=r.split(",");
-  const [d,m,a]=c[0].split("/");
-  return{
-   data:new Date(a,m-1,d),
-   pontos:+c[3]||0,
-   trades:+c[4]||0,
-   gain:+c[5]||0,
-   stop:+c[6]||0,
-   ativo:c[8]||"",
-   semana:c[9]||""
-  };
- });
-}
-
-function montarCalendario(){
- const hoje=new Date();
- const ano=hoje.getFullYear();
- const mes=hoje.getMonth();
-
- const primeiroDia=new Date(ano,mes,1);
- const ultimoDia=new Date(ano,mes+1,0);
-
- const grid=document.getElementById("calendar");
- grid.innerHTML="";
-
- for(let i=0;i<primeiroDia.getDay();i++){
-  grid.innerHTML+=`<div class="day empty"></div>`;
- }
-
- for(let dia=1;dia<=ultimoDia.getDate();dia++){
-  const dataAtual=new Date(ano,mes,dia);
-  const r=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
-
-  let classe="day";
-  let pontos="";
-  let info="";
-  let tooltip="";
-
-  if(r){
-   pontos=r.pontos;
-   if(pontos>0) classe+=" positive";
-   if(pontos<0) classe+=" negative";
-
-   let linhas=[];
-   if(r.trades>0) linhas.push(`Trades: ${r.trades}`);
-
-   let gs=[];
-   if(r.gain>0) gs.push(`Gain: ${r.gain}`);
-   if(r.stop>0) gs.push(`Stop: ${r.stop}`);
-   if(gs.length) linhas.push(`<div class="info-row">${gs.join(" ")}</div>`);
-
-   info=linhas.join("");
-
-   if(r.semana || r.ativo){
-    tooltip=`<div class="tooltip">${r.semana} | ATIVO: ${r.ativo}</div>`;
-   }
-  }
-
-  if(dataAtual.toDateString()===hoje.toDateString()){
-   classe+=" today";
-  }
-
-  grid.innerHTML+=`
-   <div class="${classe}" onclick='abrirPainel("${dataAtual.toISOString()}")'>
-    <div class="day-number">${dia}</div>
-    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
-     ${pontos!=="" ? pontos : ""}
-    </div>
-    <div class="day-info">${info}</div>
-    ${tooltip}
-   </div>
-  `;
- }
-}
-
-function abrirPainel(dataISO){
- const data=new Date(dataISO);
- const r=dados.find(d=>d.data.toDateString()===data.toDateString());
-
- document.getElementById("panelTitle").innerText=
-  data.toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
-
- let html="";
-
- if(r){
-  html+=`<div><b>Semana:</b> ${r.semana}</div>`;
-  html+=`<div><b>Ativo:</b> ${r.ativo}</div>`;
-  html+=`<div><b>Pontos:</b> ${r.pontos}</div>`;
-  html+=`<div><b>Trades:</b> ${r.trades}</div>`;
-  html+=`<div><b>Gain:</b> ${r.gain}</div>`;
-  html+=`<div><b>Stop:</b> ${r.stop}</div>`;
- }else{
-  html="<div>Sem operações neste dia.</div>";
- }
-
- document.getElementById("panelContent").innerHTML=html;
- document.getElementById("panel").classList.add("active");
- document.getElementById("overlay").classList.add("active");
-}
-
-function fecharPainel(){
- document.getElementById("panel").classList.remove("active");
- document.getElementById("overlay").classList.remove("active");
-}
-
-loadCSV();
 </script>
 
 </body>
