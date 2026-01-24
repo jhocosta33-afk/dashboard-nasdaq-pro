@@ -26,64 +26,59 @@ body{
  margin:0;
  background:linear-gradient(180deg,#0b1220,#020617);
  color:var(--text);
- padding:24px;
- overflow-x:hidden;
+ padding:20px;
 }
 
-/* ===== CALENDÁRIO ===== */
 .calendar{
- max-width:1400px;
+ max-width:1300px;
  margin:auto;
 }
 
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
+ margin-bottom:8px;
  text-align:center;
  color:var(--muted);
- font-size:14px;
+ font-size:13px;
 }
 
 .calendar-grid{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- gap:12px;
+ gap:10px;
 }
 
 .day{
  position:relative;
  background:rgba(255,255,255,.02);
  border:1px solid var(--border);
- border-radius:16px;
- min-height:115px;
+ border-radius:14px;
+ min-height:120px;
  padding:10px;
  display:flex;
  flex-direction:column;
- cursor:pointer;
  transition:.2s;
-}
-
-.day:hover{
- transform:translateY(-2px);
+ overflow:hidden;
 }
 
 .day.today{
  border-color:var(--blue);
- box-shadow:0 0 0 1px rgba(96,165,250,.4);
+ box-shadow:0 0 0 1px rgba(96,165,250,.35);
 }
 
 .day.positive{
- background:linear-gradient(180deg,rgba(34,197,94,.18),rgba(34,197,94,.02));
+ background:linear-gradient(180deg,rgba(34,197,94,.18),rgba(34,197,94,.03));
 }
 
 .day.negative{
- background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(239,68,68,.02));
+ background:linear-gradient(180deg,rgba(239,68,68,.22),rgba(239,68,68,.03));
 }
 
 .day-number{
  font-size:14px;
  color:var(--muted);
+ margin-bottom:4px;
 }
 
 .day-points{
@@ -91,81 +86,46 @@ body{
  display:flex;
  align-items:center;
  justify-content:center;
- font-size:28px;
+ font-size:30px;
  font-weight:800;
 }
 
 .day-info{
  font-size:12px;
  color:var(--muted);
- text-align:center;
  line-height:1.4;
+ text-align:center;
 }
 
-.day-info-row{
+.info-row{
  display:flex;
  justify-content:center;
  gap:10px;
 }
 
-/* ===== TOOLTIP ===== */
-.day-badge{
+.tooltip{
  position:absolute;
- bottom:8px;
  left:50%;
+ bottom:8px;
  transform:translateX(-50%);
  background:#020617;
  border:1px solid var(--border);
- padding:4px 10px;
+ border-radius:10px;
+ padding:6px 10px;
  font-size:11px;
- border-radius:999px;
+ white-space:nowrap;
  opacity:0;
  pointer-events:none;
  transition:.2s;
- white-space:nowrap;
 }
 
-.day:hover .day-badge{
+.day:hover .tooltip{
  opacity:1;
 }
 
-/* ===== EMPTY ===== */
 .empty{
  background:transparent;
  border:none;
- pointer-events:none;
-}
-
-/* ===== PAINEL LATERAL ===== */
-.panel{
- position:fixed;
- top:0;
- right:0;
- width:360px;
- height:100%;
- background:linear-gradient(180deg,#020617,#020617);
- border-left:1px solid var(--border);
- transform:translateX(100%);
- transition:.3s;
- z-index:999;
- padding:20px;
-}
-
-.panel.open{
- transform:translateX(0);
-}
-
-.panel h2{
- margin-top:0;
-}
-
-.panel-close{
- position:absolute;
- top:10px;
- right:14px;
- font-size:20px;
- cursor:pointer;
- color:var(--muted);
 }
 </style>
 </head>
@@ -177,14 +137,8 @@ body{
   <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
   <div>Qui</div><div>Sex</div><div>Sáb</div>
  </div>
- <div class="calendar-grid" id="calendar"></div>
-</div>
 
-<!-- PAINEL -->
-<div class="panel" id="panel">
- <div class="panel-close" onclick="fecharPainel()">✕</div>
- <h2 id="panel-title"></h2>
- <div id="panel-content"></div>
+ <div class="calendar-grid" id="calendar"></div>
 </div>
 
 <script>
@@ -208,13 +162,13 @@ function parseCSV(t){
   const [d,m,a]=c[0].split("/");
   return{
    data:new Date(a,m-1,d),
-   semana:c[1],
-   ativo:c[2],
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
    stop:+c[6]||0,
-   zero:+c[7]||0
+   zero:+c[7]||0,
+   ativo:c[8]||"",
+   semana:c[9]||""
   };
  });
 }
@@ -239,23 +193,28 @@ function montarCalendario(){
   const r=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
 
   let classe="day";
+  let pontos="";
   let info="";
-  let badge="";
+  let tooltip="";
 
   if(r){
-   if(r.pontos>0) classe+=" positive";
-   if(r.pontos<0) classe+=" negative";
+   pontos=r.pontos;
+   if(pontos>0) classe+=" positive";
+   if(pontos<0) classe+=" negative";
 
-   info+=`Trades: ${r.trades}<br>`;
-   let linha=[];
-   if(r.gain>0) linha.push(`Gain: ${r.gain}`);
-   if(r.stop>0) linha.push(`Stop: ${r.stop}`);
-   if(r.zero>0) linha.push(`0x0: ${r.zero}`);
-   if(linha.length){
-    info+=`<div class="day-info-row">${linha.join(" | ")}</div>`;
+   let linhas=[];
+   if(r.trades>0) linhas.push(`Trades: ${r.trades}`);
+
+   let gs=[];
+   if(r.gain>0) gs.push(`Gain: ${r.gain}`);
+   if(r.stop>0) gs.push(`Stop: ${r.stop}`);
+   if(gs.length) linhas.push(`<div class="info-row">${gs.join(" ")}</div>`);
+
+   info=linhas.join("");
+
+   if(r.semana || r.ativo){
+    tooltip=`<div class="tooltip">${r.semana} | ATIVO: ${r.ativo}</div>`;
    }
-
-   badge=`SEMANA ${r.semana} | ATIVO: ${r.ativo}`;
   }
 
   if(dataAtual.toDateString()===hoje.toDateString()){
@@ -263,32 +222,16 @@ function montarCalendario(){
   }
 
   grid.innerHTML+=`
-   <div class="${classe}" onclick='abrirPainel(${JSON.stringify(r)})'>
+   <div class="${classe}">
     <div class="day-number">${dia}</div>
-    <div class="day-points" style="color:${r?.pontos<0?'var(--red)':'var(--green)'}">
-     ${r ? r.pontos : ""}
+    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
+     ${pontos!=="" ? pontos : ""}
     </div>
     <div class="day-info">${info}</div>
-    ${badge?`<div class="day-badge">${badge}</div>`:""}
+    ${tooltip}
    </div>
   `;
  }
-}
-
-function abrirPainel(r){
- if(!r) return;
- document.getElementById("panel-title").innerText =
-  `${r.data.toLocaleDateString()} • ${r.ativo}`;
- document.getElementById("panel-content").innerHTML=`
-  <p><b>Semana:</b> ${r.semana}</p>
-  <p><b>Pontos:</b> ${r.pontos}</p>
-  <p><b>Trades:</b> ${r.trades}</p>
- `;
- document.getElementById("panel").classList.add("open");
-}
-
-function fecharPainel(){
- document.getElementById("panel").classList.remove("open");
 }
 
 loadCSV();
