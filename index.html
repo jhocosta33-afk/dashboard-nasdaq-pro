@@ -61,30 +61,6 @@ body{
  transition:.2s;
 }
 
-/* TOOLTIP */
-.day[data-tooltip]::after{
- content:attr(data-tooltip);
- position:absolute;
- bottom:110%;
- left:50%;
- transform:translateX(-50%);
- background:#020617;
- border:1px solid var(--border);
- padding:6px 10px;
- border-radius:8px;
- font-size:12px;
- color:#e5e7eb;
- white-space:nowrap;
- opacity:0;
- pointer-events:none;
- transition:.2s;
- z-index:10;
-}
-
-.day:hover::after{
- opacity:1;
-}
-
 .day.today{
  border-color:var(--blue);
  box-shadow:0 0 0 1px rgba(96,165,250,.4);
@@ -160,8 +136,6 @@ function parseCSV(t){
   const [d,m,a]=c[0].split("/");
   return{
    data:new Date(a,m-1,d),
-   semana:c[1],   // já vem "SEMANA 4"
-   ativo:c[2],
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
@@ -193,19 +167,20 @@ function montarCalendario(){
   let classe="day";
   let pontos=0;
   let info="";
-  let tooltip="";
 
   if(registro){
    pontos=registro.pontos;
    if(pontos>0) classe+=" positive";
    if(pontos<0) classe+=" negative";
 
-   info=`
-    Trades: ${registro.trades}<br>
-    Gain: ${registro.gain} | Stop: ${registro.stop} | 0x0: ${registro.zero}
-   `;
+   let linhas = [];
+   linhas.push(`Trades: ${registro.trades}`);
 
-   tooltip = `${registro.semana} | ATIVO: ${registro.ativo}`;
+   if(registro.gain > 0) linhas.push(`Gain: ${registro.gain}`);
+   if(registro.stop > 0) linhas.push(`Stop: ${registro.stop}`);
+   if(registro.zero > 0) linhas.push(`0x0: ${registro.zero}`);
+
+   info = linhas.join(" | ");
   }
 
   if(dataAtual.toDateString()===hoje.toDateString()){
@@ -213,7 +188,7 @@ function montarCalendario(){
   }
 
   grid.innerHTML+=`
-   <div class="${classe}" ${tooltip ? `data-tooltip="${tooltip}"` : ""}>
+   <div class="${classe}">
     <div class="day-number">${dia}</div>
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
      ${registro ? pontos : ""}
