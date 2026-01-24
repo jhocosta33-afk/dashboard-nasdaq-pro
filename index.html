@@ -34,6 +34,12 @@ body{
  margin:auto;
 }
 
+.calendar-title{
+ font-size:26px;
+ font-weight:800;
+ margin-bottom:18px;
+}
+
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
@@ -87,7 +93,7 @@ body{
  display:flex;
  align-items:center;
  justify-content:center;
- font-size:28px;
+ font-size:30px;
  font-weight:800;
 }
 
@@ -95,6 +101,30 @@ body{
  font-size:12px;
  color:var(--muted);
  line-height:1.4;
+ text-align:center;
+}
+
+.day-tooltip{
+ position:absolute;
+ bottom:10px;
+ left:50%;
+ transform:translateX(-50%);
+ background:#020617;
+ border:1px solid rgba(255,255,255,.15);
+ padding:6px 10px;
+ border-radius:10px;
+ font-size:11px;
+ color:#e5e7eb;
+ white-space:nowrap;
+ opacity:0;
+ pointer-events:none;
+ transition:.2s;
+ box-shadow:0 8px 20px rgba(0,0,0,.4);
+ z-index:10;
+}
+
+.day:hover .day-tooltip{
+ opacity:1;
 }
 
 .empty{
@@ -107,6 +137,8 @@ body{
 <body>
 
 <div class="calendar">
+ <div class="calendar-title">Calendário Operacional</div>
+
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
   <div>Qui</div><div>Sex</div><div>Sáb</div>
@@ -140,7 +172,9 @@ function parseCSV(t){
    trades:+c[4]||0,
    gain:+c[5]||0,
    stop:+c[6]||0,
-   zero:+c[7]||0
+   zero:+c[7]||0,
+   ativo:c[8]||"",
+   semana:c[9]||""
   };
  });
 }
@@ -165,22 +199,25 @@ function montarCalendario(){
   const registro=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
 
   let classe="day";
-  let pontos=0;
+  let pontos="";
   let info="";
 
   if(registro){
    pontos=registro.pontos;
+
    if(pontos>0) classe+=" positive";
    if(pontos<0) classe+=" negative";
 
-   let linhas = [];
-   linhas.push(`Trades: ${registro.trades}`);
+   info+=`Trades: ${registro.trades}<br>`;
 
-   if(registro.gain > 0) linhas.push(`Gain: ${registro.gain}`);
-   if(registro.stop > 0) linhas.push(`Stop: ${registro.stop}`);
-   if(registro.zero > 0) linhas.push(`0x0: ${registro.zero}`);
+   let detalhes=[];
+   if(registro.gain>0) detalhes.push(`Gain: ${registro.gain}`);
+   if(registro.stop>0) detalhes.push(`Stop: ${registro.stop}`);
+   if(registro.zero>0) detalhes.push(`0x0: ${registro.zero}`);
 
-   info = linhas.join(" | ");
+   if(detalhes.length){
+    info+=detalhes.join(" | ");
+   }
   }
 
   if(dataAtual.toDateString()===hoje.toDateString()){
@@ -190,10 +227,19 @@ function montarCalendario(){
   grid.innerHTML+=`
    <div class="${classe}">
     <div class="day-number">${dia}</div>
+
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
      ${registro ? pontos : ""}
     </div>
+
     <div class="day-info">${info}</div>
+
+    ${registro ? `
+     <div class="day-tooltip">
+      ${registro.semana}<br>
+      ATIVO: ${registro.ativo}
+     </div>
+    ` : ""}
    </div>
   `;
  }
