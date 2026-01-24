@@ -8,7 +8,6 @@
 <style>
 :root{
  --bg:#0b1220;
- --card:#0f172a;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
@@ -19,7 +18,7 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+ font-family:Inter,system-ui,-apple-system;
 }
 
 body{
@@ -37,10 +36,10 @@ body{
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
  text-align:center;
- color:var(--muted);
  font-size:14px;
+ color:var(--muted);
+ margin-bottom:10px;
 }
 
 .calendar-grid{
@@ -51,15 +50,14 @@ body{
 
 .day{
  position:relative;
+ height:130px;
  background:rgba(255,255,255,.02);
  border:1px solid var(--border);
  border-radius:16px;
- height:130px; /* ALTURA FIXA */
  padding:10px;
  display:flex;
  flex-direction:column;
- justify-content:space-between;
- transition:.2s;
+ justify-content:flex-end;
  overflow:hidden;
 }
 
@@ -80,39 +78,39 @@ body{
  position:absolute;
  top:8px;
  left:12px;
- font-size:14px; /* um pouco maior */
+ font-size:15px;
  color:var(--muted);
 }
 
 .day-points{
- flex:1;
- display:flex;
- align-items:center;
- justify-content:center;
+ text-align:center;
  font-size:26px;
  font-weight:800;
- line-height:1;
+ margin-bottom:4px;
 }
 
 .day-info{
  font-size:12px;
  color:var(--muted);
- line-height:1.4;
  text-align:center;
+ line-height:1.4;
 }
 
+/* BADGE (tooltip) */
 .day-badge{
+ position:absolute;
+ bottom:8px;
+ left:50%;
+ transform:translateX(-50%);
+ background:rgba(0,0,0,.55);
+ border:1px solid var(--border);
+ border-radius:10px;
+ padding:6px 10px;
+ font-size:11px;
+ white-space:nowrap;
  opacity:0;
  pointer-events:none;
  transition:.2s;
- margin:4px auto 0;
- padding:6px 10px;
- border-radius:10px;
- font-size:11px;
- background:rgba(0,0,0,.45);
- border:1px solid var(--border);
- color:#fff;
- width:max-content;
 }
 
 .day:hover .day-badge{
@@ -186,27 +184,30 @@ function montarCalendario(){
 
  for(let dia=1;dia<=ultimoDia.getDate();dia++){
   const dataAtual=new Date(ano,mes,dia);
-  const registro=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
+  const r=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
 
   let classe="day";
   let pontos="";
   let info="";
   let badge="";
 
-  if(registro){
-   pontos=registro.pontos;
+  if(r){
+   pontos=r.pontos;
    if(pontos>0) classe+=" positive";
    if(pontos<0) classe+=" negative";
 
-   let linhas=[];
-   if(registro.trades>0) linhas.push(`Trades: ${registro.trades}`);
-   if(registro.gain>0) linhas.push(`Gain: ${registro.gain}`);
-   if(registro.stop>0) linhas.push(`Stop: ${registro.stop}`);
-   if(registro.zero>0) linhas.push(`0x0: ${registro.zero}`);
-   info=linhas.join("<br>");
+   let linha2=[];
+   if(r.gain>0) linha2.push(`Gain: ${r.gain}`);
+   if(r.stop>0) linha2.push(`Stop: ${r.stop}`);
+   if(r.zero>0) linha2.push(`0x0: ${r.zero}`);
 
-   if(registro.semana || registro.ativo){
-    badge=`SEMANA ${registro.semana} | ATIVO: ${registro.ativo}`;
+   info = `
+     ${r.trades>0 ? `Trades: ${r.trades}<br>` : ""}
+     ${linha2.join(" | ")}
+   `;
+
+   if(r.semana || r.ativo){
+    badge=`SEMANA ${r.semana} | ATIVO: ${r.ativo}`;
    }
   }
 
@@ -217,14 +218,11 @@ function montarCalendario(){
   grid.innerHTML+=`
    <div class="${classe}">
     <div class="day-number">${dia}</div>
-
-    ${badge ? `<div class="day-badge">${badge}</div>` : ""}
-
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
      ${pontos!=="" ? pontos : ""}
     </div>
-
     <div class="day-info">${info}</div>
+    ${badge ? `<div class="day-badge">${badge}</div>` : ""}
    </div>
   `;
  }
