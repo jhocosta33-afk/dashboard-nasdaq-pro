@@ -8,7 +8,6 @@
 <style>
 :root{
  --bg:#0b1220;
- --card:#0f172a;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
@@ -58,8 +57,12 @@ body{
  padding:10px;
  display:flex;
  flex-direction:column;
+ cursor:pointer;
  transition:.2s;
- overflow:hidden;
+}
+
+.day:hover{
+ border-color:rgba(96,165,250,.6);
 }
 
 .day.today{
@@ -76,7 +79,7 @@ body{
 }
 
 .day-number{
- font-size:14px;
+ font-size:15px;
  color:var(--muted);
  margin-bottom:4px;
 }
@@ -100,7 +103,7 @@ body{
 .info-row{
  display:flex;
  justify-content:center;
- gap:10px;
+ gap:12px;
 }
 
 .tooltip{
@@ -126,6 +129,7 @@ body{
 .empty{
  background:transparent;
  border:none;
+ cursor:default;
 }
 </style>
 </head>
@@ -166,7 +170,6 @@ function parseCSV(t){
    trades:+c[4]||0,
    gain:+c[5]||0,
    stop:+c[6]||0,
-   zero:+c[7]||0,
    ativo:c[8]||"",
    semana:c[9]||""
   };
@@ -222,7 +225,7 @@ function montarCalendario(){
   }
 
   grid.innerHTML+=`
-   <div class="${classe}">
+   <div class="${classe}" onclick="clicarDia('${dataAtual.toISOString()}')">
     <div class="day-number">${dia}</div>
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
      ${pontos!=="" ? pontos : ""}
@@ -232,6 +235,11 @@ function montarCalendario(){
    </div>
   `;
  }
+}
+
+function clicarDia(data){
+ console.log("Dia clicado:", data);
+ // aqui entra o painel lateral depois
 }
 
 loadCSV();
