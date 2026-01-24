@@ -3,40 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <title>Calendário Trader</title>
+
 <style>
 body {
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: #e5e7eb;
     margin: 0;
     padding: 20px;
+    background: linear-gradient(180deg, #020617, #020617);
+    font-family: Arial, sans-serif;
+    color: #e5e7eb;
+}
+
+h2 {
+    margin-bottom: 15px;
+}
+
+/* CABEÇALHO DIAS DA SEMANA */
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    max-width: 900px;
+    margin-bottom: 8px;
+}
+
+.weekdays div {
+    text-align: center;
+    font-size: 13px;
+    color: #94a3b8;
 }
 
 /* CALENDÁRIO */
 .calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 10px;
     max-width: 900px;
 }
 
+/* DIA */
 .day {
-    background: #020617;
-    border-radius: 10px;
-    padding: 8px;
     height: 120px;
+    background: radial-gradient(circle at top, #064e3b, #020617);
+    border-radius: 14px;
+    padding: 10px;
     cursor: pointer;
     position: relative;
 }
 
-.day:hover {
-    outline: 1px solid #334155;
+.day.empty {
+    background: transparent;
+    cursor: default;
 }
 
+/* NÚMERO DO DIA */
 .day-number {
     font-size: 18px;
     font-weight: bold;
-    margin-bottom: 6px;
 }
 
 /* PAINEL LATERAL */
@@ -50,7 +72,6 @@ body {
     border-left: 1px solid #1e293b;
     padding: 20px;
     transition: right 0.3s ease;
-    overflow-y: auto;
 }
 
 .side-panel.open {
@@ -63,7 +84,7 @@ body {
     font-size: 20px;
 }
 
-/* PAINEL CONTEÚDO */
+/* CONTEÚDO PAINEL */
 .panel-title {
     font-size: 22px;
     margin-bottom: 10px;
@@ -78,12 +99,12 @@ body {
 .row {
     display: flex;
     gap: 10px;
-    margin: 8px 0;
+    margin: 10px 0;
 }
 
 .badge {
-    padding: 4px 10px;
-    border-radius: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
     font-size: 14px;
 }
 
@@ -91,15 +112,10 @@ body {
 .stop { background: #7f1d1d; }
 .zero { background: #374151; }
 
-.section {
-    margin-top: 15px;
-    border-top: 1px solid #1e293b;
-    padding-top: 10px;
-}
-
 .label {
     color: #94a3b8;
     font-size: 13px;
+    margin-top: 15px;
 }
 </style>
 </head>
@@ -108,36 +124,46 @@ body {
 
 <h2>Calendário Trader</h2>
 
+<div class="weekdays">
+    <div>Dom</div><div>Seg</div><div>Ter</div>
+    <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+</div>
+
 <div class="calendar">
+
+    <!-- ESPAÇOS VAZIOS (ex: mês começa na terça) -->
+    <div class="day empty"></div>
+    <div class="day empty"></div>
+
+    <!-- DIA 10 -->
     <div class="day" data-info='{
         "date":"10/01/2026",
         "points":"+120",
         "trades":4,
         "gain":3,
         "stop":1,
-        "zero":0,
-        "assertividade":"75%",
-        "obs":"Segui o plano perfeitamente"
+        "zero":0
     }'>
         <div class="day-number">10</div>
     </div>
 
+    <!-- DIA 11 -->
     <div class="day" data-info='{
         "date":"11/01/2026",
         "points":"-40",
         "trades":2,
         "gain":0,
         "stop":2,
-        "zero":0,
-        "assertividade":"0%",
-        "obs":"Entrei fora do contexto"
+        "zero":0
     }'>
         <div class="day-number">11</div>
     </div>
 
+    <!-- DIA 12 -->
     <div class="day" data-info='{}'>
         <div class="day-number">12</div>
     </div>
+
 </div>
 
 <!-- PAINEL -->
@@ -152,46 +178,26 @@ const panelContent = document.getElementById("panelContent");
 
 document.querySelectorAll(".day").forEach(day => {
     day.addEventListener("click", () => {
+        if (day.classList.contains("empty")) return;
+
         const data = JSON.parse(day.dataset.info || "{}");
         if (Object.keys(data).length === 0) return;
 
-        let html = `
-            <div class="panel-title">${data.date}</div>
-        `;
+        let html = `<div class="panel-title">${data.date}</div>`;
 
         if (data.points) {
             html += `<div class="highlight">${data.points} pts</div>`;
         }
 
         if (data.trades) {
-            html += `<div class="label">Trades: ${data.trades}</div>`;
+            html += `<div>Trades: ${data.trades}</div>`;
         }
 
-        if (data.gain || data.stop || data.zero) {
-            html += `<div class="row">`;
-            if (data.gain) html += `<div class="badge gain">Gain: ${data.gain}</div>`;
-            if (data.stop) html += `<div class="badge stop">Stop: ${data.stop}</div>`;
-            if (data.zero) html += `<div class="badge zero">0x0: ${data.zero}</div>`;
-            html += `</div>`;
-        }
-
-        if (data.assertividade) {
-            html += `
-                <div class="section">
-                    <div class="label">Assertividade</div>
-                    <div>${data.assertividade}</div>
-                </div>
-            `;
-        }
-
-        if (data.obs) {
-            html += `
-                <div class="section">
-                    <div class="label">Observação</div>
-                    <div>${data.obs}</div>
-                </div>
-            `;
-        }
+        html += `<div class="row">`;
+        if (data.gain) html += `<div class="badge gain">Gain ${data.gain}</div>`;
+        if (data.stop) html += `<div class="badge stop">Stop ${data.stop}</div>`;
+        if (data.zero) html += `<div class="badge zero">0x0 ${data.zero}</div>`;
+        html += `</div>`;
 
         panelContent.innerHTML = html;
         panel.classList.add("open");
