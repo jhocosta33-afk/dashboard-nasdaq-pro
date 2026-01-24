@@ -60,8 +60,8 @@ body{
  background:rgba(255,255,255,.02);
  border:1px solid var(--border);
  border-radius:16px;
- min-height:130px;
- padding:10px;
+ min-height:140px;
+ padding:12px 10px;
  display:flex;
  flex-direction:column;
  transition:.2s;
@@ -104,24 +104,27 @@ body{
  text-align:center;
 }
 
+/* 🔹 TOOLTIP CORRIGIDO */
 .tooltip{
  position:absolute;
- bottom:8px;
+ bottom:100%;
  left:50%;
- transform:translateX(-50%);
+ transform:translateX(-50%) translateY(-8px);
  background:#020617;
  border:1px solid var(--border);
- border-radius:10px;
- padding:6px 10px;
+ border-radius:12px;
+ padding:6px 12px;
  font-size:12px;
  white-space:nowrap;
  opacity:0;
  pointer-events:none;
  transition:.15s;
+ z-index:20;
 }
 
 .day:hover .tooltip{
  opacity:1;
+ transform:translateX(-50%) translateY(-14px);
 }
 
 .empty{
@@ -206,7 +209,6 @@ function montarCalendario(){
    if(pontos<0) classe+=" negative";
 
    info+=`Trades: ${r.trades}<br>`;
-
    if(r.gain>0) info+=`Gain: ${r.gain}<br>`;
    if(r.stop>0) info+=`Stop: ${r.stop}<br>`;
    if(r.zero>0) info+=`0x0: ${r.zero}<br>`;
