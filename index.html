@@ -8,6 +8,7 @@
 <style>
 :root{
  --bg:#0b1220;
+ --card:#0f172a;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
@@ -16,7 +17,10 @@
  --blue:#60a5fa;
 }
 
-*{box-sizing:border-box;font-family:Inter,system-ui;}
+*{
+ box-sizing:border-box;
+ font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+}
 
 body{
  margin:0;
@@ -25,14 +29,23 @@ body{
  padding:24px;
 }
 
-.calendar{max-width:1400px;margin:auto;}
+.calendar{
+ max-width:1400px;
+ margin:auto;
+}
+
+.calendar-title{
+ font-size:26px;
+ font-weight:800;
+ margin-bottom:18px;
+}
 
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
+ margin-bottom:10px;
  text-align:center;
  color:var(--muted);
- margin-bottom:10px;
  font-size:14px;
 }
 
@@ -62,6 +75,7 @@ body{
 .day.positive{
  background:linear-gradient(180deg,rgba(34,197,94,.15),rgba(34,197,94,.02));
 }
+
 .day.negative{
  background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(239,68,68,.02));
 }
@@ -90,34 +104,37 @@ body{
  text-align:center;
 }
 
-/* TOOLTIP */
-.day-tooltip{
+.tooltip{
  position:absolute;
- top:-8px;
+ bottom:8px;
  left:50%;
- transform:translate(-50%,-100%);
+ transform:translateX(-50%);
  background:#020617;
- border:1px solid rgba(255,255,255,.15);
- padding:6px 10px;
+ border:1px solid var(--border);
  border-radius:10px;
- font-size:11px;
- color:#e5e7eb;
+ padding:6px 10px;
+ font-size:12px;
+ white-space:nowrap;
  opacity:0;
  pointer-events:none;
- transition:.2s;
- white-space:nowrap;
- z-index:20;
+ transition:.15s;
 }
 
-.day:hover .day-tooltip{opacity:1;}
+.day:hover .tooltip{
+ opacity:1;
+}
 
-.empty{background:transparent;border:none;}
+.empty{
+ background:transparent;
+ border:none;
+}
 </style>
 </head>
 
 <body>
 
 <div class="calendar">
+ <div class="calendar-title">Calendário Operacional</div>
 
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
@@ -128,7 +145,7 @@ body{
 </div>
 
 <script>
-const CSV_URL="SUA_URL_DO_CSV";
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
 let dados=[];
 
@@ -148,13 +165,13 @@ function parseCSV(t){
   const [d,m,a]=c[0].split("/");
   return{
    data:new Date(a,m-1,d),
+   semana:c[1],
+   ativo:c[2],
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
    stop:+c[6]||0,
-   zero:+c[7]||0,
-   ativo:c[8]||"",
-   semana:c[9]||""
+   zero:+c[7]||0
   };
  });
 }
@@ -164,51 +181,53 @@ function montarCalendario(){
  const ano=hoje.getFullYear();
  const mes=hoje.getMonth();
 
- const primeiro=new Date(ano,mes,1);
- const ultimo=new Date(ano,mes+1,0);
+ const primeiroDia=new Date(ano,mes,1);
+ const ultimoDia=new Date(ano,mes+1,0);
 
  const grid=document.getElementById("calendar");
  grid.innerHTML="";
 
- for(let i=0;i<primeiro.getDay();i++)
+ for(let i=0;i<primeiroDia.getDay();i++){
   grid.innerHTML+=`<div class="day empty"></div>`;
+ }
 
- for(let d=1;d<=ultimo.getDate();d++){
-  const data=new Date(ano,mes,d);
-  const r=dados.find(x=>x.data.toDateString()===data.toDateString());
+ for(let dia=1;dia<=ultimoDia.getDate();dia++){
+  const dataAtual=new Date(ano,mes,dia);
+  const r=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
 
-  let cls="day",info="",pts="";
+  let classe="day";
+  let pontos="";
+  let info="";
+  let tooltip="";
+
   if(r){
-   pts=r.pontos;
-   if(pts>0) cls+=" positive";
-   if(pts<0) cls+=" negative";
+   pontos=r.pontos;
+   if(pontos>0) classe+=" positive";
+   if(pontos<0) classe+=" negative";
 
    info+=`Trades: ${r.trades}<br>`;
-   let det=[];
-   if(r.gain>0) det.push(`Gain: ${r.gain}`);
-   if(r.stop>0) det.push(`Stop: ${r.stop}`);
-   if(r.zero>0) det.push(`0x0: ${r.zero}`);
-   info+=det.join(" | ");
+
+   if(r.gain>0) info+=`Gain: ${r.gain}<br>`;
+   if(r.stop>0) info+=`Stop: ${r.stop}<br>`;
+   if(r.zero>0) info+=`0x0: ${r.zero}<br>`;
+
+   tooltip=`${r.semana} | ATIVO: ${r.ativo}`;
   }
 
-  if(data.toDateString()===hoje.toDateString()) cls+=" today";
+  if(dataAtual.toDateString()===hoje.toDateString()){
+   classe+=" today";
+  }
 
   grid.innerHTML+=`
-   <div class="${cls}">
-    <div class="day-number">${d}</div>
-
-    <div class="day-points" style="color:${pts<0?'var(--red)':'var(--green)'}">
-     ${r?pts:""}
+   <div class="${classe}">
+    <div class="day-number">${dia}</div>
+    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
+     ${r ? pontos : ""}
     </div>
-
     <div class="day-info">${info}</div>
-
-    ${r?`
-     <div class="day-tooltip">
-      ${r.semana}<br>
-      ATIVO: ${r.ativo}
-     </div>`:""}
-   </div>`;
+    ${tooltip?`<div class="tooltip">${tooltip}</div>`:""}
+   </div>
+  `;
  }
 }
 
