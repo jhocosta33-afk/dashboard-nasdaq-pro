@@ -54,15 +54,13 @@ body{
  background:rgba(255,255,255,.02);
  border:1px solid var(--border);
  border-radius:16px;
- min-height:145px;
- padding:12px 10px;
+ height:130px; /* ALTURA FIXA */
+ padding:10px;
  display:flex;
  flex-direction:column;
+ justify-content:space-between;
  transition:.2s;
-}
-
-.day:hover{
- transform:translateY(-2px);
+ overflow:hidden;
 }
 
 .day.today{
@@ -71,34 +69,19 @@ body{
 }
 
 .day.positive{
- background:linear-gradient(180deg,rgba(34,197,94,.18),rgba(34,197,94,.03));
+ background:linear-gradient(180deg,rgba(34,197,94,.18),rgba(34,197,94,.02));
 }
 
 .day.negative{
- background:linear-gradient(180deg,rgba(239,68,68,.2),rgba(239,68,68,.03));
+ background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(239,68,68,.02));
 }
 
-/* 🔹 DIA (um pouco maior) */
 .day-number{
  position:absolute;
  top:8px;
  left:12px;
- font-size:14px;
- font-weight:600;
+ font-size:14px; /* um pouco maior */
  color:var(--muted);
-}
-
-/* 🔹 SEMANA / ATIVO (novo local) */
-.day-badge{
- text-align:center;
- font-size:11px;
- color:#cbd5f5;
- background:rgba(0,0,0,.35);
- border:1px solid var(--border);
- border-radius:10px;
- padding:4px 8px;
- margin:8px auto 6px;
- width:fit-content;
 }
 
 .day-points{
@@ -106,8 +89,9 @@ body{
  display:flex;
  align-items:center;
  justify-content:center;
- font-size:30px;
+ font-size:26px;
  font-weight:800;
+ line-height:1;
 }
 
 .day-info{
@@ -115,7 +99,24 @@ body{
  color:var(--muted);
  line-height:1.4;
  text-align:center;
- padding-bottom:4px;
+}
+
+.day-badge{
+ opacity:0;
+ pointer-events:none;
+ transition:.2s;
+ margin:4px auto 0;
+ padding:6px 10px;
+ border-radius:10px;
+ font-size:11px;
+ background:rgba(0,0,0,.45);
+ border:1px solid var(--border);
+ color:#fff;
+ width:max-content;
+}
+
+.day:hover .day-badge{
+ opacity:1;
 }
 
 .empty{
@@ -128,7 +129,6 @@ body{
 <body>
 
 <div class="calendar">
-
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
   <div>Qui</div><div>Sex</div><div>Sáb</div>
@@ -158,13 +158,13 @@ function parseCSV(t){
   const [d,m,a]=c[0].split("/");
   return{
    data:new Date(a,m-1,d),
-   semana:c[1],
-   ativo:c[2],
    pontos:+c[3]||0,
    trades:+c[4]||0,
    gain:+c[5]||0,
    stop:+c[6]||0,
-   zero:+c[7]||0
+   zero:+c[7]||0,
+   semana:c[8]||"",
+   ativo:c[9]||""
   };
  });
 }
@@ -186,24 +186,28 @@ function montarCalendario(){
 
  for(let dia=1;dia<=ultimoDia.getDate();dia++){
   const dataAtual=new Date(ano,mes,dia);
-  const r=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
+  const registro=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
 
   let classe="day";
   let pontos="";
   let info="";
   let badge="";
 
-  if(r){
-   pontos=r.pontos;
+  if(registro){
+   pontos=registro.pontos;
    if(pontos>0) classe+=" positive";
    if(pontos<0) classe+=" negative";
 
-   info+=`Trades: ${r.trades}<br>`;
-   if(r.gain>0) info+=`Gain: ${r.gain}<br>`;
-   if(r.stop>0) info+=`Stop: ${r.stop}<br>`;
-   if(r.zero>0) info+=`0x0: ${r.zero}<br>`;
+   let linhas=[];
+   if(registro.trades>0) linhas.push(`Trades: ${registro.trades}`);
+   if(registro.gain>0) linhas.push(`Gain: ${registro.gain}`);
+   if(registro.stop>0) linhas.push(`Stop: ${registro.stop}`);
+   if(registro.zero>0) linhas.push(`0x0: ${registro.zero}`);
+   info=linhas.join("<br>");
 
-   badge=`SEMANA ${r.semana} | ATIVO: ${r.ativo}`;
+   if(registro.semana || registro.ativo){
+    badge=`SEMANA ${registro.semana} | ATIVO: ${registro.ativo}`;
+   }
   }
 
   if(dataAtual.toDateString()===hoje.toDateString()){
@@ -213,10 +217,13 @@ function montarCalendario(){
   grid.innerHTML+=`
    <div class="${classe}">
     <div class="day-number">${dia}</div>
-    ${badge?`<div class="day-badge">${badge}</div>`:""}
+
+    ${badge ? `<div class="day-badge">${badge}</div>` : ""}
+
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
-     ${r ? pontos : ""}
+     ${pontos!=="" ? pontos : ""}
     </div>
+
     <div class="day-info">${info}</div>
    </div>
   `;
