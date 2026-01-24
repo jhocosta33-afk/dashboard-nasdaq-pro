@@ -18,19 +18,20 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+ font-family:Inter,system-ui;
 }
 
 body{
  margin:0;
  background:linear-gradient(180deg,#0b1220,#020617);
  color:var(--text);
- padding:20px;
+ overflow-x:hidden;
 }
 
 .calendar{
  max-width:1300px;
  margin:auto;
+ padding:20px;
 }
 
 .calendar-header{
@@ -79,7 +80,7 @@ body{
 }
 
 .day-number{
- font-size:15px;
+ font-size:16px;
  color:var(--muted);
  margin-bottom:4px;
 }
@@ -131,6 +132,66 @@ body{
  border:none;
  cursor:default;
 }
+
+/* ===== PAINEL LATERAL ===== */
+
+.overlay{
+ position:fixed;
+ inset:0;
+ background:rgba(2,6,23,.55);
+ opacity:0;
+ pointer-events:none;
+ transition:.25s;
+}
+
+.overlay.active{
+ opacity:1;
+ pointer-events:auto;
+}
+
+.panel{
+ position:fixed;
+ top:0;
+ right:-380px;
+ width:360px;
+ height:100vh;
+ background:#020617;
+ border-left:1px solid var(--border);
+ padding:20px;
+ transition:.35s;
+ z-index:10;
+}
+
+.panel.active{
+ right:0;
+}
+
+.panel-header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:16px;
+}
+
+.panel-header h2{
+ margin:0;
+ font-size:18px;
+}
+
+.close-btn{
+ cursor:pointer;
+ font-size:20px;
+ color:var(--muted);
+}
+
+.panel-content{
+ font-size:14px;
+ line-height:1.6;
+}
+
+.panel-content div{
+ margin-bottom:6px;
+}
 </style>
 </head>
 
@@ -143,6 +204,16 @@ body{
  </div>
 
  <div class="calendar-grid" id="calendar"></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="fecharPainel()"></div>
+
+<div class="panel" id="panel">
+ <div class="panel-header">
+  <h2 id="panelTitle">Detalhes</h2>
+  <div class="close-btn" onclick="fecharPainel()">✕</div>
+ </div>
+ <div class="panel-content" id="panelContent"></div>
 </div>
 
 <script>
@@ -225,7 +296,7 @@ function montarCalendario(){
   }
 
   grid.innerHTML+=`
-   <div class="${classe}" onclick="clicarDia('${dataAtual.toISOString()}')">
+   <div class="${classe}" onclick='abrirPainel("${dataAtual.toISOString()}")'>
     <div class="day-number">${dia}</div>
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
      ${pontos!=="" ? pontos : ""}
@@ -237,9 +308,34 @@ function montarCalendario(){
  }
 }
 
-function clicarDia(data){
- console.log("Dia clicado:", data);
- // aqui entra o painel lateral depois
+function abrirPainel(dataISO){
+ const data=new Date(dataISO);
+ const r=dados.find(d=>d.data.toDateString()===data.toDateString());
+
+ document.getElementById("panelTitle").innerText=
+  data.toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
+
+ let html="";
+
+ if(r){
+  html+=`<div><b>Semana:</b> ${r.semana}</div>`;
+  html+=`<div><b>Ativo:</b> ${r.ativo}</div>`;
+  html+=`<div><b>Pontos:</b> ${r.pontos}</div>`;
+  html+=`<div><b>Trades:</b> ${r.trades}</div>`;
+  html+=`<div><b>Gain:</b> ${r.gain}</div>`;
+  html+=`<div><b>Stop:</b> ${r.stop}</div>`;
+ }else{
+  html="<div>Sem operações neste dia.</div>";
+ }
+
+ document.getElementById("panelContent").innerHTML=html;
+ document.getElementById("panel").classList.add("active");
+ document.getElementById("overlay").classList.add("active");
+}
+
+function fecharPainel(){
+ document.getElementById("panel").classList.remove("active");
+ document.getElementById("overlay").classList.remove("active");
 }
 
 loadCSV();
