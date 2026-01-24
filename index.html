@@ -8,7 +8,6 @@
 <style>
 :root{
  --bg:#0b1220;
- --card:#0f172a;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
@@ -17,10 +16,7 @@
  --blue:#60a5fa;
 }
 
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
-}
+*{box-sizing:border-box;font-family:Inter,system-ui;}
 
 body{
  margin:0;
@@ -29,23 +25,14 @@ body{
  padding:24px;
 }
 
-.calendar{
- max-width:1400px;
- margin:auto;
-}
-
-.calendar-title{
- font-size:26px;
- font-weight:800;
- margin-bottom:18px;
-}
+.calendar{max-width:1400px;margin:auto;}
 
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
  text-align:center;
  color:var(--muted);
+ margin-bottom:10px;
  font-size:14px;
 }
 
@@ -75,7 +62,6 @@ body{
 .day.positive{
  background:linear-gradient(180deg,rgba(34,197,94,.15),rgba(34,197,94,.02));
 }
-
 .day.negative{
  background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(239,68,68,.02));
 }
@@ -104,40 +90,34 @@ body{
  text-align:center;
 }
 
+/* TOOLTIP */
 .day-tooltip{
  position:absolute;
- bottom:10px;
+ top:-8px;
  left:50%;
- transform:translateX(-50%);
+ transform:translate(-50%,-100%);
  background:#020617;
  border:1px solid rgba(255,255,255,.15);
  padding:6px 10px;
  border-radius:10px;
  font-size:11px;
  color:#e5e7eb;
- white-space:nowrap;
  opacity:0;
  pointer-events:none;
  transition:.2s;
- box-shadow:0 8px 20px rgba(0,0,0,.4);
- z-index:10;
+ white-space:nowrap;
+ z-index:20;
 }
 
-.day:hover .day-tooltip{
- opacity:1;
-}
+.day:hover .day-tooltip{opacity:1;}
 
-.empty{
- background:transparent;
- border:none;
-}
+.empty{background:transparent;border:none;}
 </style>
 </head>
 
 <body>
 
 <div class="calendar">
- <div class="calendar-title">Calendário Operacional</div>
 
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
@@ -148,7 +128,7 @@ body{
 </div>
 
 <script>
-const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const CSV_URL="SUA_URL_DO_CSV";
 
 let dados=[];
 
@@ -184,64 +164,51 @@ function montarCalendario(){
  const ano=hoje.getFullYear();
  const mes=hoje.getMonth();
 
- const primeiroDia=new Date(ano,mes,1);
- const ultimoDia=new Date(ano,mes+1,0);
+ const primeiro=new Date(ano,mes,1);
+ const ultimo=new Date(ano,mes+1,0);
 
  const grid=document.getElementById("calendar");
  grid.innerHTML="";
 
- for(let i=0;i<primeiroDia.getDay();i++){
+ for(let i=0;i<primeiro.getDay();i++)
   grid.innerHTML+=`<div class="day empty"></div>`;
- }
 
- for(let dia=1;dia<=ultimoDia.getDate();dia++){
-  const dataAtual=new Date(ano,mes,dia);
-  const registro=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
+ for(let d=1;d<=ultimo.getDate();d++){
+  const data=new Date(ano,mes,d);
+  const r=dados.find(x=>x.data.toDateString()===data.toDateString());
 
-  let classe="day";
-  let pontos="";
-  let info="";
+  let cls="day",info="",pts="";
+  if(r){
+   pts=r.pontos;
+   if(pts>0) cls+=" positive";
+   if(pts<0) cls+=" negative";
 
-  if(registro){
-   pontos=registro.pontos;
-
-   if(pontos>0) classe+=" positive";
-   if(pontos<0) classe+=" negative";
-
-   info+=`Trades: ${registro.trades}<br>`;
-
-   let detalhes=[];
-   if(registro.gain>0) detalhes.push(`Gain: ${registro.gain}`);
-   if(registro.stop>0) detalhes.push(`Stop: ${registro.stop}`);
-   if(registro.zero>0) detalhes.push(`0x0: ${registro.zero}`);
-
-   if(detalhes.length){
-    info+=detalhes.join(" | ");
-   }
+   info+=`Trades: ${r.trades}<br>`;
+   let det=[];
+   if(r.gain>0) det.push(`Gain: ${r.gain}`);
+   if(r.stop>0) det.push(`Stop: ${r.stop}`);
+   if(r.zero>0) det.push(`0x0: ${r.zero}`);
+   info+=det.join(" | ");
   }
 
-  if(dataAtual.toDateString()===hoje.toDateString()){
-   classe+=" today";
-  }
+  if(data.toDateString()===hoje.toDateString()) cls+=" today";
 
   grid.innerHTML+=`
-   <div class="${classe}">
-    <div class="day-number">${dia}</div>
+   <div class="${cls}">
+    <div class="day-number">${d}</div>
 
-    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
-     ${registro ? pontos : ""}
+    <div class="day-points" style="color:${pts<0?'var(--red)':'var(--green)'}">
+     ${r?pts:""}
     </div>
 
     <div class="day-info">${info}</div>
 
-    ${registro ? `
+    ${r?`
      <div class="day-tooltip">
-      ${registro.semana}<br>
-      ATIVO: ${registro.ativo}
-     </div>
-    ` : ""}
-   </div>
-  `;
+      ${r.semana}<br>
+      ATIVO: ${r.ativo}
+     </div>`:""}
+   </div>`;
  }
 }
 
