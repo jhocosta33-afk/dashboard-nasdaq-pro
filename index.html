@@ -8,6 +8,7 @@
 <style>
 :root{
  --bg:#0b1220;
+ --card:#0f172a;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
@@ -18,7 +19,7 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system;
+ font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
 }
 
 body{
@@ -29,17 +30,22 @@ body{
 }
 
 .calendar{
- max-width:1400px;
+ max-width:1200px; /* proporcional ao dashboard */
  margin:auto;
+}
+
+.calendar h2{
+ margin-bottom:18px;
+ font-size:26px;
 }
 
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- text-align:center;
- font-size:14px;
- color:var(--muted);
  margin-bottom:10px;
+ text-align:center;
+ color:var(--muted);
+ font-size:14px;
 }
 
 .calendar-grid{
@@ -50,15 +56,14 @@ body{
 
 .day{
  position:relative;
- height:130px;
  background:rgba(255,255,255,.02);
  border:1px solid var(--border);
  border-radius:16px;
+ min-height:130px;
  padding:10px;
  display:flex;
  flex-direction:column;
- justify-content:flex-end;
- overflow:hidden;
+ transition:.2s;
 }
 
 .day.today{
@@ -67,7 +72,7 @@ body{
 }
 
 .day.positive{
- background:linear-gradient(180deg,rgba(34,197,94,.18),rgba(34,197,94,.02));
+ background:linear-gradient(180deg,rgba(34,197,94,.15),rgba(34,197,94,.02));
 }
 
 .day.negative{
@@ -75,34 +80,38 @@ body{
 }
 
 .day-number{
- position:absolute;
- top:8px;
- left:12px;
  font-size:15px;
  color:var(--muted);
 }
 
 .day-points{
- text-align:center;
- font-size:26px;
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:30px;
  font-weight:800;
- margin-bottom:4px;
 }
 
 .day-info{
  font-size:12px;
  color:var(--muted);
- text-align:center;
  line-height:1.4;
+ text-align:center;
 }
 
-/* BADGE (tooltip) */
+.day-row{
+ display:flex;
+ justify-content:center;
+ gap:10px;
+}
+
 .day-badge{
  position:absolute;
  bottom:8px;
  left:50%;
  transform:translateX(-50%);
- background:rgba(0,0,0,.55);
+ background:rgba(0,0,0,.65);
  border:1px solid var(--border);
  border-radius:10px;
  padding:6px 10px;
@@ -110,11 +119,13 @@ body{
  white-space:nowrap;
  opacity:0;
  pointer-events:none;
- transition:.2s;
+ transition:opacity .2s, transform .2s;
+ z-index:10;
 }
 
 .day:hover .day-badge{
  opacity:1;
+ transform:translateX(-50%) translateY(-4px);
 }
 
 .empty{
@@ -127,6 +138,8 @@ body{
 <body>
 
 <div class="calendar">
+ <h2>Calendário Operacional</h2>
+
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
   <div>Qui</div><div>Sex</div><div>Sáb</div>
@@ -161,8 +174,8 @@ function parseCSV(t){
    gain:+c[5]||0,
    stop:+c[6]||0,
    zero:+c[7]||0,
-   semana:c[8]||"",
-   ativo:c[9]||""
+   semana:c[1],
+   ativo:c[2]
   };
  });
 }
@@ -184,31 +197,25 @@ function montarCalendario(){
 
  for(let dia=1;dia<=ultimoDia.getDate();dia++){
   const dataAtual=new Date(ano,mes,dia);
-  const r=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
+  const registro=dados.find(d=>d.data.toDateString()===dataAtual.toDateString());
 
   let classe="day";
   let pontos="";
   let info="";
   let badge="";
 
-  if(r){
-   pontos=r.pontos;
+  if(registro){
+   pontos=registro.pontos;
    if(pontos>0) classe+=" positive";
    if(pontos<0) classe+=" negative";
 
-   let linha2=[];
-   if(r.gain>0) linha2.push(`Gain: ${r.gain}`);
-   if(r.stop>0) linha2.push(`Stop: ${r.stop}`);
-   if(r.zero>0) linha2.push(`0x0: ${r.zero}`);
+   info+=`<div>Trades: ${registro.trades}</div><div class="day-row">`;
+   if(registro.gain>0) info+=`<span>Gain: ${registro.gain}</span>`;
+   if(registro.stop>0) info+=`<span>Stop: ${registro.stop}</span>`;
+   if(registro.zero>0) info+=`<span>0x0: ${registro.zero}</span>`;
+   info+=`</div>`;
 
-   info = `
-     ${r.trades>0 ? `Trades: ${r.trades}<br>` : ""}
-     ${linha2.join(" | ")}
-   `;
-
-   if(r.semana || r.ativo){
-    badge=`SEMANA ${r.semana} | ATIVO: ${r.ativo}`;
-   }
+   badge=`${registro.semana} | ATIVO: ${registro.ativo}`;
   }
 
   if(dataAtual.toDateString()===hoje.toDateString()){
