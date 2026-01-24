@@ -14,74 +14,68 @@
  --muted:#9ca3af;
  --green:#22c55e;
  --red:#ef4444;
- --blue:#60a5fa;
 }
 
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system;
-}
+*{box-sizing:border-box;font-family:Inter,system-ui;}
 
 body{
  margin:0;
  background:radial-gradient(circle at top,#020617,#000);
  color:var(--text);
- padding:24px;
+ padding:20px;
+ overflow-x:hidden;
 }
 
 .calendar{
- max-width:1200px;
+ max-width:1100px;
  margin:auto;
 }
 
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
+ margin-bottom:8px;
  text-align:center;
  color:var(--muted);
- font-size:14px;
+ font-size:13px;
 }
 
 .calendar-grid{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- gap:12px;
+ gap:10px;
 }
 
 .day{
  position:relative;
  background:linear-gradient(180deg,#052e2b,#020617);
  border:1px solid var(--border);
- border-radius:18px;
- min-height:150px;
- padding:12px;
- padding-bottom:48px; /* espaço reservado pro badge */
- display:flex;
- flex-direction:column;
+ border-radius:16px;
+ min-height:120px; /* 🔽 MENOR */
+ padding:10px;
+ padding-bottom:40px;
+ cursor:pointer;
  transition:.2s;
- overflow:hidden;
 }
 
-.day.positive{
- background:linear-gradient(180deg,#053a32,#020617);
+.day:hover{
+ transform:translateY(-2px);
 }
 
-.day.negative{
- background:linear-gradient(180deg,#3a0505,#020617);
-}
+.day.positive{background:linear-gradient(180deg,#053a32,#020617);}
+.day.negative{background:linear-gradient(180deg,#3a0505,#020617);}
 
 .day-number{
- font-size:16px;
+ font-size:15px; /* 🔼 um pouco maior */
  color:var(--muted);
 }
 
 .day-points{
- flex:1;
+ height:100%;
  display:flex;
  align-items:center;
  justify-content:center;
- font-size:32px;
+ font-size:30px; /* 🔽 menor que antes */
  font-weight:800;
 }
 
@@ -99,28 +93,62 @@ body{
 
 .day-badge{
  position:absolute;
- bottom:10px;
+ bottom:8px;
  left:50%;
- transform:translateX(-50%) translateY(6px);
- background:rgba(0,0,0,.75);
+ transform:translateX(-50%);
+ background:rgba(0,0,0,.7);
  border:1px solid var(--border);
  border-radius:10px;
- padding:6px 10px;
+ padding:5px 10px;
  font-size:11px;
- white-space:nowrap;
  opacity:0;
- pointer-events:none;
  transition:.2s;
+ pointer-events:none;
 }
 
-.day:hover .day-badge{
- opacity:1;
- transform:translateX(-50%) translateY(0);
+.day:hover .day-badge{opacity:1;}
+
+.empty{background:none;border:none;cursor:default}
+
+/* ===== PAINEL LATERAL ===== */
+
+.panel{
+ position:fixed;
+ top:0;
+ right:-360px;
+ width:360px;
+ height:100%;
+ background:linear-gradient(180deg,#020617,#000);
+ border-left:1px solid var(--border);
+ padding:20px;
+ transition:.3s;
+ z-index:10;
 }
 
-.empty{
- background:transparent;
- border:none;
+.panel.open{right:0;}
+
+.panel h2{
+ margin:0 0 10px;
+ font-size:20px;
+}
+
+.panel .value{
+ font-size:34px;
+ font-weight:800;
+ margin:10px 0;
+}
+
+.panel .row{
+ margin:6px 0;
+ color:var(--muted);
+}
+
+.close{
+ position:absolute;
+ top:12px;
+ right:14px;
+ cursor:pointer;
+ color:var(--muted);
 }
 </style>
 </head>
@@ -128,71 +156,66 @@ body{
 <body>
 
 <div class="calendar">
-
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div>
   <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
  </div>
-
  <div class="calendar-grid" id="calendar"></div>
+</div>
+
+<!-- PAINEL -->
+<div class="panel" id="panel">
+ <div class="close" onclick="fechar()">✕</div>
+ <h2 id="pData"></h2>
+ <div class="value" id="pPontos"></div>
+ <div class="row" id="pTrades"></div>
+ <div class="row" id="pGain"></div>
+ <div class="row" id="pStop"></div>
+ <div class="row" id="pZero"></div>
+ <div class="row" id="pSemana"></div>
+ <div class="row" id="pAtivo"></div>
 </div>
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-
 let dados=[];
 
-async function loadCSV(){
- const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- parseCSV(t);
- montar();
-}
-
-function parseCSV(t){
- const rows=t.trim().split(/\r?\n/);
- rows.shift();
- dados=rows.map(r=>{
-  const c=r.split(",");
-  const [d,m,a]=c[0].split("/");
-  return{
-   data:new Date(a,m-1,d),
-   pontos:+c[3],
-   trades:+c[4],
-   gain:+c[5],
-   stop:+c[6],
-   zero:+c[7],
-   semana:c[1],
-   ativo:c[2]
-  };
+fetch(CSV_URL,{cache:"no-store"})
+ .then(r=>r.text())
+ .then(t=>{
+  const l=t.trim().split(/\r?\n/);
+  l.shift();
+  dados=l.map(r=>{
+   const c=r.split(",");
+   const [d,m,a]=c[0].split("/");
+   return{
+    data:new Date(a,m-1,d),
+    pontos:+c[3], trades:+c[4],
+    gain:+c[5], stop:+c[6], zero:+c[7],
+    semana:c[1], ativo:c[2]
+   };
+  });
+  montar();
  });
-}
 
 function montar(){
  const hoje=new Date();
- const ano=hoje.getFullYear();
- const mes=hoje.getMonth();
- const primeiro=new Date(ano,mes,1);
- const ultimo=new Date(ano,mes+1,0);
+ const y=hoje.getFullYear(), m=hoje.getMonth();
+ const p=new Date(y,m,1), u=new Date(y,m+1,0);
+ const g=document.getElementById("calendar");
+ g.innerHTML="";
 
- const grid=document.getElementById("calendar");
- grid.innerHTML="";
+ for(let i=0;i<p.getDay();i++) g.innerHTML+=`<div class="day empty"></div>`;
 
- for(let i=0;i<primeiro.getDay();i++){
-  grid.innerHTML+=`<div class="day empty"></div>`;
- }
-
- for(let d=1;d<=ultimo.getDate();d++){
-  const data=new Date(ano,mes,d);
+ for(let d=1;d<=u.getDate();d++){
+  const data=new Date(y,m,d);
   const r=dados.find(x=>x.data.toDateString()===data.toDateString());
-
-  let classe="day";
-  let pontos="",info="",badge="";
+  let c="day", pts="", info="", badge="";
 
   if(r){
-   pontos=r.pontos;
-   if(pontos>0) classe+=" positive";
-   if(pontos<0) classe+=" negative";
+   pts=r.pontos;
+   if(pts>0) c+=" positive";
+   if(pts<0) c+=" negative";
 
    info+=`<div>Trades: ${r.trades}</div><div class="day-row">`;
    if(r.gain>0) info+=`<span>Gain: ${r.gain}</span>`;
@@ -203,20 +226,32 @@ function montar(){
    badge=`${r.semana} | ATIVO: ${r.ativo}`;
   }
 
-  grid.innerHTML+=`
-   <div class="${classe}">
-    <div class="day-number">${d}</div>
-    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
-     ${pontos ?? ""}
-    </div>
-    <div class="day-info">${info}</div>
-    ${badge?`<div class="day-badge">${badge}</div>`:""}
-   </div>
-  `;
+  g.innerHTML+=`
+  <div class="${c}" onclick='abrir(${JSON.stringify(r)})'>
+   <div class="day-number">${d}</div>
+   <div class="day-points" style="color:${pts<0?'var(--red)':'var(--green)'}">${pts??""}</div>
+   <div class="day-info">${info}</div>
+   ${badge?`<div class="day-badge">${badge}</div>`:""}
+  </div>`;
  }
 }
 
-loadCSV();
+function abrir(r){
+ if(!r) return;
+ panel.classList.add("open");
+ pData.innerText=r.data.toLocaleDateString("pt-BR");
+ pPontos.innerText=r.pontos;
+ pTrades.innerText="Trades: "+r.trades;
+ pGain.innerText=r.gain?`Gain: ${r.gain}`:"";
+ pStop.innerText=r.stop?`Stop: ${r.stop}`:"";
+ pZero.innerText=r.zero?`0x0: ${r.zero}`:"";
+ pSemana.innerText=r.semana;
+ pAtivo.innerText="Ativo: "+r.ativo;
+}
+
+function fechar(){
+ panel.classList.remove("open");
+}
 </script>
 
 </body>
