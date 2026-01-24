@@ -34,12 +34,6 @@ body{
  margin:auto;
 }
 
-.calendar-title{
- font-size:26px;
- font-weight:800;
- margin-bottom:18px;
-}
-
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
@@ -60,11 +54,15 @@ body{
  background:rgba(255,255,255,.02);
  border:1px solid var(--border);
  border-radius:16px;
- min-height:140px;
+ min-height:145px;
  padding:12px 10px;
  display:flex;
  flex-direction:column;
  transition:.2s;
+}
+
+.day:hover{
+ transform:translateY(-2px);
 }
 
 .day.today{
@@ -73,19 +71,34 @@ body{
 }
 
 .day.positive{
- background:linear-gradient(180deg,rgba(34,197,94,.15),rgba(34,197,94,.02));
+ background:linear-gradient(180deg,rgba(34,197,94,.18),rgba(34,197,94,.03));
 }
 
 .day.negative{
- background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(239,68,68,.02));
+ background:linear-gradient(180deg,rgba(239,68,68,.2),rgba(239,68,68,.03));
 }
 
+/* 🔹 DIA (um pouco maior) */
 .day-number{
  position:absolute;
  top:8px;
- left:10px;
- font-size:13px;
+ left:12px;
+ font-size:14px;
+ font-weight:600;
  color:var(--muted);
+}
+
+/* 🔹 SEMANA / ATIVO (novo local) */
+.day-badge{
+ text-align:center;
+ font-size:11px;
+ color:#cbd5f5;
+ background:rgba(0,0,0,.35);
+ border:1px solid var(--border);
+ border-radius:10px;
+ padding:4px 8px;
+ margin:8px auto 6px;
+ width:fit-content;
 }
 
 .day-points{
@@ -102,29 +115,7 @@ body{
  color:var(--muted);
  line-height:1.4;
  text-align:center;
-}
-
-/* 🔹 TOOLTIP CORRIGIDO */
-.tooltip{
- position:absolute;
- bottom:100%;
- left:50%;
- transform:translateX(-50%) translateY(-8px);
- background:#020617;
- border:1px solid var(--border);
- border-radius:12px;
- padding:6px 12px;
- font-size:12px;
- white-space:nowrap;
- opacity:0;
- pointer-events:none;
- transition:.15s;
- z-index:20;
-}
-
-.day:hover .tooltip{
- opacity:1;
- transform:translateX(-50%) translateY(-14px);
+ padding-bottom:4px;
 }
 
 .empty{
@@ -137,7 +128,6 @@ body{
 <body>
 
 <div class="calendar">
- <div class="calendar-title">Calendário Operacional</div>
 
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
@@ -201,7 +191,7 @@ function montarCalendario(){
   let classe="day";
   let pontos="";
   let info="";
-  let tooltip="";
+  let badge="";
 
   if(r){
    pontos=r.pontos;
@@ -213,7 +203,7 @@ function montarCalendario(){
    if(r.stop>0) info+=`Stop: ${r.stop}<br>`;
    if(r.zero>0) info+=`0x0: ${r.zero}<br>`;
 
-   tooltip=`${r.semana} | ATIVO: ${r.ativo}`;
+   badge=`SEMANA ${r.semana} | ATIVO: ${r.ativo}`;
   }
 
   if(dataAtual.toDateString()===hoje.toDateString()){
@@ -223,11 +213,11 @@ function montarCalendario(){
   grid.innerHTML+=`
    <div class="${classe}">
     <div class="day-number">${dia}</div>
+    ${badge?`<div class="day-badge">${badge}</div>`:""}
     <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
      ${r ? pontos : ""}
     </div>
     <div class="day-info">${info}</div>
-    ${tooltip?`<div class="tooltip">${tooltip}</div>`:""}
    </div>
   `;
  }
