@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Dashboard NASDAQ PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -22,27 +21,31 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+ font-family:Inter,system-ui,-apple-system;
 }
 
 body{
  margin:0;
- background:
-  radial-gradient(circle at top,
-   #334155 0%,
-   #1e293b 35%,
-   #020617 75%);
+ background:radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);
  color:var(--text);
 }
 
 .container{
  max-width:1600px;
  margin:auto;
- padding:24px;
+ padding:clamp(16px,2vw,28px);
 }
 
 /* HEADER */
-.header img{height:84px}
+.header{
+ display:flex;
+ flex-direction:column;
+ align-items:flex-start;
+ margin-bottom:36px;
+}
+
+.header img{height:84px;}
+
 .dashboard-title{
  margin-top:20px;
  font-size:22px;
@@ -55,8 +58,8 @@ body{
 .filters{
  display:flex;
  gap:12px;
- flex-wrap:wrap;
  margin-bottom:24px;
+ flex-wrap:wrap;
 }
 
 select{
@@ -65,6 +68,7 @@ select{
  border:1px solid var(--border);
  border-radius:14px;
  padding:12px 16px;
+ font-size:15px;
  width:220px;
 }
 
@@ -95,7 +99,7 @@ select{
  font-size:28px;
 }
 
-/* GRÁFICOS */
+/* CARDS */
 .cards{
  display:grid;
  grid-template-columns:1.3fr 1fr;
@@ -108,53 +112,105 @@ select{
  border:1px solid var(--border);
  border-radius:22px;
  padding:18px;
+ height:420px;
+ display:flex;
+ flex-direction:column;
 }
 
 .card strong{
+ margin-bottom:12px;
  font-size:18px;
 }
 
-.chart-wrap{
- height:360px;
+.chart-wrap{flex:1;position:relative;}
+canvas{width:100%!important;height:100%!important;}
+
+/* TABELA */
+.table-wrap{overflow-x:auto;}
+table{width:100%;min-width:900px;border-collapse:collapse;}
+
+thead{
+ background:linear-gradient(180deg,#020b2a,#020617);
 }
 
-/* CALENDÁRIO */
+th{
+ color:var(--blue);
+ font-weight:700;
+ font-size:16px;
+ padding:14px 10px;
+ text-align:center;
+}
+
+td{
+ padding:12px 10px;
+ border-bottom:1px solid var(--border);
+ text-align:center;
+}
+
+thead th:first-child,
+tbody td:first-child{
+ text-align:left;
+ padding-left:16px;
+}
+
+tr.total{
+ background:rgba(34,197,94,.08);
+ font-weight:700;
+}
+
+/* ===== CALENDÁRIO ===== */
 .calendar{
+ margin-top:32px;
+}
+
+.calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- gap:10px;
- margin-top:16px;
+ margin-bottom:10px;
+ text-align:center;
+ color:var(--muted);
+ font-size:14px;
+}
+
+.calendar-grid{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ gap:12px;
 }
 
 .day{
- padding:16px;
- border-radius:14px;
- background:#020617;
+ background:linear-gradient(180deg,#020617,#020617);
  border:1px solid var(--border);
- text-align:center;
- cursor:pointer;
-}
-
-.day.active{
- background:rgba(34,197,94,.2);
- border-color:var(--green);
-}
-
-/* TABELA */
-table{
- width:100%;
- border-collapse:collapse;
- margin-top:16px;
-}
-
-th,td{
+ border-radius:14px;
+ min-height:90px;
  padding:10px;
- text-align:center;
- border-bottom:1px solid var(--border);
+ display:flex;
+ flex-direction:column;
+ justify-content:space-between;
 }
 
-thead th{
- color:var(--blue);
+.day.positive{
+ background:linear-gradient(180deg,#053a32,#020617);
+}
+
+.day.negative{
+ background:linear-gradient(180deg,#3a0505,#020617);
+}
+
+.day-number{
+ font-size:14px;
+ color:var(--muted);
+}
+
+.day-points{
+ text-align:center;
+ font-size:20px;
+ font-weight:700;
+}
+
+.empty{
+ background:transparent;
+ border:none;
 }
 </style>
 </head>
@@ -164,7 +220,7 @@ thead th{
 
 <div class="header">
  <img src="logo.png">
- <div class="dashboard-title">DASHBOARD</div>
+ <span class="dashboard-title">DASHBOARD</span>
 </div>
 
 <div class="filters">
@@ -193,101 +249,76 @@ thead th{
  </div>
 </div>
 
-<div class="card">
- <strong>📅 Calendário Operacional</strong>
- <div id="calendar" class="calendar"></div>
+<div class="card" style="height:auto">
+ <strong>Tabela Operacional</strong>
+ <div class="table-wrap">
+  <table>
+   <thead>
+    <tr>
+     <th>Dia</th><th>Pontos</th><th>Trades</th>
+     <th>Gain</th><th>Stop</th><th>0x0</th>
+     <th>Ativo</th><th>Semana</th>
+    </tr>
+   </thead>
+   <tbody id="tbody"></tbody>
+  </table>
+ </div>
 </div>
 
-<div class="card">
- <strong>Tabela Operacional</strong>
- <table>
-  <thead>
-   <tr>
-    <th>Dia</th><th>Pontos</th><th>Trades</th>
-    <th>Gain</th><th>Stop</th><th>0x0</th>
-   </tr>
-  </thead>
-  <tbody id="tbody"></tbody>
- </table>
+<!-- CALENDÁRIO -->
+<div class="card calendar">
+ <strong>📅 Calendário Operacional</strong>
+ <div class="calendar-header">
+  <div>Dom</div><div>Seg</div><div>Ter</div>
+  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+ </div>
+ <div class="calendar-grid" id="calendar"></div>
 </div>
 
 </div>
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-
 let data=[],chartAcumulado,chartBar;
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
- const rows=t.trim().split(/\r?\n/);
- rows.shift();
+ const rows=t.trim().split(/\r?\n/); rows.shift();
  data=rows.map(r=>{
   const c=r.split(",");
+  const [d,m,a]=c[0].split("/");
   return{
-   dia:c[0],
-   pontos:+c[3],
-   trades:+c[4],
-   gain:+c[5],
-   stop:+c[6],
-   zero:+c[7]
+   dia:c[0],data:new Date(a,m-1,d),
+   semana:c[1],ativo:c[2],
+   pontos:+c[3]||0,trades:+c[4]||0,
+   gain:+c[5]||0,stop:+c[6]||0,zero:+c[7]||0
   };
  });
- atualizar(data);
- renderCalendar();
+ montarCalendario();
 }
-
-function atualizar(f){
- let saldo=0,acc=[0],labels=[];
- f.forEach(d=>{saldo+=d.pontos;acc.push(saldo);labels.push(d.dia);});
- if(chartAcumulado)chartAcumulado.destroy();
- if(chartBar)chartBar.destroy();
-
- chartAcumulado=new Chart(chartAcumuladoEl,{
-  type:"line",
-  data:{labels:["Início",...labels],datasets:[{data:acc,borderColor:"#22c55e",fill:true}]},
-  options:{plugins:{legend:{display:false}}}
- });
-
- chartBar=new Chart(chartBarEl,{
-  type:"bar",
-  data:{labels:["Gain","Stop","0x0"],
-   datasets:[{data:[
-    f.reduce((a,b)=>a+b.gain,0),
-    f.reduce((a,b)=>a+b.stop,0),
-    f.reduce((a,b)=>a+b.zero,0)
-   ],backgroundColor:["#22c55e","#ef4444","#facc15"]}]},
-  options:{plugins:{legend:{display:false}}}
- });
-
- tbody.innerHTML="";
- f.forEach(d=>{
-  tbody.innerHTML+=`<tr>
-   <td>${d.dia}</td><td>${d.pontos}</td><td>${d.trades}</td>
-   <td>${d.gain}</td><td>${d.stop}</td><td>${d.zero}</td>
-  </tr>`;
- });
+function montarCalendario(){
+ const hoje=new Date(),ano=hoje.getFullYear(),mes=hoje.getMonth();
+ const primeiro=new Date(ano,mes,1);
+ const ultimo=new Date(ano,mes+1,0);
+ const grid=document.getElementById("calendar");
+ grid.innerHTML="";
+ for(let i=0;i<primeiro.getDay();i++) grid.innerHTML+=`<div class="empty"></div>`;
+ for(let d=1;d<=ultimo.getDate();d++){
+  const r=data.find(x=>x.data.getDate()===d && x.data.getMonth()===mes);
+  let cls="day",pts="";
+  if(r){
+   pts=r.pontos;
+   if(pts>0) cls+=" positive";
+   if(pts<0) cls+=" negative";
+  }
+  grid.innerHTML+=`
+   <div class="${cls}">
+    <div class="day-number">${d}</div>
+    <div class="day-points">${pts}</div>
+   </div>`;
+ }
 }
-
-function renderCalendar(){
- calendar.innerHTML="";
- data.forEach(d=>{
-  const el=document.createElement("div");
-  el.className="day";
-  el.textContent=d.dia.split("/")[0];
-  el.onclick=()=>{
-   document.querySelectorAll(".day").forEach(x=>x.classList.remove("active"));
-   el.classList.add("active");
-   atualizar(data.filter(x=>x.dia===d.dia));
-  };
-  calendar.appendChild(el);
- });
-}
-
-const chartAcumuladoEl=document.getElementById("chartAcumulado");
-const chartBarEl=document.getElementById("chartBar");
-
 loadCSV();
 </script>
 </body>
