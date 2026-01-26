@@ -2,211 +2,221 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Calendário Trader</title>
+<title>Calendário Operacional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-    margin: 0;
-    padding: 20px;
-    background: linear-gradient(180deg, #020617, #020617);
-    font-family: Arial, sans-serif;
-    color: #e5e7eb;
+:root{
+ --bg:#020617;
+ --card:#020617;
+ --border:rgba(255,255,255,.08);
+ --text:#e5e7eb;
+ --muted:#9ca3af;
+ --green:#22c55e;
+ --red:#ef4444;
+ --blue:#60a5fa;
 }
 
-h2 {
-    margin-bottom: 15px;
+*{
+ box-sizing:border-box;
+ font-family:Inter,system-ui,-apple-system;
 }
 
-/* CABEÇALHO DIAS DA SEMANA */
-.weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    max-width: 900px;
-    margin-bottom: 8px;
+body{
+ margin:0;
+ background:radial-gradient(circle at top,#020617,#000);
+ color:var(--text);
+ padding:24px;
 }
 
-.weekdays div {
-    text-align: center;
-    font-size: 13px;
-    color: #94a3b8;
+.calendar{
+ max-width:1200px;
+ margin:auto;
 }
 
-/* CALENDÁRIO */
-.calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    max-width: 900px;
+.calendar-header{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ margin-bottom:10px;
+ text-align:center;
+ color:var(--muted);
+ font-size:14px;
 }
 
-/* DIA */
-.day {
-    height: 120px;
-    background: radial-gradient(circle at top, #064e3b, #020617);
-    border-radius: 14px;
-    padding: 10px;
-    cursor: pointer;
-    position: relative;
+.calendar-grid{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ gap:12px;
 }
 
-.day.empty {
-    background: transparent;
-    cursor: default;
+.day{
+ position:relative;
+ background:linear-gradient(180deg,#052e2b,#020617);
+ border:1px solid var(--border);
+ border-radius:18px;
+ min-height:150px;
+ padding:12px;
+ padding-bottom:48px; /* espaço reservado pro badge */
+ display:flex;
+ flex-direction:column;
+ transition:.2s;
+ overflow:hidden;
 }
 
-/* NÚMERO DO DIA */
-.day-number {
-    font-size: 18px;
-    font-weight: bold;
+.day.positive{
+ background:linear-gradient(180deg,#053a32,#020617);
 }
 
-/* PAINEL LATERAL */
-.side-panel {
-    position: fixed;
-    top: 0;
-    right: -380px;
-    width: 360px;
-    height: 100%;
-    background: #020617;
-    border-left: 1px solid #1e293b;
-    padding: 20px;
-    transition: right 0.3s ease;
+.day.negative{
+ background:linear-gradient(180deg,#3a0505,#020617);
 }
 
-.side-panel.open {
-    right: 0;
+.day-number{
+ font-size:16px;
+ color:var(--muted);
 }
 
-.close-btn {
-    float: right;
-    cursor: pointer;
-    font-size: 20px;
+.day-points{
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:32px;
+ font-weight:800;
 }
 
-/* CONTEÚDO PAINEL */
-.panel-title {
-    font-size: 22px;
-    margin-bottom: 10px;
+.day-info{
+ font-size:12px;
+ color:var(--muted);
+ text-align:center;
 }
 
-.highlight {
-    font-size: 32px;
-    font-weight: bold;
-    margin: 10px 0;
+.day-row{
+ display:flex;
+ justify-content:center;
+ gap:12px;
 }
 
-.row {
-    display: flex;
-    gap: 10px;
-    margin: 10px 0;
+.day-badge{
+ position:absolute;
+ bottom:10px;
+ left:50%;
+ transform:translateX(-50%) translateY(6px);
+ background:rgba(0,0,0,.75);
+ border:1px solid var(--border);
+ border-radius:10px;
+ padding:6px 10px;
+ font-size:11px;
+ white-space:nowrap;
+ opacity:0;
+ pointer-events:none;
+ transition:.2s;
 }
 
-.badge {
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 14px;
+.day:hover .day-badge{
+ opacity:1;
+ transform:translateX(-50%) translateY(0);
 }
 
-.gain { background: #065f46; }
-.stop { background: #7f1d1d; }
-.zero { background: #374151; }
-
-.label {
-    color: #94a3b8;
-    font-size: 13px;
-    margin-top: 15px;
+.empty{
+ background:transparent;
+ border:none;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Calendário Trader</h2>
-
-<div class="weekdays">
-    <div>Dom</div><div>Seg</div><div>Ter</div>
-    <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-</div>
-
 <div class="calendar">
 
-    <!-- ESPAÇOS VAZIOS (ex: mês começa na terça) -->
-    <div class="day empty"></div>
-    <div class="day empty"></div>
+ <div class="calendar-header">
+  <div>Dom</div><div>Seg</div><div>Ter</div>
+  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+ </div>
 
-    <!-- DIA 10 -->
-    <div class="day" data-info='{
-        "date":"10/01/2026",
-        "points":"+120",
-        "trades":4,
-        "gain":3,
-        "stop":1,
-        "zero":0
-    }'>
-        <div class="day-number">10</div>
-    </div>
-
-    <!-- DIA 11 -->
-    <div class="day" data-info='{
-        "date":"11/01/2026",
-        "points":"-40",
-        "trades":2,
-        "gain":0,
-        "stop":2,
-        "zero":0
-    }'>
-        <div class="day-number">11</div>
-    </div>
-
-    <!-- DIA 12 -->
-    <div class="day" data-info='{}'>
-        <div class="day-number">12</div>
-    </div>
-
-</div>
-
-<!-- PAINEL -->
-<div class="side-panel" id="panel">
-    <span class="close-btn" onclick="closePanel()">✖</span>
-    <div id="panelContent"></div>
+ <div class="calendar-grid" id="calendar"></div>
 </div>
 
 <script>
-const panel = document.getElementById("panel");
-const panelContent = document.getElementById("panelContent");
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
-document.querySelectorAll(".day").forEach(day => {
-    day.addEventListener("click", () => {
-        if (day.classList.contains("empty")) return;
+let dados=[];
 
-        const data = JSON.parse(day.dataset.info || "{}");
-        if (Object.keys(data).length === 0) return;
-
-        let html = `<div class="panel-title">${data.date}</div>`;
-
-        if (data.points) {
-            html += `<div class="highlight">${data.points} pts</div>`;
-        }
-
-        if (data.trades) {
-            html += `<div>Trades: ${data.trades}</div>`;
-        }
-
-        html += `<div class="row">`;
-        if (data.gain) html += `<div class="badge gain">Gain ${data.gain}</div>`;
-        if (data.stop) html += `<div class="badge stop">Stop ${data.stop}</div>`;
-        if (data.zero) html += `<div class="badge zero">0x0 ${data.zero}</div>`;
-        html += `</div>`;
-
-        panelContent.innerHTML = html;
-        panel.classList.add("open");
-    });
-});
-
-function closePanel() {
-    panel.classList.remove("open");
+async function loadCSV(){
+ const r=await fetch(CSV_URL,{cache:"no-store"});
+ const t=await r.text();
+ parseCSV(t);
+ montar();
 }
+
+function parseCSV(t){
+ const rows=t.trim().split(/\r?\n/);
+ rows.shift();
+ dados=rows.map(r=>{
+  const c=r.split(",");
+  const [d,m,a]=c[0].split("/");
+  return{
+   data:new Date(a,m-1,d),
+   pontos:+c[3],
+   trades:+c[4],
+   gain:+c[5],
+   stop:+c[6],
+   zero:+c[7],
+   semana:c[1],
+   ativo:c[2]
+  };
+ });
+}
+
+function montar(){
+ const hoje=new Date();
+ const ano=hoje.getFullYear();
+ const mes=hoje.getMonth();
+ const primeiro=new Date(ano,mes,1);
+ const ultimo=new Date(ano,mes+1,0);
+
+ const grid=document.getElementById("calendar");
+ grid.innerHTML="";
+
+ for(let i=0;i<primeiro.getDay();i++){
+  grid.innerHTML+=`<div class="day empty"></div>`;
+ }
+
+ for(let d=1;d<=ultimo.getDate();d++){
+  const data=new Date(ano,mes,d);
+  const r=dados.find(x=>x.data.toDateString()===data.toDateString());
+
+  let classe="day";
+  let pontos="",info="",badge="";
+
+  if(r){
+   pontos=r.pontos;
+   if(pontos>0) classe+=" positive";
+   if(pontos<0) classe+=" negative";
+
+   info+=`<div>Trades: ${r.trades}</div><div class="day-row">`;
+   if(r.gain>0) info+=`<span>Gain: ${r.gain}</span>`;
+   if(r.stop>0) info+=`<span>Stop: ${r.stop}</span>`;
+   if(r.zero>0) info+=`<span>0x0: ${r.zero}</span>`;
+   info+=`</div>`;
+
+   badge=`${r.semana} | ATIVO: ${r.ativo}`;
+  }
+
+  grid.innerHTML+=`
+   <div class="${classe}">
+    <div class="day-number">${d}</div>
+    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
+     ${pontos ?? ""}
+    </div>
+    <div class="day-info">${info}</div>
+    ${badge?`<div class="day-badge">${badge}</div>`:""}
+   </div>
+  `;
+ }
+}
+
+loadCSV();
 </script>
 
 </body>
