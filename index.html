@@ -2,42 +2,139 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Calendário Trader</title>
+<title>Dashboard NASDAQ PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
  --bg:#020617;
- --card:#0b1220;
+ --card:#050b1a;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
  --muted:#9ca3af;
  --green:#22c55e;
  --red:#ef4444;
- --blue:#60a5fa;
+ --yellow:#facc15;
+ --blue:#93c5fd;
 }
 
-*{box-sizing:border-box;font-family:Inter,system-ui;}
+*{
+ box-sizing:border-box;
+ font-family:Inter,system-ui,-apple-system;
+}
 
 body{
  margin:0;
- background:linear-gradient(180deg,#020617,#020617);
+ background:
+  radial-gradient(circle at top,
+   #334155 0%,
+   #1e293b 35%,
+   #020617 75%);
  color:var(--text);
- padding:24px;
 }
 
-.calendar{
- max-width:1100px;
+.container{
+ max-width:1600px;
  margin:auto;
+ padding:clamp(16px,2vw,28px);
 }
 
+/* HEADER */
+.header{
+ display:flex;
+ flex-direction:column;
+ margin-bottom:36px;
+}
+
+.header img{height:84px;}
+.dashboard-title{
+ margin-top:20px;
+ font-size:22px;
+ letter-spacing:4px;
+ font-weight:900;
+ color:var(--blue);
+}
+
+/* FILTROS */
+.filters{
+ display:flex;
+ gap:12px;
+ margin-bottom:24px;
+ flex-wrap:wrap;
+}
+
+select{
+ background:var(--card);
+ color:var(--text);
+ border:1px solid var(--border);
+ border-radius:14px;
+ padding:12px 16px;
+ font-size:15px;
+ width:220px;
+}
+
+/* KPIs */
+.kpis{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+ gap:16px;
+ margin-bottom:28px;
+}
+
+.kpi{
+ background:linear-gradient(180deg,#050b1a,#030818);
+ border:1px solid var(--border);
+ border-radius:18px;
+ padding:18px;
+}
+
+.kpi span{
+ color:var(--muted);
+ font-size:13px;
+ text-transform:uppercase;
+}
+
+.kpi strong{
+ display:block;
+ margin-top:8px;
+ font-size:28px;
+}
+
+/* CARDS */
+.cards{
+ display:grid;
+ grid-template-columns:1.3fr 1fr;
+ gap:16px;
+ margin-bottom:24px;
+}
+
+.card{
+ background:linear-gradient(180deg,#050b1a,#030818);
+ border:1px solid var(--border);
+ border-radius:22px;
+ padding:18px;
+ height:420px;
+ display:flex;
+ flex-direction:column;
+}
+
+.card strong{
+ margin-bottom:12px;
+ font-size:18px;
+}
+
+.chart-wrap{flex:1;position:relative;}
+canvas{width:100%!important;height:100%!important;}
+
+/* CALENDÁRIO */
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
+ margin-bottom:10px;
  text-align:center;
- font-size:13px;
  color:var(--muted);
- margin-bottom:12px;
+ font-size:14px;
 }
 
 .calendar-grid{
@@ -48,27 +145,22 @@ body{
 
 .day{
  position:relative;
- background:linear-gradient(180deg,#0b1220,#020617);
+ background:linear-gradient(180deg,#052e2b,#020617);
  border:1px solid var(--border);
- border-radius:14px;
- height:120px;
- padding:10px;
- cursor:pointer;
- transition:.2s;
+ border-radius:18px;
+ min-height:140px;
+ padding:12px;
+ padding-bottom:42px;
+ display:flex;
+ flex-direction:column;
 }
 
-.day:hover{
- border-color:var(--blue);
-}
+.day.positive{background:linear-gradient(180deg,#053a32,#020617);}
+.day.negative{background:linear-gradient(180deg,#3a0505,#020617);}
 
-.day-number{
- font-size:15px;
- color:var(--muted);
-}
-
+.day-number{font-size:15px;color:var(--muted);}
 .day-points{
- position:absolute;
- inset:0;
+ flex:1;
  display:flex;
  align-items:center;
  justify-content:center;
@@ -76,89 +168,92 @@ body{
  font-weight:800;
 }
 
-.day.positive .day-points{color:var(--green);}
-.day.negative .day-points{color:var(--red);}
-
-.empty{
- background:transparent;
- border:none;
- cursor:default;
-}
-
-/* OVERLAY */
-.overlay{
- position:fixed;
- top:0;right:0;
- width:380px;
- height:100%;
- background:#020617;
- border-left:1px solid var(--border);
- padding:20px;
- transform:translateX(100%);
- transition:.3s;
- z-index:10;
-}
-
-.overlay.open{transform:translateX(0);}
-
-.overlay h2{
- margin:0 0 10px;
- font-size:18px;
-}
-
-.close{
- position:absolute;
- top:12px;
- right:14px;
- cursor:pointer;
+.day-info{
+ font-size:11px;
  color:var(--muted);
+ text-align:center;
 }
 
-.section{
- margin-top:16px;
-}
-
-.stats{
- font-size:14px;
- line-height:1.5;
-}
-
-.checklist label{
+.day-row{
  display:flex;
- gap:8px;
- margin:6px 0;
- font-size:14px;
+ justify-content:center;
+ gap:10px;
 }
 
-textarea{
- width:100%;
- min-height:90px;
- background:#0b1220;
+.day-badge{
+ position:absolute;
+ bottom:10px;
+ left:50%;
+ transform:translateX(-50%);
+ background:rgba(0,0,0,.75);
  border:1px solid var(--border);
  border-radius:10px;
- color:var(--text);
- padding:10px;
- resize:none;
+ padding:6px 10px;
+ font-size:11px;
+ white-space:nowrap;
 }
 
-button{
- margin-top:10px;
- width:100%;
- padding:10px;
- border:none;
- border-radius:10px;
- background:var(--blue);
- color:#020617;
+.empty{background:transparent;border:none}
+
+/* TABELA */
+.table-wrap{overflow-x:auto;}
+table{width:100%;min-width:900px;border-collapse:collapse;}
+thead{background:linear-gradient(180deg,#020b2a,#020617);}
+th{
+ color:var(--blue);
  font-weight:700;
- cursor:pointer;
+ font-size:16px;
+ padding:14px 10px;
+ text-align:center;
 }
+td{
+ padding:12px 10px;
+ border-bottom:1px solid var(--border);
+ text-align:center;
+}
+thead th:first-child,
+tbody td:first-child{text-align:left;padding-left:16px;}
+tr.total{background:rgba(34,197,94,.08);font-weight:700;}
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<div class="calendar">
- <h1>Calendário Trader</h1>
+<div class="header">
+ <img src="logo.png">
+ <span class="dashboard-title">DASHBOARD</span>
+</div>
+
+<div class="filters">
+ <select id="filtroAno"></select>
+ <select id="filtroMes"></select>
+ <select id="filtroSemana"></select>
+</div>
+
+<div class="kpis">
+ <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
+ <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
+ <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+ <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+ <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
+ <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+</div>
+
+<div class="cards">
+ <div class="card">
+  <strong>📈 Evolução Acumulada</strong>
+  <div class="chart-wrap"><canvas id="chartAcumulado"></canvas></div>
+ </div>
+
+ <div class="card">
+  <strong>📊 Gains x Stops</strong>
+  <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
+ </div>
+</div>
+
+<div class="card" style="height:auto">
+ <strong>📅 Calendário Operacional</strong>
 
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div>
@@ -168,101 +263,117 @@ button{
  <div class="calendar-grid" id="calendar"></div>
 </div>
 
-<div class="overlay" id="overlay">
- <div class="close" onclick="closeOverlay()">✕</div>
- <h2 id="overlay-date"></h2>
-
- <div class="section stats" id="overlay-stats"></div>
-
- <div class="section checklist">
-  <strong>Checklist</strong>
-  <label><input type="checkbox" data-tag="plano"> Seguiu o plano</label>
-  <label><input type="checkbox" data-tag="regra"> Quebrou regra</label>
-  <label><input type="checkbox" data-tag="emocional"> Emocional afetou</label>
-  <label><input type="checkbox" data-tag="overtrade"> Overtrade</label>
- </div>
-
- <div class="section">
-  <strong>Observações</strong>
-  <textarea id="obs"></textarea>
-  <button onclick="salvarObs()">Salvar</button>
+<div class="card" style="height:auto">
+ <strong>Tabela Operacional</strong>
+ <div class="table-wrap">
+  <table>
+   <thead>
+    <tr>
+     <th>Dia</th><th>Pontos</th><th>Trades</th>
+     <th>Gain</th><th>Stop</th><th>0x0</th>
+     <th>Ativo</th><th>Semana</th>
+    </tr>
+   </thead>
+   <tbody id="tbody"></tbody>
+  </table>
  </div>
 </div>
 
+</div>
+
 <script>
-const grid=document.getElementById("calendar");
-const overlay=document.getElementById("overlay");
-let selectedDate="";
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
 
-const dados={
- "2024-01-10":{pontos:73,trades:1,gain:1},
- "2024-01-11":{pontos:-27,trades:2,stop:2},
- "2024-01-12":{pontos:55,trades:1,gain:1}
-};
+let data=[],chartAcumulado,chartBar;
 
-function montar(){
+async function loadCSV(){
+ const r=await fetch(CSV_URL,{cache:"no-store"});
+ const t=await r.text();
+ const rows=t.trim().split(/\r?\n/);
+ rows.shift();
+ data=rows.map(r=>{
+  const c=r.split(",");
+  const [d,m,a]=c[0].split("/");
+  return{
+   dia:c[0], semana:c[1], ativo:c[2],
+   ano:a, mes:m, diaNum:+d,
+   pontos:+c[3]||0, trades:+c[4]||0,
+   gain:+c[5]||0, stop:+c[6]||0, zero:+c[7]||0,
+   date:new Date(a,m-1,d)
+  };
+ });
+ initFiltros();
+}
+
+function initFiltros(){
+ const anos=[...new Set(data.map(d=>d.ano))];
+ filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+ filtroAno.onchange=()=>{initMeses();atualizar();}
+ initMeses();
+}
+
+function initMeses(){
+ const meses=[...new Set(data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
+ filtroMes.innerHTML='<option value="ALL">Todos</option>'+
+  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+ filtroMes.onchange=()=>{initSemanas();atualizar();}
+ initSemanas();
+}
+
+function initSemanas(){
+ const semanas=[...new Set(data.map(d=>d.semana))];
+ filtroSemana.innerHTML='<option value="ALL">Todas</option>'+
+  semanas.map(s=>`<option>${s}</option>`).join("");
+ filtroSemana.onchange=atualizar;
+ atualizar();
+}
+
+function atualizar(){
+ const f=data.filter(d=>
+  d.ano===filtroAno.value &&
+  (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
+  (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
+ );
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
+ renderCalendario(f);
+}
+
+/* CALENDÁRIO */
+function renderCalendario(f){
  const hoje=new Date();
- const ano=hoje.getFullYear();
- const mes=hoje.getMonth();
- const primeiro=new Date(ano,mes,1).getDay();
- const total=new Date(ano,mes+1,0).getDate();
-
- for(let i=0;i<primeiro;i++){
-  grid.innerHTML+=`<div class="day empty"></div>`;
- }
-
- for(let d=1;d<=total;d++){
-  const data=`${ano}-${String(mes+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-  const r=dados[data];
-  let cls="day";
+ const ano=+filtroAno.value;
+ const mes=filtroMes.value==="ALL"?hoje.getMonth():+filtroMes.value-1;
+ const primeiro=new Date(ano,mes,1);
+ const ultimo=new Date(ano,mes+1,0);
+ calendar.innerHTML="";
+ for(let i=0;i<primeiro.getDay();i++) calendar.innerHTML+=`<div class="day empty"></div>`;
+ for(let d=1;d<=ultimo.getDate();d++){
+  const r=f.find(x=>x.diaNum===d && x.mes==String(mes+1).padStart(2,"0"));
+  let cls="day",p="",info="",badge="";
   if(r){
-   if(r.pontos>0)cls+=" positive";
-   if(r.pontos<0)cls+=" negative";
+   p=r.pontos;
+   if(p>0) cls+=" positive";
+   if(p<0) cls+=" negative";
+   info=`<div>Trades ${r.trades}</div>
+   <div class="day-row">
+    ${r.gain?`<span>G ${r.gain}</span>`:""}
+    ${r.stop?`<span>S ${r.stop}</span>`:""}
+    ${r.zero?`<span>0x0 ${r.zero}</span>`:""}
+   </div>`;
+   badge=`${r.semana} | ${r.ativo}`;
   }
-  grid.innerHTML+=`
-   <div class="${cls}" onclick="openOverlay('${data}')">
+  calendar.innerHTML+=`
+   <div class="${cls}">
     <div class="day-number">${d}</div>
-    <div class="day-points">${r?r.pontos:""}</div>
+    <div class="day-points" style="color:${p<0?'var(--red)':'var(--green)'}">${p||""}</div>
+    <div class="day-info">${info}</div>
+    ${badge?`<div class="day-badge">${badge}</div>`:""}
    </div>`;
  }
 }
-
-function openOverlay(data){
- selectedDate=data;
- overlay.classList.add("open");
- document.getElementById("overlay-date").innerText=data;
-
- const r=dados[data]||{};
- let html="";
- if(r.trades)html+=`Trades: ${r.trades}<br>`;
- if(r.gain)html+=`Gain: ${r.gain} `;
- if(r.stop)html+=`Stop: ${r.stop}`;
-
- document.getElementById("overlay-stats").innerHTML=html||"Sem dados";
-
- const saved=JSON.parse(localStorage.getItem("obs-"+data)||"{}");
- document.getElementById("obs").value=saved.text||"";
- document.querySelectorAll(".checklist input").forEach(c=>{
-  c.checked=saved[c.dataset.tag]||false;
- });
-}
-
-function closeOverlay(){
- overlay.classList.remove("open");
-}
-
-function salvarObs(){
- const data={
-  text:document.getElementById("obs").value
- };
- document.querySelectorAll(".checklist input").forEach(c=>{
-  data[c.dataset.tag]=c.checked;
- });
- localStorage.setItem("obs-"+selectedDate,JSON.stringify(data));
-}
-
-montar();
 </script>
-
 </body>
 </html>
