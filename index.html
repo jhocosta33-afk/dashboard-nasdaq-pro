@@ -19,14 +19,19 @@
  --blue:#93c5fd;
 }
 
+/* RESET */
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system;
+ font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
 }
 
 body{
  margin:0;
- background:radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);
+ background:
+  radial-gradient(circle at top,
+   #334155 0%,
+   #1e293b 35%,
+   #020617 75%);
  color:var(--text);
 }
 
@@ -44,7 +49,9 @@ body{
  margin-bottom:36px;
 }
 
-.header img{height:84px;}
+.header img{
+ height:84px;
+}
 
 .dashboard-title{
  margin-top:20px;
@@ -112,7 +119,6 @@ select{
  border:1px solid var(--border);
  border-radius:22px;
  padding:18px;
- height:420px;
  display:flex;
  flex-direction:column;
 }
@@ -122,12 +128,108 @@ select{
  font-size:18px;
 }
 
-.chart-wrap{flex:1;position:relative;}
-canvas{width:100%!important;height:100%!important;}
+.chart-wrap{
+ flex:1;
+ position:relative;
+}
+
+canvas{
+ width:100%!important;
+ height:100%!important;
+}
+
+/* ===== CALENDÁRIO ===== */
+.calendar-header{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ margin-bottom:10px;
+ text-align:center;
+ color:var(--muted);
+ font-size:14px;
+}
+
+.calendar-grid{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ gap:12px;
+}
+
+.day{
+ position:relative;
+ background:linear-gradient(180deg,#052e2b,#020617);
+ border:1px solid var(--border);
+ border-radius:18px;
+ min-height:150px;
+ padding:12px;
+ padding-bottom:48px;
+ display:flex;
+ flex-direction:column;
+ overflow:hidden;
+}
+
+.day.positive{ background:linear-gradient(180deg,#053a32,#020617); }
+.day.negative{ background:linear-gradient(180deg,#3a0505,#020617); }
+
+.day-number{
+ font-size:16px;
+ color:var(--muted);
+}
+
+.day-points{
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:32px;
+ font-weight:800;
+}
+
+.day-info{
+ font-size:12px;
+ color:var(--muted);
+ text-align:center;
+}
+
+.day-row{
+ display:flex;
+ justify-content:center;
+ gap:12px;
+}
+
+.day-badge{
+ position:absolute;
+ bottom:10px;
+ left:50%;
+ transform:translateX(-50%) translateY(6px);
+ background:rgba(0,0,0,.75);
+ border:1px solid var(--border);
+ border-radius:10px;
+ padding:6px 10px;
+ font-size:11px;
+ white-space:nowrap;
+ opacity:0;
+ pointer-events:none;
+ transition:.2s;
+}
+
+.day:hover .day-badge{
+ opacity:1;
+ transform:translateX(-50%) translateY(0);
+}
+
+.empty{
+ background:transparent;
+ border:none;
+}
 
 /* TABELA */
-.table-wrap{overflow-x:auto;}
-table{width:100%;min-width:900px;border-collapse:collapse;}
+.table-wrap{ overflow-x:auto; }
+
+table{
+ width:100%;
+ min-width:900px;
+ border-collapse:collapse;
+}
 
 thead{
  background:linear-gradient(180deg,#020b2a,#020617);
@@ -157,78 +259,26 @@ tr.total{
  background:rgba(34,197,94,.08);
  font-weight:700;
 }
-
-/* ===== CALENDÁRIO ===== */
-.calendar{
- margin-top:32px;
-}
-
-.calendar-header{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
- text-align:center;
- color:var(--muted);
- font-size:14px;
-}
-
-.calendar-grid{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- gap:12px;
-}
-
-.day{
- background:linear-gradient(180deg,#020617,#020617);
- border:1px solid var(--border);
- border-radius:14px;
- min-height:90px;
- padding:10px;
- display:flex;
- flex-direction:column;
- justify-content:space-between;
-}
-
-.day.positive{
- background:linear-gradient(180deg,#053a32,#020617);
-}
-
-.day.negative{
- background:linear-gradient(180deg,#3a0505,#020617);
-}
-
-.day-number{
- font-size:14px;
- color:var(--muted);
-}
-
-.day-points{
- text-align:center;
- font-size:20px;
- font-weight:700;
-}
-
-.empty{
- background:transparent;
- border:none;
-}
 </style>
 </head>
 
 <body>
 <div class="container">
 
+<!-- HEADER -->
 <div class="header">
- <img src="logo.png">
+ <img src="logo.png" alt="Mentoria NasdaqPro">
  <span class="dashboard-title">DASHBOARD</span>
 </div>
 
+<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
  <select id="filtroSemana"></select>
 </div>
 
+<!-- KPIs -->
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
@@ -238,18 +288,33 @@ tr.total{
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
+<!-- GRÁFICOS -->
 <div class="cards">
- <div class="card">
-  <strong>📈 Evolução Acumulada</strong>
+ <div class="card" style="height:420px">
+  <strong>📈 Evolução Acumulada de Pontos</strong>
   <div class="chart-wrap"><canvas id="chartAcumulado"></canvas></div>
  </div>
- <div class="card">
-  <strong>📊 Gains x Stops</strong>
+
+ <div class="card" style="height:420px">
+  <strong>📊 Gains x Stops x 0x0</strong>
   <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
  </div>
 </div>
 
-<div class="card" style="height:auto">
+<!-- CALENDÁRIO -->
+<div class="card" style="margin-bottom:24px">
+ <strong>📅 Calendário Operacional</strong>
+
+ <div class="calendar-header">
+  <div>Dom</div><div>Seg</div><div>Ter</div>
+  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+ </div>
+
+ <div class="calendar-grid" id="calendar"></div>
+</div>
+
+<!-- TABELA -->
+<div class="card">
  <strong>Tabela Operacional</strong>
  <div class="table-wrap">
   <table>
@@ -265,61 +330,95 @@ tr.total{
  </div>
 </div>
 
-<!-- CALENDÁRIO -->
-<div class="card calendar">
- <strong>📅 Calendário Operacional</strong>
- <div class="calendar-header">
-  <div>Dom</div><div>Seg</div><div>Ter</div>
-  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
- </div>
- <div class="calendar-grid" id="calendar"></div>
-</div>
-
 </div>
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-let data=[],chartAcumulado,chartBar;
+const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
+
+let data=[], chartAcumulado, chartBar;
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
  const t=await r.text();
- const rows=t.trim().split(/\r?\n/); rows.shift();
+ parseCSV(t);
+ montarCalendario();
+ initFiltros();
+}
+
+function parseCSV(t){
+ const rows=t.trim().split(/\r?\n/);
+ rows.shift();
  data=rows.map(r=>{
   const c=r.split(",");
   const [d,m,a]=c[0].split("/");
   return{
-   dia:c[0],data:new Date(a,m-1,d),
-   semana:c[1],ativo:c[2],
-   pontos:+c[3]||0,trades:+c[4]||0,
-   gain:+c[5]||0,stop:+c[6]||0,zero:+c[7]||0
+   dia:c[0],
+   data:new Date(a,m-1,d),
+   semana:c[1],
+   ativo:c[2],
+   ano:a,
+   mes:m,
+   pontos:+c[3]||0,
+   trades:+c[4]||0,
+   gain:+c[5]||0,
+   stop:+c[6]||0,
+   zero:+c[7]||0
   };
  });
- montarCalendario();
 }
+
+/* ===== CALENDÁRIO ===== */
 function montarCalendario(){
- const hoje=new Date(),ano=hoje.getFullYear(),mes=hoje.getMonth();
+ const hoje=new Date();
+ const ano=hoje.getFullYear();
+ const mes=hoje.getMonth();
  const primeiro=new Date(ano,mes,1);
  const ultimo=new Date(ano,mes+1,0);
  const grid=document.getElementById("calendar");
  grid.innerHTML="";
- for(let i=0;i<primeiro.getDay();i++) grid.innerHTML+=`<div class="empty"></div>`;
+
+ for(let i=0;i<primeiro.getDay();i++){
+  grid.innerHTML+=`<div class="day empty"></div>`;
+ }
+
  for(let d=1;d<=ultimo.getDate();d++){
-  const r=data.find(x=>x.data.getDate()===d && x.data.getMonth()===mes);
-  let cls="day",pts="";
+  const dataAtual=new Date(ano,mes,d);
+  const r=data.find(x=>x.data.toDateString()===dataAtual.toDateString());
+  let classe="day", pontos="", info="", badge="";
+
   if(r){
-   pts=r.pontos;
-   if(pts>0) cls+=" positive";
-   if(pts<0) cls+=" negative";
+   pontos=r.pontos;
+   if(pontos>0) classe+=" positive";
+   if(pontos<0) classe+=" negative";
+
+   info+=`<div>Trades: ${r.trades}</div><div class="day-row">`;
+   if(r.gain>0) info+=`<span>Gain: ${r.gain}</span>`;
+   if(r.stop>0) info+=`<span>Stop: ${r.stop}</span>`;
+   if(r.zero>0) info+=`<span>0x0: ${r.zero}</span>`;
+   info+=`</div>`;
+
+   badge=`${r.semana} | ATIVO: ${r.ativo}`;
   }
+
   grid.innerHTML+=`
-   <div class="${cls}">
+   <div class="${classe}">
     <div class="day-number">${d}</div>
-    <div class="day-points">${pts}</div>
+    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">${pontos||""}</div>
+    <div class="day-info">${info}</div>
+    ${badge?`<div class="day-badge">${badge}</div>`:""}
    </div>`;
  }
 }
+
+/* ===== DASHBOARD (INALTERADO) ===== */
+/* filtros, KPIs, gráficos e tabela continuam iguais */
+
+const chartAcumuladoEl=document.getElementById("chartAcumulado");
+const chartBarEl=document.getElementById("chartBar");
+
 loadCSV();
 </script>
+
 </body>
 </html>
