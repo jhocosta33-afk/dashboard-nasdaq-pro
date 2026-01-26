@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Calendário Trader – Painel Lateral</title>
+<title>Calendário Trader</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 :root{
- --bg:#050b1a;
+ --bg:#020617;
  --card:#0b1220;
  --border:rgba(255,255,255,.08);
  --text:#e5e7eb;
@@ -17,36 +17,27 @@
  --blue:#60a5fa;
 }
 
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system;
-}
+*{box-sizing:border-box;font-family:Inter,system-ui;}
 
 body{
  margin:0;
- background:linear-gradient(180deg,#050b1a,#020617);
+ background:linear-gradient(180deg,#020617,#020617);
  color:var(--text);
  padding:24px;
- overflow-x:hidden;
 }
 
-/* ===== CALENDÁRIO ===== */
 .calendar{
  max-width:1100px;
-}
-
-.calendar h2{
- margin:0 0 16px;
- font-size:22px;
+ margin:auto;
 }
 
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
  text-align:center;
- color:var(--muted);
  font-size:13px;
+ color:var(--muted);
+ margin-bottom:12px;
 }
 
 .calendar-grid{
@@ -59,8 +50,8 @@ body{
  position:relative;
  background:linear-gradient(180deg,#0b1220,#020617);
  border:1px solid var(--border);
- border-radius:16px;
- height:110px;
+ border-radius:14px;
+ height:120px;
  padding:10px;
  cursor:pointer;
  transition:.2s;
@@ -68,26 +59,25 @@ body{
 
 .day:hover{
  border-color:var(--blue);
- transform:translateY(-2px);
 }
 
 .day-number{
- position:absolute;
- top:8px;
- left:10px;
  font-size:15px;
  color:var(--muted);
 }
 
 .day-points{
- height:100%;
+ position:absolute;
+ inset:0;
  display:flex;
  align-items:center;
  justify-content:center;
- font-size:26px;
+ font-size:28px;
  font-weight:800;
- color:var(--green);
 }
+
+.day.positive .day-points{color:var(--green);}
+.day.negative .day-points{color:var(--red);}
 
 .empty{
  background:transparent;
@@ -95,74 +85,72 @@ body{
  cursor:default;
 }
 
-/* ===== PAINEL LATERAL ===== */
-.side-panel{
+/* OVERLAY */
+.overlay{
  position:fixed;
- top:0;
- right:-380px;
- width:360px;
- height:100vh;
- background:linear-gradient(180deg,#0b1220,#020617);
+ top:0;right:0;
+ width:380px;
+ height:100%;
+ background:#020617;
  border-left:1px solid var(--border);
  padding:20px;
+ transform:translateX(100%);
  transition:.3s;
  z-index:10;
 }
 
-.side-panel.open{
- right:0;
-}
+.overlay.open{transform:translateX(0);}
 
-.side-header{
- display:flex;
- justify-content:space-between;
- align-items:center;
- margin-bottom:20px;
-}
-
-.side-header h3{
- margin:0;
+.overlay h2{
+ margin:0 0 10px;
  font-size:18px;
 }
 
-.close-btn{
- background:none;
- border:none;
- color:var(--muted);
- font-size:22px;
+.close{
+ position:absolute;
+ top:12px;
+ right:14px;
  cursor:pointer;
-}
-
-.info-box{
- background:rgba(255,255,255,.03);
- border:1px solid var(--border);
- border-radius:12px;
- padding:14px;
- margin-bottom:14px;
-}
-
-.info-title{
- font-size:13px;
  color:var(--muted);
- margin-bottom:6px;
 }
 
-.info-value{
- font-size:20px;
- font-weight:700;
+.section{
+ margin-top:16px;
 }
 
-.row{
+.stats{
+ font-size:14px;
+ line-height:1.5;
+}
+
+.checklist label{
  display:flex;
- justify-content:space-between;
+ gap:8px;
+ margin:6px 0;
  font-size:14px;
- margin-top:6px;
 }
 
-.notes{
+textarea{
+ width:100%;
+ min-height:90px;
+ background:#0b1220;
+ border:1px solid var(--border);
+ border-radius:10px;
+ color:var(--text);
+ padding:10px;
+ resize:none;
+}
+
+button{
  margin-top:10px;
- font-size:14px;
- color:var(--muted);
+ width:100%;
+ padding:10px;
+ border:none;
+ border-radius:10px;
+ background:var(--blue);
+ color:#020617;
+ font-weight:700;
+ cursor:pointer;
 }
 </style>
 </head>
@@ -170,89 +158,107 @@ body{
 <body>
 
 <div class="calendar">
- <h2>Calendário Trader</h2>
+ <h1>Calendário Trader</h1>
 
  <div class="calendar-header">
-  <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
-  <div>Qui</div><div>Sex</div><div>Sáb</div>
+  <div>Dom</div><div>Seg</div><div>Ter</div>
+  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
  </div>
 
  <div class="calendar-grid" id="calendar"></div>
 </div>
 
-<!-- PAINEL LATERAL -->
-<div class="side-panel" id="panel">
- <div class="side-header">
-  <h3 id="panel-date">Dia</h3>
-  <button class="close-btn" onclick="fecharPainel()">×</button>
+<div class="overlay" id="overlay">
+ <div class="close" onclick="closeOverlay()">✕</div>
+ <h2 id="overlay-date"></h2>
+
+ <div class="section stats" id="overlay-stats"></div>
+
+ <div class="section checklist">
+  <strong>Checklist</strong>
+  <label><input type="checkbox" data-tag="plano"> Seguiu o plano</label>
+  <label><input type="checkbox" data-tag="regra"> Quebrou regra</label>
+  <label><input type="checkbox" data-tag="emocional"> Emocional afetou</label>
+  <label><input type="checkbox" data-tag="overtrade"> Overtrade</label>
  </div>
 
- <div class="info-box">
-  <div class="info-title">Resultado do dia</div>
-  <div class="info-value" id="panel-points">+0</div>
- </div>
-
- <div class="info-box">
-  <div class="row"><span>Trades</span><span id="panel-trades">0</span></div>
-  <div class="row"><span>Gain</span><span id="panel-gain">0</span></div>
-  <div class="row"><span>Stop</span><span id="panel-stop">0</span></div>
- </div>
-
- <div class="info-box">
-  <div class="info-title">Ativo</div>
-  <div class="info-value" id="panel-ativo">NASDAQ</div>
- </div>
-
- <div class="info-box">
-  <div class="info-title">Observações</div>
-  <div class="notes" id="panel-notes">
-   Dia dentro do plano. Boa leitura de contexto.
-  </div>
+ <div class="section">
+  <strong>Observações</strong>
+  <textarea id="obs"></textarea>
+  <button onclick="salvarObs()">Salvar</button>
  </div>
 </div>
 
 <script>
-const calendar=document.getElementById("calendar");
-const panel=document.getElementById("panel");
+const grid=document.getElementById("calendar");
+const overlay=document.getElementById("overlay");
+let selectedDate="";
 
-// MOCK de dados (depois liga no CSV)
 const dados={
- 10:{pontos:73,trades:1,gain:1,stop:0},
- 11:{pontos:-27,trades:2,gain:0,stop:2},
- 12:{pontos:55,trades:1,gain:1,stop:0}
+ "2024-01-10":{pontos:73,trades:1,gain:1},
+ "2024-01-11":{pontos:-27,trades:2,stop:2},
+ "2024-01-12":{pontos:55,trades:1,gain:1}
 };
 
 function montar(){
- for(let i=0;i<2;i++) calendar.innerHTML+=`<div class="day empty"></div>`;
+ const hoje=new Date();
+ const ano=hoje.getFullYear();
+ const mes=hoje.getMonth();
+ const primeiro=new Date(ano,mes,1).getDay();
+ const total=new Date(ano,mes+1,0).getDate();
 
- for(let d=10;d<=12;d++){
-  const dado=dados[d];
-  calendar.innerHTML+=`
-   <div class="day" onclick="abrirPainel(${d})">
+ for(let i=0;i<primeiro;i++){
+  grid.innerHTML+=`<div class="day empty"></div>`;
+ }
+
+ for(let d=1;d<=total;d++){
+  const data=`${ano}-${String(mes+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  const r=dados[data];
+  let cls="day";
+  if(r){
+   if(r.pontos>0)cls+=" positive";
+   if(r.pontos<0)cls+=" negative";
+  }
+  grid.innerHTML+=`
+   <div class="${cls}" onclick="openOverlay('${data}')">
     <div class="day-number">${d}</div>
-    <div class="day-points" style="color:${dado.pontos<0?'var(--red)':'var(--green)'}">
-     ${dado.pontos}
-    </div>
-   </div>
-  `;
+    <div class="day-points">${r?r.pontos:""}</div>
+   </div>`;
  }
 }
 
-function abrirPainel(dia){
- const d=dados[dia];
- document.getElementById("panel-date").innerText=`Dia ${dia}`;
- document.getElementById("panel-points").innerText=d.pontos;
- document.getElementById("panel-points").style.color=
-  d.pontos<0?'var(--red)':'var(--green)';
- document.getElementById("panel-trades").innerText=d.trades;
- document.getElementById("panel-gain").innerText=d.gain;
- document.getElementById("panel-stop").innerText=d.stop;
+function openOverlay(data){
+ selectedDate=data;
+ overlay.classList.add("open");
+ document.getElementById("overlay-date").innerText=data;
 
- panel.classList.add("open");
+ const r=dados[data]||{};
+ let html="";
+ if(r.trades)html+=`Trades: ${r.trades}<br>`;
+ if(r.gain)html+=`Gain: ${r.gain} `;
+ if(r.stop)html+=`Stop: ${r.stop}`;
+
+ document.getElementById("overlay-stats").innerHTML=html||"Sem dados";
+
+ const saved=JSON.parse(localStorage.getItem("obs-"+data)||"{}");
+ document.getElementById("obs").value=saved.text||"";
+ document.querySelectorAll(".checklist input").forEach(c=>{
+  c.checked=saved[c.dataset.tag]||false;
+ });
 }
 
-function fecharPainel(){
- panel.classList.remove("open");
+function closeOverlay(){
+ overlay.classList.remove("open");
+}
+
+function salvarObs(){
+ const data={
+  text:document.getElementById("obs").value
+ };
+ document.querySelectorAll(".checklist input").forEach(c=>{
+  data[c.dataset.tag]=c.checked;
+ });
+ localStorage.setItem("obs-"+selectedDate,JSON.stringify(data));
 }
 
 montar();
