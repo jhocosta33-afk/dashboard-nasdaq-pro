@@ -21,7 +21,7 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+ font-family:Inter,system-ui,-apple-system;
 }
 
 body{
@@ -37,23 +37,20 @@ body{
 .container{
  max-width:1600px;
  margin:auto;
- padding:clamp(16px,2vw,28px);
+ padding:24px;
 }
 
 /* HEADER */
 .header{
- display:flex;
- flex-direction:column;
- align-items:flex-start;
  margin-bottom:36px;
 }
 
 .header img{
- height:84px;
+ height:90px;
 }
 
 .dashboard-title{
- margin-top:20px;
+ margin-top:12px;
  font-size:22px;
  letter-spacing:4px;
  font-weight:900;
@@ -130,7 +127,6 @@ select{
 
 .chart-wrap{
  flex:1;
- position:relative;
 }
 
 canvas{
@@ -183,20 +179,17 @@ tr.total{
 <body>
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
  <img src="logo.png" alt="Mentoria NasdaqPro">
- <span class="dashboard-title">DASHBOARD</span>
+ <div class="dashboard-title">DASHBOARD</div>
 </div>
 
-<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
  <select id="filtroSemana"></select>
 </div>
 
-<!-- KPIs -->
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
@@ -206,24 +199,22 @@ tr.total{
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
-<!-- GRÁFICOS -->
 <div class="cards">
  <div class="card">
-  <strong>📈 Evolução Acumulada de Pontos</strong>
+  <strong>📈 Evolução Acumulada</strong>
   <div class="chart-wrap">
    <canvas id="chartAcumulado"></canvas>
   </div>
  </div>
 
  <div class="card">
-  <strong>📊 Gains x Stops x 0x0</strong>
+  <strong>📊 Gains x Stops</strong>
   <div class="chart-wrap">
    <canvas id="chartBar"></canvas>
   </div>
  </div>
 </div>
 
-<!-- TABELA -->
 <div class="card" style="height:auto">
  <strong>Tabela Operacional</strong>
  <div class="table-wrap">
@@ -249,13 +240,13 @@ tr.total{
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
+const nomesMeses={
+ "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
+ "05":"Maio","06":"Junho","07":"Julho","08":"Agosto",
+ "09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"
+};
 
 let data=[],chartAcumulado,chartBar;
-
-const hoje = new Date();
-const anoAtual = String(hoje.getFullYear());
-const mesAtual = String(hoje.getMonth()+1).padStart(2,"0");
 
 async function loadCSV(){
  const r=await fetch(CSV_URL,{cache:"no-store"});
@@ -285,18 +276,16 @@ function parseCSV(t){
 }
 
 function initFiltros(){
- const anos=[...new Set(data.map(d=>d.ano))].sort();
- filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
- filtroAno.value = anos.includes(anoAtual) ? anoAtual : anos[anos.length-1];
+ const anos=[...new Set(data.map(d=>d.ano))];
+ filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
  filtroAno.onchange=()=>{initMeses();atualizar();}
  initMeses();
 }
 
 function initMeses(){
  const meses=[...new Set(data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
- filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
+ filtroMes.innerHTML='<option value="ALL">Todos</option>'+
   meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value = meses.includes(mesAtual) ? mesAtual : "ALL";
  filtroMes.onchange=()=>{initSemanas();atualizar();}
  initSemanas();
 }
@@ -307,9 +296,8 @@ function initSemanas(){
    (filtroMes.value==="ALL"||d.mes===filtroMes.value))
   .map(d=>d.semana)
  )];
- filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
-  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
- filtroSemana.value="ALL";
+ filtroSemana.innerHTML='<option value="ALL">Todas</option>'+
+  semanas.map(s=>`<option>${s}</option>`).join("");
  filtroSemana.onchange=atualizar;
  atualizar();
 }
@@ -345,13 +333,7 @@ function renderKPIs(f){
 
 function renderTabela(f){
  tbody.innerHTML="";
- let tot={p:0,t:0,g:0,s:0,z:0};
  f.forEach(d=>{
-  tot.p+=d.pontos;
-  tot.t+=d.trades;
-  tot.g+=d.gain;
-  tot.s+=d.stop;
-  tot.z+=d.zero;
   tbody.innerHTML+=`
   <tr>
    <td>${d.dia}</td>
@@ -364,22 +346,15 @@ function renderTabela(f){
    <td>${d.semana}</td>
   </tr>`;
  });
- tbody.innerHTML+=`
- <tr class="total">
-  <td>TOTAL</td>
-  <td>${tot.p}</td>
-  <td>${tot.t}</td>
-  <td>${tot.g}</td>
-  <td>${tot.s}</td>
-  <td>${tot.z}</td>
-  <td colspan="2"></td>
- </tr>`;
 }
 
 function renderGraficos(f){
+ if(chartAcumulado) chartAcumulado.destroy();
+ if(chartBar) chartBar.destroy();
+
  let saldo=0;
  const labels=[];
- const acumulado=[0];
+ const acumulado=[];
 
  f.forEach(d=>{
   saldo+=d.pontos;
@@ -387,14 +362,12 @@ function renderGraficos(f){
   acumulado.push(saldo);
  });
 
- if(chartAcumulado) chartAcumulado.destroy();
- if(chartBar) chartBar.destroy();
-
  chartAcumulado=new Chart(chartAcumuladoEl,{
   type:"line",
   data:{
-   labels:["Início",...labels],
+   labels,
    datasets:[{
+    label:"Pontos Acumulados",
     data:acumulado,
     borderColor:"#22c55e",
     backgroundColor:"rgba(34,197,94,.18)",
@@ -403,10 +376,9 @@ function renderGraficos(f){
    }]
   },
   options:{
-   responsive:true,
-   maintainAspectRatio:false,
    plugins:{legend:{display:false}},
-   scales:{y:{beginAtZero:true}}
+   responsive:true,
+   maintainAspectRatio:false
   }
  });
 
@@ -415,6 +387,7 @@ function renderGraficos(f){
   data:{
    labels:["Gain","Stop","0x0"],
    datasets:[{
+    label:"Quantidade",
     data:[
      f.reduce((a,b)=>a+b.gain,0),
      f.reduce((a,b)=>a+b.stop,0),
@@ -425,9 +398,9 @@ function renderGraficos(f){
    }]
   },
   options:{
+   plugins:{legend:{display:false}},
    responsive:true,
-   maintainAspectRatio:false,
-   plugins:{legend:{display:false}}
+   maintainAspectRatio:false
   }
  });
 }
