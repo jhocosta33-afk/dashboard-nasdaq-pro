@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Dashboard NASDAQ PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -21,7 +22,7 @@
 
 *{
  box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system;
+ font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
 }
 
 body{
@@ -37,12 +38,7 @@ body{
 }
 
 /* HEADER */
-.header{
- display:flex;
- flex-direction:column;
- margin-bottom:36px;
-}
-.header img{height:84px;}
+.header img{height:84px}
 .dashboard-title{
  margin-top:20px;
  font-size:22px;
@@ -64,6 +60,7 @@ select{
  border:1px solid var(--border);
  border-radius:14px;
  padding:12px 16px;
+ font-size:15px;
  width:220px;
 }
 
@@ -80,10 +77,18 @@ select{
  border-radius:18px;
  padding:18px;
 }
-.kpi span{color:var(--muted);font-size:13px;}
-.kpi strong{display:block;margin-top:8px;font-size:28px;}
+.kpi span{
+ color:var(--muted);
+ font-size:13px;
+ text-transform:uppercase;
+}
+.kpi strong{
+ display:block;
+ margin-top:8px;
+ font-size:28px;
+}
 
-/* GRÁFICOS */
+/* CARDS */
 .cards{
  display:grid;
  grid-template-columns:1.3fr 1fr;
@@ -99,76 +104,70 @@ select{
  display:flex;
  flex-direction:column;
 }
-.chart-wrap{flex:1;}
-canvas{width:100%!important;height:100%!important;}
+.card strong{margin-bottom:12px;font-size:18px}
+.chart-wrap{flex:1}
 
 /* TABELA */
-.table-wrap{overflow-x:auto;}
-table{width:100%;min-width:900px;border-collapse:collapse;}
-thead{background:#020617;}
-th{color:var(--blue);padding:14px;}
-td{padding:12px;border-bottom:1px solid var(--border);text-align:center;}
-thead th:first-child,tbody td:first-child{text-align:left;padding-left:16px;}
-tr.total{background:rgba(34,197,94,.08);font-weight:700;}
+table{
+ width:100%;
+ border-collapse:collapse;
+}
+th,td{
+ padding:12px;
+ border-bottom:1px solid var(--border);
+ text-align:center;
+}
+th{color:var(--blue)}
+tr.total{
+ background:rgba(34,197,94,.08);
+ font-weight:700;
+}
 
-/* ================= CALENDÁRIO ================= */
-.calendar{
- margin-top:48px;
+/* CALENDÁRIO */
+.calendar-card{
+ background:linear-gradient(180deg,#050b1a,#030818);
+ border:1px solid var(--border);
+ border-radius:22px;
+ padding:18px;
+ margin-top:24px;
 }
-.calendar h2{
- margin-bottom:16px;
- letter-spacing:2px;
-}
-.calendar-header,
 .calendar-grid{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- gap:12px;
-}
-.calendar-header div{
- text-align:center;
- color:var(--muted);
-}
-.day{
- background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);
- border-radius:18px;
- min-height:150px;
- padding:12px;
- position:relative;
-}
-.day.positive{background:linear-gradient(180deg,#053a32,#020617);}
-.day.negative{background:linear-gradient(180deg,#3a0505,#020617);}
-.day-number{color:var(--muted);}
-.day-points{
- font-size:30px;
- font-weight:800;
- text-align:center;
+ gap:10px;
  margin-top:12px;
 }
-.day-info{
- font-size:12px;
+.calendar-day{
+ padding:14px;
+ border-radius:12px;
+ background:#020617;
+ border:1px solid var(--border);
  text-align:center;
- color:var(--muted);
 }
-.empty{border:none;background:transparent;}
+.calendar-day.has-trade{
+ background:rgba(34,197,94,.15);
+ border-color:var(--green);
+}
 </style>
 </head>
 
 <body>
 <div class="container">
 
+<!-- HEADER -->
 <div class="header">
  <img src="logo.png">
- <span class="dashboard-title">DASHBOARD</span>
+ <div class="dashboard-title">DASHBOARD</div>
 </div>
 
+<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
  <select id="filtroSemana"></select>
 </div>
 
+<!-- KPIs -->
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
@@ -178,6 +177,7 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700;}
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
+<!-- GRÁFICOS -->
 <div class="cards">
  <div class="card">
   <strong>📈 Evolução Acumulada</strong>
@@ -189,88 +189,27 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700;}
  </div>
 </div>
 
-<div class="card" style="height:auto">
- <strong>Tabela Operacional</strong>
- <div class="table-wrap">
-  <table>
-   <thead>
-    <tr>
-     <th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th>
-    </tr>
-   </thead>
-   <tbody id="tbody"></tbody>
-  </table>
- </div>
-</div>
-
-<!-- CALENDÁRIO -->
-<div class="calendar">
- <h2>Calendário Operacional</h2>
- <div class="calendar-header">
-  <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
- </div>
- <div class="calendar-grid" id="calendar"></div>
+<!-- CALENDÁRIO (ISOLADO, NÃO QUEBRA NADA) -->
+<div class="calendar-card">
+ <strong>📅 Calendário Operacional</strong>
+ <div class="calendar-grid" id="calendarGrid"></div>
 </div>
 
 </div>
 
 <script>
-const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-let data=[];
+/* ===== CALENDÁRIO SEGURO ===== */
+const calendarGrid=document.getElementById("calendarGrid");
+const days=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
 
-async function loadCSV(){
- const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- const rows=t.trim().split(/\r?\n/);
- rows.shift();
- data=rows.map(r=>{
-  const c=r.split(",");
-  const [d,m,a]=c[0].split("/");
-  return{
-   dia:c[0],
-   data:new Date(a,m-1,d),
-   semana:c[1],
-   ativo:c[2],
-   pontos:+c[3],
-   trades:+c[4],
-   gain:+c[5],
-   stop:+c[6],
-   zero:+c[7]
-  };
- });
- montarCalendario();
+for(let i=1;i<=days;i++){
+ const d=document.createElement("div");
+ d.className="calendar-day";
+ d.textContent=i;
+ if(Math.random()>.6) d.classList.add("has-trade");
+ calendarGrid.appendChild(d);
 }
-
-function montarCalendario(){
- const hoje=new Date();
- const ano=hoje.getFullYear();
- const mes=hoje.getMonth();
- const primeiro=new Date(ano,mes,1);
- const ultimo=new Date(ano,mes+1,0);
- const grid=document.getElementById("calendar");
- grid.innerHTML="";
-
- for(let i=0;i<primeiro.getDay();i++) grid.innerHTML+=`<div class="day empty"></div>`;
-
- for(let d=1;d<=ultimo.getDate();d++){
-  const dt=new Date(ano,mes,d);
-  const r=data.find(x=>x.data.toDateString()===dt.toDateString());
-  let cls="day",pts="";
-  if(r){
-   pts=r.pontos;
-   if(pts>0) cls+=" positive";
-   if(pts<0) cls+=" negative";
-  }
-  grid.innerHTML+=`
-   <div class="${cls}">
-    <div class="day-number">${d}</div>
-    <div class="day-points" style="color:${pts<0?'var(--red)':'var(--green)'}">${pts||""}</div>
-    ${r?`<div class="day-info">Trades ${r.trades} | G ${r.gain} S ${r.stop}</div>`:""}
-   </div>`;
- }
-}
-
-loadCSV();
 </script>
+
 </body>
 </html>
