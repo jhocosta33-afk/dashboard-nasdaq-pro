@@ -27,7 +27,10 @@
 body{
  margin:0;
  background:
-  radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);
+  radial-gradient(circle at top,
+   #334155 0%,
+   #1e293b 35%,
+   #020617 75%);
  color:var(--text);
 }
 
@@ -41,6 +44,7 @@ body{
 .header{
  display:flex;
  flex-direction:column;
+ align-items:flex-start;
  margin-bottom:36px;
 }
 
@@ -234,26 +238,17 @@ tr.total{
  text-align:center;
 }
 
-/* ✅ BADGE SOMENTE NO HOVER */
 .day-badge{
  position:absolute;
  bottom:8px;
  left:50%;
- transform:translateX(-50%) translateY(6px);
+ transform:translateX(-50%);
  background:rgba(0,0,0,.75);
  border:1px solid var(--border);
  border-radius:10px;
  padding:5px 8px;
  font-size:10px;
  white-space:nowrap;
- opacity:0;
- pointer-events:none;
- transition:.2s;
-}
-
-.day:hover .day-badge{
- opacity:1;
- transform:translateX(-50%) translateY(0);
 }
 
 .empty{
@@ -267,7 +262,7 @@ tr.total{
 <div class="container">
 
 <div class="header">
- <img src="logo.png">
+ <img src="logo.png" alt="Mentoria NasdaqPro">
  <span class="dashboard-title">DASHBOARD</span>
 </div>
 
@@ -363,26 +358,28 @@ function initFiltros(){
  const anos=[...new Set(dadosCSV.map(d=>d.ano))].sort();
  filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
  filtroAno.value=anos[anos.length-1];
- filtroAno.onchange=()=>{initMeses();};
+ filtroAno.onchange=()=>{initMeses();atualizar();}
  initMeses();
 }
 
 function initMeses(){
  const meses=[...new Set(dadosCSV.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
- filtroMes.innerHTML=meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value=meses[meses.length-1];
- filtroMes.onchange=()=>{initSemanas();};
+ filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
+  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+ filtroMes.value="ALL";
+ filtroMes.onchange=()=>{initSemanas();atualizar();}
  initSemanas();
 }
 
-/* ✅ ABRE AUTOMATICAMENTE NA ÚLTIMA SEMANA */
 function initSemanas(){
  const semanas=[...new Set(
-  dadosCSV.filter(d=>d.ano===filtroAno.value && d.mes===filtroMes.value)
+  dadosCSV.filter(d=>d.ano===filtroAno.value &&
+   (filtroMes.value==="ALL"||d.mes===filtroMes.value))
   .map(d=>d.semana)
  )];
- filtroSemana.innerHTML=semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
- filtroSemana.value=semanas[semanas.length-1];
+ filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
+  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+ filtroSemana.value="ALL";
  filtroSemana.onchange=atualizar;
  atualizar();
 }
@@ -390,8 +387,8 @@ function initSemanas(){
 function atualizar(){
  const f=dadosCSV.filter(d=>
   d.ano===filtroAno.value &&
-  d.mes===filtroMes.value &&
-  d.semana===filtroSemana.value
+  (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
+  (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
  );
  renderKPIs(f);
  renderTabela(f);
@@ -399,7 +396,116 @@ function atualizar(){
  renderCalendario(f);
 }
 
-/* resto das funções permanecem IGUAIS às suas */
+function renderKPIs(f){
+ let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
+ f.forEach(d=>{
+  t.trades+=d.trades;
+  t.pontos+=d.pontos;
+  t.gain+=d.gain;
+  t.stop+=d.stop;
+  t.zero+=d.zero;
+ });
+ const ops=t.gain+t.stop;
+ kTrades.textContent=t.trades;
+ kPontos.textContent=t.pontos;
+ kGains.textContent=t.gain;
+ kStops.textContent=t.stop;
+ kZero.textContent=t.zero;
+ kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
+}
+
+function renderTabela(f){
+ tbody.innerHTML="";
+ let tot={p:0,t:0,g:0,s:0,z:0};
+ f.forEach(d=>{
+  tot.p+=d.pontos; tot.t+=d.trades;
+  tot.g+=d.gain; tot.s+=d.stop; tot.z+=d.zero;
+  tbody.innerHTML+=`
+   <tr>
+    <td>${d.dia}</td>
+    <td style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
+    <td>${d.trades}</td>
+    <td>${d.gain}</td>
+    <td>${d.stop}</td>
+    <td>${d.zero}</td>
+    <td>${d.ativo}</td>
+    <td>${d.semana}</td>
+   </tr>`;
+ });
+ tbody.innerHTML+=`
+  <tr class="total">
+   <td>TOTAL</td><td>${tot.p}</td><td>${tot.t}</td>
+   <td>${tot.g}</td><td>${tot.s}</td><td>${tot.z}</td>
+   <td colspan="2"></td>
+  </tr>`;
+}
+
+function renderGraficos(f){
+ let saldo=0,labels=[],ac=[0];
+ f.forEach(d=>{saldo+=d.pontos;labels.push(d.dia);ac.push(saldo);});
+ if(chartAcumulado)chartAcumulado.destroy();
+ if(chartBar)chartBar.destroy();
+
+ chartAcumulado=new Chart(chartAcumuladoEl,{
+  type:"line",
+  data:{labels:["Início",...labels],datasets:[{data:ac,borderColor:"#22c55e",fill:true,tension:.35}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+ });
+
+ chartBar=new Chart(chartBarEl,{
+  type:"bar",
+  data:{labels:["Gain","Stop","0x0"],datasets:[{data:[
+   f.reduce((a,b)=>a+b.gain,0),
+   f.reduce((a,b)=>a+b.stop,0),
+   f.reduce((a,b)=>a+b.zero,0)
+  ],backgroundColor:["#22c55e","#ef4444","#facc15"],borderRadius:10}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+ });
+}
+
+/* ✅ CALENDÁRIO – correção pontual */
+function renderCalendario(f){
+ const grid=document.getElementById("calendar");
+ grid.innerHTML="";
+ if(!f.length) return;
+
+ let base=f[0];
+ if(filtroMes.value!=="ALL"){
+  base=f.find(d=>d.mes===filtroMes.value)||f[0];
+ }
+
+ const ano=base.data.getFullYear();
+ const mes=base.data.getMonth();
+
+ const primeiro=new Date(ano,mes,1);
+ const ultimo=new Date(ano,mes+1,0);
+
+ for(let i=0;i<primeiro.getDay();i++)
+  grid.innerHTML+=`<div class="day empty"></div>`;
+
+ for(let d=1;d<=ultimo.getDate();d++){
+  const data=new Date(ano,mes,d);
+  const r=f.find(x=>x.data.toDateString()===data.toDateString());
+  let cls="day",pts="",info="",badge="";
+  if(r){
+   pts=r.pontos;
+   if(pts>0)cls+=" positive";
+   if(pts<0)cls+=" negative";
+   info=`Trades:${r.trades}<br>Gain:${r.gain} Stop:${r.stop}`;
+   badge=`<div class="day-badge">${r.semana} | ${r.ativo}</div>`;
+  }
+  grid.innerHTML+=`
+   <div class="${cls}">
+    <div class="day-number">${d}</div>
+    <div class="day-points"
+     style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
+     ${pts??""}
+    </div>
+    <div class="day-info">${info}</div>
+    ${badge}
+   </div>`;
+ }
+}
 
 const chartAcumuladoEl=document.getElementById("chartAcumulado");
 const chartBarEl=document.getElementById("chartBar");
