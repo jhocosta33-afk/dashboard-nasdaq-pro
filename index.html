@@ -19,98 +19,45 @@
  --blue:#93c5fd;
 }
 
-*{
- box-sizing:border-box;
- font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
-}
+*{box-sizing:border-box;font-family:Inter,system-ui;}
 
 body{
  margin:0;
- background:
-  radial-gradient(circle at top,
-   #334155 0%,
-   #1e293b 35%,
-   #020617 75%);
+ background:radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);
  color:var(--text);
 }
 
-.container{
- max-width:1600px;
- margin:auto;
- padding:clamp(16px,2vw,28px);
-}
+.container{max-width:1600px;margin:auto;padding:24px}
 
 /* HEADER */
-.header{
- display:flex;
- flex-direction:column;
- align-items:flex-start;
- margin-bottom:36px;
-}
-
-.header img{ height:84px; }
-
-.dashboard-title{
- margin-top:20px;
- font-size:22px;
- letter-spacing:4px;
- font-weight:900;
- color:var(--blue);
-}
+.header{margin-bottom:32px}
+.header img{height:80px}
+.dashboard-title{margin-top:16px;font-size:22px;letter-spacing:4px;font-weight:900;color:var(--blue)}
 
 /* FILTROS */
-.filters{
- display:flex;
- gap:12px;
- margin-bottom:24px;
- flex-wrap:wrap;
-}
-
+.filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
 select{
  background:var(--card);
  color:var(--text);
  border:1px solid var(--border);
  border-radius:14px;
  padding:12px 16px;
- font-size:15px;
  width:220px;
 }
 
 /* KPIs */
-.kpis{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
- gap:16px;
- margin-bottom:28px;
-}
-
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
 .kpi{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
  border-radius:18px;
  padding:18px;
 }
+.kpi span{color:var(--muted);font-size:13px}
+.kpi strong{display:block;margin-top:6px;font-size:28px}
 
-.kpi span{
- color:var(--muted);
- font-size:13px;
- text-transform:uppercase;
-}
-
-.kpi strong{
- display:block;
- margin-top:8px;
- font-size:28px;
-}
-
-/* GRÁFICOS */
-.cards{
- display:grid;
- grid-template-columns:1.3fr 1fr;
- gap:16px;
- margin-bottom:24px;
-}
-
+/* CARDS */
+.cards{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:24px}
 .card{
  background:linear-gradient(180deg,#050b1a,#030818);
  border:1px solid var(--border);
@@ -120,59 +67,18 @@ select{
  display:flex;
  flex-direction:column;
 }
-
-.card strong{
- margin-bottom:12px;
- font-size:18px;
-}
-
-.chart-wrap{
- flex:1;
- position:relative;
-}
-
-canvas{
- width:100%!important;
- height:100%!important;
-}
+.card strong{margin-bottom:12px}
+.chart-wrap{flex:1;position:relative}
+canvas{width:100%!important;height:100%!important}
 
 /* TABELA */
-.table-wrap{ overflow-x:auto; }
-
-table{
- width:100%;
- min-width:900px;
- border-collapse:collapse;
-}
-
-thead{
- background:linear-gradient(180deg,#020b2a,#020617);
-}
-
-th{
- color:var(--blue);
- font-weight:700;
- font-size:16px;
- padding:14px 10px;
- text-align:center;
-}
-
-td{
- padding:12px 10px;
- border-bottom:1px solid var(--border);
- text-align:center;
-}
-
-thead th:first-child,
-tbody td:first-child{
- text-align:left;
- padding-left:16px;
-}
-
-tr.total{
- background:rgba(34,197,94,.08);
- font-weight:700;
-}
+.table-wrap{overflow-x:auto}
+table{width:100%;min-width:900px;border-collapse:collapse}
+thead{background:linear-gradient(180deg,#020b2a,#020617)}
+th{color:var(--blue);padding:14px;text-align:center}
+td{padding:12px;border-bottom:1px solid var(--border);text-align:center}
+thead th:first-child,tbody td:first-child{text-align:left;padding-left:16px}
+tr.total{background:rgba(34,197,94,.08);font-weight:700}
 
 /* CALENDÁRIO */
 .calendar-wrapper{
@@ -182,21 +88,14 @@ tr.total{
  border-radius:22px;
  padding:18px;
 }
-
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
  text-align:center;
  color:var(--muted);
- font-size:14px;
+ margin-bottom:10px;
 }
-
-.calendar-grid{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- gap:12px;
-}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
 
 .day{
  position:relative;
@@ -204,43 +103,22 @@ tr.total{
  border:1px solid var(--border);
  border-radius:16px;
  min-height:120px;
- padding:10px;
- padding-bottom:42px;
+ padding:10px 10px 40px;
  display:flex;
  flex-direction:column;
+ cursor:pointer;
 }
+.day.positive{background:linear-gradient(180deg,#053a32,#020617)}
+.day.negative{background:linear-gradient(180deg,#3a0505,#020617)}
 
-.day.positive{
- background:linear-gradient(180deg,#053a32,#020617);
-}
+.day-number{font-size:13px;color:var(--muted)}
+.day-points{flex:1;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800}
+.day-info{font-size:11px;color:var(--muted);text-align:center}
 
-.day.negative{
- background:linear-gradient(180deg,#3a0505,#020617);
-}
-
-.day-number{
- font-size:14px;
- color:var(--muted);
-}
-
-.day-points{
- flex:1;
- display:flex;
- align-items:center;
- justify-content:center;
- font-size:26px;
- font-weight:800;
-}
-
-.day-info{
- font-size:11px;
- color:var(--muted);
- text-align:center;
-}
-
-.day-badge{
+/* TOOLTIP */
+.day-tooltip{
  position:absolute;
- bottom:8px;
+ bottom:6px;
  left:50%;
  transform:translateX(-50%);
  background:rgba(0,0,0,.75);
@@ -249,12 +127,13 @@ tr.total{
  padding:5px 8px;
  font-size:10px;
  white-space:nowrap;
+ opacity:0;
+ transition:.2s;
+ pointer-events:none;
 }
+.day:hover .day-tooltip{opacity:1}
 
-.empty{
- background:transparent;
- border:none;
-}
+.empty{background:transparent;border:none}
 </style>
 </head>
 
@@ -262,8 +141,8 @@ tr.total{
 <div class="container">
 
 <div class="header">
- <img src="logo.png" alt="Mentoria NasdaqPro">
- <span class="dashboard-title">DASHBOARD</span>
+ <img src="logo.png">
+ <div class="dashboard-title">DASHBOARD</div>
 </div>
 
 <div class="filters">
@@ -283,7 +162,7 @@ tr.total{
 
 <div class="cards">
  <div class="card">
-  <strong>📈 Evolução Acumulada de Pontos</strong>
+  <strong>📈 Evolução Acumulada</strong>
   <div class="chart-wrap"><canvas id="chartAcumulado"></canvas></div>
  </div>
  <div class="card">
@@ -321,196 +200,104 @@ tr.total{
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
+let dados=[],chartA,chartB;
 
-let dadosCSV=[],chartAcumulado,chartBar;
-
-async function loadCSV(){
- const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- parseCSV(t);
-}
-
-function parseCSV(t){
- const rows=t.trim().split(/\r?\n/);
- rows.shift();
- dadosCSV=rows.map(r=>{
-  const c=r.split(",");
-  const [d,m,a]=c[0].split("/");
-  return{
-   dia:c[0],
-   data:new Date(a,m-1,d),
-   semana:c[1],
-   ativo:c[2],
-   ano:a,
-   mes:m,
-   pontos:+c[3]||0,
-   trades:+c[4]||0,
-   gain:+c[5]||0,
-   stop:+c[6]||0,
-   zero:+c[7]||0
-  };
+async function load(){
+ const t=await (await fetch(CSV_URL,{cache:"no-store"})).text();
+ const rows=t.trim().split(/\r?\n/);rows.shift();
+ dados=rows.map(r=>{
+  const c=r.split(","),[d,m,a]=c[0].split("/");
+  return{dia:c[0],data:new Date(a,m-1,d),semana:c[1],ativo:c[2],ano:a,mes:m,
+   pontos:+c[3],trades:+c[4],gain:+c[5],stop:+c[6],zero:+c[7]};
  });
  initFiltros();
 }
 
 function initFiltros(){
- const anos=[...new Set(dadosCSV.map(d=>d.ano))].sort();
- filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
- filtroAno.value=anos[anos.length-1];
- filtroAno.onchange=()=>{initMeses();atualizar();}
+ const anos=[...new Set(dados.map(d=>d.ano))];
+ filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+ filtroAno.value=new Date().getFullYear();
+ filtroAno.onchange=initMeses;
  initMeses();
 }
 
 function initMeses(){
- const meses=[...new Set(dadosCSV.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
- filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
-  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value="ALL";
- filtroMes.onchange=()=>{initSemanas();atualizar();}
+ const meses=[...new Set(dados.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))];
+ filtroMes.innerHTML=meses.map(m=>`<option>${m}</option>`).join("");
+ filtroMes.value=String(new Date().getMonth()+1).padStart(2,"0");
+ filtroMes.onchange=initSemanas;
  initSemanas();
 }
 
 function initSemanas(){
- const semanas=[...new Set(
-  dadosCSV.filter(d=>d.ano===filtroAno.value &&
-   (filtroMes.value==="ALL"||d.mes===filtroMes.value))
-  .map(d=>d.semana)
- )];
- filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
-  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
- filtroSemana.value="ALL";
+ const semanas=[...new Set(dados.filter(d=>d.ano==filtroAno.value&&d.mes==filtroMes.value).map(d=>d.semana))];
+ filtroSemana.innerHTML=semanas.map(s=>`<option>${s}</option>`).join("");
+ filtroSemana.value=semanas[semanas.length-1];
  filtroSemana.onchange=atualizar;
  atualizar();
 }
 
 function atualizar(){
- const f=dadosCSV.filter(d=>
-  d.ano===filtroAno.value &&
-  (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
-  (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
- );
- renderKPIs(f);
- renderTabela(f);
- renderGraficos(f);
- renderCalendario(f);
+ const f=dados.filter(d=>d.ano==filtroAno.value&&d.mes==filtroMes.value&&d.semana==filtroSemana.value);
+ renderKPIs(f);renderTabela(f);renderGraficos(f);renderCalendario(f);
 }
 
 function renderKPIs(f){
- let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
- f.forEach(d=>{
-  t.trades+=d.trades;
-  t.pontos+=d.pontos;
-  t.gain+=d.gain;
-  t.stop+=d.stop;
-  t.zero+=d.zero;
- });
- const ops=t.gain+t.stop;
- kTrades.textContent=t.trades;
- kPontos.textContent=t.pontos;
- kGains.textContent=t.gain;
- kStops.textContent=t.stop;
- kZero.textContent=t.zero;
- kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
+ let t={tr:0,p:0,g:0,s:0,z:0};
+ f.forEach(d=>{t.tr+=d.trades;t.p+=d.pontos;t.g+=d.gain;t.s+=d.stop;t.z+=d.zero});
+ kTrades.textContent=t.tr;kPontos.textContent=t.p;kGains.textContent=t.g;kStops.textContent=t.s;kZero.textContent=t.z;
+ kAcc.textContent=(t.g+t.s)?Math.round(t.g/(t.g+t.s)*100)+"%":"0%";
 }
 
 function renderTabela(f){
  tbody.innerHTML="";
- let tot={p:0,t:0,g:0,s:0,z:0};
  f.forEach(d=>{
-  tot.p+=d.pontos; tot.t+=d.trades;
-  tot.g+=d.gain; tot.s+=d.stop; tot.z+=d.zero;
-  tbody.innerHTML+=`
-   <tr>
-    <td>${d.dia}</td>
-    <td style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
-    <td>${d.trades}</td>
-    <td>${d.gain}</td>
-    <td>${d.stop}</td>
-    <td>${d.zero}</td>
-    <td>${d.ativo}</td>
-    <td>${d.semana}</td>
-   </tr>`;
+  tbody.innerHTML+=`<tr>
+   <td>${d.dia}</td>
+   <td style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
+   <td>${d.trades}</td><td>${d.gain}</td><td>${d.stop}</td><td>${d.zero}</td>
+   <td>${d.ativo}</td><td>${d.semana}</td></tr>`;
  });
- tbody.innerHTML+=`
-  <tr class="total">
-   <td>TOTAL</td><td>${tot.p}</td><td>${tot.t}</td>
-   <td>${tot.g}</td><td>${tot.s}</td><td>${tot.z}</td>
-   <td colspan="2"></td>
-  </tr>`;
 }
 
 function renderGraficos(f){
- let saldo=0,labels=[],ac=[0];
- f.forEach(d=>{saldo+=d.pontos;labels.push(d.dia);ac.push(saldo);});
- if(chartAcumulado)chartAcumulado.destroy();
- if(chartBar)chartBar.destroy();
-
- chartAcumulado=new Chart(chartAcumuladoEl,{
-  type:"line",
-  data:{labels:["Início",...labels],datasets:[{data:ac,borderColor:"#22c55e",fill:true,tension:.35}]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
- });
-
- chartBar=new Chart(chartBarEl,{
-  type:"bar",
-  data:{labels:["Gain","Stop","0x0"],datasets:[{data:[
-   f.reduce((a,b)=>a+b.gain,0),
-   f.reduce((a,b)=>a+b.stop,0),
-   f.reduce((a,b)=>a+b.zero,0)
-  ],backgroundColor:["#22c55e","#ef4444","#facc15"],borderRadius:10}]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
- });
+ if(chartA)chartA.destroy();if(chartB)chartB.destroy();
+ let s=0,ac=[0],l=[];
+ f.forEach(d=>{s+=d.pontos;ac.push(s);l.push(d.dia)});
+ chartA=new Chart(chartAcumulado,{type:"line",data:{labels:["Início",...l],datasets:[{data:ac,borderColor:"#22c55e",fill:true}]},options:{responsive:true,maintainAspectRatio:false}});
+ chartB=new Chart(chartBar,{type:"bar",data:{labels:["Gain","Stop","0x0"],datasets:[{data:[
+  f.reduce((a,b)=>a+b.gain,0),
+  f.reduce((a,b)=>a+b.stop,0),
+  f.reduce((a,b)=>a+b.zero,0)
+ ],backgroundColor:["#22c55e","#ef4444","#facc15"]}]},options:{responsive:true,maintainAspectRatio:false}});
 }
 
-/* ✅ CALENDÁRIO – correção pontual */
 function renderCalendario(f){
- const grid=document.getElementById("calendar");
- grid.innerHTML="";
- if(!f.length) return;
-
- let base=f[0];
- if(filtroMes.value!=="ALL"){
-  base=f.find(d=>d.mes===filtroMes.value)||f[0];
- }
-
- const ano=base.data.getFullYear();
- const mes=base.data.getMonth();
-
- const primeiro=new Date(ano,mes,1);
- const ultimo=new Date(ano,mes+1,0);
-
- for(let i=0;i<primeiro.getDay();i++)
-  grid.innerHTML+=`<div class="day empty"></div>`;
-
- for(let d=1;d<=ultimo.getDate();d++){
-  const data=new Date(ano,mes,d);
-  const r=f.find(x=>x.data.toDateString()===data.toDateString());
-  let cls="day",pts="",info="",badge="";
+ calendar.innerHTML="";
+ if(!f.length)return;
+ const a=f[0].data.getFullYear(),m=f[0].data.getMonth();
+ const p=new Date(a,m,1).getDay(),u=new Date(a,m+1,0).getDate();
+ for(let i=0;i<p;i++)calendar.innerHTML+=`<div class="day empty"></div>`;
+ for(let d=1;d<=u;d++){
+  const r=f.find(x=>x.data.getDate()==d);
+  let cls="day",pts="",info="",tip="";
   if(r){
    pts=r.pontos;
-   if(pts>0)cls+=" positive";
-   if(pts<0)cls+=" negative";
+   cls+=pts>0?" positive":pts<0?" negative":"";
    info=`Trades:${r.trades}<br>Gain:${r.gain} Stop:${r.stop}`;
-   badge=`<div class="day-badge">${r.semana} | ${r.ativo}</div>`;
+   tip=`SEMANA ${r.semana} | ${r.ativo}`;
   }
-  grid.innerHTML+=`
+  calendar.innerHTML+=`
    <div class="${cls}">
     <div class="day-number">${d}</div>
-    <div class="day-points"
-     style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
-     ${pts??""}
-    </div>
+    <div class="day-points" style="color:${pts<0?'var(--red)':'var(--green)'}">${pts??""}</div>
     <div class="day-info">${info}</div>
-    ${badge}
+    ${tip?`<div class="day-tooltip">${tip}</div>`:""}
    </div>`;
  }
 }
 
-const chartAcumuladoEl=document.getElementById("chartAcumulado");
-const chartBarEl=document.getElementById("chartBar");
-
-loadCSV();
+load();
 </script>
 </body>
 </html>
