@@ -14,7 +14,6 @@
  --muted:#9ca3af;
  --green:#22c55e;
  --red:#ef4444;
- --blue:#60a5fa;
 }
 
 *{
@@ -24,42 +23,44 @@
 
 body{
  margin:0;
- background:radial-gradient(circle at top,#020617,#000);
+ background:transparent; /* IMPORTANTE p/ dashboard */
  color:var(--text);
- padding:24px;
+ padding:0;
 }
 
 .calendar{
- max-width:1200px;
- margin:auto;
+ width:100%;
+ margin:0;
 }
 
+/* Cabeçalho dias da semana */
 .calendar-header{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
+ margin-bottom:6px;
  text-align:center;
  color:var(--muted);
- font-size:14px;
+ font-size:11px;
 }
 
+/* Grid compacto */
 .calendar-grid{
  display:grid;
  grid-template-columns:repeat(7,1fr);
- gap:12px;
+ gap:8px;
 }
 
+/* CARD DO DIA (COMPACTO) */
 .day{
  position:relative;
  background:linear-gradient(180deg,#052e2b,#020617);
  border:1px solid var(--border);
- border-radius:18px;
- min-height:150px;
- padding:12px;
- padding-bottom:48px; /* espaço reservado pro badge */
+ border-radius:12px;
+ height:78px;               /* 🔑 controla o tamanho total */
+ padding:6px;
  display:flex;
  flex-direction:column;
- transition:.2s;
+ justify-content:space-between;
  overflow:hidden;
 }
 
@@ -72,45 +73,48 @@ body{
 }
 
 .day-number{
- font-size:16px;
+ font-size:11px;
  color:var(--muted);
 }
 
+/* Pontos */
 .day-points{
- flex:1;
- display:flex;
- align-items:center;
- justify-content:center;
- font-size:32px;
+ text-align:center;
+ font-size:18px;
  font-weight:800;
+ line-height:1;
 }
 
+/* Infos */
 .day-info{
- font-size:12px;
+ font-size:10px;
  color:var(--muted);
  text-align:center;
+ line-height:1.2;
 }
 
 .day-row{
  display:flex;
  justify-content:center;
- gap:12px;
+ gap:6px;
 }
 
+/* Badge só no hover (não ocupa espaço) */
 .day-badge{
  position:absolute;
- bottom:10px;
+ bottom:6px;
  left:50%;
  transform:translateX(-50%) translateY(6px);
- background:rgba(0,0,0,.75);
+ background:rgba(0,0,0,.85);
  border:1px solid var(--border);
- border-radius:10px;
- padding:6px 10px;
- font-size:11px;
+ border-radius:8px;
+ padding:4px 8px;
+ font-size:10px;
  white-space:nowrap;
  opacity:0;
  pointer-events:none;
  transition:.2s;
+ z-index:5;
 }
 
 .day:hover .day-badge{
@@ -121,6 +125,22 @@ body{
 .empty{
  background:transparent;
  border:none;
+}
+
+/* MOBILE ainda mais compacto */
+@media (max-width:768px){
+ .day{
+  height:64px;
+  padding:4px;
+ }
+
+ .day-points{
+  font-size:14px;
+ }
+
+ .day-info{
+  font-size:9px;
+ }
 }
 </style>
 </head>
@@ -194,13 +214,13 @@ function montar(){
    if(pontos>0) classe+=" positive";
    if(pontos<0) classe+=" negative";
 
-   info+=`<div>Trades: ${r.trades}</div><div class="day-row">`;
-   if(r.gain>0) info+=`<span>Gain: ${r.gain}</span>`;
-   if(r.stop>0) info+=`<span>Stop: ${r.stop}</span>`;
-   if(r.zero>0) info+=`<span>0x0: ${r.zero}</span>`;
+   info+=`<div>Tr: ${r.trades}</div><div class="day-row">`;
+   if(r.gain>0) info+=`<span>G:${r.gain}</span>`;
+   if(r.stop>0) info+=`<span>S:${r.stop}</span>`;
+   if(r.zero>0) info+=`<span>0:${r.zero}</span>`;
    info+=`</div>`;
 
-   badge=`${r.semana} | ATIVO: ${r.ativo}`;
+   badge=`${r.semana} | ${r.ativo}`;
   }
 
   grid.innerHTML+=`
