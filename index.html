@@ -18,28 +18,22 @@
  --yellow:#facc15;
  --blue:#93c5fd;
 }
-
 *{box-sizing:border-box;font-family:Inter,system-ui;}
-
 body{
  margin:0;
  background:radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);
  color:var(--text);
 }
-
 .container{max-width:1600px;margin:auto;padding:24px;}
-
 .header{display:flex;flex-direction:column;margin-bottom:36px;}
 .header img{height:84px;}
 .dashboard-title{margin-top:20px;font-size:22px;letter-spacing:4px;font-weight:900;color:var(--blue);}
-
 .filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;}
 select{
  background:var(--card);color:var(--text);
  border:1px solid var(--border);border-radius:14px;
  padding:12px 16px;font-size:15px;width:220px;
 }
-
 .kpis{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -52,7 +46,6 @@ select{
 }
 .kpi span{color:var(--muted);font-size:13px;text-transform:uppercase;}
 .kpi strong{display:block;margin-top:8px;font-size:28px;}
-
 .cards{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:24px;}
 .card{
  background:linear-gradient(180deg,#050b1a,#030818);
@@ -63,7 +56,6 @@ select{
 .card strong{margin-bottom:12px;font-size:18px;}
 .chart-wrap{flex:1;position:relative;}
 canvas{width:100%!important;height:100%!important;}
-
 .table-wrap{overflow-x:auto;}
 table{width:100%;min-width:900px;border-collapse:collapse;}
 thead{background:linear-gradient(180deg,#020b2a,#020617);}
@@ -72,7 +64,6 @@ th{color:var(--blue);}
 td{border-bottom:1px solid var(--border);}
 thead th:first-child,tbody td:first-child{text-align:left;padding-left:16px;}
 tr.total{background:rgba(34,197,94,.08);font-weight:700;}
-
 .calendar-wrapper{
  margin-top:28px;
  background:linear-gradient(180deg,#050b1a,#030818);
@@ -94,7 +85,10 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700;}
 .day.positive{background:linear-gradient(180deg,#053a32,#020617);}
 .day.negative{background:linear-gradient(180deg,#3a0505,#020617);}
 .day-number{font-size:14px;color:var(--muted);}
-.day-points{flex:1;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;}
+.day-points{
+ flex:1;display:flex;align-items:center;justify-content:center;
+ font-size:26px;font-weight:800;
+}
 .day-info{font-size:11px;color:var(--muted);text-align:center;}
 .empty{background:transparent;border:none;}
 </style>
@@ -164,37 +158,50 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700;}
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
 
-const els={
- ano:filtroAno=document.getElementById("filtroAno"),
- mes:document.getElementById("filtroMes"),
- sem:document.getElementById("filtroSemana"),
- tbody:document.getElementById("tbody"),
- calendar:document.getElementById("calendar"),
-};
+const filtroAno=document.getElementById("filtroAno");
+const filtroMes=document.getElementById("filtroMes");
+const filtroSemana=document.getElementById("filtroSemana");
+const tbody=document.getElementById("tbody");
+const calendar=document.getElementById("calendar");
+
+const kTrades=document.getElementById("kTrades");
+const kPontos=document.getElementById("kPontos");
+const kGains=document.getElementById("kGains");
+const kStops=document.getElementById("kStops");
+const kZero=document.getElementById("kZero");
+const kAcc=document.getElementById("kAcc");
+
+const chartAcumuladoEl=document.getElementById("chartAcumulado");
+const chartBarEl=document.getElementById("chartBar");
 
 let dados=[],chartA,chartB;
 
 async function loadCSV(){
  try{
   const r=await fetch(CSV_URL,{cache:"no-store"});
-  if(!r.ok) throw "Erro ao carregar CSV";
+  if(!r.ok) throw "erro";
   parseCSV(await r.text());
- }catch(e){alert("Erro ao carregar dados");}
+ }catch{
+  alert("Erro ao carregar dados");
+ }
 }
 
 function parseCSV(t){
  const rows=t.trim().split(/\r?\n/).slice(1);
  dados=rows.map(l=>{
-  const c=l.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-  const [d,m,a]=c[0].replace(/"/g,"").split("/");
+  const c=l.split(",");
+  const [d,m,a]=c[0].split("/");
   return{
    dia:c[0],
    data:new Date(a,m-1,d),
    semana:c[1],
    ativo:c[2],
    ano:a,mes:m,
-   pontos:+c[3]||0,trades:+c[4]||0,
-   gain:+c[5]||0,stop:+c[6]||0,zero:+c[7]||0
+   pontos:+c[3]||0,
+   trades:+c[4]||0,
+   gain:+c[5]||0,
+   stop:+c[6]||0,
+   zero:+c[7]||0
   };
  });
  initFiltros();
@@ -202,42 +209,135 @@ function parseCSV(t){
 
 function initFiltros(){
  const anos=[...new Set(dados.map(d=>d.ano))].sort();
- els.ano.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
- els.ano.value=anos.at(-1);
- els.ano.onchange=()=>{initMeses();atualizar();}
+ filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
+ filtroAno.value=anos.at(-1);
+ filtroAno.onchange=()=>{initMeses();atualizar();}
  initMeses();
 }
 
 function initMeses(){
- const meses=[...new Set(dados.filter(d=>d.ano===els.ano.value).map(d=>d.mes))].sort((a,b)=>a-b);
- els.mes.innerHTML=`<option value="ALL">Todos</option>`+
+ const meses=[...new Set(dados.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))].sort((a,b)=>a-b);
+ filtroMes.innerHTML=`<option value="ALL">Todos</option>`+
   meses.map(m=>`<option value="${m}">${m}</option>`).join("");
- els.mes.value="ALL";
- els.mes.onchange=()=>{initSemanas();atualizar();}
+ filtroMes.value="ALL";
+ filtroMes.onchange=()=>{initSemanas();atualizar();}
  initSemanas();
 }
 
 function initSemanas(){
  const s=[...new Set(dados.filter(d=>
-  d.ano===els.ano.value&&(els.mes.value==="ALL"||d.mes===els.mes.value)
+  d.ano===filtroAno.value&&(filtroMes.value==="ALL"||d.mes===filtroMes.value)
  ).map(d=>d.semana))].sort();
- els.sem.innerHTML=`<option value="ALL">Todas</option>`+
+ filtroSemana.innerHTML=`<option value="ALL">Todas</option>`+
   s.map(v=>`<option>${v}</option>`).join("");
- els.sem.value="ALL";
- els.sem.onchange=atualizar;
+ filtroSemana.value="ALL";
+ filtroSemana.onchange=atualizar;
  atualizar();
 }
 
 function atualizar(){
  const f=dados.filter(d=>
-  d.ano===els.ano.value &&
-  (els.mes.value==="ALL"||d.mes===els.mes.value) &&
-  (els.sem.value==="ALL"||d.semana===els.sem.value)
+  d.ano===filtroAno.value &&
+  (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
+  (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
  );
- renderKPIs(f);renderTabela(f);renderGraficos(f);renderCalendario(f);
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
+ renderCalendario(f);
 }
 
-/* KPIs, gráficos e calendário seguem lógica corrigida */
+function renderKPIs(f){
+ let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
+ f.forEach(d=>{
+  t.trades+=d.trades;
+  t.pontos+=d.pontos;
+  t.gain+=d.gain;
+  t.stop+=d.stop;
+  t.zero+=d.zero;
+ });
+ const ops=t.gain+t.stop;
+ kTrades.textContent=t.trades;
+ kPontos.textContent=t.pontos;
+ kGains.textContent=t.gain;
+ kStops.textContent=t.stop;
+ kZero.textContent=t.zero;
+ kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
+}
+
+function renderTabela(f){
+ tbody.innerHTML="";
+ let tot={p:0,t:0,g:0,s:0,z:0};
+ f.forEach(d=>{
+  tot.p+=d.pontos;tot.t+=d.trades;
+  tot.g+=d.gain;tot.s+=d.stop;tot.z+=d.zero;
+  tbody.innerHTML+=`
+   <tr>
+    <td>${d.dia}</td>
+    <td style="color:${d.pontos>0?'var(--green)':d.pontos<0?'var(--red)':'var(--muted)'}">${d.pontos}</td>
+    <td>${d.trades}</td>
+    <td>${d.gain}</td>
+    <td>${d.stop}</td>
+    <td>${d.zero}</td>
+    <td>${d.ativo}</td>
+    <td>${d.semana}</td>
+   </tr>`;
+ });
+ tbody.innerHTML+=`
+  <tr class="total">
+   <td>TOTAL</td><td>${tot.p}</td><td>${tot.t}</td>
+   <td>${tot.g}</td><td>${tot.s}</td><td>${tot.z}</td>
+   <td colspan="2"></td>
+  </tr>`;
+}
+
+function renderGraficos(f){
+ let saldo=0,labels=[],ac=[];
+ f.forEach(d=>{saldo+=d.pontos;labels.push(d.dia);ac.push(saldo);});
+ if(chartA)chartA.destroy();
+ if(chartB)chartB.destroy();
+ chartA=new Chart(chartAcumuladoEl,{
+  type:"line",
+  data:{labels,datasets:[{data:ac,borderColor:"#22c55e",fill:true,tension:.35}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+ });
+ chartB=new Chart(chartBarEl,{
+  type:"bar",
+  data:{labels:["Gain","Stop","0x0"],datasets:[{data:[
+   f.reduce((a,b)=>a+b.gain,0),
+   f.reduce((a,b)=>a+b.stop,0),
+   f.reduce((a,b)=>a+b.zero,0)
+  ],backgroundColor:["#22c55e","#ef4444","#facc15"],borderRadius:10}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+ });
+}
+
+function renderCalendario(f){
+ calendar.innerHTML="";
+ if(!f.length)return;
+ const ano=f[0].data.getFullYear();
+ const mes=f[0].data.getMonth();
+ const primeiro=new Date(ano,mes,1);
+ const ultimo=new Date(ano,mes+1,0);
+
+ for(let i=0;i<primeiro.getDay();i++)
+  calendar.innerHTML+=`<div class="day empty"></div>`;
+
+ for(let d=1;d<=ultimo.getDate();d++){
+  const data=new Date(ano,mes,d);
+  const dia=f.filter(x=>x.data.toDateString()===data.toDateString());
+  let pts=dia.reduce((a,b)=>a+b.pontos,0);
+  let cls="day";
+  if(pts>0)cls+=" positive";
+  if(pts<0)cls+=" negative";
+  calendar.innerHTML+=`
+   <div class="${cls}">
+    <div class="day-number">${d}</div>
+    <div class="day-points" style="color:${pts>0?'var(--green)':pts<0?'var(--red)':'var(--muted)'}">${pts||""}</div>
+    <div class="day-info">Trades:${dia.reduce((a,b)=>a+b.trades,0)}</div>
+   </div>`;
+ }
+}
 
 loadCSV();
 </script>
