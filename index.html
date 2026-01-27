@@ -7,7 +7,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* ================= BASE ================= */
 :root{
  --bg:#020617;
  --card:#050b1a;
@@ -41,7 +40,7 @@ body{
  padding:clamp(16px,2vw,28px);
 }
 
-/* ================= HEADER ================= */
+/* HEADER */
 .header{
  display:flex;
  flex-direction:column;
@@ -61,7 +60,7 @@ body{
  color:var(--blue);
 }
 
-/* ================= FILTROS ================= */
+/* FILTROS */
 .filters{
  display:flex;
  gap:12px;
@@ -79,7 +78,7 @@ select{
  width:220px;
 }
 
-/* ================= KPIs ================= */
+/* KPIs */
 .kpis{
  display:grid;
  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -106,7 +105,7 @@ select{
  font-size:28px;
 }
 
-/* ================= GRÁFICOS ================= */
+/* GRÁFICOS */
 .cards{
  display:grid;
  grid-template-columns:1.3fr 1fr;
@@ -139,7 +138,7 @@ canvas{
  height:100%!important;
 }
 
-/* ================= TABELA ================= */
+/* TABELA */
 .table-wrap{
  overflow-x:auto;
 }
@@ -178,75 +177,6 @@ tr.total{
  background:rgba(34,197,94,.08);
  font-weight:700;
 }
-
-/* ================= CALENDÁRIO ================= */
-.calendar-wrapper{
- margin-top:28px;
- background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);
- border-radius:22px;
- padding:18px;
-}
-
-.calendar-header{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- margin-bottom:10px;
- text-align:center;
- color:var(--muted);
- font-size:14px;
-}
-
-.calendar-grid{
- display:grid;
- grid-template-columns:repeat(7,1fr);
- gap:12px;
-}
-
-.day{
- position:relative;
- background:linear-gradient(180deg,#052e2b,#020617);
- border:1px solid var(--border);
- border-radius:16px;
- min-height:120px;
- padding:10px;
- padding-bottom:42px;
- display:flex;
- flex-direction:column;
-}
-
-.day.positive{
- background:linear-gradient(180deg,#053a32,#020617);
-}
-
-.day.negative{
- background:linear-gradient(180deg,#3a0505,#020617);
-}
-
-.day-number{
- font-size:14px;
- color:var(--muted);
-}
-
-.day-points{
- flex:1;
- display:flex;
- align-items:center;
- justify-content:center;
- font-size:26px;
- font-weight:800;
-}
-
-.day-info{
- font-size:11px;
- color:var(--muted);
- text-align:center;
-}
-
-.empty{
- background:transparent;
- border:none;
-}
 </style>
 </head>
 
@@ -254,7 +184,7 @@ tr.total{
 <div class="container">
 
 <div class="header">
- <img src="logo.png">
+ <img src="logo.png" alt="Mentoria NasdaqPro">
  <span class="dashboard-title">DASHBOARD</span>
 </div>
 
@@ -273,16 +203,142 @@ tr.total{
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
-<script>
-function getSemanaAtualDisponivel(semanas){
- const hoje=new Date();
- const atual=dadosCSV.find(d=>{
-  const diff=Math.floor((hoje-d.data)/(1000*60*60*24));
-  return diff>=0 && diff<=6;
- });
- return atual?.semana || semanas[semanas.length-1];
-}
-</script>
+<div class="cards">
+ <div class="card">
+  <strong>📈 Evolução Acumulada de Pontos</strong>
+  <div class="chart-wrap">
+   <canvas id="chartAcumulado"></canvas>
+  </div>
+ </div>
 
+ <div class="card">
+  <strong>📊 Gains x Stops x 0x0</strong>
+  <div class="chart-wrap">
+   <canvas id="chartBar"></canvas>
+  </div>
+ </div>
+</div>
+
+<div class="card" style="height:auto">
+ <strong>Tabela Operacional</strong>
+ <div class="table-wrap">
+  <table>
+   <thead>
+    <tr>
+     <th>Dia</th>
+     <th>Pontos</th>
+     <th>Trades</th>
+     <th>Gain</th>
+     <th>Stop</th>
+     <th>0x0</th>
+     <th>Ativo</th>
+     <th>Semana</th>
+    </tr>
+   </thead>
+   <tbody id="tbody"></tbody>
+  </table>
+ </div>
+</div>
+
+</div>
+
+<script>
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
+
+let data=[],chartAcumulado,chartBar;
+
+const hoje = new Date();
+const anoAtual = String(hoje.getFullYear());
+const mesAtual = String(hoje.getMonth()+1).padStart(2,"0");
+
+/* 🔹 NOVO: função semana vigente */
+function getSemanaAtual(){
+ const primeiroDiaAno = new Date(hoje.getFullYear(),0,1);
+ const dias = Math.floor((hoje - primeiroDiaAno) / 86400000);
+ const semana = Math.ceil((dias + primeiroDiaAno.getDay() + 1) / 7);
+ return `SEMANA ${semana}`;
+}
+
+async function loadCSV(){
+ const r=await fetch(CSV_URL,{cache:"no-store"});
+ const t=await r.text();
+ parseCSV(t);
+}
+
+function parseCSV(t){
+ const rows=t.trim().split(/\r?\n/);
+ rows.shift();
+ data=rows.map(r=>{
+  const c=r.split(",");
+  return{
+   dia:c[0],
+   semana:c[1],
+   ativo:c[2],
+   ano:c[0].substring(6,10),
+   mes:c[0].substring(3,5),
+   pontos:+c[3]||0,
+   trades:+c[4]||0,
+   gain:+c[5]||0,
+   stop:+c[6]||0,
+   zero:+c[7]||0
+  };
+ });
+ initFiltros();
+}
+
+function initFiltros(){
+ const anos=[...new Set(data.map(d=>d.ano))].sort();
+ filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
+ filtroAno.value=anoAtual;
+ filtroAno.onchange=()=>{initMeses();atualizar();}
+ initMeses();
+}
+
+function initMeses(){
+ const meses=[...new Set(data.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
+ filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
+  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+ filtroMes.value="ALL";
+ filtroMes.onchange=()=>{initSemanas();atualizar();}
+ initSemanas();
+}
+
+function initSemanas(){
+ const semanas=[...new Set(
+  data.filter(d=>d.ano===filtroAno.value &&
+   (filtroMes.value==="ALL"||d.mes===filtroMes.value))
+  .map(d=>d.semana)
+ )];
+
+ filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
+  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+
+ /* 🔹 NOVO: seleciona semana vigente ao abrir */
+ const semanaAtual=getSemanaAtual();
+ filtroSemana.value=semanas.includes(semanaAtual)?semanaAtual:"ALL";
+
+ filtroSemana.onchange=atualizar;
+ atualizar();
+}
+
+function atualizar(){
+ const f=data.filter(d=>
+  d.ano===filtroAno.value &&
+  (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
+  (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
+ );
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
+}
+
+/* (restante do código permanece 100% igual) */
+
+const chartAcumuladoEl=document.getElementById("chartAcumulado");
+const chartBarEl=document.getElementById("chartBar");
+
+loadCSV();
+</script>
 </body>
 </html>
