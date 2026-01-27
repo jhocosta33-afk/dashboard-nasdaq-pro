@@ -718,7 +718,7 @@ const Dashboard = {
 
   this.elementos.filtroSemana.innerHTML = 
    '<option value="ALL">Todas as semanas</option>' +
-   semanas.map(s => `<option value="${s}">Semana ${s}</option>`).join("");
+   semanas.map(s => `<option value="${s}">${s}</option>`).join("");
 
   if (this.primeiraCarga) {
    const hoje = new Date();
