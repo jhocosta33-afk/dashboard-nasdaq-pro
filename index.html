@@ -138,6 +138,26 @@ canvas{
  height:100%!important;
 }
 
+/* ===== CALENDÁRIO NO DASHBOARD ===== */
+.calendar-card{
+ height:auto;
+ margin-bottom:24px;
+}
+
+.calendar-iframe{
+ width:100%;
+ height:360px; /* desktop */
+ border:none;
+ border-radius:16px;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+ .calendar-iframe{
+  height:520px;
+ }
+}
+
 /* TABELA */
 .table-wrap{
  overflow-x:auto;
@@ -224,15 +244,13 @@ tr.total{
 </div>
 
 <!-- CALENDÁRIO -->
-<div class="card" style="height:auto; margin-bottom:24px">
+<div class="card calendar-card">
  <strong>📅 Calendário Operacional</strong>
- <div style="width:100%; height:420px; border-radius:16px; overflow:hidden;">
-  <iframe 
-    src="calendario.html"
-    style="width:100%; height:100%; border:none;"
-    loading="lazy">
-  </iframe>
- </div>
+ <iframe
+  src="calendario.html"
+  class="calendar-iframe"
+  loading="lazy">
+ </iframe>
 </div>
 
 <!-- TABELA -->
