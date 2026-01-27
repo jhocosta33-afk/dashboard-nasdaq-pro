@@ -243,19 +243,6 @@ tr.total{
  text-align:center;
 }
 
-.day-badge{
- position:absolute;
- bottom:8px;
- left:50%;
- transform:translateX(-50%);
- background:rgba(0,0,0,.75);
- border:1px solid var(--border);
- border-radius:10px;
- padding:5px 8px;
- font-size:10px;
- white-space:nowrap;
-}
-
 .empty{
  background:transparent;
  border:none;
@@ -266,20 +253,17 @@ tr.total{
 <body>
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
- <img src="logo.png" alt="Mentoria NasdaqPro">
+ <img src="logo.png">
  <span class="dashboard-title">DASHBOARD</span>
 </div>
 
-<!-- FILTROS -->
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
  <select id="filtroSemana"></select>
 </div>
 
-<!-- KPIs -->
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
@@ -289,234 +273,16 @@ tr.total{
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
-<!-- GRÁFICOS -->
-<div class="cards">
- <div class="card">
-  <strong>📈 Evolução Acumulada de Pontos</strong>
-  <div class="chart-wrap">
-   <canvas id="chartAcumulado"></canvas>
-  </div>
- </div>
-
- <div class="card">
-  <strong>📊 Gains x Stops x 0x0</strong>
-  <div class="chart-wrap">
-   <canvas id="chartBar"></canvas>
-  </div>
- </div>
-</div>
-
-<!-- TABELA -->
-<div class="card" style="height:auto">
- <strong>Tabela Operacional</strong>
- <div class="table-wrap">
-  <table>
-   <thead>
-    <tr>
-     <th>Dia</th><th>Pontos</th><th>Trades</th>
-     <th>Gain</th><th>Stop</th><th>0x0</th>
-     <th>Ativo</th><th>Semana</th>
-    </tr>
-   </thead>
-   <tbody id="tbody"></tbody>
-  </table>
- </div>
-</div>
-
-<!-- CALENDÁRIO -->
-<div class="calendar-wrapper">
- <strong>📅 Calendário Operacional</strong>
- <div class="calendar-header">
-  <div>Dom</div><div>Seg</div><div>Ter</div>
-  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
- </div>
- <div class="calendar-grid" id="calendar"></div>
-</div>
-
-</div>
-
 <script>
-const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
-
-let dadosCSV=[],chartAcumulado,chartBar;
-
-async function loadCSV(){
- const r=await fetch(CSV_URL,{cache:"no-store"});
- const t=await r.text();
- parseCSV(t);
-}
-
-function parseCSV(t){
- const rows=t.trim().split(/\r?\n/);
- rows.shift();
- dadosCSV=rows.map(r=>{
-  const c=r.split(",");
-  const [d,m,a]=c[0].split("/");
-  return{
-   dia:c[0],
-   data:new Date(a,m-1,d),
-   semana:c[1],
-   ativo:c[2],
-   ano:a,
-   mes:m,
-   pontos:+c[3]||0,
-   trades:+c[4]||0,
-   gain:+c[5]||0,
-   stop:+c[6]||0,
-   zero:+c[7]||0
-  };
+function getSemanaAtualDisponivel(semanas){
+ const hoje=new Date();
+ const atual=dadosCSV.find(d=>{
+  const diff=Math.floor((hoje-d.data)/(1000*60*60*24));
+  return diff>=0 && diff<=6;
  });
- initFiltros();
+ return atual?.semana || semanas[semanas.length-1];
 }
-
-function initFiltros(){
- const anos=[...new Set(dadosCSV.map(d=>d.ano))].sort();
- filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
- filtroAno.value=anos[anos.length-1];
- filtroAno.onchange=()=>{initMeses();atualizar();}
- initMeses();
-}
-
-function initMeses(){
- const meses=[...new Set(dadosCSV.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
- filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+
-  meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
- filtroMes.value="ALL";
- filtroMes.onchange=()=>{initSemanas();atualizar();}
- initSemanas();
-}
-
-function initSemanas(){
- const semanas=[...new Set(
-  dadosCSV.filter(d=>d.ano===filtroAno.value &&
-   (filtroMes.value==="ALL"||d.mes===filtroMes.value))
-  .map(d=>d.semana)
- )];
- filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+
-  semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
- filtroSemana.value="ALL";
- filtroSemana.onchange=atualizar;
- atualizar();
-}
-
-function atualizar(){
- const f=dadosCSV.filter(d=>
-  d.ano===filtroAno.value &&
-  (filtroMes.value==="ALL"||d.mes===filtroMes.value) &&
-  (filtroSemana.value==="ALL"||d.semana===filtroSemana.value)
- );
- renderKPIs(f);
- renderTabela(f);
- renderGraficos(f);
- renderCalendario(f);
-}
-
-/* ===== DASHBOARD ===== */
-function renderKPIs(f){
- let t={trades:0,pontos:0,gain:0,stop:0,zero:0};
- f.forEach(d=>{
-  t.trades+=d.trades;
-  t.pontos+=d.pontos;
-  t.gain+=d.gain;
-  t.stop+=d.stop;
-  t.zero+=d.zero;
- });
- const ops=t.gain+t.stop;
- kTrades.textContent=t.trades;
- kPontos.textContent=t.pontos;
- kGains.textContent=t.gain;
- kStops.textContent=t.stop;
- kZero.textContent=t.zero;
- kAcc.textContent=ops?Math.round(t.gain/ops*100)+"%":"0%";
-}
-
-function renderTabela(f){
- tbody.innerHTML="";
- let tot={p:0,t:0,g:0,s:0,z:0};
- f.forEach(d=>{
-  tot.p+=d.pontos; tot.t+=d.trades;
-  tot.g+=d.gain; tot.s+=d.stop; tot.z+=d.zero;
-  tbody.innerHTML+=`
-   <tr>
-    <td>${d.dia}</td>
-    <td style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</td>
-    <td>${d.trades}</td>
-    <td>${d.gain}</td>
-    <td>${d.stop}</td>
-    <td>${d.zero}</td>
-    <td>${d.ativo}</td>
-    <td>${d.semana}</td>
-   </tr>`;
- });
- tbody.innerHTML+=`
-  <tr class="total">
-   <td>TOTAL</td><td>${tot.p}</td><td>${tot.t}</td>
-   <td>${tot.g}</td><td>${tot.s}</td><td>${tot.z}</td>
-   <td colspan="2"></td>
-  </tr>`;
-}
-
-function renderGraficos(f){
- let saldo=0,labels=[],ac=[0];
- f.forEach(d=>{saldo+=d.pontos;labels.push(d.dia);ac.push(saldo);});
- if(chartAcumulado)chartAcumulado.destroy();
- if(chartBar)chartBar.destroy();
-
- chartAcumulado=new Chart(chartAcumuladoEl,{
-  type:"line",
-  data:{labels:["Início",...labels],datasets:[{data:ac,borderColor:"#22c55e",fill:true,tension:.35}]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
- });
-
- chartBar=new Chart(chartBarEl,{
-  type:"bar",
-  data:{labels:["Gain","Stop","0x0"],datasets:[{data:[
-   f.reduce((a,b)=>a+b.gain,0),
-   f.reduce((a,b)=>a+b.stop,0),
-   f.reduce((a,b)=>a+b.zero,0)
-  ],backgroundColor:["#22c55e","#ef4444","#facc15"],borderRadius:10}]},
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
- });
-}
-
-/* ===== CALENDÁRIO ===== */
-function renderCalendario(f){
- const grid=document.getElementById("calendar");
- grid.innerHTML="";
- if(!f.length)return;
-
- const ano=f[0].data.getFullYear();
- const mes=f[0].data.getMonth();
- const primeiro=new Date(ano,mes,1);
- const ultimo=new Date(ano,mes+1,0);
-
- for(let i=0;i<primeiro.getDay();i++)
-  grid.innerHTML+=`<div class="day empty"></div>`;
-
- for(let d=1;d<=ultimo.getDate();d++){
-  const data=new Date(ano,mes,d);
-  const r=f.find(x=>x.data.toDateString()===data.toDateString());
-  let cls="day",pts="",info="";
-  if(r){
-   pts=r.pontos;
-   if(pts>0)cls+=" positive";
-   if(pts<0)cls+=" negative";
-   info=`Trades:${r.trades}<br>Gain:${r.gain} Stop:${r.stop}`;
-  }
-  grid.innerHTML+=`
-   <div class="${cls}">
-    <div class="day-number">${d}</div>
-    <div class="day-points" style="color:${pts<0?'var(--red)':'var(--green)'}">${pts??""}</div>
-    <div class="day-info">${info}</div>
-   </div>`;
- }
-}
-
-const chartAcumuladoEl=document.getElementById("chartAcumulado");
-const chartBarEl=document.getElementById("chartBar");
-
-loadCSV();
 </script>
+
 </body>
 </html>
