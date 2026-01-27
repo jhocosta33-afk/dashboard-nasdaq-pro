@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Calendário Operacional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+ --bg:#020617;
+ --card:#020617;
+ --border:rgba(255,255,255,.08);
+ --text:#e5e7eb;
+ --muted:#9ca3af;
+ --green:#22c55e;
+ --red:#ef4444;
+ --blue:#60a5fa;
+}
+
+*{
+ box-sizing:border-box;
+ font-family:Inter,system-ui,-apple-system;
+}
+
+body{
+ margin:0;
+ background:radial-gradient(circle at top,#020617,#000);
+ color:var(--text);
+ padding:24px;
+}
+
+.calendar{
+ max-width:1200px;
+ margin:auto;
+}
+
+.calendar-header{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ margin-bottom:10px;
+ text-align:center;
+ color:var(--muted);
+ font-size:14px;
+}
+
+.calendar-grid{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ gap:12px;
+}
+
+.day{
+ position:relative;
+ background:linear-gradient(180deg,#052e2b,#020617);
+ border:1px solid var(--border);
+ border-radius:18px;
+ min-height:150px;
+ padding:12px;
+ padding-bottom:48px; /* espaço reservado pro badge */
+ display:flex;
+ flex-direction:column;
+ transition:.2s;
+ overflow:hidden;
+}
+
+.day.positive{
+ background:linear-gradient(180deg,#053a32,#020617);
+}
+
+.day.negative{
+ background:linear-gradient(180deg,#3a0505,#020617);
+}
+
+.day-number{
+ font-size:16px;
+ color:var(--muted);
+}
+
+.day-points{
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:32px;
+ font-weight:800;
+}
+
+.day-info{
+ font-size:12px;
+ color:var(--muted);
+ text-align:center;
+}
+
+.day-row{
+ display:flex;
+ justify-content:center;
+ gap:12px;
+}
+
+.day-badge{
+ position:absolute;
+ bottom:10px;
+ left:50%;
+ transform:translateX(-50%) translateY(6px);
+ background:rgba(0,0,0,.75);
+ border:1px solid var(--border);
+ border-radius:10px;
+ padding:6px 10px;
+ font-size:11px;
+ white-space:nowrap;
+ opacity:0;
+ pointer-events:none;
+ transition:.2s;
+}
+
+.day:hover .day-badge{
+ opacity:1;
+ transform:translateX(-50%) translateY(0);
+}
+
+.empty{
+ background:transparent;
+ border:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="calendar">
+
+ <div class="calendar-header">
+  <div>Dom</div><div>Seg</div><div>Ter</div>
+  <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+ </div>
+
+ <div class="calendar-grid" id="calendar"></div>
+</div>
+
+<script>
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+
+let dados=[];
+
+async function loadCSV(){
+ const r=await fetch(CSV_URL,{cache:"no-store"});
+ const t=await r.text();
+ parseCSV(t);
+ montar();
+}
+
+function parseCSV(t){
+ const rows=t.trim().split(/\r?\n/);
+ rows.shift();
+ dados=rows.map(r=>{
+  const c=r.split(",");
+  const [d,m,a]=c[0].split("/");
+  return{
+   data:new Date(a,m-1,d),
+   pontos:+c[3],
+   trades:+c[4],
+   gain:+c[5],
+   stop:+c[6],
+   zero:+c[7],
+   semana:c[1],
+   ativo:c[2]
+  };
+ });
+}
+
+function montar(){
+ const hoje=new Date();
+ const ano=hoje.getFullYear();
+ const mes=hoje.getMonth();
+ const primeiro=new Date(ano,mes,1);
+ const ultimo=new Date(ano,mes+1,0);
+
+ const grid=document.getElementById("calendar");
+ grid.innerHTML="";
+
+ for(let i=0;i<primeiro.getDay();i++){
+  grid.innerHTML+=`<div class="day empty"></div>`;
+ }
+
+ for(let d=1;d<=ultimo.getDate();d++){
+  const data=new Date(ano,mes,d);
+  const r=dados.find(x=>x.data.toDateString()===data.toDateString());
+
+  let classe="day";
+  let pontos="",info="",badge="";
+
+  if(r){
+   pontos=r.pontos;
+   if(pontos>0) classe+=" positive";
+   if(pontos<0) classe+=" negative";
+
+   info+=`<div>Trades: ${r.trades}</div><div class="day-row">`;
+   if(r.gain>0) info+=`<span>Gain: ${r.gain}</span>`;
+   if(r.stop>0) info+=`<span>Stop: ${r.stop}</span>`;
+   if(r.zero>0) info+=`<span>0x0: ${r.zero}</span>`;
+   info+=`</div>`;
+
+   badge=`${r.semana} | ATIVO: ${r.ativo}`;
+  }
+
+  grid.innerHTML+=`
+   <div class="${classe}">
+    <div class="day-number">${d}</div>
+    <div class="day-points" style="color:${pontos<0?'var(--red)':'var(--green)'}">
+     ${pontos ?? ""}
+    </div>
+    <div class="day-info">${info}</div>
+    ${badge?`<div class="day-badge">${badge}</div>`:""}
+   </div>
+  `;
+ }
+}
+
+loadCSV();
+</script>
+
+</body>
+</html>
