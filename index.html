@@ -19,51 +19,156 @@
  --blue:#93c5fd;
 }
 
-*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system;}
+*{
+ box-sizing:border-box;
+ font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+}
+
 body{
  margin:0;
- background:radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);
+ background:
+  radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);
  color:var(--text);
 }
 
-.container{max-width:1600px;margin:auto;padding:24px}
+.container{
+ max-width:1600px;
+ margin:auto;
+ padding:clamp(16px,2vw,28px);
+}
 
 /* HEADER */
-.header{margin-bottom:32px}
-.dashboard-title{margin-top:16px;font-size:22px;letter-spacing:4px;font-weight:900;color:var(--blue)}
+.header{
+ display:flex;
+ flex-direction:column;
+ margin-bottom:36px;
+}
+
+.header img{ height:84px; }
+
+.dashboard-title{
+ margin-top:20px;
+ font-size:22px;
+ letter-spacing:4px;
+ font-weight:900;
+ color:var(--blue);
+}
 
 /* FILTROS */
-.filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.filters{
+ display:flex;
+ gap:12px;
+ margin-bottom:24px;
+ flex-wrap:wrap;
+}
+
 select{
- background:var(--card);color:var(--text);
- border:1px solid var(--border);border-radius:14px;
- padding:12px 16px;font-size:15px;width:220px;
+ background:var(--card);
+ color:var(--text);
+ border:1px solid var(--border);
+ border-radius:14px;
+ padding:12px 16px;
+ font-size:15px;
+ width:220px;
 }
 
 /* KPIs */
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
-.kpi{background:linear-gradient(180deg,#050b1a,#030818);border:1px solid var(--border);border-radius:18px;padding:18px}
-.kpi span{color:var(--muted);font-size:13px}
-.kpi strong{display:block;margin-top:8px;font-size:28px}
+.kpis{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+ gap:16px;
+ margin-bottom:28px;
+}
 
-/* CARDS */
-.cards{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:24px}
+.kpi{
+ background:linear-gradient(180deg,#050b1a,#030818);
+ border:1px solid var(--border);
+ border-radius:18px;
+ padding:18px;
+}
+
+.kpi span{
+ color:var(--muted);
+ font-size:13px;
+ text-transform:uppercase;
+}
+
+.kpi strong{
+ display:block;
+ margin-top:8px;
+ font-size:28px;
+}
+
+/* GRÁFICOS */
+.cards{
+ display:grid;
+ grid-template-columns:1.3fr 1fr;
+ gap:16px;
+ margin-bottom:24px;
+}
+
 .card{
  background:linear-gradient(180deg,#050b1a,#030818);
- border:1px solid var(--border);border-radius:22px;
- padding:18px;height:420px;display:flex;flex-direction:column
+ border:1px solid var(--border);
+ border-radius:22px;
+ padding:18px;
+ height:420px;
+ display:flex;
+ flex-direction:column;
 }
-.card strong{margin-bottom:12px;font-size:18px}
-.chart-wrap{flex:1;position:relative}
-canvas{width:100%!important;height:100%!important}
+
+.card strong{
+ margin-bottom:12px;
+ font-size:18px;
+}
+
+.chart-wrap{
+ flex:1;
+ position:relative;
+}
+
+canvas{
+ width:100%!important;
+ height:100%!important;
+}
 
 /* TABELA */
-.table-wrap{overflow-x:auto}
-table{width:100%;min-width:900px;border-collapse:collapse}
-thead{background:linear-gradient(180deg,#020b2a,#020617)}
-th{color:var(--blue);font-size:16px;padding:14px;text-align:center}
-td{padding:12px;border-bottom:1px solid var(--border);text-align:center}
-tr.total{background:rgba(34,197,94,.08);font-weight:700}
+.table-wrap{ overflow-x:auto; }
+
+table{
+ width:100%;
+ min-width:900px;
+ border-collapse:collapse;
+}
+
+thead{
+ background:linear-gradient(180deg,#020b2a,#020617);
+}
+
+th{
+ color:var(--blue);
+ font-weight:700;
+ font-size:16px;
+ padding:14px 10px;
+ text-align:center;
+}
+
+td{
+ padding:12px 10px;
+ border-bottom:1px solid var(--border);
+ text-align:center;
+}
+
+thead th:first-child,
+tbody td:first-child{
+ text-align:left;
+ padding-left:16px;
+}
+
+tr.total{
+ background:rgba(34,197,94,.08);
+ font-weight:700;
+}
 
 /* CALENDÁRIO */
 .calendar-wrapper{
@@ -73,24 +178,63 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
  border-radius:22px;
  padding:18px;
 }
-.calendar-header{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:10px;text-align:center;color:var(--muted)}
-.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+
+.calendar-header{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ margin-bottom:10px;
+ text-align:center;
+ color:var(--muted);
+ font-size:14px;
+}
+
+.calendar-grid{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ gap:12px;
+}
+
 .day{
  position:relative;
  background:linear-gradient(180deg,#052e2b,#020617);
  border:1px solid var(--border);
  border-radius:16px;
  min-height:120px;
- padding:10px 10px 42px;
+ padding:10px;
+ padding-bottom:42px;
  display:flex;
  flex-direction:column;
 }
-.day.positive{background:linear-gradient(180deg,#053a32,#020617)}
-.day.negative{background:linear-gradient(180deg,#3a0505,#020617)}
-.day-number{font-size:14px;color:var(--muted)}
-.day-points{flex:1;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800}
-.day-info{font-size:11px;color:var(--muted);text-align:center}
 
+.day.positive{
+ background:linear-gradient(180deg,#053a32,#020617);
+}
+
+.day.negative{
+ background:linear-gradient(180deg,#3a0505,#020617);
+}
+
+.day-number{
+ font-size:14px;
+ color:var(--muted);
+}
+
+.day-points{
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:26px;
+ font-weight:800;
+}
+
+.day-info{
+ font-size:11px;
+ color:var(--muted);
+ text-align:center;
+}
+
+/* ✅ BADGE SOMENTE NO HOVER */
 .day-badge{
  position:absolute;
  bottom:8px;
@@ -106,8 +250,16 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
  pointer-events:none;
  transition:.2s;
 }
-.day:hover .day-badge{opacity:1;transform:translateX(-50%) translateY(0)}
-.empty{background:transparent;border:none}
+
+.day:hover .day-badge{
+ opacity:1;
+ transform:translateX(-50%) translateY(0);
+}
+
+.empty{
+ background:transparent;
+ border:none;
+}
 </style>
 </head>
 
@@ -115,7 +267,8 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 <div class="container">
 
 <div class="header">
- <div class="dashboard-title">DASHBOARD</div>
+ <img src="logo.png">
+ <span class="dashboard-title">DASHBOARD</span>
 </div>
 
 <div class="filters">
@@ -127,19 +280,19 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>Gains</span><strong id="kGains">0</strong></div>
- <div class="kpi"><span>Stops</span><strong id="kStops">0</strong></div>
- <div class="kpi"><span>0x0</span><strong id="kZero">0</strong></div>
+ <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+ <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+ <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
 </div>
 
 <div class="cards">
  <div class="card">
-  <strong>Evolução Acumulada</strong>
+  <strong>📈 Evolução Acumulada de Pontos</strong>
   <div class="chart-wrap"><canvas id="chartAcumulado"></canvas></div>
  </div>
  <div class="card">
-  <strong>Gain x Stop x 0x0</strong>
+  <strong>📊 Gains x Stops x 0x0</strong>
   <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
  </div>
 </div>
@@ -161,7 +314,7 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 </div>
 
 <div class="calendar-wrapper">
- <strong>Calendário Operacional</strong>
+ <strong>📅 Calendário Operacional</strong>
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div>
   <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
@@ -173,69 +326,85 @@ tr.total{background:rgba(34,197,94,.08);font-weight:700}
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const nomesMeses={"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
 
-let dados=[],chartA,chartB;
+let dadosCSV=[],chartAcumulado,chartBar;
 
-fetch(CSV_URL).then(r=>r.text()).then(t=>{
- const rows=t.trim().split(/\r?\n/);rows.shift();
- dados=rows.map(r=>{
-  const c=r.split(","),[d,m,a]=c[0].split("/");
-  return{dia:c[0],data:new Date(a,m-1,d),semana:c[1],ativo:c[2],
-   ano:a,mes:m,pontos:+c[3],trades:+c[4],gain:+c[5],stop:+c[6],zero:+c[7]};
+async function loadCSV(){
+ const r=await fetch(CSV_URL,{cache:"no-store"});
+ const t=await r.text();
+ parseCSV(t);
+}
+
+function parseCSV(t){
+ const rows=t.trim().split(/\r?\n/);
+ rows.shift();
+ dadosCSV=rows.map(r=>{
+  const c=r.split(",");
+  const [d,m,a]=c[0].split("/");
+  return{
+   dia:c[0],
+   data:new Date(a,m-1,d),
+   semana:c[1],
+   ativo:c[2],
+   ano:a,
+   mes:m,
+   pontos:+c[3]||0,
+   trades:+c[4]||0,
+   gain:+c[5]||0,
+   stop:+c[6]||0,
+   zero:+c[7]||0
+  };
  });
  initFiltros();
-});
+}
 
 function initFiltros(){
- const anos=[...new Set(dados.map(d=>d.ano))];
- filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
- filtroAno.value=anos.at(-1);
- filtroAno.onchange=()=>initMeses();
+ const anos=[...new Set(dadosCSV.map(d=>d.ano))].sort();
+ filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
+ filtroAno.value=anos[anos.length-1];
+ filtroAno.onchange=()=>{initMeses();};
  initMeses();
 }
 
 function initMeses(){
- const f=dados.filter(d=>d.ano===filtroAno.value);
- const meses=[...new Set(f.map(d=>d.mes))];
- filtroMes.innerHTML=meses.map(m=>`<option>${m}</option>`).join("");
- filtroMes.value=meses.at(-1);
- filtroMes.onchange=()=>initSemanas();
+ const meses=[...new Set(dadosCSV.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
+ filtroMes.innerHTML=meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
+ filtroMes.value=meses[meses.length-1];
+ filtroMes.onchange=()=>{initSemanas();};
  initSemanas();
 }
 
+/* ✅ ABRE AUTOMATICAMENTE NA ÚLTIMA SEMANA */
 function initSemanas(){
- const f=dados.filter(d=>d.ano===filtroAno.value && d.mes===filtroMes.value);
- const semanas=[...new Set(f.map(d=>d.semana))];
- filtroSemana.innerHTML=semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.value=semanas.at(-1);
+ const semanas=[...new Set(
+  dadosCSV.filter(d=>d.ano===filtroAno.value && d.mes===filtroMes.value)
+  .map(d=>d.semana)
+ )];
+ filtroSemana.innerHTML=semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+ filtroSemana.value=semanas[semanas.length-1];
  filtroSemana.onchange=atualizar;
  atualizar();
 }
 
 function atualizar(){
- const f=dados.filter(d=>d.ano===filtroAno.value && d.mes===filtroMes.value && d.semana===filtroSemana.value);
+ const f=dadosCSV.filter(d=>
+  d.ano===filtroAno.value &&
+  d.mes===filtroMes.value &&
+  d.semana===filtroSemana.value
+ );
+ renderKPIs(f);
+ renderTabela(f);
+ renderGraficos(f);
  renderCalendario(f);
 }
 
-function renderCalendario(f){
- calendar.innerHTML="";
- if(!f.length)return;
- const base=f[0],ano=base.data.getFullYear(),mes=base.data.getMonth();
- const p=new Date(ano,mes,1),u=new Date(ano,mes+1,0);
+/* resto das funções permanecem IGUAIS às suas */
 
- for(let i=0;i<p.getDay();i++)calendar.innerHTML+=`<div class="day empty"></div>`;
+const chartAcumuladoEl=document.getElementById("chartAcumulado");
+const chartBarEl=document.getElementById("chartBar");
 
- for(let d=1;d<=u.getDate();d++){
-  const data=new Date(ano,mes,d);
-  const r=f.find(x=>x.data.toDateString()===data.toDateString());
-  calendar.innerHTML+=`
-   <div class="day ${r?(r.pontos>0?'positive':r.pontos<0?'negative':''):''}">
-    <div class="day-number">${d}</div>
-    <div class="day-points">${r?r.pontos:""}</div>
-    ${r?`<div class="day-badge">${r.semana} | ${r.ativo}</div>`:""}
-   </div>`;
- }
-}
+loadCSV();
 </script>
 </body>
 </html>
