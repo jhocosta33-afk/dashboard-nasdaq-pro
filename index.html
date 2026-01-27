@@ -8,59 +8,23 @@
 
 <style>
 :root{
- --bg:#020617;
- --card:#050b1a;
- --border:rgba(255,255,255,.08);
- --text:#e5e7eb;
- --muted:#9ca3af;
- --green:#22c55e;
- --red:#ef4444;
- --yellow:#facc15;
- --blue:#93c5fd;
+ --bg:#020617;--card:#050b1a;--border:rgba(255,255,255,.08);
+ --text:#e5e7eb;--muted:#9ca3af;
+ --green:#22c55e;--red:#ef4444;--yellow:#facc15;--blue:#93c5fd;
 }
-
 *{box-sizing:border-box;font-family:Inter,system-ui}
-body{
- margin:0;
- background:radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);
- color:var(--text);
-}
+body{margin:0;background:radial-gradient(circle at top,#334155 0%,#1e293b 35%,#020617 75%);color:var(--text)}
 .container{max-width:1600px;margin:auto;padding:24px}
-
-/* HEADER */
-.header{margin-bottom:36px}
-.header img{height:84px}
-.dashboard-title{margin-top:20px;font-size:22px;letter-spacing:4px;font-weight:900;color:var(--blue)}
-
-/* FILTROS */
-.filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
-select{
- background:var(--card);color:var(--text);
- border:1px solid var(--border);border-radius:14px;
- padding:12px 16px;font-size:15px;width:220px
-}
-
-/* KPIs */
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
-.kpi{background:linear-gradient(180deg,#050b1a,#030818);border:1px solid var(--border);border-radius:18px;padding:18px}
-.kpi span{color:var(--muted);font-size:13px}
-.kpi strong{display:block;margin-top:8px;font-size:28px}
-
-/* CARDS */
-.cards{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:24px}
-.card{background:linear-gradient(180deg,#050b1a,#030818);border:1px solid var(--border);border-radius:22px;padding:18px;height:420px}
-.chart-wrap{height:100%}
-
-/* TABELA */
+.filters{display:flex;gap:12px;margin-bottom:24px}
+select{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:12px;width:220px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.kpi{background:#050b1a;border:1px solid var(--border);border-radius:18px;padding:18px}
+.cards{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin:24px 0}
+.card{background:#050b1a;border:1px solid var(--border);border-radius:22px;padding:18px;height:420px}
 table{width:100%;border-collapse:collapse}
-th,td{padding:12px;border-bottom:1px solid var(--border);text-align:center}
-th{color:var(--blue)}
-tr.total{background:rgba(34,197,94,.1);font-weight:700}
-
-/* CALENDÁRIO */
-.calendar-wrapper{margin-top:28px;background:linear-gradient(180deg,#050b1a,#030818);border:1px solid var(--border);border-radius:22px;padding:18px}
-.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
-.day{background:#020617;border:1px solid var(--border);border-radius:16px;min-height:110px;padding:8px}
+th,td{padding:10px;border-bottom:1px solid var(--border);text-align:center}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.day{background:#020617;border:1px solid var(--border);border-radius:14px;padding:8px;min-height:90px}
 .day.positive{background:#053a32}
 .day.negative{background:#3a0505}
 .empty{border:none;background:transparent}
@@ -70,11 +34,6 @@ tr.total{background:rgba(34,197,94,.1);font-weight:700}
 <body>
 <div class="container">
 
-<div class="header">
- <img src="logo.png">
- <div class="dashboard-title">DASHBOARD</div>
-</div>
-
 <div class="filters">
  <select id="filtroAno"></select>
  <select id="filtroMes"></select>
@@ -82,12 +41,12 @@ tr.total{background:rgba(34,197,94,.1);font-weight:700}
 </div>
 
 <div class="kpis">
- <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
- <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
- <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
- <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
- <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+ <div class="kpi">Trades <strong id="kTrades">0</strong></div>
+ <div class="kpi">Pontos <strong id="kPontos">0</strong></div>
+ <div class="kpi">Gains <strong id="kGains">0</strong></div>
+ <div class="kpi">Stops <strong id="kStops">0</strong></div>
+ <div class="kpi">0x0 <strong id="kZero">0</strong></div>
+ <div class="kpi">Assertividade <strong id="kAcc">0%</strong></div>
 </div>
 
 <div class="cards">
@@ -95,46 +54,44 @@ tr.total{background:rgba(34,197,94,.1);font-weight:700}
  <div class="card"><canvas id="chartBar"></canvas></div>
 </div>
 
-<div class="card" style="height:auto">
- <table>
-  <thead>
-   <tr>
-    <th>Dia</th><th>Pontos</th><th>Trades</th>
-    <th>Gain</th><th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th>
-   </tr>
-  </thead>
-  <tbody id="tbody"></tbody>
- </table>
-</div>
+<table>
+ <thead>
+  <tr><th>Dia</th><th>Pontos</th><th>Trades</th><th>Gain</th><th>Stop</th><th>0x0</th><th>Ativo</th><th>Semana</th></tr>
+ </thead>
+ <tbody id="tbody"></tbody>
+</table>
 
-<div class="calendar-wrapper">
- <div class="calendar-grid" id="calendar"></div>
-</div>
+<div class="calendar-grid" id="calendar"></div>
 
 </div>
 
 <script>
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
-const mesesNome=["","Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const meses=["","Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
-let dados=[],chart1,chart2;
+let dados=[],c1,c2;
 
 fetch(CSV_URL).then(r=>r.text()).then(t=>{
  const rows=t.trim().split("\n");rows.shift();
  dados=rows.map(l=>{
   const c=l.split(",");
   const [d,m,a]=c[0].split("/");
+  const semTxt=c[1]?.trim()||"";
+  const semNum=(semTxt.match(/\d+/)||[])[0]||"";
   return{
    dia:c[0],data:new Date(a,m-1,d),
-   semana:+c[1],ativo:c[2],ano:a,mes:+m,
-   pontos:+c[3],trades:+c[4],gain:+c[5],stop:+c[6],zero:+c[7]
+   semanaTexto:semTxt||"SEMANA "+semNum,
+   semanaNum:+semNum||0,
+   ativo:c[2],ano:a,mes:+m,
+   pontos:+c[3]||0,trades:+c[4]||0,
+   gain:+c[5]||0,stop:+c[6]||0,zero:+c[7]||0
   }
  });
  init();
 });
 
 function init(){
- const anos=[...new Set(dados.map(d=>d.ano))].sort();
+ const anos=[...new Set(dados.map(d=>d.ano))];
  filtroAno.innerHTML=anos.map(a=>`<option>${a}</option>`).join("");
  filtroAno.value=anos.at(-1);
  filtroAno.onchange=()=>{initMeses();update();}
@@ -142,25 +99,21 @@ function init(){
 }
 
 function initMeses(){
- const meses=[...new Set(dados.filter(d=>d.ano==filtroAno.value && (d.trades||d.pontos)).map(d=>d.mes))].sort();
- filtroMes.innerHTML=meses.map(m=>`<option value="${m}">${mesesNome[m]}</option>`).join("");
- filtroMes.value=meses.at(-1);
+ const ms=[...new Set(dados.filter(d=>d.ano==filtroAno.value).map(d=>d.mes))];
+ filtroMes.innerHTML=ms.map(m=>`<option value="${m}">${meses[m]}</option>`).join("");
+ filtroMes.value=ms.at(-1);
  filtroMes.onchange=()=>{initSemanas();update();}
  initSemanas();
 }
 
-/* ⭐ MUDANÇA 2 – ÚLTIMA SEMANA COM DADOS */
 function initSemanas(){
- const semanas=[...new Set(
-  dados.filter(d=>
-   d.ano==filtroAno.value &&
-   d.mes==filtroMes.value &&
-   (d.trades||d.pontos)
-  ).map(d=>d.semana)
- )].sort((a,b)=>a-b);
+ const sems=[...new Map(
+  dados.filter(d=>d.ano==filtroAno.value&&d.mes==filtroMes.value&&(d.trades||d.pontos))
+   .map(d=>[d.semanaTexto,d])
+ ).values()].sort((a,b)=>a.semanaNum-b.semanaNum);
 
- filtroSemana.innerHTML=semanas.map(s=>`<option>${s}</option>`).join("");
- filtroSemana.value=semanas.at(-1);
+ filtroSemana.innerHTML=sems.map(s=>`<option value="${s.semanaTexto}">${s.semanaTexto}</option>`).join("");
+ filtroSemana.value=sems.at(-1)?.semanaTexto||"";
  filtroSemana.onchange=update;
  update();
 }
@@ -169,53 +122,43 @@ function update(){
  const f=dados.filter(d=>
   d.ano==filtroAno.value &&
   d.mes==filtroMes.value &&
-  d.semana==filtroSemana.value
+  d.semanaTexto==filtroSemana.value
  );
-
  renderKPIs(f);renderTabela(f);renderCharts(f);renderCalendar(f);
 }
 
 function renderKPIs(f){
  let t={tr:0,p:0,g:0,s:0,z:0};
  f.forEach(d=>{t.tr+=d.trades;t.p+=d.pontos;t.g+=d.gain;t.s+=d.stop;t.z+=d.zero});
- kTrades.textContent=t.tr;
- kPontos.textContent=t.p;
- kGains.textContent=t.g;
- kStops.textContent=t.s;
- kZero.textContent=t.z;
+ kTrades.textContent=t.tr;kPontos.textContent=t.p;kGains.textContent=t.g;
+ kStops.textContent=t.s;kZero.textContent=t.z;
  kAcc.textContent=t.g+t.s?Math.round(t.g/(t.g+t.s)*100)+"%":"0%";
 }
 
 function renderTabela(f){
  tbody.innerHTML="";
  f.forEach(d=>{
-  tbody.innerHTML+=`<tr>
-   <td>${d.dia}</td><td>${d.pontos}</td><td>${d.trades}</td>
-   <td>${d.gain}</td><td>${d.stop}</td><td>${d.zero}</td>
-   <td>${d.ativo}</td><td>${d.semana}</td></tr>`;
+  tbody.innerHTML+=`<tr><td>${d.dia}</td><td>${d.pontos}</td><td>${d.trades}</td><td>${d.gain}</td><td>${d.stop}</td><td>${d.zero}</td><td>${d.ativo}</td><td>${d.semanaTexto}</td></tr>`;
  });
 }
 
 function renderCharts(f){
  let s=0,l=[],a=[0];
  f.forEach(d=>{s+=d.pontos;l.push(d.dia);a.push(s)});
- if(chart1)chart1.destroy();
- if(chart2)chart2.destroy();
- chart1=new Chart(chartAcumulado,{type:"line",data:{labels:["Início",...l],datasets:[{data:a,borderColor:"#22c55e"}]},options:{plugins:{legend:{display:false}}}});
- chart2=new Chart(chartBar,{type:"bar",data:{labels:["Gain","Stop","0x0"],datasets:[{data:[f.reduce((a,b)=>a+b.gain,0),f.reduce((a,b)=>a+b.stop,0),f.reduce((a,b)=>a+b.zero,0)],backgroundColor:["#22c55e","#ef4444","#facc15"]}]},options:{plugins:{legend:{display:false}}}});
+ if(c1)c1.destroy();if(c2)c2.destroy();
+ c1=new Chart(chartAcumulado,{type:"line",data:{labels:["Início",...l],datasets:[{data:a,borderColor:"#22c55e"}]},options:{plugins:{legend:{display:false}}}});
+ c2=new Chart(chartBar,{type:"bar",data:{labels:["Gain","Stop","0x0"],datasets:[{data:[f.reduce((a,b)=>a+b.gain,0),f.reduce((a,b)=>a+b.stop,0),f.reduce((a,b)=>a+b.zero,0)],backgroundColor:["#22c55e","#ef4444","#facc15"]}]},options:{plugins:{legend:{display:false}}}});
 }
 
 function renderCalendar(f){
  calendar.innerHTML="";
- const base=f[0]; if(!base)return;
- const y=base.data.getFullYear(),m=base.data.getMonth();
+ if(!f.length)return;
+ const y=f[0].data.getFullYear(),m=f[0].data.getMonth();
  const first=new Date(y,m,1),last=new Date(y,m+1,0);
  for(let i=0;i<first.getDay();i++)calendar.innerHTML+=`<div class="day empty"></div>`;
  for(let d=1;d<=last.getDate();d++){
   const r=f.find(x=>x.data.getDate()==d);
-  calendar.innerHTML+=`<div class="day ${r?(r.pontos>0?'positive':r.pontos<0?'negative':''):''}">
-   ${d}<br>${r?r.pontos:""}
-  </div>`;
+  calendar.innerHTML+=`<div class="day ${r?(r.pontos>0?'positive':r.pontos<0?'negative':''):''}">${d}<br>${r?r.pontos:""}</div>`;
  }
 }
 </script>
