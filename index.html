@@ -32,8 +32,16 @@ body {
  background: var(--main-bg);
  color: var(--text);
  display: flex;
+ justify-content: center;
  min-height: 100vh;
  overflow: hidden;
+}
+
+.dashboard-container {
+ display: flex;
+ max-width: 1600px;
+ width: 100%;
+ min-height: 100vh;
 }
 
 /* SIDEBAR */
@@ -141,13 +149,10 @@ body {
  padding: 25px 30px;
  overflow-y: auto;
  overflow-x: hidden;
- display: flex;
- justify-content: center;
 }
 
-.main-wrapper {
- width: 100%;
- max-width: 1400px;
+.header-main {
+ margin-bottom: 20px;
 }
 
 .header-main {
@@ -155,33 +160,36 @@ body {
 }
 
 .header-main h1 {
- font-size: 26px;
+ font-size: 28px;
  font-weight: 800;
  margin-bottom: 5px;
 }
 
 .header-main p {
  color: var(--muted);
- font-size: 13px;
+ font-size: 14px;
 }
 
 /* KPIs HORIZONTAL */
 .kpis {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
- gap: 12px;
- margin-bottom: 20px;
+ grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+ gap: 16px;
+ margin-bottom: 24px;
 }
 
 .kpi {
  background: var(--card-bg);
- padding: 14px 16px;
- border-radius: 10px;
+ padding: 18px 20px;
+ border-radius: 12px;
  border: 1px solid var(--border);
  position: relative;
  overflow: hidden;
  transition: all 0.2s;
- min-height: 80px;
+ min-height: 95px;
+ display: flex;
+ flex-direction: column;
+ justify-content: space-between;
 }
 
 .kpi::before {
@@ -208,18 +216,19 @@ body {
 
 .kpi span {
  display: block;
- font-size: 10px;
+ font-size: 11px;
  text-transform: uppercase;
- letter-spacing: 1.2px;
+ letter-spacing: 1.5px;
  color: var(--muted);
- margin-bottom: 6px;
  font-weight: 600;
 }
 
 .kpi strong {
  display: block;
- font-size: 26px;
+ font-size: 32px;
  font-weight: 700;
+ line-height: 1;
+ margin-top: 8px;
 }
 
 .kpi input {
@@ -227,11 +236,11 @@ body {
  color: var(--text);
  border: 1px solid var(--border);
  border-radius: 8px;
- padding: 6px;
- font-size: 20px;
+ padding: 8px;
+ font-size: 24px;
  font-weight: 800;
  width: 100%;
- margin-top: 4px;
+ margin-top: 8px;
  text-align: center;
 }
 
@@ -240,7 +249,7 @@ body {
  display: grid;
  grid-template-columns: 2fr 1fr;
  gap: 16px;
- margin-bottom: 20px;
+ margin-bottom: 24px;
 }
 
 .chart-card {
@@ -250,23 +259,22 @@ body {
  border: 1px solid var(--border);
  display: flex;
  flex-direction: column;
- height: 240px;
+ height: 420px;
 }
 
 .chart-card h3 {
- font-size: 13px;
- margin-bottom: 10px;
+ font-size: 16px;
+ margin-bottom: 12px;
  font-weight: 600;
  display: flex;
  align-items: center;
- gap: 6px;
+ gap: 8px;
 }
 
 .chart-wrap {
  flex: 1;
  position: relative;
- min-height: 180px;
- max-height: 200px;
+ min-height: 0;
 }
 
 canvas {
@@ -276,7 +284,7 @@ canvas {
 
 /* CALENDAR */
 .calendar-wrapper {
- margin-bottom: 20px;
+ margin-bottom: 24px;
  background: var(--card-bg);
  border: 1px solid var(--border);
  border-radius: 12px;
@@ -285,35 +293,35 @@ canvas {
 
 .calendar-wrapper strong {
  display: block;
- margin-bottom: 12px;
- font-size: 14px;
+ margin-bottom: 16px;
+ font-size: 16px;
  font-weight: 600;
 }
 
 .calendar-header {
  display: grid;
  grid-template-columns: repeat(7, 1fr);
- margin-bottom: 8px;
+ margin-bottom: 10px;
  text-align: center;
  color: var(--muted);
- font-size: 11px;
+ font-size: 14px;
  font-weight: 600;
 }
 
 .calendar-grid {
  display: grid;
  grid-template-columns: repeat(7, 1fr);
- gap: 8px;
+ gap: 10px;
 }
 
 .day {
  position: relative;
  background: linear-gradient(180deg, #1a2332, var(--card-bg));
  border: 1px solid var(--border);
- border-radius: 8px;
- min-height: 75px;
- padding: 6px;
- padding-bottom: 28px;
+ border-radius: 12px;
+ min-height: 100px;
+ padding: 8px;
+ padding-bottom: 36px;
  display: flex;
  flex-direction: column;
  transition: all 0.2s;
@@ -327,14 +335,15 @@ canvas {
  background: linear-gradient(180deg, #3a0505, var(--card-bg));
 }
 
-.day:hover {
+.day:hover:not(.empty) {
  transform: translateY(-2px);
- box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+ box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
 .day-number {
- font-size: 10px;
+ font-size: 13px;
  color: var(--muted);
+ font-weight: 600;
 }
 
 .day-points {
@@ -342,27 +351,27 @@ canvas {
  display: flex;
  align-items: center;
  justify-content: center;
- font-size: 22px;
+ font-size: 32px;
  font-weight: 800;
 }
 
 .day-info {
- font-size: 9px;
+ font-size: 13px;
  color: var(--muted);
  text-align: center;
- line-height: 1.2;
+ line-height: 1.5;
 }
 
 .day-badge {
  position: absolute;
- bottom: 4px;
+ bottom: 8px;
  left: 50%;
  transform: translateX(-50%);
- background: rgba(0,0,0,0.8);
+ background: rgba(0,0,0,0.75);
  border: 1px solid var(--border);
- border-radius: 6px;
- padding: 3px 6px;
- font-size: 8px;
+ border-radius: 10px;
+ padding: 5px 8px;
+ font-size: 10px;
  white-space: nowrap;
  opacity: 0;
  transition: opacity 0.2s ease;
@@ -383,13 +392,13 @@ canvas {
  border: 1px solid var(--border);
  border-radius: 12px;
  padding: 18px;
- margin-bottom: 20px;
+ margin-bottom: 28px;
 }
 
 .table-card strong {
  display: block;
- margin-bottom: 12px;
- font-size: 14px;
+ margin-bottom: 16px;
+ font-size: 16px;
  font-weight: 600;
 }
 
@@ -410,16 +419,16 @@ thead {
 th {
  color: var(--blue);
  font-weight: 700;
- font-size: 13px;
- padding: 12px 8px;
+ font-size: 16px;
+ padding: 14px 10px;
  text-align: center;
 }
 
 td {
- padding: 10px 8px;
+ padding: 12px 10px;
  border-bottom: 1px solid var(--border);
  text-align: center;
- font-size: 13px;
+ font-size: 14px;
 }
 
 thead th:first-child,
@@ -429,8 +438,12 @@ tbody td:first-child {
 }
 
 tr.total {
- background: rgba(34,197,94,0.1);
+ background: rgba(34,197,94,0.08);
  font-weight: 700;
+}
+
+tbody tr:hover {
+ background: rgba(147,197,253,0.05);
 }
 
 /* MODO BÁSICO */
@@ -532,6 +545,7 @@ body.basic-mode .pro-only {
  <div class="spinner"></div>
 </div>
 
+<div class="dashboard-container">
 <!-- SIDEBAR -->
 <div class="sidebar">
  <div class="logo">
@@ -646,6 +660,7 @@ body.basic-mode .pro-only {
   </div>
  </div>
  </div>
+</div>
 </div>
 
 <script>
