@@ -38,9 +38,9 @@ body {
 
 /* SIDEBAR */
 .sidebar {
- width: 280px;
+ width: 260px;
  background: var(--sidebar-bg);
- padding: 30px 20px;
+ padding: 25px 18px;
  border-right: 1px solid var(--border);
  overflow-y: auto;
  display: flex;
@@ -50,51 +50,32 @@ body {
 .logo {
  display: flex;
  align-items: center;
- gap: 12px;
- margin-bottom: 40px;
-}
-
-.logo-icon {
- width: 48px;
- height: 48px;
- background: linear-gradient(135deg, #667eea, #764ba2);
- border-radius: 12px;
- display: flex;
- align-items: center;
  justify-content: center;
- font-size: 24px;
- font-weight: 800;
+ margin-bottom: 20px;
 }
 
-.logo-text h1 {
- font-size: 18px;
- font-weight: 800;
- color: var(--blue);
- letter-spacing: 1px;
-}
-
-.logo-text p {
- font-size: 11px;
- color: var(--muted);
- text-transform: uppercase;
- letter-spacing: 2px;
+.logo img {
+ max-height: 60px;
+ width: auto;
+ max-width: 100%;
 }
 
 .filters {
- margin-bottom: 30px;
+ margin-bottom: auto;
+ margin-top: 20px;
 }
 
 .filter-group {
- margin-bottom: 20px;
+ margin-bottom: 16px;
 }
 
 .filter-group label {
  display: block;
- font-size: 11px;
+ font-size: 10px;
  text-transform: uppercase;
  letter-spacing: 1px;
  color: var(--muted);
- margin-bottom: 8px;
+ margin-bottom: 6px;
  font-weight: 600;
 }
 
@@ -103,9 +84,9 @@ body {
  background: var(--card-bg);
  color: var(--text);
  border: 1px solid var(--border);
- padding: 12px;
+ padding: 10px;
  border-radius: 8px;
- font-size: 14px;
+ font-size: 13px;
  cursor: pointer;
  transition: all 0.2s;
 }
@@ -120,31 +101,38 @@ body {
  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
 }
 
+.filter-group select:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+}
+
 .mode-toggle {
  width: 100%;
- background: linear-gradient(135deg, #667eea, #764ba2);
+ background: linear-gradient(135deg, #3b82f6, #2563eb);
  color: white;
  border: none;
- padding: 14px;
+ padding: 12px;
  border-radius: 10px;
  font-weight: 700;
- font-size: 14px;
+ font-size: 13px;
  cursor: pointer;
  transition: all 0.2s;
  display: flex;
  align-items: center;
  justify-content: center;
  gap: 8px;
- margin-top: auto;
+ margin-bottom: 20px;
+ text-transform: uppercase;
+ letter-spacing: 1px;
 }
 
 .mode-toggle:hover {
  transform: translateY(-2px);
- box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+ box-shadow: 0 8px 20px rgba(59,130,246,0.4);
 }
 
-.mode-toggle.basic {
- background: linear-gradient(135deg, #3b82f6, #2563eb);
+.mode-toggle.pro {
+ background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
 /* MAIN CONTENT */
@@ -159,27 +147,27 @@ body {
 }
 
 .header-main h1 {
- font-size: 32px;
+ font-size: 28px;
  font-weight: 800;
  margin-bottom: 5px;
 }
 
 .header-main p {
  color: var(--muted);
- font-size: 14px;
+ font-size: 13px;
 }
 
 /* KPIs HORIZONTAL */
 .kpis {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
- gap: 16px;
- margin-bottom: 30px;
+ grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+ gap: 14px;
+ margin-bottom: 25px;
 }
 
 .kpi {
  background: var(--card-bg);
- padding: 20px;
+ padding: 18px;
  border-radius: 12px;
  border: 1px solid var(--border);
  position: relative;
@@ -211,17 +199,17 @@ body {
 
 .kpi span {
  display: block;
- font-size: 11px;
+ font-size: 10px;
  text-transform: uppercase;
- letter-spacing: 1.5px;
+ letter-spacing: 1.3px;
  color: var(--muted);
- margin-bottom: 10px;
+ margin-bottom: 8px;
  font-weight: 600;
 }
 
 .kpi strong {
  display: block;
- font-size: 32px;
+ font-size: 28px;
  font-weight: 700;
 }
 
@@ -231,10 +219,10 @@ body {
  border: 1px solid var(--border);
  border-radius: 8px;
  padding: 8px;
- font-size: 24px;
+ font-size: 22px;
  font-weight: 800;
  width: 100%;
- margin-top: 8px;
+ margin-top: 6px;
  text-align: center;
 }
 
@@ -536,12 +524,13 @@ body.basic-mode .pro-only {
 <!-- SIDEBAR -->
 <div class="sidebar">
  <div class="logo">
-  <div class="logo-icon">📊</div>
-  <div class="logo-text">
-   <h1>NASDAQ PRO</h1>
-   <p>Dashboard</p>
-  </div>
+  <img src="https://i.imgur.com/placeholder.png" alt="NASDAQ PRO" style="height: 50px; width: auto;" onerror="this.style.display='none'">
  </div>
+ 
+ <button class="mode-toggle" id="toggleMode">
+  <span id="modeIcon">📊</span>
+  <span id="modeText">BÁSICO</span>
+ </button>
  
  <div class="filters">
   <div class="filter-group">
@@ -557,11 +546,6 @@ body.basic-mode .pro-only {
    <select id="filtroSemana"></select>
   </div>
  </div>
- 
- <button class="mode-toggle basic" id="toggleMode">
-  <span id="modeIcon">📊</span>
-  <span id="modeText">Modo Básico</span>
- </button>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -731,9 +715,23 @@ const Dashboard = {
   
   filtroMes.onchange = () => {
    this.primeiraCarga = false;
+   
+   // Bloqueia/Desbloqueia select de semanas
+   if (filtroMes.value === "ALL") {
+    filtroSemana.disabled = true;
+    filtroSemana.value = "ALL";
+   } else {
+    filtroSemana.disabled = false;
+   }
+   
    this.inicializarSemanas();
    this.atualizar();
   };
+  
+  // Inicializa estado do select de semanas
+  if (filtroMes.value === "ALL") {
+   filtroSemana.disabled = true;
+  }
   
   this.inicializarSemanas();
  },
@@ -776,12 +774,13 @@ const Dashboard = {
   const toggleBtn = document.getElementById('toggleMode');
   const modeIcon = document.getElementById('modeIcon');
   const modeText = document.getElementById('modeText');
-  let isProMode = false;
+  let isProMode = true; // COMEÇA EM PRO AGORA
   
-  document.body.classList.add('basic-mode');
-  toggleBtn.classList.add('basic');
-  modeIcon.textContent = '📊';
-  modeText.textContent = 'Modo Básico';
+  // Define modo PRO como padrão
+  document.body.classList.remove('basic-mode');
+  toggleBtn.classList.add('pro');
+  modeIcon.textContent = '⚡';
+  modeText.textContent = 'PRO';
   
   if (toggleBtn) {
    toggleBtn.addEventListener('click', () => {
@@ -789,14 +788,16 @@ const Dashboard = {
     
     if (isProMode) {
      document.body.classList.remove('basic-mode');
+     toggleBtn.classList.add('pro');
      toggleBtn.classList.remove('basic');
      modeIcon.textContent = '⚡';
-     modeText.textContent = 'Modo PRO';
+     modeText.textContent = 'PRO';
     } else {
      document.body.classList.add('basic-mode');
+     toggleBtn.classList.remove('pro');
      toggleBtn.classList.add('basic');
      modeIcon.textContent = '📊';
-     modeText.textContent = 'Modo Básico';
+     modeText.textContent = 'BÁSICO';
     }
    });
   }
