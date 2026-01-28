@@ -32,7 +32,7 @@ body {
  background: var(--main-bg);
  color: var(--text);
  display: flex;
- height: 100vh;
+ min-height: 100vh;
  overflow: hidden;
 }
 
@@ -45,6 +45,7 @@ body {
  overflow-y: auto;
  display: flex;
  flex-direction: column;
+ flex-shrink: 0;
 }
 
 .logo {
@@ -137,10 +138,16 @@ body {
 /* MAIN CONTENT */
 .main-content {
  flex: 1;
- padding: 30px;
+ padding: 25px 30px;
  overflow-y: auto;
- max-width: 1600px;
- margin: 0 auto;
+ overflow-x: hidden;
+ display: flex;
+ justify-content: center;
+}
+
+.main-wrapper {
+ width: 100%;
+ max-width: 1400px;
 }
 
 .header-main {
@@ -148,7 +155,7 @@ body {
 }
 
 .header-main h1 {
- font-size: 28px;
+ font-size: 26px;
  font-weight: 800;
  margin-bottom: 5px;
 }
@@ -161,19 +168,20 @@ body {
 /* KPIs HORIZONTAL */
 .kpis {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
- gap: 14px;
- margin-bottom: 25px;
+ grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+ gap: 12px;
+ margin-bottom: 20px;
 }
 
 .kpi {
  background: var(--card-bg);
- padding: 18px;
- border-radius: 12px;
+ padding: 14px 16px;
+ border-radius: 10px;
  border: 1px solid var(--border);
  position: relative;
  overflow: hidden;
  transition: all 0.2s;
+ min-height: 80px;
 }
 
 .kpi::before {
@@ -202,15 +210,15 @@ body {
  display: block;
  font-size: 10px;
  text-transform: uppercase;
- letter-spacing: 1.3px;
+ letter-spacing: 1.2px;
  color: var(--muted);
- margin-bottom: 8px;
+ margin-bottom: 6px;
  font-weight: 600;
 }
 
 .kpi strong {
  display: block;
- font-size: 28px;
+ font-size: 26px;
  font-weight: 700;
 }
 
@@ -219,11 +227,11 @@ body {
  color: var(--text);
  border: 1px solid var(--border);
  border-radius: 8px;
- padding: 8px;
- font-size: 22px;
+ padding: 6px;
+ font-size: 20px;
  font-weight: 800;
  width: 100%;
- margin-top: 6px;
+ margin-top: 4px;
  text-align: center;
 }
 
@@ -553,12 +561,13 @@ body.basic-mode .pro-only {
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
- <div class="header-main">
-  <h1>Dashboard</h1>
-  <p>Visão geral das suas operações</p>
- </div>
- 
- <div class="kpis">
+ <div class="main-wrapper">
+  <div class="header-main">
+   <h1>Dashboard</h1>
+   <p>Visão geral das suas operações</p>
+  </div>
+  
+  <div class="kpis">
   <div class="kpi kpi-dias">
    <span>Dias Operados</span>
    <strong id="kDias">0</strong>
@@ -635,6 +644,7 @@ body.basic-mode .pro-only {
     <tbody id="tbody"></tbody>
    </table>
   </div>
+ </div>
  </div>
 </div>
 
