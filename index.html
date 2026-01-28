@@ -195,7 +195,71 @@ select:focus{
 
 .kpi:hover{
  transform:translateY(-2px);
- box-shadow:0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* Sombras neon específicas para cada card */
+.kpi-dias {
+ box-shadow: 0 0 20px rgba(147, 197, 253, 0.15);
+}
+
+.kpi-dias:hover {
+ box-shadow: 0 4px 30px rgba(147, 197, 253, 0.3);
+}
+
+.kpi-trades {
+ box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+}
+
+.kpi-trades:hover {
+ box-shadow: 0 4px 30px rgba(168, 85, 247, 0.3);
+}
+
+.kpi-pontos {
+ box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+.kpi-pontos:hover {
+ box-shadow: 0 4px 30px rgba(34, 197, 94, 0.3);
+}
+
+.kpi-acc {
+ box-shadow: 0 0 20px rgba(251, 191, 36, 0.15);
+}
+
+.kpi-acc:hover {
+ box-shadow: 0 4px 30px rgba(251, 191, 36, 0.3);
+}
+
+.kpi-gains {
+ box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+.kpi-gains:hover {
+ box-shadow: 0 4px 30px rgba(34, 197, 94, 0.3);
+}
+
+.kpi-stops {
+ box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+}
+
+.kpi-stops:hover {
+ box-shadow: 0 4px 30px rgba(239, 68, 68, 0.3);
+}
+
+.kpi-zero {
+ box-shadow: 0 0 20px rgba(250, 204, 21, 0.15);
+}
+
+.kpi-zero:hover {
+ box-shadow: 0 4px 30px rgba(250, 204, 21, 0.3);
+}
+
+.kpi-dolar {
+ box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.kpi-dolar:hover {
+ box-shadow: 0 4px 30px rgba(16, 185, 129, 0.3);
 }
 
 .kpi span{
@@ -524,13 +588,13 @@ body.basic-mode .pro-only {
 </div>
 
 <div class="kpis">
- <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
- <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>Dias Operados</span><strong id="kDias">0</strong></div>
- <div class="kpi pro-only"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
- <div class="kpi pro-only"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
- <div class="kpi pro-only"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
- <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+ <div class="kpi kpi-dias"><span>Dias Operados</span><strong id="kDias">0</strong></div>
+ <div class="kpi kpi-trades"><span>Trades</span><strong id="kTrades">0</strong></div>
+ <div class="kpi kpi-pontos"><span>Pontos</span><strong id="kPontos">0</strong></div>
+ <div class="kpi kpi-acc"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+ <div class="kpi kpi-gains pro-only"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+ <div class="kpi kpi-stops pro-only"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+ <div class="kpi kpi-zero pro-only"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
  <div class="kpi pro-only">
   <span>Contratos</span>
   <input type="number" id="contratos" value="0" min="0" style="
@@ -546,7 +610,7 @@ body.basic-mode .pro-only {
    text-align:center;
   ">
  </div>
- <div class="kpi pro-only"><span>Total em Dólar</span><strong id="kDolar" style="color:var(--green)">$0.00</strong></div>
+ <div class="kpi kpi-dolar pro-only"><span>Total em Dólar</span><strong id="kDolar" style="color:var(--green)">$0.00</strong></div>
 </div>
 
 <div class="cards pro-only">
@@ -776,7 +840,13 @@ const Dashboard = {
   const toggleBtn = document.getElementById('toggleMode');
   const modeIcon = document.getElementById('modeIcon');
   const modeText = document.getElementById('modeText');
-  let isProMode = true;
+  let isProMode = false; // Começa em modo BÁSICO
+  
+  // Define modo básico como padrão
+  document.body.classList.add('basic-mode');
+  toggleBtn.classList.add('basic');
+  modeIcon.textContent = '📊';
+  modeText.textContent = 'Modo Básico';
   
   if(toggleBtn) {
    toggleBtn.addEventListener('click', () => {
