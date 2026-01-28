@@ -51,18 +51,17 @@ body {
  display: flex;
  align-items: center;
  justify-content: center;
- margin-bottom: 20px;
+ margin-bottom: 30px;
 }
 
 .logo img {
- max-height: 60px;
+ max-height: 80px;
  width: auto;
  max-width: 100%;
 }
 
 .filters {
- margin-bottom: auto;
- margin-top: 20px;
+ margin-bottom: 20px;
 }
 
 .filter-group {
@@ -121,9 +120,9 @@ body {
  align-items: center;
  justify-content: center;
  gap: 8px;
- margin-bottom: 20px;
  text-transform: uppercase;
  letter-spacing: 1px;
+ margin-top: 20px;
 }
 
 .mode-toggle:hover {
@@ -230,22 +229,23 @@ body {
 .charts {
  display: grid;
  grid-template-columns: 2fr 1fr;
- gap: 20px;
+ gap: 16px;
  margin-bottom: 20px;
 }
 
 .chart-card {
  background: var(--card-bg);
- padding: 25px;
+ padding: 20px;
  border-radius: 12px;
  border: 1px solid var(--border);
  display: flex;
  flex-direction: column;
+ height: 320px;
 }
 
 .chart-card h3 {
- font-size: 16px;
- margin-bottom: 15px;
+ font-size: 14px;
+ margin-bottom: 12px;
  font-weight: 600;
  display: flex;
  align-items: center;
@@ -255,7 +255,8 @@ body {
 .chart-wrap {
  flex: 1;
  position: relative;
- min-height: 250px;
+ min-height: 200px;
+ max-height: 280px;
 }
 
 canvas {
@@ -524,13 +525,8 @@ body.basic-mode .pro-only {
 <!-- SIDEBAR -->
 <div class="sidebar">
  <div class="logo">
-  <img src="https://i.imgur.com/placeholder.png" alt="NASDAQ PRO" style="height: 50px; width: auto;" onerror="this.style.display='none'">
+  <img src="logo.png" alt="Mentoria NasdaqPro" style="height: 80px; width: auto;" onerror="this.style.display='none'">
  </div>
- 
- <button class="mode-toggle" id="toggleMode">
-  <span id="modeIcon">📊</span>
-  <span id="modeText">BÁSICO</span>
- </button>
  
  <div class="filters">
   <div class="filter-group">
@@ -546,6 +542,11 @@ body.basic-mode .pro-only {
    <select id="filtroSemana"></select>
   </div>
  </div>
+ 
+ <button class="mode-toggle" id="toggleMode">
+  <span id="modeIcon">📊</span>
+  <span id="modeText">BÁSICO</span>
+ </button>
 </div>
 
 <!-- MAIN CONTENT -->
