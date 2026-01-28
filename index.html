@@ -481,9 +481,13 @@ tbody tr:hover{
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
+ <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+ <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+ <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
+ <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
  <div class="kpi">
   <span>Contratos</span>
-  <input type="number" id="contratos" value="1" min="1" style="
+  <input type="number" id="contratos" value="0" min="0" style="
    background:var(--bg);
    color:var(--text);
    border:1px solid var(--border);
@@ -496,11 +500,7 @@ tbody tr:hover{
    text-align:center;
   ">
  </div>
- <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
- <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
- <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
- <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
- <div class="kpi"><span>💲 Total (US$)</span><strong id="kDolar" style="color:var(--green)">$0.00</strong></div>
+ <div class="kpi"><span>Total em Dólar</span><strong id="kDolar" style="color:var(--green)">$0.00</strong></div>
 </div>
 
 <div class="cards">
@@ -844,8 +844,9 @@ const Dashboard = {
   const assertividade = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
 
   // Calcular valor em dólar: Pontos × Contratos × $2
-  const contratos = parseInt(document.getElementById('contratos').value) || 1;
-  const totalDolar = totais.pontos * contratos * 2;
+  // Se Contratos = 0, Total = $0
+  const contratos = parseInt(document.getElementById('contratos').value) || 0;
+  const totalDolar = contratos === 0 ? 0 : totais.pontos * contratos * 2;
 
   document.getElementById("kTrades").textContent = totais.trades;
   document.getElementById("kPontos").textContent = totais.pontos;
