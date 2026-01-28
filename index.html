@@ -126,6 +126,31 @@ body{
  align-items:center;
 }
 
+.mode-toggle{
+ background:linear-gradient(135deg,#667eea,#764ba2);
+ color:white;
+ border:none;
+ border-radius:14px;
+ padding:12px 20px;
+ font-size:15px;
+ font-weight:700;
+ cursor:pointer;
+ transition:all 0.3s ease;
+ display:flex;
+ align-items:center;
+ gap:8px;
+ box-shadow:0 4px 12px rgba(102,126,234,0.3);
+}
+
+.mode-toggle:hover{
+ transform:translateY(-2px);
+ box-shadow:0 6px 20px rgba(102,126,234,0.5);
+}
+
+.mode-toggle.basic{
+ background:linear-gradient(135deg,#3b82f6,#2563eb);
+}
+
 select{
  background:var(--card);
  color:var(--text);
@@ -397,6 +422,14 @@ tbody tr:hover{
 }
 
 /* RESPONSIVIDADE */
+.pro-only {
+ transition: opacity 0.3s ease;
+}
+
+body.basic-mode .pro-only {
+ display: none !important;
+}
+
 @media (max-width: 1024px) {
  .cards {
   grid-template-columns: 1fr;
@@ -484,16 +517,21 @@ tbody tr:hover{
  <select id="filtroAno" aria-label="Selecionar ano"></select>
  <select id="filtroMes" aria-label="Selecionar mês"></select>
  <select id="filtroSemana" aria-label="Selecionar semana"></select>
+ <button id="toggleMode" class="mode-toggle">
+  <span id="modeIcon">⚡</span>
+  <span id="modeText">Modo PRO</span>
+ </button>
 </div>
 
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
- <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
- <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
+ <div class="kpi"><span>Dias Operados</span><strong id="kDias">0</strong></div>
+ <div class="kpi pro-only"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+ <div class="kpi pro-only"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+ <div class="kpi pro-only"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
- <div class="kpi">
+ <div class="kpi pro-only">
   <span>Contratos</span>
   <input type="number" id="contratos" value="0" min="0" style="
    background:var(--bg);
@@ -508,10 +546,10 @@ tbody tr:hover{
    text-align:center;
   ">
  </div>
- <div class="kpi"><span>Total em Dólar</span><strong id="kDolar" style="color:var(--green)">$0.00</strong></div>
+ <div class="kpi pro-only"><span>Total em Dólar</span><strong id="kDolar" style="color:var(--green)">$0.00</strong></div>
 </div>
 
-<div class="cards">
+<div class="cards pro-only">
  <div class="card">
   <strong>📈 Evolução Acumulada de Pontos</strong>
   <div class="chart-wrap"><canvas id="chartAcumulado"></canvas></div>
@@ -523,7 +561,7 @@ tbody tr:hover{
 </div>
 
 <!-- CALENDÁRIO -->
-<div class="calendar-wrapper">
+<div class="calendar-wrapper pro-only">
  <strong>📅 Calendário Operacional</strong>
  <div class="calendar-header">
   <div>Dom</div><div>Seg</div><div>Ter</div>
@@ -598,6 +636,7 @@ const Dashboard = {
   */
  async init() {
   this.cacheElementos();
+  this.inicializarToggleMode();
   await this.carregarDados();
  },
 
@@ -731,6 +770,34 @@ const Dashboard = {
  },
 
  /**
+  * Inicializa o toggle de modo Básico/PRO
+  */
+ inicializarToggleMode() {
+  const toggleBtn = document.getElementById('toggleMode');
+  const modeIcon = document.getElementById('modeIcon');
+  const modeText = document.getElementById('modeText');
+  let isProMode = true;
+  
+  if(toggleBtn) {
+   toggleBtn.addEventListener('click', () => {
+    isProMode = !isProMode;
+    
+    if(isProMode) {
+     document.body.classList.remove('basic-mode');
+     toggleBtn.classList.remove('basic');
+     modeIcon.textContent = '⚡';
+     modeText.textContent = 'Modo PRO';
+    } else {
+     document.body.classList.add('basic-mode');
+     toggleBtn.classList.add('basic');
+     modeIcon.textContent = '📊';
+     modeText.textContent = 'Modo Básico';
+    }
+   });
+  }
+ },
+
+ /**
   * Inicializa os filtros de ano
   */
  inicializarFiltros() {
@@ -851,18 +918,24 @@ const Dashboard = {
   const operacoes = totais.gain + totais.stop;
   const assertividade = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
 
+  // Contar dias operados (dias com pelo menos 1 trade)
+  const diasOperados = dados.filter(d => d.trades > 0).length;
+
   // Calcular valor em dólar: Pontos × Contratos × $2
   // Se Contratos = 0, Total = $0
-  const contratos = parseInt(document.getElementById('contratos').value) || 0;
+  const contratos = parseInt(document.getElementById('contratos')?.value) || 0;
   const totalDolar = contratos === 0 ? 0 : totais.pontos * contratos * 2;
 
   document.getElementById("kTrades").textContent = totais.trades;
   document.getElementById("kPontos").textContent = totais.pontos;
+  document.getElementById("kDias").textContent = diasOperados;
   
   // Formatar valor em dólar
   const kDolar = document.getElementById("kDolar");
-  kDolar.textContent = totalDolar.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
-  kDolar.style.color = totalDolar >= 0 ? 'var(--green)' : 'var(--red)';
+  if(kDolar) {
+   kDolar.textContent = totalDolar.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+   kDolar.style.color = totalDolar >= 0 ? 'var(--green)' : 'var(--red)';
+  }
   
   document.getElementById("kGains").textContent = totais.gain;
   document.getElementById("kStops").textContent = totais.stop;
