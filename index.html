@@ -126,32 +126,6 @@ body{
  align-items:center;
 }
 
-.calc-config{
- display:flex;
- align-items:center;
- gap:8px;
- background:var(--card);
- border:1px solid var(--border);
- border-radius:14px;
- padding:8px 12px;
-}
-
-.calc-config label{
- font-size:13px;
- color:var(--muted);
- white-space:nowrap;
-}
-
-.calc-config input{
- background:var(--bg);
- color:var(--text);
- border:1px solid var(--border);
- border-radius:8px;
- padding:6px 10px;
- font-size:14px;
- width:80px;
-}
-
 select{
  background:var(--card);
  color:var(--text);
@@ -430,15 +404,6 @@ tbody tr:hover{
   grid-template-columns: repeat(2, 1fr);
  }
  
- .calc-config {
-  width: 100%;
-  justify-content: space-between;
- }
- 
- .calc-config input {
-  width: 70px;
- }
- 
  .calendar-grid {
   gap: 5px;
  }
@@ -511,20 +476,31 @@ tbody tr:hover{
  <select id="filtroAno" aria-label="Selecionar ano"></select>
  <select id="filtroMes" aria-label="Selecionar mês"></select>
  <select id="filtroSemana" aria-label="Selecionar semana"></select>
- <div class="calc-config">
-  <label>💲 US$ por ponto:</label>
-  <input type="number" id="valorDolar" value="2" min="0" step="0.01">
- </div>
 </div>
 
 <div class="kpis">
  <div class="kpi"><span>Trades</span><strong id="kTrades">0</strong></div>
  <div class="kpi"><span>Pontos</span><strong id="kPontos">0</strong></div>
- <div class="kpi"><span>💲 Dólar (US$)</span><strong id="kDolar" style="color:var(--green)">$ 0.00</strong></div>
+ <div class="kpi">
+  <span>Contratos</span>
+  <input type="number" id="contratos" value="1" min="1" style="
+   background:var(--bg);
+   color:var(--text);
+   border:1px solid var(--border);
+   border-radius:8px;
+   padding:8px;
+   font-size:24px;
+   font-weight:800;
+   width:100%;
+   margin-top:8px;
+   text-align:center;
+  ">
+ </div>
  <div class="kpi"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
  <div class="kpi"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
  <div class="kpi"><span>0x0</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
  <div class="kpi"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
+ <div class="kpi"><span>💲 Total (US$)</span><strong id="kDolar" style="color:var(--green)">$0.00</strong></div>
 </div>
 
 <div class="cards">
@@ -739,10 +715,10 @@ const Dashboard = {
   * Inicializa listeners para calculadora de moeda
   */
  inicializarCalculadora() {
-  const inputDolar = document.getElementById('valorDolar');
+  const inputContratos = document.getElementById('contratos');
   
-  if(inputDolar) {
-   inputDolar.addEventListener('input', () => this.atualizar());
+  if(inputContratos) {
+   inputContratos.addEventListener('input', () => this.atualizar());
   }
  },
 
@@ -867,9 +843,9 @@ const Dashboard = {
   const operacoes = totais.gain + totais.stop;
   const assertividade = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
 
-  // Calcular valor em dólar
-  const valorDolar = parseFloat(document.getElementById('valorDolar').value) || 0;
-  const totalDolar = totais.pontos * valorDolar;
+  // Calcular valor em dólar: Pontos × Contratos × $2
+  const contratos = parseInt(document.getElementById('contratos').value) || 1;
+  const totalDolar = totais.pontos * contratos * 2;
 
   document.getElementById("kTrades").textContent = totais.trades;
   document.getElementById("kPontos").textContent = totais.pontos;
