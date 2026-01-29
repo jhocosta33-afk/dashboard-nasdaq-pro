@@ -217,6 +217,8 @@ body::before {
 .mode-toggle #modeIcon {
  font-size: 18px;
  line-height: 1;
+ position: absolute;
+ left: 20px;
 }
 
 .mode-toggle #modeText {
@@ -503,16 +505,6 @@ body::before {
  user-select: none;
 }
 
-.kpi input:focus {
- outline: none;
- border-color: var(--blue);
- box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
-}
-
-.kpi input:hover {
- border-color: var(--blue-bright);
-}
-
 /* ========== CHARTS ========== */
 .charts {
  display: grid;
@@ -698,6 +690,8 @@ canvas {
  text-align: center;
  line-height: 1.5;
  font-weight: 600;
+ position: relative;
+ z-index: 1;
 }
 
 .day-badge {
@@ -705,7 +699,7 @@ canvas {
  bottom: 6px;
  left: 50%;
  transform: translateX(-50%);
- background: rgba(0,0,0,0.9);
+ background: rgba(0,0,0,0.95);
  backdrop-filter: blur(10px);
  border: 1px solid var(--border-bright);
  border-radius: 8px;
@@ -717,7 +711,8 @@ canvas {
  font-weight: 700;
  font-family: 'JetBrains Mono', monospace;
  letter-spacing: 0.5px;
- z-index: 100;
+ z-index: 200;
+ pointer-events: none;
 }
 
 .day:hover .day-badge {
@@ -1228,7 +1223,7 @@ const Dashboard = {
  
  processarCSV(texto) {
   const linhas = texto.trim().split(/\r?\n/);
-  linhas.shift(); // Remove header
+  linhas.shift();
   
   this.dados = linhas.map(linha => {
    const cols = linha.split(",");
@@ -1250,7 +1245,6 @@ const Dashboard = {
   
   this.inicializarFiltros();
   
-  // Inicializa calculadora depois que tudo estiver renderizado
   setTimeout(() => {
    this.inicializarCalculadora();
   }, 100);
@@ -1278,7 +1272,8 @@ const Dashboard = {
    meses.map(m => `<option value="${m}">${nomesMeses[m]}</option>`).join("");
   
   const mesAtual = (new Date().getMonth()+1).toString().padStart(2,"0");
-  // Na primeira carga, sempre seleciona o mês atual para permitir selecionar semana
+  
+  // SEMPRE seleciona o mês atual na primeira carga para permitir selecionar semana
   if (this.primeiraCarga && meses.includes(mesAtual)) {
    filtroMes.value = mesAtual;
   } else {
@@ -1315,12 +1310,18 @@ const Dashboard = {
   )].sort((a,b) => a-b);
   
   filtroSemana.innerHTML = '<option value="ALL">Todas as semanas</option>' +
-   semanas.map(s => `<option value="${s}">${s}</option>`).join("");
+   semanas.map(s => `<option value="${s}">Semana ${s}</option>`).join("");
   
+  // CORREÇÃO: Sempre abre na semana atual (vigente)
   if (this.primeiraCarga) {
    const hoje = new Date();
    const atual = this.dados.find(d => d.data.toDateString() === hoje.toDateString());
-   filtroSemana.value = atual?.semana || "ALL";
+   if (atual && semanas.includes(atual.semana)) {
+    filtroSemana.value = atual.semana;
+   } else {
+    // Se não houver dados de hoje, pega a última semana disponível
+    filtroSemana.value = semanas.length > 0 ? semanas[semanas.length-1] : "ALL";
+   }
   } else {
    filtroSemana.value = "ALL";
   }
@@ -1339,43 +1340,29 @@ const Dashboard = {
    const btnMenos = document.getElementById('btnMenos');
    const valorDiv = document.getElementById('valorContratos');
    
-   console.log('Tentando inicializar contratos...');
-   console.log('btnMais:', btnMais);
-   console.log('btnMenos:', btnMenos);
-   console.log('valorDiv:', valorDiv);
-   
    if (!btnMais || !btnMenos || !valorDiv) {
-    console.log('❌ Botões de contratos não encontrados (modo básico ativo)');
     return;
    }
    
-   let valor = 0; // Começa em 0
+   let valor = 0;
    
-   // Botão Mais
    btnMais.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     valor++;
-    console.log('➕ Aumentado para:', valor);
     valorDiv.textContent = valor;
     Dashboard.atualizar();
    });
    
-   // Botão Menos
    btnMenos.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (valor > 0) { // Pode diminuir até 0
+    if (valor > 0) {
      valor--;
-     console.log('➖ Diminuído para:', valor);
      valorDiv.textContent = valor;
      Dashboard.atualizar();
-    } else {
-     console.log('⚠️ Valor mínimo é 0');
     }
    });
-   
-   console.log('✅ Controles de contratos configurados com sucesso!');
   }, 500);
  },
  
@@ -1383,9 +1370,8 @@ const Dashboard = {
   const toggleBtn = document.getElementById('toggleMode');
   const modeIcon = document.getElementById('modeIcon');
   const modeText = document.getElementById('modeText');
-  let isProMode = false; // INICIA NO MODO BÁSICO
+  let isProMode = false;
   
-  // Define modo BÁSICO como padrão
   document.body.classList.add('basic-mode');
   toggleBtn.classList.remove('pro');
   toggleBtn.classList.add('basic');
@@ -1403,7 +1389,6 @@ const Dashboard = {
      modeIcon.textContent = '⚡';
      modeText.textContent = 'PRO';
      
-     // Re-inicializa o input quando entrar no modo PRO
      setTimeout(() => {
       this.inicializarCalculadora();
      }, 100);
@@ -1449,7 +1434,6 @@ const Dashboard = {
   const assertividade = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
   const diasOperados = dados.filter(d => d.trades > 0).length;
   
-  // Pega o valor dos contratos da div ao invés do input
   const valorContratosDiv = document.getElementById('valorContratos');
   const contratos = valorContratosDiv ? parseInt(valorContratosDiv.textContent) || 0 : 0;
   const totalDolar = totais.pontos * contratos * 2;
@@ -1724,13 +1708,16 @@ const Dashboard = {
    
    if (r) {
     pts = r.pontos;
-    if (pts > 0) cls += " positive";
-    if (pts < 0) cls += " negative";
     
-    // Primeira linha: número de trades
+    // CORREÇÃO: Mostrar 0 quando houver trades mas pontos = 0
+    if (r.trades > 0) {
+     if (pts > 0) cls += " positive";
+     else if (pts < 0) cls += " negative";
+     // Se pts === 0 e houver trades, não adiciona classe mas mostra o 0
+    }
+    
     let primeiraLinha = `${r.trades} trade${r.trades !== 1 ? 's' : ''}`;
     
-    // Segunda linha: gains, stops e 0x0
     let segundaLinha = [];
     if (r.gain > 0) segundaLinha.push(`${r.gain} gain${r.gain !== 1 ? 's' : ''}`);
     if (r.stop > 0) segundaLinha.push(`${r.stop} stop${r.stop !== 1 ? 's' : ''}`);
@@ -1742,7 +1729,8 @@ const Dashboard = {
      info = primeiraLinha;
     }
     
-    badge = `<div class="day-badge">S${r.semana} • ${r.ativo}</div>`;
+    // CORREÇÃO: Badge sem "S" duplo
+    badge = `<div class="day-badge">Sem ${r.semana} • ${r.ativo}</div>`;
    }
    
    grid.innerHTML += `
@@ -1750,7 +1738,7 @@ const Dashboard = {
      <div class="day-number">${d}</div>
      <div class="day-points"
       style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
-      ${pts || ""}
+      ${r && r.trades > 0 ? (pts || 0) : ""}
      </div>
      <div class="day-info">${info}</div>
      ${badge}
@@ -1759,10 +1747,8 @@ const Dashboard = {
  }
 };
 
-// Inicialização
 Dashboard.init();
 
-// Easter egg: atalho de teclado para alternar modo
 document.addEventListener('keydown', (e) => {
  if (e.ctrlKey && e.key === 'm') {
   e.preventDefault();
