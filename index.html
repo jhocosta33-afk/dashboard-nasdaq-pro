@@ -543,12 +543,11 @@ canvas {
  grid-template-columns: repeat(7, 1fr);
  margin-bottom: 16px;
  text-align: center;
- color: var(--blue-bright);
+ color: var(--text-dim);
  font-size: 14px;
  font-weight: 800;
  text-transform: uppercase;
  letter-spacing: 1.5px;
- text-shadow: 0 0 10px rgba(99,102,241,0.3);
 }
 
 .calendar-grid {
@@ -1168,7 +1167,11 @@ const Dashboard = {
   }).filter(Boolean);
   
   this.inicializarFiltros();
-  this.inicializarCalculadora();
+  
+  // Inicializa calculadora depois que tudo estiver renderizado
+  setTimeout(() => {
+   this.inicializarCalculadora();
+  }, 100);
  },
  
  inicializarFiltros() {
@@ -1246,6 +1249,8 @@ const Dashboard = {
  inicializarCalculadora() {
   const input = document.getElementById('contratos');
   if (input) {
+   console.log('Input de contratos encontrado!', input);
+   
    // Remove todo o conteúdo ao focar
    input.addEventListener('focus', function() {
     this.select(); // Seleciona todo o texto para fácil substituição
@@ -1259,14 +1264,24 @@ const Dashboard = {
    });
    
    // Atualiza ao digitar
-   input.addEventListener('input', () => {
+   input.addEventListener('input', (e) => {
+    console.log('Input event:', e.target.value);
     this.atualizar();
    });
    
    // Atualiza ao usar teclas de seta
-   input.addEventListener('change', () => {
+   input.addEventListener('change', (e) => {
+    console.log('Change event:', e.target.value);
     this.atualizar();
    });
+   
+   // Atualiza ao pressionar tecla
+   input.addEventListener('keyup', (e) => {
+    console.log('Keyup event:', e.target.value);
+    this.atualizar();
+   });
+  } else {
+   console.log('Input de contratos NÃO encontrado!');
   }
  },
  
@@ -1335,7 +1350,9 @@ const Dashboard = {
   const assertividade = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
   const diasOperados = dados.filter(d => d.trades > 0).length;
   
-  const contratos = parseInt(document.getElementById('contratos')?.value) || 1;
+  // Pega o valor do input de contratos
+  const inputContratos = document.getElementById('contratos');
+  const contratos = inputContratos ? (parseInt(inputContratos.value) || 1) : 1;
   const totalDolar = totais.pontos * contratos * 2;
   
   document.getElementById("kDias").textContent = diasOperados;
@@ -1615,7 +1632,7 @@ const Dashboard = {
     infoParts.push(`${r.trades} trade${r.trades !== 1 ? 's' : ''}`);
     if (r.gain > 0) infoParts.push(`${r.gain} gain${r.gain !== 1 ? 's' : ''}`);
     if (r.stop > 0) infoParts.push(`${r.stop} stop${r.stop !== 1 ? 's' : ''}`);
-    if (r.zero > 0) infoParts.push(`${r.zero} breakeven`);
+    if (r.zero > 0) infoParts.push(`${r.zero} 0x0`);
     info = infoParts.join(' • ');
     
     badge = `<div class="day-badge">S${r.semana} • ${r.ativo}</div>`;
