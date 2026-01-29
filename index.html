@@ -410,15 +410,14 @@ body::before {
  text-align: center;
  font-family: 'JetBrains Mono', monospace;
  transition: all 0.2s;
- -webkit-appearance: none;
- -moz-appearance: textfield;
  cursor: text;
+ user-select: text;
+ -webkit-user-select: text;
 }
 
 .kpi input::-webkit-outer-spin-button,
 .kpi input::-webkit-inner-spin-button {
- -webkit-appearance: none;
- margin: 0;
+ display: none;
 }
 
 .kpi input::placeholder {
@@ -616,10 +615,10 @@ canvas {
 }
 
 .day-info {
- font-size: 12px;
+ font-size: 11px;
  color: var(--text-dim);
  text-align: center;
- line-height: 1.6;
+ line-height: 1.5;
  font-weight: 600;
 }
 
@@ -1057,7 +1056,7 @@ body.basic-mode .pro-only {
   </div>
   <div class="kpi pro-only">
    <span>Contratos por Trade</span>
-   <input type="number" id="contratos" value="1" min="1" step="1" placeholder="Digite...">
+   <input type="text" id="contratos" value="1" placeholder="Digite o número">
   </div>
   <div class="kpi pro-only">
    <span>Total em Dólar</span>
@@ -1254,29 +1253,37 @@ const Dashboard = {
   if (input._initialized) return;
   input._initialized = true;
   
+  // Permite apenas números
+  input.addEventListener('keypress', function(e) {
+   if (e.key && !/[0-9]/.test(e.key)) {
+    e.preventDefault();
+   }
+  });
+  
   // Seleciona todo o texto ao focar
   input.addEventListener('focus', function() {
    this.select();
   });
   
-  // Restaura 1 se estiver vazio
+  // Valida e restaura ao desfocar
   input.addEventListener('blur', function() {
-   if (!this.value || this.value === '0') {
+   const valor = parseInt(this.value);
+   if (!valor || valor < 1 || isNaN(valor)) {
     this.value = '1';
-    // Força atualização após restaurar valor
-    const event = new Event('input', { bubbles: true });
-    this.dispatchEvent(event);
+   } else {
+    this.value = valor.toString();
    }
+   // Força atualização
+   Dashboard.renderizarKPIs(Dashboard.obterDadosFiltrados());
   });
   
-  // Função de atualização
-  const atualizarValor = () => {
-   const dados = Dashboard.obterDadosFiltrados();
-   Dashboard.renderizarKPIs(dados);
-  };
-  
-  input.addEventListener('input', atualizarValor);
-  input.addEventListener('change', atualizarValor);
+  // Atualiza em tempo real
+  input.addEventListener('input', function() {
+   const valor = parseInt(this.value);
+   if (valor && valor > 0) {
+    Dashboard.renderizarKPIs(Dashboard.obterDadosFiltrados());
+   }
+  });
  },
  
  inicializarToggleMode() {
@@ -1627,14 +1634,22 @@ const Dashboard = {
     if (pts > 0) cls += " positive";
     if (pts < 0) cls += " negative";
     
-    let infoParts = [];
-    infoParts.push(`${r.trades} trade${r.trades !== 1 ? 's' : ''}`);
-    if (r.gain > 0) infoParts.push(`${r.gain} gain${r.gain !== 1 ? 's' : ''}`);
-    if (r.stop > 0) infoParts.push(`${r.stop} stop${r.stop !== 1 ? 's' : ''}`);
-    if (r.zero > 0) infoParts.push(`${r.zero} 0x0`);
-    info = infoParts.join(' • ');
+    // Primeira linha: número de trades
+    let primeiraLinha = `${r.trades} trade${r.trades !== 1 ? 's' : ''}`;
     
-    badge = `<div class="day-badge">S${r.semana} • ${r.ativo}</div>`;
+    // Segunda linha: gains, stops e 0x0
+    let segundaLinha = [];
+    if (r.gain > 0) segundaLinha.push(`${r.gain} gain${r.gain !== 1 ? 's' : ''}`);
+    if (r.stop > 0) segundaLinha.push(`${r.stop} stop${r.stop !== 1 ? 's' : ''}`);
+    if (r.zero > 0) segundaLinha.push(`${r.zero} 0x0`);
+    
+    if (segundaLinha.length > 0) {
+     info = `${primeiraLinha}<br>${segundaLinha.join(' • ')}`;
+    } else {
+     info = primeiraLinha;
+    }
+    
+    badge = `<div class="day-badge">Semana ${r.semana} • ${r.ativo}</div>`;
    }
    
    grid.innerHTML += `
