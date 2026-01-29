@@ -147,9 +147,9 @@ body::before {
 
 .filter-group label {
  display: block;
- font-size: 11px;
+ font-size: 12px;
  text-transform: uppercase;
- letter-spacing: 2px;
+ letter-spacing: 1.5px;
  color: var(--text-dim);
  margin-bottom: 10px;
  font-weight: 700;
@@ -162,7 +162,7 @@ body::before {
  border: 1px solid var(--border);
  padding: 14px 16px;
  border-radius: 12px;
- font-size: 14px;
+ font-size: 15px;
  font-weight: 600;
  cursor: pointer;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -192,21 +192,22 @@ body::before {
  background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
  color: white;
  border: none;
- padding: 16px;
+ padding: 18px 20px;
  border-radius: 14px;
- font-weight: 900;
- font-size: 14px;
+ font-weight: 800;
+ font-size: 15px;
  cursor: pointer;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
  display: flex;
  align-items: center;
  justify-content: center;
- gap: 10px;
+ gap: 12px;
  text-transform: uppercase;
- letter-spacing: 2px;
+ letter-spacing: 2.5px;
  margin-top: 24px;
  position: relative;
  overflow: hidden;
+ box-shadow: 0 4px 12px rgba(99,102,241,0.3);
 }
 
 .mode-toggle::before {
@@ -253,11 +254,11 @@ body::before {
  display: flex;
  justify-content: space-between;
  align-items: center;
- padding: 12px;
- margin-bottom: 8px;
+ padding: 14px;
+ margin-bottom: 10px;
  background: rgba(99,102,241,0.05);
- border-radius: 8px;
- font-size: 13px;
+ border-radius: 10px;
+ font-size: 14px;
  transition: all 0.2s;
 }
 
@@ -267,14 +268,15 @@ body::before {
 }
 
 .sidebar-stat span:first-child {
- color: var(--muted);
+ color: var(--text-dim);
  font-weight: 600;
 }
 
 .sidebar-stat span:last-child {
  color: var(--text);
- font-weight: 700;
+ font-weight: 800;
  font-family: 'JetBrains Mono', monospace;
+ font-size: 15px;
 }
 
 /* ========== MAIN CONTENT ========== */
@@ -304,18 +306,12 @@ body::before {
 .header-main h1 {
  font-size: 40px;
  font-weight: 900;
- margin-bottom: 8px;
+ margin-bottom: 0;
  background: linear-gradient(135deg, var(--text) 0%, var(--blue-bright) 100%);
  -webkit-background-clip: text;
  -webkit-text-fill-color: transparent;
  background-clip: text;
  letter-spacing: -1px;
-}
-
-.header-main p {
- color: var(--muted);
- font-size: 15px;
- font-weight: 500;
 }
 
 /* ========== KPIs ========== */
@@ -360,6 +356,8 @@ body::before {
  width: 100%;
  height: 3px;
  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ z-index: 0;
+ pointer-events: none;
 }
 
 .kpi:hover {
@@ -383,12 +381,15 @@ body::before {
 
 .kpi span {
  display: block;
- font-size: 11px;
+ font-size: 12px;
  text-transform: uppercase;
- letter-spacing: 2px;
- color: var(--muted);
+ letter-spacing: 1.5px;
+ color: var(--text-dim);
  font-weight: 700;
  margin-bottom: 12px;
+ opacity: 0.95;
+ position: relative;
+ z-index: 1;
 }
 
 .kpi strong {
@@ -398,12 +399,14 @@ body::before {
  line-height: 1;
  font-family: 'JetBrains Mono', monospace;
  letter-spacing: -1px;
+ position: relative;
+ z-index: 1;
 }
 
 .kpi input {
  background: var(--main-bg);
  color: var(--text);
- border: 1px solid var(--border);
+ border: 2px solid var(--blue);
  border-radius: 10px;
  padding: 12px;
  font-size: 24px;
@@ -413,6 +416,76 @@ body::before {
  text-align: center;
  font-family: 'JetBrains Mono', monospace;
  transition: all 0.2s;
+ cursor: text;
+}
+
+.kpi input:focus {
+ outline: none;
+ border-color: var(--blue-bright);
+ box-shadow: 0 0 0 4px rgba(99,102,241,0.2);
+}
+
+.kpi input:hover {
+ border-color: var(--blue-bright);
+}
+
+.kpi input::placeholder {
+ color: var(--muted);
+ opacity: 0.5;
+}
+
+.contratos-control {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 12px;
+ margin-top: 8px;
+ position: relative;
+ z-index: 10;
+}
+
+.btn-control {
+ background: var(--blue);
+ color: white;
+ border: none;
+ border-radius: 8px;
+ width: 40px;
+ height: 40px;
+ font-size: 24px;
+ font-weight: 800;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ pointer-events: auto;
+ z-index: 10;
+ position: relative;
+}
+
+.btn-control:hover {
+ background: var(--blue-bright);
+ transform: scale(1.1);
+ box-shadow: 0 4px 12px rgba(99,102,241,0.5);
+}
+
+.btn-control:active {
+ transform: scale(0.95);
+ box-shadow: 0 2px 6px rgba(99,102,241,0.5);
+}
+
+.valor-contratos {
+ background: var(--main-bg);
+ color: var(--text);
+ border: 2px solid var(--blue);
+ border-radius: 10px;
+ padding: 8px 24px;
+ font-size: 28px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ min-width: 80px;
+ text-align: center;
+ user-select: none;
 }
 
 .kpi input:focus {
@@ -532,11 +605,11 @@ canvas {
  grid-template-columns: repeat(7, 1fr);
  margin-bottom: 16px;
  text-align: center;
- color: var(--muted);
- font-size: 13px;
- font-weight: 700;
+ color: var(--text-dim);
+ font-size: 14px;
+ font-weight: 800;
  text-transform: uppercase;
- letter-spacing: 1px;
+ letter-spacing: 1.5px;
 }
 
 .calendar-grid {
@@ -550,11 +623,13 @@ canvas {
  background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
  border: 1px solid var(--border);
  border-radius: 14px;
- min-height: 110px;
- padding: 12px;
- padding-bottom: 40px;
+ min-height: 90px;
+ padding: 10px;
+ padding-bottom: 38px;
  display: flex;
  flex-direction: column;
+ justify-content: flex-start;
+ gap: 4px;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
  cursor: pointer;
 }
@@ -592,21 +667,22 @@ canvas {
 }
 
 .day-points {
- flex: 1;
  display: flex;
  align-items: center;
  justify-content: center;
- font-size: 28px;
+ font-size: 26px;
  font-weight: 900;
  font-family: 'JetBrains Mono', monospace;
+ margin-top: 2px;
+ margin-bottom: 6px;
 }
 
 .day-info {
  font-size: 11px;
- color: var(--muted);
+ color: var(--text-dim);
  text-align: center;
- line-height: 1.6;
- font-weight: 500;
+ line-height: 1.5;
+ font-weight: 600;
 }
 
 .day-badge {
@@ -614,17 +690,18 @@ canvas {
  bottom: 10px;
  left: 50%;
  transform: translateX(-50%);
- background: rgba(0,0,0,0.85);
+ background: rgba(0,0,0,0.9);
  backdrop-filter: blur(10px);
  border: 1px solid var(--border-bright);
  border-radius: 8px;
- padding: 6px 10px;
- font-size: 10px;
+ padding: 7px 12px;
+ font-size: 11px;
  white-space: nowrap;
  opacity: 0;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
- font-weight: 600;
+ font-weight: 700;
  font-family: 'JetBrains Mono', monospace;
+ letter-spacing: 0.5px;
 }
 
 .day:hover .day-badge {
@@ -984,19 +1061,15 @@ body.basic-mode .pro-only {
   </div>
  </div>
  
- <button class="mode-toggle pro" id="toggleMode">
-  <span id="modeIcon">⚡</span>
-  <span id="modeText">PRO</span>
+ <button class="mode-toggle basic" id="toggleMode">
+  <span id="modeIcon">📊</span>
+  <span id="modeText">BÁSICO</span>
  </button>
  
- <div class="stats-sidebar pro-only">
+ <div class="stats-sidebar">
   <div class="sidebar-stat">
-   <span>Win Rate</span>
+   <span>Assertividade</span>
    <span id="sidebarWinRate">0%</span>
-  </div>
-  <div class="sidebar-stat">
-   <span>Avg Pontos/Dia</span>
-   <span id="sidebarAvgPontos">0</span>
   </div>
   <div class="sidebar-stat">
    <span>Melhor Dia</span>
@@ -1013,7 +1086,6 @@ body.basic-mode .pro-only {
 <div class="main-content">
  <div class="header-main">
   <h1>Dashboard de Trading</h1>
-  <p>Acompanhe sua performance em tempo real</p>
  </div>
  
  <div class="kpis">
@@ -1047,7 +1119,11 @@ body.basic-mode .pro-only {
   </div>
   <div class="kpi pro-only">
    <span>Contratos por Trade</span>
-   <input type="number" id="contratos" value="0" min="0" placeholder="Ex: 1">
+   <div class="contratos-control">
+    <button id="btnMenos" class="btn-control">-</button>
+    <div id="valorContratos" class="valor-contratos">0</div>
+    <button id="btnMais" class="btn-control">+</button>
+   </div>
   </div>
   <div class="kpi pro-only">
    <span>Total em Dólar</span>
@@ -1157,7 +1233,11 @@ const Dashboard = {
   }).filter(Boolean);
   
   this.inicializarFiltros();
-  this.inicializarCalculadora();
+  
+  // Inicializa calculadora depois que tudo estiver renderizado
+  setTimeout(() => {
+   this.inicializarCalculadora();
+  }, 100);
  },
  
  inicializarFiltros() {
@@ -1214,7 +1294,7 @@ const Dashboard = {
   )].sort((a,b) => a-b);
   
   filtroSemana.innerHTML = '<option value="ALL">Todas as semanas</option>' +
-   semanas.map(s => `<option value="${s}">Semana ${s}</option>`).join("");
+   semanas.map(s => `<option value="${s}">${s}</option>`).join("");
   
   if (this.primeiraCarga) {
    const hoje = new Date();
@@ -1233,22 +1313,63 @@ const Dashboard = {
  },
  
  inicializarCalculadora() {
-  const input = document.getElementById('contratos');
-  if (input) {
-   input.addEventListener('input', () => this.atualizar());
-  }
+  setTimeout(() => {
+   const btnMais = document.getElementById('btnMais');
+   const btnMenos = document.getElementById('btnMenos');
+   const valorDiv = document.getElementById('valorContratos');
+   
+   console.log('Tentando inicializar contratos...');
+   console.log('btnMais:', btnMais);
+   console.log('btnMenos:', btnMenos);
+   console.log('valorDiv:', valorDiv);
+   
+   if (!btnMais || !btnMenos || !valorDiv) {
+    console.log('❌ Botões de contratos não encontrados (modo básico ativo)');
+    return;
+   }
+   
+   let valor = 0; // Começa em 0
+   
+   // Botão Mais
+   btnMais.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    valor++;
+    console.log('➕ Aumentado para:', valor);
+    valorDiv.textContent = valor;
+    Dashboard.atualizar();
+   });
+   
+   // Botão Menos
+   btnMenos.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (valor > 0) { // Pode diminuir até 0
+     valor--;
+     console.log('➖ Diminuído para:', valor);
+     valorDiv.textContent = valor;
+     Dashboard.atualizar();
+    } else {
+     console.log('⚠️ Valor mínimo é 0');
+    }
+   });
+   
+   console.log('✅ Controles de contratos configurados com sucesso!');
+  }, 500);
  },
  
  inicializarToggleMode() {
   const toggleBtn = document.getElementById('toggleMode');
   const modeIcon = document.getElementById('modeIcon');
   const modeText = document.getElementById('modeText');
-  let isProMode = true;
+  let isProMode = false; // INICIA NO MODO BÁSICO
   
-  document.body.classList.remove('basic-mode');
-  toggleBtn.classList.add('pro');
-  modeIcon.textContent = '⚡';
-  modeText.textContent = 'PRO';
+  // Define modo BÁSICO como padrão
+  document.body.classList.add('basic-mode');
+  toggleBtn.classList.remove('pro');
+  toggleBtn.classList.add('basic');
+  modeIcon.textContent = '📊';
+  modeText.textContent = 'BÁSICO';
   
   if (toggleBtn) {
    toggleBtn.addEventListener('click', () => {
@@ -1260,6 +1381,11 @@ const Dashboard = {
      toggleBtn.classList.remove('basic');
      modeIcon.textContent = '⚡';
      modeText.textContent = 'PRO';
+     
+     // Re-inicializa o input quando entrar no modo PRO
+     setTimeout(() => {
+      this.inicializarCalculadora();
+     }, 100);
     } else {
      document.body.classList.add('basic-mode');
      toggleBtn.classList.remove('pro');
@@ -1302,8 +1428,10 @@ const Dashboard = {
   const assertividade = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
   const diasOperados = dados.filter(d => d.trades > 0).length;
   
-  const contratos = parseInt(document.getElementById('contratos')?.value) || 0;
-  const totalDolar = contratos === 0 ? 0 : totais.pontos * contratos * 2;
+  // Pega o valor dos contratos da div ao invés do input
+  const valorContratosDiv = document.getElementById('valorContratos');
+  const contratos = valorContratosDiv ? parseInt(valorContratosDiv.textContent) || 0 : 0;
+  const totalDolar = totais.pontos * contratos * 2;
   
   document.getElementById("kDias").textContent = diasOperados;
   document.getElementById("kTrades").textContent = totais.trades;
@@ -1335,19 +1463,16 @@ const Dashboard = {
   const diasOperados = dados.filter(d => d.trades > 0).length;
   const operacoes = totais.gain + totais.stop;
   const winRate = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
-  const avgPontos = diasOperados ? Math.round(totais.pontos / diasOperados) : 0;
   
   const pontosPorDia = dados.filter(d => d.trades > 0).map(d => d.pontos);
   const melhorDia = pontosPorDia.length ? Math.max(...pontosPorDia) : 0;
   const piorDia = pontosPorDia.length ? Math.min(...pontosPorDia) : 0;
   
   const sidebarWinRate = document.getElementById('sidebarWinRate');
-  const sidebarAvgPontos = document.getElementById('sidebarAvgPontos');
   const sidebarBestDay = document.getElementById('sidebarBestDay');
   const sidebarWorstDay = document.getElementById('sidebarWorstDay');
   
   if (sidebarWinRate) sidebarWinRate.textContent = winRate + '%';
-  if (sidebarAvgPontos) sidebarAvgPontos.textContent = avgPontos;
   if (sidebarBestDay) {
    sidebarBestDay.textContent = melhorDia;
    sidebarBestDay.style.color = 'var(--green)';
@@ -1491,7 +1616,11 @@ const Dashboard = {
        grid: { color: 'rgba(255,255,255,0.05)' }
       },
       x: {
-       ticks: { color: '#9ca3af', maxRotation: 45, font: { size: 10 } },
+       ticks: { 
+        color: '#cbd5e1', 
+        maxRotation: 45, 
+        font: { size: 11, weight: '600' }
+       },
        grid: { display: false }
       }
      }
@@ -1577,12 +1706,20 @@ const Dashboard = {
     if (pts > 0) cls += " positive";
     if (pts < 0) cls += " negative";
     
-    let infoParts = [];
-    infoParts.push(`${r.trades} trade${r.trades !== 1 ? 's' : ''}`);
-    if (r.gain > 0) infoParts.push(`${r.gain} gain${r.gain !== 1 ? 's' : ''}`);
-    if (r.stop > 0) infoParts.push(`${r.stop} stop${r.stop !== 1 ? 's' : ''}`);
-    if (r.zero > 0) infoParts.push(`${r.zero} breakeven`);
-    info = infoParts.join(' • ');
+    // Primeira linha: número de trades
+    let primeiraLinha = `${r.trades} trade${r.trades !== 1 ? 's' : ''}`;
+    
+    // Segunda linha: gains, stops e 0x0
+    let segundaLinha = [];
+    if (r.gain > 0) segundaLinha.push(`${r.gain} gain${r.gain !== 1 ? 's' : ''}`);
+    if (r.stop > 0) segundaLinha.push(`${r.stop} stop${r.stop !== 1 ? 's' : ''}`);
+    if (r.zero > 0) segundaLinha.push(`${r.zero} 0x0`);
+    
+    if (segundaLinha.length > 0) {
+     info = `${primeiraLinha}<br>${segundaLinha.join(' • ')}`;
+    } else {
+     info = primeiraLinha;
+    }
     
     badge = `<div class="day-badge">S${r.semana} • ${r.ativo}</div>`;
    }
