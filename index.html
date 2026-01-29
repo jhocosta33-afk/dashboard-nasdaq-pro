@@ -1248,41 +1248,35 @@ const Dashboard = {
  
  inicializarCalculadora() {
   const input = document.getElementById('contratos');
-  if (input) {
-   console.log('Input de contratos encontrado!', input);
-   
-   // Remove todo o conteúdo ao focar
-   input.addEventListener('focus', function() {
-    this.select(); // Seleciona todo o texto para fácil substituição
-   });
-   
-   // Restaura 1 se estiver vazio ou 0 ao desfocar
-   input.addEventListener('blur', function() {
-    if (this.value === '' || this.value === '0') {
-     this.value = '1';
-    }
-   });
-   
-   // Atualiza ao digitar
-   input.addEventListener('input', (e) => {
-    console.log('Input event:', e.target.value);
-    this.atualizar();
-   });
-   
-   // Atualiza ao usar teclas de seta
-   input.addEventListener('change', (e) => {
-    console.log('Change event:', e.target.value);
-    this.atualizar();
-   });
-   
-   // Atualiza ao pressionar tecla
-   input.addEventListener('keyup', (e) => {
-    console.log('Keyup event:', e.target.value);
-    this.atualizar();
-   });
-  } else {
-   console.log('Input de contratos NÃO encontrado!');
-  }
+  if (!input) return;
+  
+  // Remove event listeners anteriores se existirem
+  if (input._initialized) return;
+  input._initialized = true;
+  
+  // Seleciona todo o texto ao focar
+  input.addEventListener('focus', function() {
+   this.select();
+  });
+  
+  // Restaura 1 se estiver vazio
+  input.addEventListener('blur', function() {
+   if (!this.value || this.value === '0') {
+    this.value = '1';
+    // Força atualização após restaurar valor
+    const event = new Event('input', { bubbles: true });
+    this.dispatchEvent(event);
+   }
+  });
+  
+  // Função de atualização
+  const atualizarValor = () => {
+   const dados = Dashboard.obterDadosFiltrados();
+   Dashboard.renderizarKPIs(dados);
+  };
+  
+  input.addEventListener('input', atualizarValor);
+  input.addEventListener('change', atualizarValor);
  },
  
  inicializarToggleMode() {
@@ -1308,6 +1302,11 @@ const Dashboard = {
      toggleBtn.classList.remove('basic');
      modeIcon.textContent = '⚡';
      modeText.textContent = 'PRO';
+     
+     // Re-inicializa o input quando entrar no modo PRO
+     setTimeout(() => {
+      this.inicializarCalculadora();
+     }, 100);
     } else {
      document.body.classList.add('basic-mode');
      toggleBtn.classList.remove('pro');
