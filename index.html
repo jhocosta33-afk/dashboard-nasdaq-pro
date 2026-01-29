@@ -201,13 +201,28 @@ body::before {
  display: flex;
  align-items: center;
  justify-content: center;
- gap: 12px;
+ gap: 8px;
  text-transform: uppercase;
  letter-spacing: 2.5px;
  margin-top: 24px;
  position: relative;
  overflow: hidden;
  box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+}
+
+.mode-toggle span {
+ display: inline-block;
+}
+
+.mode-toggle #modeIcon {
+ font-size: 18px;
+ line-height: 1;
+}
+
+.mode-toggle #modeText {
+ font-size: 15px;
+ font-weight: 800;
+ letter-spacing: 2.5px;
 }
 
 .mode-toggle::before {
@@ -615,7 +630,7 @@ canvas {
 .calendar-grid {
  display: grid;
  grid-template-columns: repeat(7, 1fr);
- gap: 12px;
+ gap: 10px;
 }
 
 .day {
@@ -623,13 +638,13 @@ canvas {
  background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
  border: 1px solid var(--border);
  border-radius: 14px;
- min-height: 90px;
- padding: 10px;
- padding-bottom: 38px;
+ min-height: 85px;
+ padding: 8px;
+ padding-bottom: 32px;
  display: flex;
  flex-direction: column;
  justify-content: flex-start;
- gap: 4px;
+ gap: 3px;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
  cursor: pointer;
 }
@@ -687,21 +702,22 @@ canvas {
 
 .day-badge {
  position: absolute;
- bottom: 10px;
+ bottom: 6px;
  left: 50%;
  transform: translateX(-50%);
  background: rgba(0,0,0,0.9);
  backdrop-filter: blur(10px);
  border: 1px solid var(--border-bright);
  border-radius: 8px;
- padding: 7px 12px;
- font-size: 11px;
+ padding: 5px 10px;
+ font-size: 10px;
  white-space: nowrap;
  opacity: 0;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
  font-weight: 700;
  font-family: 'JetBrains Mono', monospace;
  letter-spacing: 0.5px;
+ z-index: 100;
 }
 
 .day:hover .day-badge {
@@ -1262,7 +1278,12 @@ const Dashboard = {
    meses.map(m => `<option value="${m}">${nomesMeses[m]}</option>`).join("");
   
   const mesAtual = (new Date().getMonth()+1).toString().padStart(2,"0");
-  filtroMes.value = this.primeiraCarga && meses.includes(mesAtual) ? mesAtual : "ALL";
+  // Na primeira carga, sempre seleciona o mês atual para permitir selecionar semana
+  if (this.primeiraCarga && meses.includes(mesAtual)) {
+   filtroMes.value = mesAtual;
+  } else {
+   filtroMes.value = "ALL";
+  }
   
   filtroMes.onchange = () => {
    this.primeiraCarga = false;
