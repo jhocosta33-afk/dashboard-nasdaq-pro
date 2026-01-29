@@ -428,6 +428,53 @@ body::before {
  opacity: 0.5;
 }
 
+.contratos-control {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 12px;
+ margin-top: 8px;
+}
+
+.btn-control {
+ background: var(--blue);
+ color: white;
+ border: none;
+ border-radius: 8px;
+ width: 40px;
+ height: 40px;
+ font-size: 24px;
+ font-weight: 800;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+
+.btn-control:hover {
+ background: var(--blue-bright);
+ transform: scale(1.1);
+}
+
+.btn-control:active {
+ transform: scale(0.95);
+}
+
+.valor-contratos {
+ background: var(--main-bg);
+ color: var(--text);
+ border: 2px solid var(--blue);
+ border-radius: 10px;
+ padding: 8px 24px;
+ font-size: 28px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ min-width: 80px;
+ text-align: center;
+ user-select: none;
+}
+
 .kpi input:focus {
  outline: none;
  border-color: var(--blue);
@@ -1059,7 +1106,11 @@ body.basic-mode .pro-only {
   </div>
   <div class="kpi pro-only">
    <span>Contratos por Trade</span>
-   <input type="text" id="contratos" value="1">
+   <div class="contratos-control">
+    <button id="btnMenos" class="btn-control">-</button>
+    <div id="valorContratos" class="valor-contratos">1</div>
+    <button id="btnMais" class="btn-control">+</button>
+   </div>
   </div>
   <div class="kpi pro-only">
    <span>Total em Dólar</span>
@@ -1230,7 +1281,7 @@ const Dashboard = {
   )].sort((a,b) => a-b);
   
   filtroSemana.innerHTML = '<option value="ALL">Todas as semanas</option>' +
-   semanas.map(s => `<option value="${s}">Semana ${s}</option>`).join("");
+   semanas.map(s => `<option value="${s}">${s}</option>`).join("");
   
   if (this.primeiraCarga) {
    const hoje = new Date();
@@ -1249,57 +1300,33 @@ const Dashboard = {
  },
  
  inicializarCalculadora() {
-  // Aguarda o DOM estar pronto
   setTimeout(() => {
-   const input = document.getElementById('contratos');
-   if (!input) {
-    console.error('Input de contratos não encontrado');
+   const btnMais = document.getElementById('btnMais');
+   const btnMenos = document.getElementById('btnMenos');
+   const valorDiv = document.getElementById('valorContratos');
+   
+   if (!btnMais || !btnMenos || !valorDiv) {
+    console.log('Botões de contratos não encontrados (modo básico ativo)');
     return;
    }
    
-   console.log('✅ Input de contratos encontrado e será configurado');
+   let valor = 1;
    
-   // Limpa atributos que podem bloquear edição
-   input.removeAttribute('readonly');
-   input.removeAttribute('disabled');
-   input.setAttribute('contenteditable', 'true');
-   
-   // Clique para selecionar tudo
-   input.onclick = function() {
-    console.log('Input clicado');
-    this.select();
-   };
-   
-   // Ao focar, seleciona tudo
-   input.onfocus = function() {
-    console.log('Input focado');
-    this.select();
-   };
-   
-   // Ao digitar, atualiza
-   input.oninput = function() {
-    const valor = this.value.replace(/\D/g, ''); // Remove não-números
-    this.value = valor || '1';
-    console.log('Novo valor:', this.value);
+   btnMais.onclick = () => {
+    valor++;
+    valorDiv.textContent = valor;
     Dashboard.atualizar();
    };
    
-   // Ao pressionar tecla
-   input.onkeyup = function() {
-    const valor = this.value.replace(/\D/g, '');
-    this.value = valor || '1';
-    Dashboard.atualizar();
-   };
-   
-   // Ao sair, valida
-   input.onblur = function() {
-    if (!this.value || this.value === '0') {
-     this.value = '1';
+   btnMenos.onclick = () => {
+    if (valor > 1) {
+     valor--;
+     valorDiv.textContent = valor;
+     Dashboard.atualizar();
     }
-    Dashboard.atualizar();
    };
    
-   console.log('✅ Input configurado com sucesso. Valor atual:', input.value);
+   console.log('✅ Controles de contratos configurados');
   }, 300);
  },
  
@@ -1373,9 +1400,9 @@ const Dashboard = {
   const assertividade = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
   const diasOperados = dados.filter(d => d.trades > 0).length;
   
-  // Pega o valor do input de contratos
-  const inputContratos = document.getElementById('contratos');
-  const contratos = inputContratos ? (parseInt(inputContratos.value) || 1) : 1;
+  // Pega o valor dos contratos da div ao invés do input
+  const valorContratosDiv = document.getElementById('valorContratos');
+  const contratos = valorContratosDiv ? parseInt(valorContratosDiv.textContent) || 1 : 1;
   const totalDolar = totais.pontos * contratos * 2;
   
   document.getElementById("kDias").textContent = diasOperados;
@@ -1666,7 +1693,7 @@ const Dashboard = {
      info = primeiraLinha;
     }
     
-    badge = `<div class="day-badge">Semana ${r.semana} • ${r.ativo}</div>`;
+    badge = `<div class="day-badge">S${r.semana} • ${r.ativo}</div>`;
    }
    
    grid.innerHTML += `
