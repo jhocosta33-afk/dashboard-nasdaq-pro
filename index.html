@@ -400,7 +400,7 @@ body::before {
 .kpi input {
  background: var(--main-bg);
  color: var(--text);
- border: 2px solid var(--border);
+ border: 2px solid var(--blue);
  border-radius: 10px;
  padding: 12px;
  font-size: 24px;
@@ -411,13 +411,16 @@ body::before {
  font-family: 'JetBrains Mono', monospace;
  transition: all 0.2s;
  cursor: text;
- user-select: text;
- -webkit-user-select: text;
 }
 
-.kpi input::-webkit-outer-spin-button,
-.kpi input::-webkit-inner-spin-button {
- display: none;
+.kpi input:focus {
+ outline: none;
+ border-color: var(--blue-bright);
+ box-shadow: 0 0 0 4px rgba(99,102,241,0.2);
+}
+
+.kpi input:hover {
+ border-color: var(--blue-bright);
 }
 
 .kpi input::placeholder {
@@ -1056,7 +1059,7 @@ body.basic-mode .pro-only {
   </div>
   <div class="kpi pro-only">
    <span>Contratos por Trade</span>
-   <input type="text" id="contratos" value="1" placeholder="Digite o número">
+   <input type="text" id="contratos" value="1">
   </div>
   <div class="kpi pro-only">
    <span>Total em Dólar</span>
@@ -1227,7 +1230,7 @@ const Dashboard = {
   )].sort((a,b) => a-b);
   
   filtroSemana.innerHTML = '<option value="ALL">Todas as semanas</option>' +
-   semanas.map(s => `<option value="${s}">${s}</option>`).join("");
+   semanas.map(s => `<option value="${s}">Semana ${s}</option>`).join("");
   
   if (this.primeiraCarga) {
    const hoje = new Date();
@@ -1246,44 +1249,58 @@ const Dashboard = {
  },
  
  inicializarCalculadora() {
-  const input = document.getElementById('contratos');
-  if (!input) return;
-  
-  // Remove event listeners anteriores se existirem
-  if (input._initialized) return;
-  input._initialized = true;
-  
-  // Permite apenas números
-  input.addEventListener('keypress', function(e) {
-   if (e.key && !/[0-9]/.test(e.key)) {
-    e.preventDefault();
+  // Aguarda o DOM estar pronto
+  setTimeout(() => {
+   const input = document.getElementById('contratos');
+   if (!input) {
+    console.error('Input de contratos não encontrado');
+    return;
    }
-  });
-  
-  // Seleciona todo o texto ao focar
-  input.addEventListener('focus', function() {
-   this.select();
-  });
-  
-  // Valida e restaura ao desfocar
-  input.addEventListener('blur', function() {
-   const valor = parseInt(this.value);
-   if (!valor || valor < 1 || isNaN(valor)) {
-    this.value = '1';
-   } else {
-    this.value = valor.toString();
-   }
-   // Força atualização
-   Dashboard.renderizarKPIs(Dashboard.obterDadosFiltrados());
-  });
-  
-  // Atualiza em tempo real
-  input.addEventListener('input', function() {
-   const valor = parseInt(this.value);
-   if (valor && valor > 0) {
-    Dashboard.renderizarKPIs(Dashboard.obterDadosFiltrados());
-   }
-  });
+   
+   console.log('✅ Input de contratos encontrado e será configurado');
+   
+   // Limpa atributos que podem bloquear edição
+   input.removeAttribute('readonly');
+   input.removeAttribute('disabled');
+   input.setAttribute('contenteditable', 'true');
+   
+   // Clique para selecionar tudo
+   input.onclick = function() {
+    console.log('Input clicado');
+    this.select();
+   };
+   
+   // Ao focar, seleciona tudo
+   input.onfocus = function() {
+    console.log('Input focado');
+    this.select();
+   };
+   
+   // Ao digitar, atualiza
+   input.oninput = function() {
+    const valor = this.value.replace(/\D/g, ''); // Remove não-números
+    this.value = valor || '1';
+    console.log('Novo valor:', this.value);
+    Dashboard.atualizar();
+   };
+   
+   // Ao pressionar tecla
+   input.onkeyup = function() {
+    const valor = this.value.replace(/\D/g, '');
+    this.value = valor || '1';
+    Dashboard.atualizar();
+   };
+   
+   // Ao sair, valida
+   input.onblur = function() {
+    if (!this.value || this.value === '0') {
+     this.value = '1';
+    }
+    Dashboard.atualizar();
+   };
+   
+   console.log('✅ Input configurado com sucesso. Valor atual:', input.value);
+  }, 300);
  },
  
  inicializarToggleMode() {
