@@ -356,6 +356,8 @@ body::before {
  width: 100%;
  height: 3px;
  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ z-index: 0;
+ pointer-events: none;
 }
 
 .kpi:hover {
@@ -386,6 +388,8 @@ body::before {
  font-weight: 700;
  margin-bottom: 12px;
  opacity: 0.95;
+ position: relative;
+ z-index: 1;
 }
 
 .kpi strong {
@@ -395,6 +399,8 @@ body::before {
  line-height: 1;
  font-family: 'JetBrains Mono', monospace;
  letter-spacing: -1px;
+ position: relative;
+ z-index: 1;
 }
 
 .kpi input {
@@ -434,6 +440,8 @@ body::before {
  justify-content: center;
  gap: 12px;
  margin-top: 8px;
+ position: relative;
+ z-index: 10;
 }
 
 .btn-control {
@@ -450,15 +458,20 @@ body::before {
  display: flex;
  align-items: center;
  justify-content: center;
+ pointer-events: auto;
+ z-index: 10;
+ position: relative;
 }
 
 .btn-control:hover {
  background: var(--blue-bright);
  transform: scale(1.1);
+ box-shadow: 0 4px 12px rgba(99,102,241,0.5);
 }
 
 .btn-control:active {
  transform: scale(0.95);
+ box-shadow: 0 2px 6px rgba(99,102,241,0.5);
 }
 
 .valor-contratos {
@@ -1305,29 +1318,44 @@ const Dashboard = {
    const btnMenos = document.getElementById('btnMenos');
    const valorDiv = document.getElementById('valorContratos');
    
+   console.log('Tentando inicializar contratos...');
+   console.log('btnMais:', btnMais);
+   console.log('btnMenos:', btnMenos);
+   console.log('valorDiv:', valorDiv);
+   
    if (!btnMais || !btnMenos || !valorDiv) {
-    console.log('Botões de contratos não encontrados (modo básico ativo)');
+    console.log('❌ Botões de contratos não encontrados (modo básico ativo)');
     return;
    }
    
    let valor = 1;
    
-   btnMais.onclick = () => {
+   // Botão Mais
+   btnMais.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     valor++;
+    console.log('➕ Aumentado para:', valor);
     valorDiv.textContent = valor;
     Dashboard.atualizar();
-   };
+   });
    
-   btnMenos.onclick = () => {
+   // Botão Menos
+   btnMenos.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     if (valor > 1) {
      valor--;
+     console.log('➖ Diminuído para:', valor);
      valorDiv.textContent = valor;
      Dashboard.atualizar();
+    } else {
+     console.log('⚠️ Valor mínimo é 1');
     }
-   };
+   });
    
-   console.log('✅ Controles de contratos configurados');
-  }, 300);
+   console.log('✅ Controles de contratos configurados com sucesso!');
+  }, 500);
  },
  
  inicializarToggleMode() {
