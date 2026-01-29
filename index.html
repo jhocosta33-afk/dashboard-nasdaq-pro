@@ -198,11 +198,10 @@ body::before {
  font-size: 15px;
  cursor: pointer;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
- display: grid;
- grid-template-columns: 20px 1fr;
+ display: flex;
  align-items: center;
- justify-items: center;
- gap: 0;
+ justify-content: center;
+ gap: 8px;
  text-transform: uppercase;
  letter-spacing: 2.5px;
  margin-top: 24px;
@@ -218,15 +217,12 @@ body::before {
 .mode-toggle #modeIcon {
  font-size: 18px;
  line-height: 1;
- justify-self: end;
 }
 
 .mode-toggle #modeText {
  font-size: 15px;
  font-weight: 800;
  letter-spacing: 2.5px;
- justify-self: start;
- margin-left: 8px;
 }
 
 .mode-toggle::before {
@@ -602,7 +598,7 @@ canvas {
  background: var(--card-bg);
  border: 1px solid var(--border);
  border-radius: 16px;
- padding: 24px;
+ padding: 28px;
  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
  transition: all 0.3s;
 }
@@ -634,21 +630,21 @@ canvas {
 .calendar-grid {
  display: grid;
  grid-template-columns: repeat(7, 1fr);
- gap: 8px;
+ gap: 10px;
 }
 
 .day {
  position: relative;
  background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
  border: 1px solid var(--border);
- border-radius: 12px;
- min-height: 80px;
+ border-radius: 14px;
+ min-height: 85px;
  padding: 8px;
- padding-bottom: 28px;
+ padding-bottom: 32px;
  display: flex;
  flex-direction: column;
  justify-content: flex-start;
- gap: 2px;
+ gap: 3px;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
  cursor: pointer;
 }
@@ -706,27 +702,27 @@ canvas {
 
 .day-badge {
  position: absolute;
- bottom: 4px;
+ bottom: 6px;
  left: 50%;
  transform: translateX(-50%);
- background: rgba(0,0,0,0.95);
+ background: rgba(0,0,0,0.9);
  backdrop-filter: blur(10px);
  border: 1px solid var(--border-bright);
- border-radius: 6px;
- padding: 4px 8px;
- font-size: 9px;
+ border-radius: 8px;
+ padding: 5px 10px;
+ font-size: 10px;
  white-space: nowrap;
  opacity: 0;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
  font-weight: 700;
  font-family: 'JetBrains Mono', monospace;
- letter-spacing: 0.3px;
+ letter-spacing: 0.5px;
  z-index: 100;
- pointer-events: none;
 }
 
 .day:hover .day-badge {
  opacity: 1;
+ transform: translateX(-50%) translateY(-4px);
 }
 
 .empty {
