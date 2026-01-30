@@ -244,8 +244,7 @@ body::before {
  align-items: center;
  justify-items: center;
  gap: 0;
- text-transform: uppercase;
- letter-spacing: 2.5px;
+ letter-spacing: 1px;
  position: relative;
  overflow: hidden;
  box-shadow: 0 4px 12px rgba(99,102,241,0.3);
@@ -264,7 +263,7 @@ body::before {
 .mode-toggle #modeText {
  font-size: 15px;
  font-weight: 800;
- letter-spacing: 2.5px;
+ letter-spacing: 1px;
  justify-self: start;
  margin-left: 8px;
 }
@@ -626,6 +625,74 @@ canvas {
  gap: 8px;
 }
 
+.calendar-grid:has(.month-card) {
+ grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+ gap: 16px;
+}
+
+/* Month Cards (quando "Todos os meses" está selecionado) */
+.month-card {
+ background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
+ border: 2px solid var(--border);
+ border-radius: 16px;
+ padding: 24px;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ gap: 12px;
+ min-height: 140px;
+}
+
+.month-card:hover {
+ transform: translateY(-6px) scale(1.03);
+ box-shadow: var(--shadow-lg);
+ border-color: var(--blue-bright);
+}
+
+.month-card.positive {
+ background: linear-gradient(135deg, rgba(16,185,129,0.1), var(--card-bg));
+ border-color: rgba(16,185,129,0.4);
+}
+
+.month-card.positive:hover {
+ box-shadow: 0 8px 32px var(--green-glow);
+ border-color: var(--green);
+}
+
+.month-card.negative {
+ background: linear-gradient(135deg, rgba(239,68,68,0.1), var(--card-bg));
+ border-color: rgba(239,68,68,0.4);
+}
+
+.month-card.negative:hover {
+ box-shadow: 0 8px 32px var(--red-glow);
+ border-color: var(--red);
+}
+
+.month-name {
+ font-size: 20px;
+ font-weight: 800;
+ color: var(--text);
+ text-transform: uppercase;
+ letter-spacing: 1px;
+}
+
+.month-points {
+ font-size: 48px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ line-height: 1;
+}
+
+.month-info {
+ font-size: 14px;
+ color: var(--text-dim);
+ font-weight: 600;
+}
+
 .day {
  position: relative;
  background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
@@ -633,7 +700,7 @@ canvas {
  border-radius: 12px;
  min-height: 80px;
  padding: 8px;
- padding-bottom: 28px;
+ padding-bottom: 30px;
  display: flex;
  flex-direction: column;
  justify-content: flex-start;
@@ -686,7 +753,7 @@ canvas {
 }
 
 .day-info {
- font-size: 11px;
+ font-size: 12px;
  color: var(--text-dim);
  text-align: center;
  line-height: 1.5;
@@ -1105,7 +1172,7 @@ body.basic-mode .pro-only {
  
  <button class="mode-toggle basic" id="toggleMode">
   <span id="modeIcon">📊</span>
-  <span id="modeText">MODO BÁSICO</span>
+  <span id="modeText">Modo Básico</span>
  </button>
  
  <div class="stats-sidebar">
@@ -1189,7 +1256,7 @@ body.basic-mode .pro-only {
  </div>
  
  <div class="calendar-wrapper pro-only">
-  <strong>📅 Calendário de Trading</strong>
+  <strong id="calendarTitle">📅 Calendário de Trading</strong>
   <div class="calendar-header">
    <div>Dom</div><div>Seg</div><div>Ter</div>
    <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
@@ -1302,12 +1369,8 @@ const Dashboard = {
   filtroMes.innerHTML = '<option value="ALL">Todos os meses</option>' +
    meses.map(m => `<option value="${m}">${nomesMeses[m]}</option>`).join("");
   
-  const mesAtual = (new Date().getMonth()+1).toString().padStart(2,"0");
-  if (this.primeiraCarga && meses.includes(mesAtual)) {
-   filtroMes.value = mesAtual;
-  } else {
-   filtroMes.value = "ALL";
-  }
+  // Sempre começa em "Todos os meses" para mostrar o seletor de meses
+  filtroMes.value = "ALL";
   
   filtroMes.onchange = () => {
    this.primeiraCarga = false;
@@ -1341,13 +1404,8 @@ const Dashboard = {
   filtroSemana.innerHTML = '<option value="ALL">Todas as semanas</option>' +
    semanas.map(s => `<option value="${s}">${s}</option>`).join("");
   
-  if (this.primeiraCarga) {
-   const hoje = new Date();
-   const atual = this.dados.find(d => d.data.toDateString() === hoje.toDateString());
-   filtroSemana.value = atual?.semana || "ALL";
-  } else {
-   filtroSemana.value = "ALL";
-  }
+  // Na primeira carga, sempre deixa em "Todas as semanas" para mostrar o mês completo
+  filtroSemana.value = "ALL";
   
   filtroSemana.onchange = () => {
    this.primeiraCarga = false;
@@ -1399,7 +1457,7 @@ const Dashboard = {
   toggleBtn.classList.remove('pro');
   toggleBtn.classList.add('basic');
   modeIcon.textContent = '📊';
-  modeText.textContent = 'MODO BÁSICO';
+  modeText.textContent = 'Modo Básico';
   
   if (toggleBtn) {
    toggleBtn.addEventListener('click', () => {
@@ -1410,7 +1468,7 @@ const Dashboard = {
      toggleBtn.classList.add('pro');
      toggleBtn.classList.remove('basic');
      modeIcon.textContent = '⚡';
-     modeText.textContent = 'MODO PRO';
+     modeText.textContent = 'Modo Pro';
      
      setTimeout(() => {
       this.inicializarCalculadora();
@@ -1420,7 +1478,7 @@ const Dashboard = {
      toggleBtn.classList.remove('pro');
      toggleBtn.classList.add('basic');
      modeIcon.textContent = '📊';
-     modeText.textContent = 'MODO BÁSICO';
+     modeText.textContent = 'Modo Básico';
     }
    });
   }
@@ -1705,20 +1763,75 @@ const Dashboard = {
  
  renderizarCalendario(dados) {
   const grid = document.getElementById("calendar");
+  const calendarTitle = document.getElementById("calendarTitle");
+  
   if (!grid) return;
   
   grid.innerHTML = "";
+  
+  // Se estiver em "Todos os meses", mostra seletor de meses
+  if (filtroMes.value === "ALL") {
+   if (calendarTitle) {
+    calendarTitle.textContent = `📅 Selecione um Mês`;
+   }
+   
+   // Pega todos os meses disponíveis para o ano selecionado
+   const mesesDisponiveis = [...new Set(
+    this.dados
+     .filter(d => d.ano === filtroAno.value)
+     .map(d => d.mes)
+   )].sort();
+   
+   // Cria cards clicáveis para cada mês
+   mesesDisponiveis.forEach(mesNum => {
+    const nomeMes = nomesMeses[mesNum];
+    const dadosDoMes = this.dados.filter(d => d.ano === filtroAno.value && d.mes === mesNum);
+    const totalPontos = dadosDoMes.reduce((acc, d) => acc + d.pontos, 0);
+    const diasOperados = dadosDoMes.filter(d => d.trades > 0).length;
+    
+    const mesCard = document.createElement('div');
+    mesCard.className = 'month-card';
+    if (totalPontos > 0) mesCard.classList.add('positive');
+    if (totalPontos < 0) mesCard.classList.add('negative');
+    
+    mesCard.innerHTML = `
+     <div class="month-name">${nomeMes}</div>
+     <div class="month-points" style="color:${totalPontos<0?'var(--red)':totalPontos>0?'var(--green)':'var(--muted)'}">
+      ${totalPontos > 0 ? '+' : ''}${totalPontos}
+     </div>
+     <div class="month-info">${diasOperados} dia${diasOperados !== 1 ? 's' : ''}</div>
+    `;
+    
+    mesCard.onclick = () => {
+     filtroMes.value = mesNum;
+     this.primeiraCarga = false;
+     filtroSemana.disabled = false;
+     this.inicializarSemanas();
+     this.atualizar();
+    };
+    
+    grid.appendChild(mesCard);
+   });
+   
+   return;
+  }
+  
+  // Se um mês específico está selecionado, mostra o calendário normal
   if (!dados.length) return;
   
-  let base = dados[0];
-  if (filtroMes.value !== "ALL") {
-   base = dados.find(d => d.mes === filtroMes.value) || dados[0];
-  }
+  let base = dados.find(d => d.mes === filtroMes.value) || dados[0];
   
   const ano = base.data.getFullYear();
   const mes = base.data.getMonth();
   const primeiro = new Date(ano, mes, 1);
   const ultimo = new Date(ano, mes+1, 0);
+  
+  // Atualiza o título com o nome do mês
+  const mesStr = (mes + 1).toString().padStart(2, "0");
+  const nomeMes = nomesMeses[mesStr] || "";
+  if (calendarTitle) {
+   calendarTitle.textContent = `📅 Calendário de Trading - ${nomeMes} ${ano}`;
+  }
   
   for (let i = 0; i < primeiro.getDay(); i++) {
    grid.innerHTML += `<div class="day empty"></div>`;
