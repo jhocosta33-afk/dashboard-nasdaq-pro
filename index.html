@@ -607,6 +607,90 @@ canvas {
  color: var(--text-dim);
 }
 
+#calendarTitle {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 12px;
+}
+
+#calendarTitle span {
+ flex: 1;
+ text-align: center;
+}
+
+.back-to-months-btn {
+ background: var(--blue);
+ color: white;
+ border: none;
+ border-radius: 8px;
+ padding: 8px 16px;
+ font-size: 13px;
+ font-weight: 700;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ white-space: nowrap;
+}
+
+.back-to-months-btn:hover {
+ background: var(--blue-bright);
+ transform: translateX(-3px);
+}
+
+.back-to-months-btn:active {
+ transform: translateX(-1px);
+}
+
+.calendar-month-selector {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-bottom: 24px;
+ gap: 16px;
+}
+
+.calendar-month-selector strong {
+ flex: 1;
+ text-align: center;
+ font-size: 18px;
+ font-weight: 700;
+ color: var(--text-dim);
+}
+
+.month-nav-btn {
+ background: var(--blue);
+ color: white;
+ border: none;
+ border-radius: 8px;
+ width: 40px;
+ height: 40px;
+ font-size: 20px;
+ font-weight: 800;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+
+.month-nav-btn:hover {
+ background: var(--blue-bright);
+ transform: scale(1.1);
+}
+
+.month-nav-btn:active {
+ transform: scale(0.95);
+}
+
+.month-nav-btn:disabled {
+ opacity: 0.3;
+ cursor: not-allowed;
+ transform: none;
+}
+
 .calendar-header {
  display: grid;
  grid-template-columns: repeat(7, 1fr);
@@ -626,28 +710,28 @@ canvas {
 }
 
 .calendar-grid:has(.month-card) {
- grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
- gap: 16px;
+ grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+ gap: 12px;
 }
 
 /* Month Cards (quando "Todos os meses" está selecionado) */
 .month-card {
  background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
  border: 2px solid var(--border);
- border-radius: 16px;
- padding: 24px;
+ border-radius: 12px;
+ padding: 16px;
  cursor: pointer;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
  display: flex;
  flex-direction: column;
  align-items: center;
  justify-content: center;
- gap: 12px;
- min-height: 140px;
+ gap: 8px;
+ min-height: 100px;
 }
 
 .month-card:hover {
- transform: translateY(-6px) scale(1.03);
+ transform: translateY(-4px) scale(1.02);
  box-shadow: var(--shadow-lg);
  border-color: var(--blue-bright);
 }
@@ -673,22 +757,22 @@ canvas {
 }
 
 .month-name {
- font-size: 20px;
+ font-size: 14px;
  font-weight: 800;
  color: var(--text);
  text-transform: uppercase;
- letter-spacing: 1px;
+ letter-spacing: 0.5px;
 }
 
 .month-points {
- font-size: 48px;
+ font-size: 32px;
  font-weight: 900;
  font-family: 'JetBrains Mono', monospace;
  line-height: 1;
 }
 
 .month-info {
- font-size: 14px;
+ font-size: 11px;
  color: var(--text-dim);
  font-weight: 600;
 }
@@ -697,10 +781,10 @@ canvas {
  position: relative;
  background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
  border: 1px solid var(--border);
- border-radius: 12px;
- min-height: 80px;
- padding: 8px;
- padding-bottom: 30px;
+ border-radius: 10px;
+ min-height: 75px;
+ padding: 6px;
+ padding-bottom: 26px;
  display: flex;
  flex-direction: column;
  justify-content: flex-start;
@@ -735,7 +819,7 @@ canvas {
 }
 
 .day-number {
- font-size: 12px;
+ font-size: 11px;
  color: var(--muted);
  font-weight: 700;
  font-family: 'JetBrains Mono', monospace;
@@ -745,18 +829,18 @@ canvas {
  display: flex;
  align-items: center;
  justify-content: center;
- font-size: 26px;
+ font-size: 22px;
  font-weight: 900;
  font-family: 'JetBrains Mono', monospace;
- margin-top: 2px;
- margin-bottom: 6px;
+ margin-top: 1px;
+ margin-bottom: 4px;
 }
 
 .day-info {
- font-size: 12px;
+ font-size: 10px;
  color: var(--text-dim);
  text-align: center;
- line-height: 1.5;
+ line-height: 1.4;
  font-weight: 600;
 }
 
@@ -1256,7 +1340,11 @@ body.basic-mode .pro-only {
  </div>
  
  <div class="calendar-wrapper pro-only">
-  <strong id="calendarTitle">📅 Calendário de Trading</strong>
+  <div class="calendar-month-selector">
+   <button id="prevMonth" class="month-nav-btn">←</button>
+   <strong id="calendarTitle">📅 Calendário de Trading</strong>
+   <button id="nextMonth" class="month-nav-btn">→</button>
+  </div>
   <div class="calendar-header">
    <div>Dom</div><div>Seg</div><div>Ter</div>
    <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
@@ -1295,11 +1383,14 @@ const Dashboard = {
  primeiraCarga: true,
  chartAcumulado: null,
  chartBar: null,
+ mesAtualCalendario: null,
+ anoAtualCalendario: null,
  
  async init() {
   this.inicializarToggleMode();
   await this.carregarDados();
   this.atualizarPerformanceIndicator();
+  this.inicializarNavegacaoMeses();
  },
  
  async carregarDados() {
@@ -1761,6 +1852,75 @@ const Dashboard = {
   }
  },
  
+ inicializarNavegacaoMeses() {
+  const btnPrev = document.getElementById('prevMonth');
+  const btnNext = document.getElementById('nextMonth');
+  
+  if (!btnPrev || !btnNext) return;
+  
+  btnPrev.addEventListener('click', () => {
+   if (!this.mesAtualCalendario || !this.anoAtualCalendario) return;
+   
+   let mes = this.mesAtualCalendario - 1;
+   let ano = this.anoAtualCalendario;
+   
+   if (mes < 0) {
+    mes = 11;
+    ano--;
+   }
+   
+   // Verifica se há dados para este mês
+   const mesStr = (mes + 1).toString().padStart(2, '0');
+   const temDados = this.dados.some(d => d.mes === mesStr && d.ano === ano.toString());
+   
+   if (temDados) {
+    this.mesAtualCalendario = mes;
+    this.anoAtualCalendario = ano;
+    
+    // Atualiza o filtro de mês
+    filtroMes.value = mesStr;
+    filtroSemana.value = "ALL";
+    
+    this.atualizar();
+   }
+  });
+  
+  btnNext.addEventListener('click', () => {
+   if (!this.mesAtualCalendario || !this.anoAtualCalendario) return;
+   
+   let mes = this.mesAtualCalendario + 1;
+   let ano = this.anoAtualCalendario;
+   
+   if (mes > 11) {
+    mes = 0;
+    ano++;
+   }
+   
+   // Verifica se há dados para este mês
+   const mesStr = (mes + 1).toString().padStart(2, '0');
+   const temDados = this.dados.some(d => d.mes === mesStr && d.ano === ano.toString());
+   
+   if (temDados) {
+    this.mesAtualCalendario = mes;
+    this.anoAtualCalendario = ano;
+    
+    // Atualiza o filtro de mês
+    filtroMes.value = mesStr;
+    filtroSemana.value = "ALL";
+    
+    this.atualizar();
+   }
+  });
+ },
+ 
+ voltarParaMeses() {
+  filtroMes.value = "ALL";
+  filtroSemana.disabled = true;
+  filtroSemana.value = "ALL";
+  this.primeiraCarga = false;
+  this.atualizar();
+ },
+ 
  renderizarCalendario(dados) {
   const grid = document.getElementById("calendar");
   const calendarTitle = document.getElementById("calendarTitle");
@@ -1826,11 +1986,17 @@ const Dashboard = {
   const primeiro = new Date(ano, mes, 1);
   const ultimo = new Date(ano, mes+1, 0);
   
-  // Atualiza o título com o nome do mês
+  // Atualiza o título com o nome do mês e botão de voltar
   const mesStr = (mes + 1).toString().padStart(2, "0");
   const nomeMes = nomesMeses[mesStr] || "";
   if (calendarTitle) {
-   calendarTitle.textContent = `📅 Calendário de Trading - ${nomeMes} ${ano}`;
+   calendarTitle.innerHTML = `
+    <button class="back-to-months-btn" onclick="Dashboard.voltarParaMeses()" title="Voltar para seleção de meses">
+     ← Voltar
+    </button>
+    <span>📅 ${nomeMes} ${ano}</span>
+    <div></div>
+   `;
   }
   
   for (let i = 0; i < primeiro.getDay(); i++) {
