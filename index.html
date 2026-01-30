@@ -188,11 +188,9 @@ body::before {
 }
 
 .stats-sidebar {
- margin-top: auto;
- margin-bottom: 24px;
- padding: 24px 0;
+ margin-top: 24px;
+ padding-top: 24px;
  border-top: 1px solid var(--border);
- border-bottom: 1px solid var(--border);
  animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
 }
 
@@ -1105,6 +1103,11 @@ body.basic-mode .pro-only {
   </div>
  </div>
  
+ <button class="mode-toggle basic" id="toggleMode">
+  <span id="modeIcon">📊</span>
+  <span id="modeText">MODO BÁSICO</span>
+ </button>
+ 
  <div class="stats-sidebar">
   <div class="sidebar-stat">
    <span>Assertividade</span>
@@ -1119,11 +1122,6 @@ body.basic-mode .pro-only {
    <span id="sidebarWorstDay">0</span>
   </div>
  </div>
- 
- <button class="mode-toggle basic" id="toggleMode">
-  <span id="modeIcon">📊</span>
-  <span id="modeText">BÁSICO</span>
- </button>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -1401,7 +1399,7 @@ const Dashboard = {
   toggleBtn.classList.remove('pro');
   toggleBtn.classList.add('basic');
   modeIcon.textContent = '📊';
-  modeText.textContent = 'BÁSICO';
+  modeText.textContent = 'MODO BÁSICO';
   
   if (toggleBtn) {
    toggleBtn.addEventListener('click', () => {
@@ -1412,7 +1410,7 @@ const Dashboard = {
      toggleBtn.classList.add('pro');
      toggleBtn.classList.remove('basic');
      modeIcon.textContent = '⚡';
-     modeText.textContent = 'PRO';
+     modeText.textContent = 'MODO PRO';
      
      setTimeout(() => {
       this.inicializarCalculadora();
@@ -1422,7 +1420,7 @@ const Dashboard = {
      toggleBtn.classList.remove('pro');
      toggleBtn.classList.add('basic');
      modeIcon.textContent = '📊';
-     modeText.textContent = 'BÁSICO';
+     modeText.textContent = 'MODO BÁSICO';
     }
    });
   }
@@ -1757,7 +1755,7 @@ const Dashboard = {
      <div class="day-number">${d}</div>
      <div class="day-points"
       style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
-      ${pts || ""}
+      ${r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "")}
      </div>
      <div class="day-info">${info}</div>
      ${badge}
