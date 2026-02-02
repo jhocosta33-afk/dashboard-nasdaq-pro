@@ -2225,13 +2225,16 @@ const Dashboard = {
   for (let d = 1; d <= ultimo.getDate(); d++) {
    const data = new Date(ano, mes, d);
    const r = dados.find(x => x.data.toDateString() === data.toDateString());
-   let cls = "day", pts = "", info = "", badge = "";
-   let clickEvent = "";
+   
+   const dayDiv = document.createElement('div');
+   dayDiv.className = "day";
+   
+   let pts = "", info = "", badge = "";
    
    if (r) {
     pts = r.pontos;
-    if (pts > 0) cls += " positive";
-    if (pts < 0) cls += " negative";
+    if (pts > 0) dayDiv.classList.add("positive");
+    if (pts < 0) dayDiv.classList.add("negative");
     
     let primeiraLinha = `${r.trades} trade${r.trades !== 1 ? 's' : ''}`;
     
@@ -2250,23 +2253,24 @@ const Dashboard = {
     
     // Adiciona evento de clique apenas se houver trades
     if (r.trades > 0) {
-     cls += " clickable";
-     // Escapa as aspas nos dados JSON
-     const dadosJson = JSON.stringify(r).replace(/"/g, '&quot;');
-     clickEvent = `onclick="Dashboard.abrirModal(JSON.parse('${dadosJson}'.replace(/&quot;/g, '\\\"')))"`;
+     dayDiv.classList.add("clickable");
+     dayDiv.addEventListener('click', () => {
+      this.abrirModal(r);
+     });
     }
    }
    
-   grid.innerHTML += `
-    <div class="${cls}" ${clickEvent}>
-     <div class="day-number">${d}</div>
-     <div class="day-points"
-      style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
-      ${r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "")}
-     </div>
-     <div class="day-info">${info}</div>
-     ${badge}
-    </div>`;
+   dayDiv.innerHTML = `
+    <div class="day-number">${d}</div>
+    <div class="day-points"
+     style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
+     ${r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "")}
+    </div>
+    <div class="day-info">${info}</div>
+    ${badge}
+   `;
+   
+   grid.appendChild(dayDiv);
   }
  }
 };
