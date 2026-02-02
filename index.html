@@ -2097,24 +2097,60 @@ const Dashboard = {
   
   // Se tiver ID da foto (da planilha), usa direto
   if (fotoId && fotoId.trim()) {
-   const url = `https://drive.google.com/uc?export=view&id=${fotoId.trim()}`;
+   const idLimpo = fotoId.trim();
+   console.log('🔍 Tentando carregar foto com ID:', idLimpo);
    
-   const img = new Image();
-   img.onload = () => {
-    container.innerHTML = `<img src="${url}" alt="Trade do dia ${dataStr}">`;
+   // Tenta múltiplas URLs do Google Drive
+   const urls = [
+    `https://drive.google.com/uc?export=view&id=${idLimpo}`,
+    `https://drive.google.com/thumbnail?id=${idLimpo}&sz=w1000`,
+    `https://lh3.googleusercontent.com/d/${idLimpo}`
+   ];
+   
+   let tentativa = 0;
+   
+   const tentarCarregar = (urlIndex) => {
+    if (urlIndex >= urls.length) {
+     console.error('❌ Todas as URLs falharam para ID:', idLimpo);
+     container.innerHTML = `
+      <div class="modal-photo-error">
+       ❌ Erro ao carregar foto<br>
+       <small style="font-size: 13px; opacity: 0.7; margin-top: 12px; display: block; line-height: 1.6;">
+        <strong>Possíveis causas:</strong><br>
+        • ID da foto incorreto: <code style="background: rgba(239,68,68,0.2); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">${idLimpo}</code><br>
+        • Arquivo não está compartilhado como "Qualquer pessoa com o link"<br>
+        • Foto foi deletada do Google Drive<br><br>
+        
+        <strong style="color: var(--blue-bright);">📋 Checklist:</strong><br>
+        1. Abra o Google Drive<br>
+        2. Encontre a foto do dia ${nomeArquivo}<br>
+        3. Botão direito → Compartilhar<br>
+        4. Altere para "Qualquer pessoa com o link"<br>
+        5. Copie o ID da URL e cole na planilha
+       </small>
+      </div>
+     `;
+     return;
+    }
+    
+    const url = urls[urlIndex];
+    console.log(`🔄 Tentativa ${urlIndex + 1}/${urls.length}:`, url);
+    
+    const img = new Image();
+    img.onload = () => {
+     console.log('✅ Foto carregada com sucesso:', url);
+     container.innerHTML = `<img src="${url}" alt="Trade do dia ${dataStr}">`;
+    };
+    img.onerror = () => {
+     console.warn(`⚠️ Falha na URL ${urlIndex + 1}:`, url);
+     tentarCarregar(urlIndex + 1);
+    };
+    img.src = url;
    };
-   img.onerror = () => {
-    container.innerHTML = `
-     <div class="modal-photo-error">
-      ❌ Erro ao carregar foto<br>
-      <small style="font-size: 13px; opacity: 0.7; margin-top: 8px; display: block;">
-       Verifique se o ID da foto está correto e se o arquivo está compartilhado como "Qualquer pessoa com o link"
-      </small>
-     </div>
-    `;
-   };
-   img.src = url;
+   
+   tentarCarregar(0);
   } else {
+   console.log('📷 Nenhum fotoId encontrado para', dataStr);
    // Se não tiver ID, mostra instruções
    container.innerHTML = `
     <div class="modal-photo-error">
@@ -2127,11 +2163,11 @@ const Dashboard = {
       <strong>3.</strong> Clique com botão direito → "Compartilhar"<br>
       <strong>4.</strong> Mude para "Qualquer pessoa com o link"<br>
       <strong>5.</strong> Copie o <strong>ID</strong> da URL (parte depois de <code style="font-size: 10px;">/d/</code>)<br>
-      <strong>6.</strong> Cole o ID na planilha, coluna <strong>FOTO_ID</strong><br><br>
+      <strong>6.</strong> Cole o ID na planilha, coluna <strong>FOTO_ID</strong> (coluna I)<br><br>
       
       <div style="background: rgba(99,102,241,0.1); padding: 12px; border-radius: 8px; border-left: 3px solid var(--blue);">
        <strong>💡 Dica:</strong> A URL completa é algo como:<br>
-       <code style="font-size: 10px; word-break: break-all;">drive.google.com/file/d/<span style="color: var(--green);">ABC123xyz...</span>/view</code><br>
+       <code style="font-size: 10px; word-break: break-all;">drive.google.com/file/d/<span style="color: var(--green);">1ABC-xyz123_EXEMPLO</span>/view</code><br>
        Copie apenas a parte verde (ID)
       </div>
      </small>
