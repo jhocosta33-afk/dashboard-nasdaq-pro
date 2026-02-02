@@ -743,7 +743,25 @@ canvas {
  justify-content: flex-start;
  gap: 2px;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ cursor: default;
+}
+
+.day.clickable {
  cursor: pointer;
+}
+
+.day.clickable::after {
+ content: '🔍';
+ position: absolute;
+ top: 6px;
+ right: 6px;
+ font-size: 12px;
+ opacity: 0;
+ transition: opacity 0.3s;
+}
+
+.day.clickable:hover::after {
+ opacity: 0.6;
 }
 
 .day.positive {
@@ -1015,6 +1033,177 @@ body.basic-mode .pro-only {
 @keyframes glow {
  0%, 100% { box-shadow: 0 0 5px currentColor; }
  50% { box-shadow: 0 0 20px currentColor; }
+}
+
+/* ========== MODAL DE FOTO DO TRADE ========== */
+.trade-photo-modal {
+ position: fixed;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: rgba(0, 0, 0, 0.95);
+ display: none;
+ align-items: center;
+ justify-content: center;
+ z-index: 10000;
+ padding: 20px;
+ backdrop-filter: blur(10px);
+ animation: fadeIn 0.3s ease-out;
+}
+
+.trade-photo-modal.active {
+ display: flex;
+}
+
+.modal-content {
+ background: var(--card-bg);
+ border: 2px solid var(--border-bright);
+ border-radius: 20px;
+ max-width: 900px;
+ width: 100%;
+ max-height: 90vh;
+ overflow-y: auto;
+ position: relative;
+ box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+ animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+ from {
+  opacity: 0;
+  transform: translateY(50px) scale(0.9);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+ }
+}
+
+.modal-header {
+ padding: 24px 28px;
+ border-bottom: 1px solid var(--border);
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+}
+
+.modal-header h2 {
+ font-size: 24px;
+ font-weight: 800;
+ color: var(--text);
+ display: flex;
+ align-items: center;
+ gap: 12px;
+}
+
+.modal-close-btn {
+ background: var(--red);
+ color: white;
+ border: none;
+ border-radius: 50%;
+ width: 40px;
+ height: 40px;
+ font-size: 24px;
+ font-weight: 800;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ line-height: 1;
+}
+
+.modal-close-btn:hover {
+ background: #dc2626;
+ transform: rotate(90deg) scale(1.1);
+}
+
+.modal-body {
+ padding: 28px;
+}
+
+.modal-info-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+ gap: 16px;
+ margin-bottom: 24px;
+}
+
+.modal-info-item {
+ background: rgba(99, 102, 241, 0.05);
+ border: 1px solid var(--border);
+ border-radius: 12px;
+ padding: 16px;
+ text-align: center;
+}
+
+.modal-info-item label {
+ display: block;
+ font-size: 12px;
+ text-transform: uppercase;
+ letter-spacing: 1px;
+ color: var(--text-dim);
+ margin-bottom: 8px;
+ font-weight: 700;
+}
+
+.modal-info-item .value {
+ font-size: 28px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ color: var(--text);
+}
+
+.modal-info-item.positive .value {
+ color: var(--green);
+}
+
+.modal-info-item.negative .value {
+ color: var(--red);
+}
+
+.modal-photo-container {
+ background: var(--main-bg);
+ border: 2px solid var(--border);
+ border-radius: 16px;
+ padding: 16px;
+ margin-top: 24px;
+ position: relative;
+ overflow: hidden;
+}
+
+.modal-photo-container img {
+ width: 100%;
+ height: auto;
+ border-radius: 12px;
+ display: block;
+}
+
+.modal-photo-loading {
+ text-align: center;
+ padding: 60px 20px;
+ color: var(--text-dim);
+ font-size: 16px;
+ font-weight: 600;
+}
+
+.modal-photo-error {
+ text-align: center;
+ padding: 60px 20px;
+ color: var(--red);
+ font-size: 16px;
+ font-weight: 600;
+}
+
+.modal-photo-spinner {
+ width: 50px;
+ height: 50px;
+ border: 4px solid var(--border);
+ border-top-color: var(--blue);
+ border-radius: 50%;
+ animation: spin 1s linear infinite;
+ margin: 0 auto 20px;
 }
 
 /* ========== SCROLLBAR ========== */
@@ -1319,8 +1508,28 @@ body.basic-mode .pro-only {
 </div>
 </div>
 
+<!-- MODAL DE FOTO DO TRADE -->
+<div class="trade-photo-modal" id="tradePhotoModal">
+ <div class="modal-content">
+  <div class="modal-header">
+   <h2 id="modalTitle">📅 Carregando...</h2>
+   <button class="modal-close-btn" onclick="Dashboard.fecharModal()">×</button>
+  </div>
+  <div class="modal-body">
+   <div class="modal-info-grid" id="modalInfoGrid"></div>
+   <div class="modal-photo-container" id="modalPhotoContainer">
+    <div class="modal-photo-loading">
+     <div class="modal-photo-spinner"></div>
+     Carregando foto...
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const GOOGLE_DRIVE_FOLDER_ID = "13wSi9sB3nDbQcF0oYDF1ZxWtLVNNrroh";
 const nomesMeses = {
  "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
  "05":"Maio","06":"Junho","07":"Julho","08":"Agosto",
@@ -1374,7 +1583,8 @@ const Dashboard = {
     trades: +cols[4] || 0,
     gain: +cols[5] || 0,
     stop: +cols[6] || 0,
-    zero: +cols[7] || 0
+    zero: +cols[7] || 0,
+    fotoId: cols[8] || "" // Coluna 8: ID da foto do Google Drive
    };
   }).filter(Boolean);
   
@@ -1814,6 +2024,122 @@ const Dashboard = {
   this.atualizar();
  },
  
+ abrirModal(dadosDia) {
+  const modal = document.getElementById('tradePhotoModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalInfoGrid = document.getElementById('modalInfoGrid');
+  const modalPhotoContainer = document.getElementById('modalPhotoContainer');
+  
+  // Formata a data
+  const data = new Date(dadosDia.data);
+  const dia = data.getDate();
+  const mes = nomesMeses[dadosDia.mes];
+  const ano = dadosDia.ano;
+  
+  // Atualiza título
+  modalTitle.textContent = `📅 ${dia} de ${mes} de ${ano}`;
+  
+  // Monta grid de informações
+  let infoHTML = `
+   <div class="modal-info-item ${dadosDia.pontos > 0 ? 'positive' : dadosDia.pontos < 0 ? 'negative' : ''}">
+    <label>Pontos</label>
+    <div class="value">${dadosDia.pontos > 0 ? '+' : ''}${dadosDia.pontos}</div>
+   </div>
+   <div class="modal-info-item">
+    <label>Trades</label>
+    <div class="value">${dadosDia.trades}</div>
+   </div>
+   <div class="modal-info-item positive">
+    <label>Gains</label>
+    <div class="value">${dadosDia.gain}</div>
+   </div>
+   <div class="modal-info-item negative">
+    <label>Stops</label>
+    <div class="value">${dadosDia.stop}</div>
+   </div>
+  `;
+  
+  if (dadosDia.zero > 0) {
+   infoHTML += `
+    <div class="modal-info-item">
+     <label>Breakeven</label>
+     <div class="value" style="color: var(--yellow)">${dadosDia.zero}</div>
+    </div>
+   `;
+  }
+  
+  modalInfoGrid.innerHTML = infoHTML;
+  
+  // Carrega a foto (passa o ID da foto se existir)
+  this.carregarFotoTrade(dadosDia.dia, modalPhotoContainer, dadosDia.fotoId);
+  
+  // Mostra modal
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+ },
+ 
+ fecharModal() {
+  const modal = document.getElementById('tradePhotoModal');
+  modal.classList.remove('active');
+  document.body.style.overflow = 'auto';
+ },
+ 
+ carregarFotoTrade(dataStr, container, fotoId) {
+  const [dia, mes, ano] = dataStr.split('/');
+  const nomeArquivo = `${dia}-${mes}-${ano}`;
+  
+  container.innerHTML = `
+   <div class="modal-photo-loading">
+    <div class="modal-photo-spinner"></div>
+    Carregando foto...
+   </div>
+  `;
+  
+  // Se tiver ID da foto (da planilha), usa direto
+  if (fotoId && fotoId.trim()) {
+   const url = `https://drive.google.com/uc?export=view&id=${fotoId.trim()}`;
+   
+   const img = new Image();
+   img.onload = () => {
+    container.innerHTML = `<img src="${url}" alt="Trade do dia ${dataStr}">`;
+   };
+   img.onerror = () => {
+    container.innerHTML = `
+     <div class="modal-photo-error">
+      ❌ Erro ao carregar foto<br>
+      <small style="font-size: 13px; opacity: 0.7; margin-top: 8px; display: block;">
+       Verifique se o ID da foto está correto e se o arquivo está compartilhado como "Qualquer pessoa com o link"
+      </small>
+     </div>
+    `;
+   };
+   img.src = url;
+  } else {
+   // Se não tiver ID, mostra instruções
+   container.innerHTML = `
+    <div class="modal-photo-error">
+     📷 Foto não configurada<br>
+     <small style="font-size: 12px; opacity: 0.8; margin-top: 16px; display: block; line-height: 1.7; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;">
+      <strong style="display: block; margin-bottom: 8px; color: var(--blue-bright);">Como adicionar fotos:</strong>
+      
+      <strong>1.</strong> Faça upload da foto no Google Drive<br>
+      <strong>2.</strong> Renomeie para: <code style="background: rgba(99,102,241,0.2); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;">${nomeArquivo}.png</code><br>
+      <strong>3.</strong> Clique com botão direito → "Compartilhar"<br>
+      <strong>4.</strong> Mude para "Qualquer pessoa com o link"<br>
+      <strong>5.</strong> Copie o <strong>ID</strong> da URL (parte depois de <code style="font-size: 10px;">/d/</code>)<br>
+      <strong>6.</strong> Cole o ID na planilha, coluna <strong>FOTO_ID</strong><br><br>
+      
+      <div style="background: rgba(99,102,241,0.1); padding: 12px; border-radius: 8px; border-left: 3px solid var(--blue);">
+       <strong>💡 Dica:</strong> A URL completa é algo como:<br>
+       <code style="font-size: 10px; word-break: break-all;">drive.google.com/file/d/<span style="color: var(--green);">ABC123xyz...</span>/view</code><br>
+       Copie apenas a parte verde (ID)
+      </div>
+     </small>
+    </div>
+   `;
+  }
+ },
+ 
  renderizarCalendario(dados) {
   const grid = document.getElementById("calendar");
   const calendarTitle = document.getElementById("calendarTitle");
@@ -1900,6 +2226,7 @@ const Dashboard = {
    const data = new Date(ano, mes, d);
    const r = dados.find(x => x.data.toDateString() === data.toDateString());
    let cls = "day", pts = "", info = "", badge = "";
+   let clickEvent = "";
    
    if (r) {
     pts = r.pontos;
@@ -1920,10 +2247,18 @@ const Dashboard = {
     }
     
     badge = `<div class="day-badge">${r.semana} • ${r.ativo}</div>`;
+    
+    // Adiciona evento de clique apenas se houver trades
+    if (r.trades > 0) {
+     cls += " clickable";
+     // Escapa as aspas nos dados JSON
+     const dadosJson = JSON.stringify(r).replace(/"/g, '&quot;');
+     clickEvent = `onclick="Dashboard.abrirModal(JSON.parse('${dadosJson}'.replace(/&quot;/g, '\\\"')))"`;
+    }
    }
    
    grid.innerHTML += `
-    <div class="${cls}">
+    <div class="${cls}" ${clickEvent}>
      <div class="day-number">${d}</div>
      <div class="day-points"
       style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
@@ -1938,7 +2273,18 @@ const Dashboard = {
 
 Dashboard.init();
 
+// Fechar modal ao clicar fora
+document.getElementById('tradePhotoModal')?.addEventListener('click', (e) => {
+ if (e.target.id === 'tradePhotoModal') {
+  Dashboard.fecharModal();
+ }
+});
+
+// Fechar modal com ESC e alternar modo com Ctrl+M
 document.addEventListener('keydown', (e) => {
+ if (e.key === 'Escape') {
+  Dashboard.fecharModal();
+ }
  if (e.ctrlKey && e.key === 'm') {
   e.preventDefault();
   document.getElementById('toggleMode')?.click();
