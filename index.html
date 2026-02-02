@@ -644,53 +644,6 @@ canvas {
  transform: translateX(-1px);
 }
 
-.calendar-month-selector {
- display: flex;
- align-items: center;
- justify-content: space-between;
- margin-bottom: 24px;
- gap: 16px;
-}
-
-.calendar-month-selector strong {
- flex: 1;
- text-align: center;
- font-size: 18px;
- font-weight: 700;
- color: var(--text-dim);
-}
-
-.month-nav-btn {
- background: var(--blue);
- color: white;
- border: none;
- border-radius: 8px;
- width: 40px;
- height: 40px;
- font-size: 20px;
- font-weight: 800;
- cursor: pointer;
- transition: all 0.2s;
- display: flex;
- align-items: center;
- justify-content: center;
-}
-
-.month-nav-btn:hover {
- background: var(--blue-bright);
- transform: scale(1.1);
-}
-
-.month-nav-btn:active {
- transform: scale(0.95);
-}
-
-.month-nav-btn:disabled {
- opacity: 0.3;
- cursor: not-allowed;
- transform: none;
-}
-
 .calendar-header {
  display: grid;
  grid-template-columns: repeat(7, 1fr);
@@ -1340,11 +1293,7 @@ body.basic-mode .pro-only {
  </div>
  
  <div class="calendar-wrapper pro-only">
-  <div class="calendar-month-selector">
-   <button id="prevMonth" class="month-nav-btn">←</button>
-   <strong id="calendarTitle">📅 Calendário de Trading</strong>
-   <button id="nextMonth" class="month-nav-btn">→</button>
-  </div>
+  <strong id="calendarTitle">📅 Calendário de Trading</strong>
   <div class="calendar-header">
    <div>Dom</div><div>Seg</div><div>Ter</div>
    <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
@@ -1383,14 +1332,11 @@ const Dashboard = {
  primeiraCarga: true,
  chartAcumulado: null,
  chartBar: null,
- mesAtualCalendario: null,
- anoAtualCalendario: null,
  
  async init() {
   this.inicializarToggleMode();
   await this.carregarDados();
   this.atualizarPerformanceIndicator();
-  this.inicializarNavegacaoMeses();
  },
  
  async carregarDados() {
@@ -1460,8 +1406,16 @@ const Dashboard = {
   filtroMes.innerHTML = '<option value="ALL">Todos os meses</option>' +
    meses.map(m => `<option value="${m}">${nomesMeses[m]}</option>`).join("");
   
-  // Sempre começa em "Todos os meses" para mostrar o seletor de meses
-  filtroMes.value = "ALL";
+  const mesAtual = (new Date().getMonth()+1).toString().padStart(2,"0");
+  
+  // Na primeira carga, seleciona o mês atual (não "Todos os meses")
+  if (this.primeiraCarga && meses.includes(mesAtual)) {
+   filtroMes.value = mesAtual;
+   filtroSemana.disabled = false;
+  } else if (!this.primeiraCarga) {
+   filtroMes.value = "ALL";
+   filtroSemana.disabled = true;
+  }
   
   filtroMes.onchange = () => {
    this.primeiraCarga = false;
@@ -1850,67 +1804,6 @@ const Dashboard = {
     }
    });
   }
- },
- 
- inicializarNavegacaoMeses() {
-  const btnPrev = document.getElementById('prevMonth');
-  const btnNext = document.getElementById('nextMonth');
-  
-  if (!btnPrev || !btnNext) return;
-  
-  btnPrev.addEventListener('click', () => {
-   if (!this.mesAtualCalendario || !this.anoAtualCalendario) return;
-   
-   let mes = this.mesAtualCalendario - 1;
-   let ano = this.anoAtualCalendario;
-   
-   if (mes < 0) {
-    mes = 11;
-    ano--;
-   }
-   
-   // Verifica se há dados para este mês
-   const mesStr = (mes + 1).toString().padStart(2, '0');
-   const temDados = this.dados.some(d => d.mes === mesStr && d.ano === ano.toString());
-   
-   if (temDados) {
-    this.mesAtualCalendario = mes;
-    this.anoAtualCalendario = ano;
-    
-    // Atualiza o filtro de mês
-    filtroMes.value = mesStr;
-    filtroSemana.value = "ALL";
-    
-    this.atualizar();
-   }
-  });
-  
-  btnNext.addEventListener('click', () => {
-   if (!this.mesAtualCalendario || !this.anoAtualCalendario) return;
-   
-   let mes = this.mesAtualCalendario + 1;
-   let ano = this.anoAtualCalendario;
-   
-   if (mes > 11) {
-    mes = 0;
-    ano++;
-   }
-   
-   // Verifica se há dados para este mês
-   const mesStr = (mes + 1).toString().padStart(2, '0');
-   const temDados = this.dados.some(d => d.mes === mesStr && d.ano === ano.toString());
-   
-   if (temDados) {
-    this.mesAtualCalendario = mes;
-    this.anoAtualCalendario = ano;
-    
-    // Atualiza o filtro de mês
-    filtroMes.value = mesStr;
-    filtroSemana.value = "ALL";
-    
-    this.atualizar();
-   }
-  });
  },
  
  voltarParaMeses() {
