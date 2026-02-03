@@ -1060,9 +1060,9 @@ body.basic-mode .pro-only {
  background: var(--card-bg);
  border: 2px solid var(--border-bright);
  border-radius: 20px;
- max-width: 900px;
+ max-width: 650px;
  width: 100%;
- max-height: 90vh;
+ max-height: 85vh;
  overflow-y: auto;
  position: relative;
  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
@@ -1081,7 +1081,7 @@ body.basic-mode .pro-only {
 }
 
 .modal-header {
- padding: 24px 28px;
+ padding: 18px 20px;
  border-bottom: 1px solid var(--border);
  display: flex;
  align-items: center;
@@ -1089,12 +1089,12 @@ body.basic-mode .pro-only {
 }
 
 .modal-header h2 {
- font-size: 24px;
+ font-size: 20px;
  font-weight: 800;
  color: var(--text);
  display: flex;
  align-items: center;
- gap: 12px;
+ gap: 10px;
 }
 
 .modal-close-btn {
@@ -1102,9 +1102,9 @@ body.basic-mode .pro-only {
  color: white;
  border: none;
  border-radius: 50%;
- width: 40px;
- height: 40px;
- font-size: 24px;
+ width: 36px;
+ height: 36px;
+ font-size: 22px;
  font-weight: 800;
  cursor: pointer;
  transition: all 0.2s;
@@ -1120,36 +1120,36 @@ body.basic-mode .pro-only {
 }
 
 .modal-body {
- padding: 28px;
+ padding: 20px;
 }
 
 .modal-info-grid {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
- gap: 16px;
- margin-bottom: 24px;
+ grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+ gap: 12px;
+ margin-bottom: 20px;
 }
 
 .modal-info-item {
  background: rgba(99, 102, 241, 0.05);
  border: 1px solid var(--border);
- border-radius: 12px;
- padding: 16px;
+ border-radius: 10px;
+ padding: 12px;
  text-align: center;
 }
 
 .modal-info-item label {
  display: block;
- font-size: 12px;
+ font-size: 11px;
  text-transform: uppercase;
- letter-spacing: 1px;
+ letter-spacing: 0.5px;
  color: var(--text-dim);
- margin-bottom: 8px;
+ margin-bottom: 6px;
  font-weight: 700;
 }
 
 .modal-info-item .value {
- font-size: 28px;
+ font-size: 22px;
  font-weight: 900;
  font-family: 'JetBrains Mono', monospace;
  color: var(--text);
@@ -1166,9 +1166,9 @@ body.basic-mode .pro-only {
 .modal-photo-container {
  background: var(--main-bg);
  border: 2px solid var(--border);
- border-radius: 16px;
- padding: 16px;
- margin-top: 24px;
+ border-radius: 12px;
+ padding: 12px;
+ margin-top: 20px;
  position: relative;
  overflow: hidden;
 }
@@ -1176,34 +1176,36 @@ body.basic-mode .pro-only {
 .modal-photo-container img {
  width: 100%;
  height: auto;
- border-radius: 12px;
+ max-height: 400px;
+ object-fit: contain;
+ border-radius: 8px;
  display: block;
 }
 
 .modal-photo-loading {
  text-align: center;
- padding: 60px 20px;
+ padding: 40px 20px;
  color: var(--text-dim);
- font-size: 16px;
+ font-size: 14px;
  font-weight: 600;
 }
 
 .modal-photo-error {
  text-align: center;
- padding: 60px 20px;
+ padding: 40px 20px;
  color: var(--red);
- font-size: 16px;
+ font-size: 14px;
  font-weight: 600;
 }
 
 .modal-photo-spinner {
- width: 50px;
- height: 50px;
- border: 4px solid var(--border);
+ width: 40px;
+ height: 40px;
+ border: 3px solid var(--border);
  border-top-color: var(--blue);
  border-radius: 50%;
  animation: spin 1s linear infinite;
- margin: 0 auto 20px;
+ margin: 0 auto 16px;
 }
 
 /* ========== SCROLLBAR ========== */
@@ -1309,6 +1311,71 @@ body.basic-mode .pro-only {
  .calendar-wrapper > strong {
   font-size: 16px;
   margin-bottom: 16px;
+ }
+ 
+ /* Modal menor em mobile */
+ .modal-content {
+  max-width: 95%;
+  max-height: 90vh;
+ }
+ 
+ .modal-header {
+  padding: 14px 16px;
+ }
+ 
+ .modal-header h2 {
+  font-size: 16px;
+  gap: 8px;
+ }
+ 
+ .modal-close-btn {
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+ }
+ 
+ .modal-body {
+  padding: 16px;
+ }
+ 
+ .modal-info-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+ }
+ 
+ .modal-info-item {
+  padding: 10px;
+ }
+ 
+ .modal-info-item label {
+  font-size: 10px;
+  margin-bottom: 4px;
+ }
+ 
+ .modal-info-item .value {
+  font-size: 18px;
+ }
+ 
+ .modal-photo-container {
+  padding: 10px;
+  margin-top: 16px;
+ }
+ 
+ .modal-photo-container img {
+  max-height: 300px;
+ }
+ 
+ .modal-photo-loading,
+ .modal-photo-error {
+  padding: 30px 16px;
+  font-size: 13px;
+ }
+ 
+ .modal-photo-spinner {
+  width: 35px;
+  height: 35px;
+  margin-bottom: 12px;
  }
 }
 
@@ -2097,60 +2164,24 @@ const Dashboard = {
   
   // Se tiver ID da foto (da planilha), usa direto
   if (fotoId && fotoId.trim()) {
-   const idLimpo = fotoId.trim();
-   console.log('🔍 Tentando carregar foto com ID:', idLimpo);
+   const url = `https://drive.google.com/uc?export=view&id=${fotoId.trim()}`;
    
-   // Tenta múltiplas URLs do Google Drive
-   const urls = [
-    `https://drive.google.com/uc?export=view&id=${idLimpo}`,
-    `https://drive.google.com/thumbnail?id=${idLimpo}&sz=w1000`,
-    `https://lh3.googleusercontent.com/d/${idLimpo}`
-   ];
-   
-   let tentativa = 0;
-   
-   const tentarCarregar = (urlIndex) => {
-    if (urlIndex >= urls.length) {
-     console.error('❌ Todas as URLs falharam para ID:', idLimpo);
-     container.innerHTML = `
-      <div class="modal-photo-error">
-       ❌ Erro ao carregar foto<br>
-       <small style="font-size: 13px; opacity: 0.7; margin-top: 12px; display: block; line-height: 1.6;">
-        <strong>Possíveis causas:</strong><br>
-        • ID da foto incorreto: <code style="background: rgba(239,68,68,0.2); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">${idLimpo}</code><br>
-        • Arquivo não está compartilhado como "Qualquer pessoa com o link"<br>
-        • Foto foi deletada do Google Drive<br><br>
-        
-        <strong style="color: var(--blue-bright);">📋 Checklist:</strong><br>
-        1. Abra o Google Drive<br>
-        2. Encontre a foto do dia ${nomeArquivo}<br>
-        3. Botão direito → Compartilhar<br>
-        4. Altere para "Qualquer pessoa com o link"<br>
-        5. Copie o ID da URL e cole na planilha
-       </small>
-      </div>
-     `;
-     return;
-    }
-    
-    const url = urls[urlIndex];
-    console.log(`🔄 Tentativa ${urlIndex + 1}/${urls.length}:`, url);
-    
-    const img = new Image();
-    img.onload = () => {
-     console.log('✅ Foto carregada com sucesso:', url);
-     container.innerHTML = `<img src="${url}" alt="Trade do dia ${dataStr}">`;
-    };
-    img.onerror = () => {
-     console.warn(`⚠️ Falha na URL ${urlIndex + 1}:`, url);
-     tentarCarregar(urlIndex + 1);
-    };
-    img.src = url;
+   const img = new Image();
+   img.onload = () => {
+    container.innerHTML = `<img src="${url}" alt="Trade do dia ${dataStr}">`;
    };
-   
-   tentarCarregar(0);
+   img.onerror = () => {
+    container.innerHTML = `
+     <div class="modal-photo-error">
+      ❌ Erro ao carregar foto<br>
+      <small style="font-size: 13px; opacity: 0.7; margin-top: 8px; display: block;">
+       Verifique se o ID da foto está correto e se o arquivo está compartilhado como "Qualquer pessoa com o link"
+      </small>
+     </div>
+    `;
+   };
+   img.src = url;
   } else {
-   console.log('📷 Nenhum fotoId encontrado para', dataStr);
    // Se não tiver ID, mostra instruções
    container.innerHTML = `
     <div class="modal-photo-error">
@@ -2163,11 +2194,11 @@ const Dashboard = {
       <strong>3.</strong> Clique com botão direito → "Compartilhar"<br>
       <strong>4.</strong> Mude para "Qualquer pessoa com o link"<br>
       <strong>5.</strong> Copie o <strong>ID</strong> da URL (parte depois de <code style="font-size: 10px;">/d/</code>)<br>
-      <strong>6.</strong> Cole o ID na planilha, coluna <strong>FOTO_ID</strong> (coluna I)<br><br>
+      <strong>6.</strong> Cole o ID na planilha, coluna <strong>FOTO_ID</strong><br><br>
       
       <div style="background: rgba(99,102,241,0.1); padding: 12px; border-radius: 8px; border-left: 3px solid var(--blue);">
        <strong>💡 Dica:</strong> A URL completa é algo como:<br>
-       <code style="font-size: 10px; word-break: break-all;">drive.google.com/file/d/<span style="color: var(--green);">1ABC-xyz123_EXEMPLO</span>/view</code><br>
+       <code style="font-size: 10px; word-break: break-all;">drive.google.com/file/d/<span style="color: var(--green);">ABC123xyz...</span>/view</code><br>
        Copie apenas a parte verde (ID)
       </div>
      </small>
@@ -2261,16 +2292,13 @@ const Dashboard = {
   for (let d = 1; d <= ultimo.getDate(); d++) {
    const data = new Date(ano, mes, d);
    const r = dados.find(x => x.data.toDateString() === data.toDateString());
-   
-   const dayDiv = document.createElement('div');
-   dayDiv.className = "day";
-   
-   let pts = "", info = "", badge = "";
+   let cls = "day", pts = "", info = "", badge = "";
+   let clickEvent = "";
    
    if (r) {
     pts = r.pontos;
-    if (pts > 0) dayDiv.classList.add("positive");
-    if (pts < 0) dayDiv.classList.add("negative");
+    if (pts > 0) cls += " positive";
+    if (pts < 0) cls += " negative";
     
     let primeiraLinha = `${r.trades} trade${r.trades !== 1 ? 's' : ''}`;
     
@@ -2289,24 +2317,23 @@ const Dashboard = {
     
     // Adiciona evento de clique apenas se houver trades
     if (r.trades > 0) {
-     dayDiv.classList.add("clickable");
-     dayDiv.addEventListener('click', () => {
-      this.abrirModal(r);
-     });
+     cls += " clickable";
+     // Escapa as aspas nos dados JSON
+     const dadosJson = JSON.stringify(r).replace(/"/g, '&quot;');
+     clickEvent = `onclick="Dashboard.abrirModal(JSON.parse('${dadosJson}'.replace(/&quot;/g, '\\\"')))"`;
     }
    }
    
-   dayDiv.innerHTML = `
-    <div class="day-number">${d}</div>
-    <div class="day-points"
-     style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
-     ${r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "")}
-    </div>
-    <div class="day-info">${info}</div>
-    ${badge}
-   `;
-   
-   grid.appendChild(dayDiv);
+   grid.innerHTML += `
+    <div class="${cls}" ${clickEvent}>
+     <div class="day-number">${d}</div>
+     <div class="day-points"
+      style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
+      ${r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "")}
+     </div>
+     <div class="day-info">${info}</div>
+     ${badge}
+    </div>`;
   }
  }
 };
