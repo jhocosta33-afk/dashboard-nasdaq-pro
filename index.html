@@ -751,7 +751,7 @@ canvas {
 }
 
 .day.clickable::after {
- content: '🔍';
+ content: '📸';
  position: absolute;
  top: 6px;
  right: 6px;
@@ -761,7 +761,7 @@ canvas {
 }
 
 .day.clickable:hover::after {
- opacity: 0.6;
+ opacity: 0.7;
 }
 
 .day.positive {
@@ -2092,16 +2092,25 @@ const Dashboard = {
  },
  
  abrirModal(dadosDia) {
+  console.log('📸 Abrindo modal com dados:', dadosDia);
+  
   const modal = document.getElementById('tradePhotoModal');
   const modalTitle = document.getElementById('modalTitle');
   const modalInfoGrid = document.getElementById('modalInfoGrid');
   const modalPhotoContainer = document.getElementById('modalPhotoContainer');
+  
+  if (!modal || !modalTitle || !modalInfoGrid || !modalPhotoContainer) {
+   console.error('❌ Elementos do modal não encontrados');
+   return;
+  }
   
   // Formata a data
   const data = new Date(dadosDia.data);
   const dia = data.getDate();
   const mes = nomesMeses[dadosDia.mes];
   const ano = dadosDia.ano;
+  
+  console.log('📅 Data formatada:', `${dia} de ${mes} de ${ano}`);
   
   // Atualiza título
   modalTitle.textContent = `📅 ${dia} de ${mes} de ${ano}`;
@@ -2137,12 +2146,16 @@ const Dashboard = {
   
   modalInfoGrid.innerHTML = infoHTML;
   
+  console.log('🖼️ Carregando foto. ID:', dadosDia.fotoId);
+  
   // Carrega a foto (passa o ID da foto se existir)
   this.carregarFotoTrade(dadosDia.dia, modalPhotoContainer, dadosDia.fotoId);
   
   // Mostra modal
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
+  
+  console.log('✅ Modal aberto com sucesso');
  },
  
  fecharModal() {
@@ -2286,19 +2299,26 @@ const Dashboard = {
   }
   
   for (let i = 0; i < primeiro.getDay(); i++) {
-   grid.innerHTML += `<div class="day empty"></div>`;
+   const emptyDay = document.createElement('div');
+   emptyDay.className = 'day empty';
+   grid.appendChild(emptyDay);
   }
   
   for (let d = 1; d <= ultimo.getDate(); d++) {
    const data = new Date(ano, mes, d);
    const r = dados.find(x => x.data.toDateString() === data.toDateString());
-   let cls = "day", pts = "", info = "", badge = "";
-   let clickEvent = "";
+   
+   const dayDiv = document.createElement('div');
+   dayDiv.className = 'day';
+   
+   let pts = "";
+   let info = "";
+   let badge = "";
    
    if (r) {
     pts = r.pontos;
-    if (pts > 0) cls += " positive";
-    if (pts < 0) cls += " negative";
+    if (pts > 0) dayDiv.classList.add('positive');
+    if (pts < 0) dayDiv.classList.add('negative');
     
     let primeiraLinha = `${r.trades} trade${r.trades !== 1 ? 's' : ''}`;
     
@@ -2315,25 +2335,32 @@ const Dashboard = {
     
     badge = `<div class="day-badge">${r.semana} • ${r.ativo}</div>`;
     
-    // Adiciona evento de clique apenas se houver trades
-    if (r.trades > 0) {
-     cls += " clickable";
-     // Escapa as aspas nos dados JSON
-     const dadosJson = JSON.stringify(r).replace(/"/g, '&quot;');
-     clickEvent = `onclick="Dashboard.abrirModal(JSON.parse('${dadosJson}'.replace(/&quot;/g, '\\\"')))"`;
+    // Adiciona evento de clique apenas se houver trades E foto
+    if (r.trades > 0 && r.fotoId && r.fotoId.toString().trim() !== '') {
+     dayDiv.classList.add('clickable');
+     dayDiv.style.cursor = 'pointer';
+     
+     // Adiciona evento de clique
+     dayDiv.addEventListener('click', () => {
+      Dashboard.abrirModal(r);
+     });
     }
    }
    
-   grid.innerHTML += `
-    <div class="${cls}" ${clickEvent}>
-     <div class="day-number">${d}</div>
-     <div class="day-points"
-      style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
-      ${r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "")}
-     </div>
-     <div class="day-info">${info}</div>
-     ${badge}
-    </div>`;
+   // Monta o HTML interno
+   const ptsDisplay = r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "");
+   const ptsColor = pts < 0 ? 'var(--red)' : pts > 0 ? 'var(--green)' : 'var(--muted)';
+   
+   dayDiv.innerHTML = `
+    <div class="day-number">${d}</div>
+    <div class="day-points" style="color:${ptsColor}">
+     ${ptsDisplay}
+    </div>
+    <div class="day-info">${info}</div>
+    ${badge}
+   `;
+   
+   grid.appendChild(dayDiv);
   }
  }
 };
