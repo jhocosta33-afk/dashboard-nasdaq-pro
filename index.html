@@ -2168,6 +2168,8 @@ const Dashboard = {
   const [dia, mes, ano] = dataStr.split('/');
   const nomeArquivo = `${dia}-${mes}-${ano}`;
   
+  console.log('🖼️ Carregando foto:', { dataStr, nomeArquivo, fotoId });
+  
   container.innerHTML = `
    <div class="modal-photo-loading">
     <div class="modal-photo-spinner"></div>
@@ -2179,11 +2181,17 @@ const Dashboard = {
   if (fotoId && fotoId.trim()) {
    const url = `https://drive.google.com/uc?export=view&id=${fotoId.trim()}`;
    
+   console.log('📸 URL da foto:', url);
+   
    const img = new Image();
+   
    img.onload = () => {
+    console.log('✅ Foto carregada com sucesso');
     container.innerHTML = `<img src="${url}" alt="Trade do dia ${dataStr}">`;
    };
+   
    img.onerror = () => {
+    console.error('❌ Erro ao carregar foto. ID:', fotoId);
     container.innerHTML = `
      <div class="modal-photo-error">
       ❌ Erro ao carregar foto<br>
@@ -2193,9 +2201,10 @@ const Dashboard = {
      </div>
     `;
    };
+   
    img.src = url;
   } else {
-   // Se não tiver ID, mostra instruções
+   console.warn('⚠️ Nenhum ID de foto fornecido');
    container.innerHTML = `
     <div class="modal-photo-error">
      📷 Foto não configurada<br>
