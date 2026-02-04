@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Dashboard NASDAQ PRO - Premium Edition</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#050711">
+<meta name="mobile-web-app-capable" content="yes">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -751,7 +753,7 @@ canvas {
 }
 
 .day.clickable::after {
- content: '🔍';
+ content: '📸';
  position: absolute;
  top: 6px;
  right: 6px;
@@ -761,7 +763,7 @@ canvas {
 }
 
 .day.clickable:hover::after {
- opacity: 0.6;
+ opacity: 0.7;
 }
 
 .day.positive {
@@ -1060,9 +1062,9 @@ body.basic-mode .pro-only {
  background: var(--card-bg);
  border: 2px solid var(--border-bright);
  border-radius: 20px;
- max-width: 900px;
+ max-width: 650px;
  width: 100%;
- max-height: 90vh;
+ max-height: 85vh;
  overflow-y: auto;
  position: relative;
  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
@@ -1081,7 +1083,7 @@ body.basic-mode .pro-only {
 }
 
 .modal-header {
- padding: 24px 28px;
+ padding: 18px 20px;
  border-bottom: 1px solid var(--border);
  display: flex;
  align-items: center;
@@ -1089,12 +1091,12 @@ body.basic-mode .pro-only {
 }
 
 .modal-header h2 {
- font-size: 24px;
+ font-size: 20px;
  font-weight: 800;
  color: var(--text);
  display: flex;
  align-items: center;
- gap: 12px;
+ gap: 10px;
 }
 
 .modal-close-btn {
@@ -1102,9 +1104,9 @@ body.basic-mode .pro-only {
  color: white;
  border: none;
  border-radius: 50%;
- width: 40px;
- height: 40px;
- font-size: 24px;
+ width: 36px;
+ height: 36px;
+ font-size: 22px;
  font-weight: 800;
  cursor: pointer;
  transition: all 0.2s;
@@ -1120,36 +1122,36 @@ body.basic-mode .pro-only {
 }
 
 .modal-body {
- padding: 28px;
+ padding: 20px;
 }
 
 .modal-info-grid {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
- gap: 16px;
- margin-bottom: 24px;
+ grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+ gap: 12px;
+ margin-bottom: 20px;
 }
 
 .modal-info-item {
  background: rgba(99, 102, 241, 0.05);
  border: 1px solid var(--border);
- border-radius: 12px;
- padding: 16px;
+ border-radius: 10px;
+ padding: 12px;
  text-align: center;
 }
 
 .modal-info-item label {
  display: block;
- font-size: 12px;
+ font-size: 11px;
  text-transform: uppercase;
- letter-spacing: 1px;
+ letter-spacing: 0.5px;
  color: var(--text-dim);
- margin-bottom: 8px;
+ margin-bottom: 6px;
  font-weight: 700;
 }
 
 .modal-info-item .value {
- font-size: 28px;
+ font-size: 22px;
  font-weight: 900;
  font-family: 'JetBrains Mono', monospace;
  color: var(--text);
@@ -1166,9 +1168,9 @@ body.basic-mode .pro-only {
 .modal-photo-container {
  background: var(--main-bg);
  border: 2px solid var(--border);
- border-radius: 16px;
- padding: 16px;
- margin-top: 24px;
+ border-radius: 12px;
+ padding: 12px;
+ margin-top: 20px;
  position: relative;
  overflow: hidden;
 }
@@ -1176,34 +1178,36 @@ body.basic-mode .pro-only {
 .modal-photo-container img {
  width: 100%;
  height: auto;
- border-radius: 12px;
+ max-height: 400px;
+ object-fit: contain;
+ border-radius: 8px;
  display: block;
 }
 
 .modal-photo-loading {
  text-align: center;
- padding: 60px 20px;
+ padding: 40px 20px;
  color: var(--text-dim);
- font-size: 16px;
+ font-size: 14px;
  font-weight: 600;
 }
 
 .modal-photo-error {
  text-align: center;
- padding: 60px 20px;
+ padding: 40px 20px;
  color: var(--red);
- font-size: 16px;
+ font-size: 14px;
  font-weight: 600;
 }
 
 .modal-photo-spinner {
- width: 50px;
- height: 50px;
- border: 4px solid var(--border);
+ width: 40px;
+ height: 40px;
+ border: 3px solid var(--border);
  border-top-color: var(--blue);
  border-radius: 50%;
  animation: spin 1s linear infinite;
- margin: 0 auto 20px;
+ margin: 0 auto 16px;
 }
 
 /* ========== SCROLLBAR ========== */
@@ -1241,7 +1245,7 @@ body.basic-mode .pro-only {
   width: 100%;
   border-right: none;
   border-bottom: 1px solid var(--border);
-  padding: 24px 20px;
+  padding: 20px 16px;
  }
  
  .sidebar::before {
@@ -1252,18 +1256,106 @@ body.basic-mode .pro-only {
   background: linear-gradient(90deg, transparent, var(--blue), transparent);
  }
  
+ .logo {
+  margin-bottom: 20px;
+  padding: 16px;
+ }
+ 
+ .logo img {
+  max-height: 60px;
+ }
+ 
+ .filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+ }
+ 
+ .filter-group {
+  margin-bottom: 0;
+ }
+ 
+ .filter-group label {
+  font-size: 11px;
+  margin-bottom: 6px;
+ }
+ 
+ .filter-group select {
+  padding: 10px 12px;
+  font-size: 13px;
+ }
+ 
+ .stats-sidebar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+ }
+ 
+ .sidebar-stat {
+  margin-bottom: 0;
+  padding: 10px;
+  font-size: 12px;
+ }
+ 
+ .sidebar-stat span:last-child {
+  font-size: 13px;
+ }
+ 
+ .mode-toggle {
+  padding: 14px 16px;
+  font-size: 13px;
+  margin-top: 16px;
+ }
+ 
+ .mode-toggle #modeText {
+  font-size: 13px;
+ }
+ 
+ .mode-toggle #modeIcon {
+  font-size: 16px;
+ }
+ 
  .main-content {
-  padding: 24px 20px;
+  padding: 20px 16px;
+ }
+ 
+ .header-main {
+  margin-bottom: 24px;
  }
  
  .header-main h1 {
-  font-size: 32px;
+  font-size: 28px;
+ }
+ 
+ .performance-indicator {
+  top: 12px;
+  right: 12px;
+  font-size: 11px;
+  padding: 8px 12px;
  }
 }
 
 @media (max-width: 768px) {
  .kpis {
   grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+ }
+ 
+ .kpi {
+  min-height: 90px;
+  padding: 16px;
+ }
+ 
+ .kpi span {
+  font-size: 10px;
+  margin-bottom: 8px;
+ }
+ 
+ .kpi strong {
+  font-size: 28px;
  }
  
  .calendar-grid {
@@ -1299,33 +1391,173 @@ body.basic-mode .pro-only {
  }
  
  .chart-card {
-  height: 350px;
+  height: 300px;
+  padding: 20px;
+ }
+ 
+ .chart-card h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
  }
  
  .calendar-wrapper {
   padding: 16px;
  }
  
- .calendar-wrapper > strong {
+ .calendar-wrapper > strong,
+ #calendarTitle {
   font-size: 16px;
   margin-bottom: 16px;
+ }
+ 
+ .calendar-header {
+  font-size: 12px;
+  margin-bottom: 12px;
+ }
+ 
+ .back-to-months-btn {
+  font-size: 12px;
+  padding: 6px 12px;
+ }
+ 
+ .month-card {
+  min-height: 90px;
+  padding: 14px;
+  gap: 6px;
+ }
+ 
+ .month-name {
+  font-size: 13px;
+ }
+ 
+ .month-points {
+  font-size: 28px;
+ }
+ 
+ .month-info {
+  font-size: 10px;
+ }
+ 
+ .table-card {
+  padding: 20px 16px;
+ }
+ 
+ .table-card > strong {
+  font-size: 16px;
+  margin-bottom: 16px;
+ }
+ 
+ table {
+  min-width: 700px;
+ }
+ 
+ th {
+  font-size: 11px;
+  padding: 12px 10px;
+ }
+ 
+ td {
+  font-size: 12px;
+  padding: 12px 10px;
+ }
+ 
+ /* Modal menor em mobile */
+ .modal-content {
+  max-width: 95%;
+  max-height: 90vh;
+ }
+ 
+ .modal-header {
+  padding: 14px 16px;
+ }
+ 
+ .modal-header h2 {
+  font-size: 16px;
+  gap: 8px;
+ }
+ 
+ .modal-close-btn {
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+ }
+ 
+ .modal-body {
+  padding: 16px;
+ }
+ 
+ .modal-info-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+ }
+ 
+ .modal-info-item {
+  padding: 10px;
+ }
+ 
+ .modal-info-item label {
+  font-size: 10px;
+  margin-bottom: 4px;
+ }
+ 
+ .modal-info-item .value {
+  font-size: 18px;
+ }
+ 
+ .modal-photo-container {
+  padding: 10px;
+  margin-top: 16px;
+ }
+ 
+ .modal-photo-container img {
+  max-height: 300px;
+ }
+ 
+ .modal-photo-loading,
+ .modal-photo-error {
+  padding: 30px 16px;
+  font-size: 13px;
+ }
+ 
+ .modal-photo-spinner {
+  width: 35px;
+  height: 35px;
+  margin-bottom: 12px;
  }
 }
 
 @media (max-width: 480px) {
  .kpis {
   grid-template-columns: 1fr;
+  gap: 10px;
+ }
+ 
+ .kpi {
+  min-height: 80px;
+  padding: 14px;
  }
  
  .header-main h1 {
-  font-size: 28px;
+  font-size: 24px;
  }
  
  .performance-indicator {
-  top: 10px;
-  right: 10px;
-  font-size: 11px;
-  padding: 8px 12px;
+  position: relative;
+  top: 0;
+  right: 0;
+  margin-bottom: 16px;
+  justify-content: flex-start;
+ }
+ 
+ .filters {
+  grid-template-columns: 1fr;
+  gap: 10px;
+ }
+ 
+ .stats-sidebar {
+  grid-template-columns: 1fr;
+  gap: 8px;
  }
  
  .day {
@@ -1336,6 +1568,58 @@ body.basic-mode .pro-only {
  
  .day-points {
   font-size: 18px;
+ }
+ 
+ .day-info {
+  font-size: 8px;
+ }
+ 
+ .calendar-header {
+  font-size: 11px;
+ }
+ 
+ .chart-card {
+  height: 250px;
+  padding: 16px;
+ }
+ 
+ .chart-card h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+ }
+ 
+ .modal-content {
+  max-width: 98%;
+  border-radius: 16px;
+ }
+ 
+ .modal-header h2 {
+  font-size: 14px;
+ }
+ 
+ .modal-info-grid {
+  grid-template-columns: 1fr;
+  gap: 8px;
+ }
+ 
+ .modal-photo-container img {
+  max-height: 250px;
+ }
+ 
+ .contratos-control {
+  gap: 8px;
+ }
+ 
+ .btn-control {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+ }
+ 
+ .valor-contratos {
+  font-size: 24px;
+  padding: 6px 18px;
+  min-width: 70px;
  }
 }
 
@@ -2025,16 +2309,25 @@ const Dashboard = {
  },
  
  abrirModal(dadosDia) {
+  console.log('📸 Abrindo modal com dados:', dadosDia);
+  
   const modal = document.getElementById('tradePhotoModal');
   const modalTitle = document.getElementById('modalTitle');
   const modalInfoGrid = document.getElementById('modalInfoGrid');
   const modalPhotoContainer = document.getElementById('modalPhotoContainer');
+  
+  if (!modal || !modalTitle || !modalInfoGrid || !modalPhotoContainer) {
+   console.error('❌ Elementos do modal não encontrados');
+   return;
+  }
   
   // Formata a data
   const data = new Date(dadosDia.data);
   const dia = data.getDate();
   const mes = nomesMeses[dadosDia.mes];
   const ano = dadosDia.ano;
+  
+  console.log('📅 Data formatada:', `${dia} de ${mes} de ${ano}`);
   
   // Atualiza título
   modalTitle.textContent = `📅 ${dia} de ${mes} de ${ano}`;
@@ -2070,12 +2363,16 @@ const Dashboard = {
   
   modalInfoGrid.innerHTML = infoHTML;
   
+  console.log('🖼️ Carregando foto. ID:', dadosDia.fotoId);
+  
   // Carrega a foto (passa o ID da foto se existir)
   this.carregarFotoTrade(dadosDia.dia, modalPhotoContainer, dadosDia.fotoId);
   
   // Mostra modal
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
+  
+  console.log('✅ Modal aberto com sucesso');
  },
  
  fecharModal() {
@@ -2088,6 +2385,14 @@ const Dashboard = {
   const [dia, mes, ano] = dataStr.split('/');
   const nomeArquivo = `${dia}-${mes}-${ano}`;
   
+  console.log('====== DEBUG FOTO ======');
+  console.log('📅 Data:', dataStr);
+  console.log('📝 Nome arquivo:', nomeArquivo);
+  console.log('🆔 ID recebido:', fotoId);
+  console.log('🔍 ID tipo:', typeof fotoId);
+  console.log('📏 ID length:', fotoId ? fotoId.length : 0);
+  console.log('✂️ ID trimmed:', fotoId ? fotoId.trim() : 'VAZIO');
+  
   container.innerHTML = `
    <div class="modal-photo-loading">
     <div class="modal-photo-spinner"></div>
@@ -2098,82 +2403,91 @@ const Dashboard = {
   // Se tiver ID da foto (da planilha), usa direto
   if (fotoId && fotoId.trim()) {
    const idLimpo = fotoId.trim();
-   console.log('🔍 Tentando carregar foto com ID:', idLimpo);
    
-   // Tenta múltiplas URLs do Google Drive
+   // Testa 3 URLs diferentes do Google Drive
    const urls = [
     `https://drive.google.com/uc?export=view&id=${idLimpo}`,
     `https://drive.google.com/thumbnail?id=${idLimpo}&sz=w1000`,
     `https://lh3.googleusercontent.com/d/${idLimpo}`
    ];
    
-   let tentativa = 0;
+   console.log('📸 Tentando URLs:');
+   urls.forEach((u, i) => console.log(`   ${i+1}. ${u}`));
    
-   const tentarCarregar = (urlIndex) => {
-    if (urlIndex >= urls.length) {
-     console.error('❌ Todas as URLs falharam para ID:', idLimpo);
+   let tentativaAtual = 0;
+   
+   const tentarProximaURL = () => {
+    if (tentativaAtual >= urls.length) {
+     console.error('❌ TODAS AS URLs falharam!');
+     console.error('🔴 ID usado:', idLimpo);
+     console.error('');
+     console.error('🔧 CHECKLIST:');
+     console.error('1. Foto está compartilhada como "Qualquer pessoa com o link"?');
+     console.error('2. ID está correto?');
+     console.error('3. Arquivo existe no Drive?');
+     
      container.innerHTML = `
       <div class="modal-photo-error">
-       ❌ Erro ao carregar foto<br>
-       <small style="font-size: 13px; opacity: 0.7; margin-top: 12px; display: block; line-height: 1.6;">
-        <strong>Possíveis causas:</strong><br>
-        • ID da foto incorreto: <code style="background: rgba(239,68,68,0.2); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">${idLimpo}</code><br>
-        • Arquivo não está compartilhado como "Qualquer pessoa com o link"<br>
-        • Foto foi deletada do Google Drive<br><br>
-        
-        <strong style="color: var(--blue-bright);">📋 Checklist:</strong><br>
-        1. Abra o Google Drive<br>
-        2. Encontre a foto do dia ${nomeArquivo}<br>
-        3. Botão direito → Compartilhar<br>
-        4. Altere para "Qualquer pessoa com o link"<br>
-        5. Copie o ID da URL e cole na planilha
+       ❌ Não foi possível carregar a foto<br>
+       <small style="font-size: 11px; opacity: 0.7; margin-top: 10px; display: block; line-height: 1.5;">
+        <strong>ID testado:</strong><br>
+        <code style="background: rgba(255,0,0,0.2); padding: 2px 6px; border-radius: 4px; font-size: 10px; word-break: break-all;">${idLimpo}</code><br><br>
+        <strong>Verifique:</strong><br>
+        1️⃣ Foto está como "Qualquer pessoa com o link"<br>
+        2️⃣ ID está correto na planilha<br>
+        3️⃣ Arquivo não foi deletado<br><br>
+        <strong>Teste você mesmo:</strong><br>
+        Cole este link no navegador:<br>
+        <code style="font-size: 9px; word-break: break-all;">drive.google.com/file/d/${idLimpo}/view</code>
        </small>
       </div>
      `;
      return;
     }
     
-    const url = urls[urlIndex];
-    console.log(`🔄 Tentativa ${urlIndex + 1}/${urls.length}:`, url);
+    const urlAtual = urls[tentativaAtual];
+    console.log(`🔄 Tentativa ${tentativaAtual + 1}/${urls.length}: ${urlAtual}`);
     
     const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
     img.onload = () => {
-     console.log('✅ Foto carregada com sucesso:', url);
-     container.innerHTML = `<img src="${url}" alt="Trade do dia ${dataStr}">`;
+     console.log(`✅ SUCESSO na tentativa ${tentativaAtual + 1}!`);
+     console.log('🖼️ URL que funcionou:', urlAtual);
+     console.log('📐 Dimensões:', img.width, 'x', img.height);
+     container.innerHTML = `<img src="${urlAtual}" alt="Trade do dia ${dataStr}" crossorigin="anonymous">`;
     };
+    
     img.onerror = () => {
-     console.warn(`⚠️ Falha na URL ${urlIndex + 1}:`, url);
-     tentarCarregar(urlIndex + 1);
+     console.warn(`⚠️ Falha na tentativa ${tentativaAtual + 1}`);
+     tentativaAtual++;
+     tentarProximaURL();
     };
-    img.src = url;
+    
+    img.src = urlAtual;
    };
    
-   tentarCarregar(0);
+   tentarProximaURL();
+   
   } else {
-   console.log('📷 Nenhum fotoId encontrado para', dataStr);
-   // Se não tiver ID, mostra instruções
+   console.warn('⚠️ NENHUM ID FORNECIDO');
+   console.warn('Verifique se a coluna FOTO_ID tem valor na planilha');
+   
    container.innerHTML = `
     <div class="modal-photo-error">
-     📷 Foto não configurada<br>
-     <small style="font-size: 12px; opacity: 0.8; margin-top: 16px; display: block; line-height: 1.7; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;">
-      <strong style="display: block; margin-bottom: 8px; color: var(--blue-bright);">Como adicionar fotos:</strong>
-      
-      <strong>1.</strong> Faça upload da foto no Google Drive<br>
-      <strong>2.</strong> Renomeie para: <code style="background: rgba(99,102,241,0.2); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;">${nomeArquivo}.png</code><br>
-      <strong>3.</strong> Clique com botão direito → "Compartilhar"<br>
-      <strong>4.</strong> Mude para "Qualquer pessoa com o link"<br>
-      <strong>5.</strong> Copie o <strong>ID</strong> da URL (parte depois de <code style="font-size: 10px;">/d/</code>)<br>
-      <strong>6.</strong> Cole o ID na planilha, coluna <strong>FOTO_ID</strong> (coluna I)<br><br>
-      
-      <div style="background: rgba(99,102,241,0.1); padding: 12px; border-radius: 8px; border-left: 3px solid var(--blue);">
-       <strong>💡 Dica:</strong> A URL completa é algo como:<br>
-       <code style="font-size: 10px; word-break: break-all;">drive.google.com/file/d/<span style="color: var(--green);">1ABC-xyz123_EXEMPLO</span>/view</code><br>
-       Copie apenas a parte verde (ID)
-      </div>
+     📷 Nenhuma foto configurada<br>
+     <small style="font-size: 11px; opacity: 0.8; margin-top: 10px; display: block;">
+      O ID da foto não está na planilha.<br><br>
+      <strong>Como adicionar:</strong><br>
+      1. Coluna <strong>FOTO_ID</strong> (coluna I)<br>
+      2. Cole o ID da foto do Google Drive<br>
+      3. Menu: <strong>📸 Fotos → Sincronizar</strong>
      </small>
     </div>
    `;
   }
+  
+  console.log('========================');
  },
  
  renderizarCalendario(dados) {
@@ -2255,7 +2569,9 @@ const Dashboard = {
   }
   
   for (let i = 0; i < primeiro.getDay(); i++) {
-   grid.innerHTML += `<div class="day empty"></div>`;
+   const emptyDay = document.createElement('div');
+   emptyDay.className = 'day empty';
+   grid.appendChild(emptyDay);
   }
   
   for (let d = 1; d <= ultimo.getDate(); d++) {
@@ -2263,14 +2579,16 @@ const Dashboard = {
    const r = dados.find(x => x.data.toDateString() === data.toDateString());
    
    const dayDiv = document.createElement('div');
-   dayDiv.className = "day";
+   dayDiv.className = 'day';
    
-   let pts = "", info = "", badge = "";
+   let pts = "";
+   let info = "";
+   let badge = "";
    
    if (r) {
     pts = r.pontos;
-    if (pts > 0) dayDiv.classList.add("positive");
-    if (pts < 0) dayDiv.classList.add("negative");
+    if (pts > 0) dayDiv.classList.add('positive');
+    if (pts < 0) dayDiv.classList.add('negative');
     
     let primeiraLinha = `${r.trades} trade${r.trades !== 1 ? 's' : ''}`;
     
@@ -2287,20 +2605,26 @@ const Dashboard = {
     
     badge = `<div class="day-badge">${r.semana} • ${r.ativo}</div>`;
     
-    // Adiciona evento de clique apenas se houver trades
-    if (r.trades > 0) {
-     dayDiv.classList.add("clickable");
+    // Adiciona evento de clique apenas se houver trades E foto
+    if (r.trades > 0 && r.fotoId && r.fotoId.toString().trim() !== '') {
+     dayDiv.classList.add('clickable');
+     dayDiv.style.cursor = 'pointer';
+     
+     // Adiciona evento de clique
      dayDiv.addEventListener('click', () => {
-      this.abrirModal(r);
+      Dashboard.abrirModal(r);
      });
     }
    }
    
+   // Monta o HTML interno
+   const ptsDisplay = r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "");
+   const ptsColor = pts < 0 ? 'var(--red)' : pts > 0 ? 'var(--green)' : 'var(--muted)';
+   
    dayDiv.innerHTML = `
     <div class="day-number">${d}</div>
-    <div class="day-points"
-     style="color:${pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)'}">
-     ${r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "")}
+    <div class="day-points" style="color:${ptsColor}">
+     ${ptsDisplay}
     </div>
     <div class="day-info">${info}</div>
     ${badge}
