@@ -1273,59 +1273,32 @@ body.basic-mode .pro-only {
  margin: 0 auto 16px;
 }
 
-.currency-converter {
- display: flex;
- align-items: center;
- gap: 12px;
- margin-top: 8px;
-}
-
-.currency-flag {
- width: 32px;
- height: 32px;
- border-radius: 50%;
- cursor: pointer;
- transition: all 0.3s;
- border: 3px solid transparent;
- font-size: 20px;
+.currency-display {
  display: flex;
  align-items: center;
  justify-content: center;
- background: rgba(99, 102, 241, 0.1);
+ gap: 8px;
+ margin-top: 12px;
+ padding: 8px 16px;
+ background: rgba(99, 102, 241, 0.08);
+ border-radius: 8px;
+ border: 1px solid rgba(99, 102, 241, 0.15);
 }
 
-.currency-flag:hover {
- transform: scale(1.15);
- box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+.currency-icon {
+ font-size: 18px;
+ filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
-.currency-flag.active {
- border-color: var(--blue);
- box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
- animation: pulse 2s infinite;
-}
-
-.currency-value {
- font-size: 16px;
+.currency-value-brl {
+ font-size: 15px;
  font-weight: 800;
  font-family: 'JetBrains Mono', monospace;
  color: var(--text);
- min-width: 120px;
- text-align: center;
-}
-
-.currency-label {
- font-size: 11px;
- color: var(--text-dim);
- text-transform: uppercase;
  letter-spacing: 0.5px;
- font-weight: 700;
 }
 
-@keyframes pulse {
- 0%, 100% { transform: scale(1); }
- 50% { transform: scale(1.05); }
-}
+/* Remove CSS antigo do conversor */
 ::-webkit-scrollbar {
  width: 8px;
  height: 8px;
@@ -1640,6 +1613,20 @@ body.basic-mode .pro-only {
   height: 35px;
   margin-bottom: 12px;
  }
+ 
+ .currency-display {
+  padding: 6px 12px;
+  margin-top: 10px;
+  gap: 6px;
+ }
+ 
+ .currency-icon {
+  font-size: 16px;
+ }
+ 
+ .currency-value-brl {
+  font-size: 13px;
+ }
 }
 
 @media (max-width: 480px) {
@@ -1862,13 +1849,9 @@ body.basic-mode .pro-only {
   <div class="kpi pro-only">
    <span>Total em Dólar</span>
    <strong id="kDolar" style="color:var(--green)">$0.00</strong>
-   <div class="currency-converter">
-    <div class="currency-flag" id="flagUSD" title="Dólar (USD)">🇺🇸</div>
-    <div>
-     <div class="currency-label" id="currencyLabel">USD</div>
-     <div class="currency-value" id="currencyValue">$0.00</div>
-    </div>
-    <div class="currency-flag" id="flagBRL" title="Real (BRL)">🇧🇷</div>
+   <div class="currency-display">
+    <span class="currency-icon">🇧🇷</span>
+    <span class="currency-value-brl" id="valorBRL">R$ 0,00</span>
    </div>
   </div>
  </div>
@@ -1948,7 +1931,6 @@ const Dashboard = {
  primeiraCarga: true,
  chartAcumulado: null,
  chartBar: null,
- moedaAtual: 'USD',
  cotacaoUSDtoBRL: 5.50,
  valorTotalUSD: 0,
  zoomLevel: 1,
@@ -2201,9 +2183,9 @@ const Dashboard = {
    kDolar.textContent = totalDolar.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
    kDolar.style.color = totalDolar >= 0 ? 'var(--green)' : 'var(--red)';
    
-   // Atualiza conversor de moeda
+   // Atualiza valor em Real
    this.valorTotalUSD = totalDolar;
-   this.mudarMoeda(this.moedaAtual);
+   this.atualizarValorReal();
   }
   
   const kGains = document.getElementById("kGains");
@@ -2524,24 +2506,8 @@ const Dashboard = {
  },
  
  async inicializarConversorMoeda() {
-  const flagUSD = document.getElementById('flagUSD');
-  const flagBRL = document.getElementById('flagBRL');
-  
-  if (!flagUSD || !flagBRL) return;
-  
   // Busca cotação atual
   await this.atualizarCotacao();
-  
-  // USD está ativo por padrão
-  flagUSD.classList.add('active');
-  
-  flagUSD.addEventListener('click', () => {
-   this.mudarMoeda('USD');
-  });
-  
-  flagBRL.addEventListener('click', () => {
-   this.mudarMoeda('BRL');
-  });
  },
  
  async atualizarCotacao() {
@@ -2549,32 +2515,20 @@ const Dashboard = {
    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
    const data = await response.json();
    this.cotacaoUSDtoBRL = data.rates.BRL;
-   console.log('💱 Cotação atualizada: 1 USD =', this.cotacaoUSDtoBRL.toFixed(2), 'BRL');
+   console.log('💱 Cotação USD → BRL:', this.cotacaoUSDtoBRL.toFixed(2));
   } catch (error) {
    console.warn('⚠️ Erro ao buscar cotação, usando valor padrão:', this.cotacaoUSDtoBRL);
   }
  },
  
- mudarMoeda(moeda) {
-  this.moedaAtual = moeda;
-  
-  const flagUSD = document.getElementById('flagUSD');
-  const flagBRL = document.getElementById('flagBRL');
-  const currencyLabel = document.getElementById('currencyLabel');
-  const currencyValue = document.getElementById('currencyValue');
-  
-  if (moeda === 'USD') {
-   flagUSD.classList.add('active');
-   flagBRL.classList.remove('active');
-   currencyLabel.textContent = 'USD';
-   const valorUSD = this.valorTotalUSD;
-   currencyValue.textContent = `$${valorUSD.toFixed(2)}`;
-  } else {
-   flagBRL.classList.add('active');
-   flagUSD.classList.remove('active');
-   currencyLabel.textContent = 'BRL';
-   const valorBRL = this.valorTotalUSD * this.cotacaoUSDtoBRL;
-   currencyValue.textContent = `R$${valorBRL.toFixed(2)}`;
+ atualizarValorReal() {
+  const valorBRL = document.getElementById('valorBRL');
+  if (valorBRL) {
+   const valorEmReais = this.valorTotalUSD * this.cotacaoUSDtoBRL;
+   valorBRL.textContent = valorEmReais.toLocaleString('pt-BR', { 
+    style: 'currency', 
+    currency: 'BRL' 
+   });
   }
  },
  
