@@ -308,7 +308,7 @@ body::before {
 }
 
 .header-main {
- margin-bottom: 36px;
+ margin-bottom: 24px;
  animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -316,6 +316,81 @@ body::before {
  from {
   opacity: 0;
   transform: translateY(-20px);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
+
+/* ========== SISTEMA DE ABAS ========== */
+.tab-navigation {
+ display: flex;
+ gap: 12px;
+ margin-bottom: 32px;
+ border-bottom: 2px solid var(--border);
+ padding-bottom: 0;
+}
+
+.tab-btn {
+ background: transparent;
+ border: none;
+ border-bottom: 3px solid transparent;
+ padding: 14px 24px;
+ font-size: 15px;
+ font-weight: 700;
+ color: var(--text-dim);
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ position: relative;
+ margin-bottom: -2px;
+}
+
+.tab-icon {
+ font-size: 18px;
+ transition: transform 0.3s;
+}
+
+.tab-label {
+ font-family: 'Archivo', sans-serif;
+ letter-spacing: 0.5px;
+}
+
+.tab-btn:hover {
+ color: var(--text);
+ border-bottom-color: rgba(99, 102, 241, 0.3);
+}
+
+.tab-btn:hover .tab-icon {
+ transform: scale(1.15);
+}
+
+.tab-btn.active {
+ color: var(--blue-bright);
+ border-bottom-color: var(--blue);
+ background: linear-gradient(180deg, transparent 0%, rgba(99, 102, 241, 0.05) 100%);
+}
+
+.tab-btn.active .tab-icon {
+ animation: pulse 2s infinite;
+}
+
+.tab-content {
+ display: none;
+ animation: fadeIn 0.4s ease-out;
+}
+
+.tab-content.active {
+ display: block;
+}
+
+@keyframes fadeIn {
+ from {
+  opacity: 0;
+  transform: translateY(10px);
  }
  to {
   opacity: 1;
@@ -1853,6 +1928,24 @@ body.basic-mode .pro-only {
  .market-content iframe {
   height: 400px !important;
  }
+ 
+ .tab-navigation {
+  gap: 8px;
+  margin-bottom: 24px;
+ }
+ 
+ .tab-btn {
+  padding: 12px 20px;
+  font-size: 14px;
+ }
+ 
+ .tab-icon {
+  font-size: 16px;
+ }
+ 
+ .tab-label {
+  font-size: 14px;
+ }
 }
 
 @media (max-width: 480px) {
@@ -1977,6 +2070,25 @@ body.basic-mode .pro-only {
  .market-content iframe {
   height: 350px !important;
  }
+ 
+ .tab-navigation {
+  gap: 6px;
+  margin-bottom: 20px;
+ }
+ 
+ .tab-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  gap: 6px;
+ }
+ 
+ .tab-icon {
+  font-size: 15px;
+ }
+ 
+ .tab-label {
+  font-size: 13px;
+ }
 }
 
 /* ========== TOOLTIP ========== */
@@ -2063,6 +2175,21 @@ body.basic-mode .pro-only {
   <h1>Dashboard de Trading</h1>
  </div>
  
+ <!-- ABAS DE NAVEGAÇÃO -->
+ <div class="tab-navigation">
+  <button class="tab-btn active" id="tabDashboard" onclick="Dashboard.mudarAba('dashboard')">
+   <span class="tab-icon">📊</span>
+   <span class="tab-label">Dashboard</span>
+  </button>
+  <button class="tab-btn" id="tabMercado" onclick="Dashboard.mudarAba('mercado')">
+   <span class="tab-icon">🌎</span>
+   <span class="tab-label">Mercado</span>
+  </button>
+ </div>
+ 
+ <!-- CONTEÚDO DASHBOARD -->
+ <div id="contentDashboard" class="tab-content active">
+ 
  <div class="kpis">
   <div class="kpi kpi-dias">
    <span>Dias Operados</span>
@@ -2125,48 +2252,52 @@ body.basic-mode .pro-only {
   </div>
  </div>
  
- <!-- CALENDÁRIO ECONÔMICO E MAPA DE CALOR -->
- <div class="market-data pro-only">
-  <div class="market-card">
-   <div class="market-header">
-    <h3>📅 Calendário Econômico</h3>
-    <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
-     Ver Completo →
-    </a>
+ </div><!-- FIM CONTEÚDO DASHBOARD -->
+ 
+ <!-- CONTEÚDO MERCADO -->
+ <div id="contentMercado" class="tab-content">
+  <div class="market-data">
+   <div class="market-card">
+    <div class="market-header">
+     <h3>📅 Calendário Econômico</h3>
+     <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
+      Ver Completo →
+     </a>
+    </div>
+    <div class="market-content">
+     <iframe 
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&category=_employment,_economicActivity,_inflation,_credit,_centralBanks,_confidenceIndex,_balance,_Bonds&importance=2,3&features=datepicker,timezone&countries=5,6,37,72&calType=day&timeZone=23&lang=56"
+      width="100%" 
+      height="467" 
+      frameborder="0" 
+      allowtransparency="true" 
+      marginwidth="0" 
+      marginheight="0"
+      loading="lazy">
+     </iframe>
+    </div>
    </div>
-   <div class="market-content">
-    <iframe 
-     src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&category=_employment,_economicActivity,_inflation,_credit,_centralBanks,_confidenceIndex,_balance,_Bonds&importance=2,3&features=datepicker,timezone&countries=5,6,37,72&calType=day&timeZone=23&lang=56"
-     width="100%" 
-     height="467" 
-     frameborder="0" 
-     allowtransparency="true" 
-     marginwidth="0" 
-     marginheight="0"
-     loading="lazy">
-    </iframe>
+   
+   <div class="market-card">
+    <div class="market-header">
+     <h3>🗺️ Mapa de Calor S&P500</h3>
+     <a href="https://finviz.com/map.ashx" target="_blank" class="market-link">
+      Ver Completo →
+     </a>
+    </div>
+    <div class="market-content">
+     <iframe 
+      src="https://finviz.com/map.ashx?t=sec" 
+      width="100%" 
+      height="467" 
+      frameborder="0" 
+      allowtransparency="true"
+      loading="lazy">
+     </iframe>
+    </div>
    </div>
   </div>
-  
-  <div class="market-card">
-   <div class="market-header">
-    <h3>🗺️ Mapa de Calor S&P500</h3>
-    <a href="https://finviz.com/map.ashx" target="_blank" class="market-link">
-     Ver Completo →
-    </a>
-   </div>
-   <div class="market-content">
-    <iframe 
-     src="https://finviz.com/map.ashx?t=sec" 
-     width="100%" 
-     height="467" 
-     frameborder="0" 
-     allowtransparency="true"
-     loading="lazy">
-    </iframe>
-   </div>
-  </div>
- </div>
+ </div><!-- FIM CONTEÚDO MERCADO -->
  
  <div class="calendar-wrapper pro-only">
   <strong id="calendarTitle">📅 Calendário de Trading</strong>
@@ -2843,6 +2974,28 @@ const Dashboard = {
     style: 'currency', 
     currency: 'BRL' 
    });
+  }
+ },
+ 
+ mudarAba(aba) {
+  // Atualiza botões
+  const tabDashboard = document.getElementById('tabDashboard');
+  const tabMercado = document.getElementById('tabMercado');
+  
+  // Atualiza conteúdo
+  const contentDashboard = document.getElementById('contentDashboard');
+  const contentMercado = document.getElementById('contentMercado');
+  
+  if (aba === 'dashboard') {
+   tabDashboard.classList.add('active');
+   tabMercado.classList.remove('active');
+   contentDashboard.classList.add('active');
+   contentMercado.classList.remove('active');
+  } else if (aba === 'mercado') {
+   tabMercado.classList.add('active');
+   tabDashboard.classList.remove('active');
+   contentMercado.classList.add('active');
+   contentDashboard.classList.remove('active');
   }
  },
  
