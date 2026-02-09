@@ -1121,6 +1121,16 @@ body.basic-mode .pro-only {
  transform: rotate(90deg) scale(1.1);
 }
 
+.modal-download-btn:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 16px rgba(16,185,129,0.4);
+ background: linear-gradient(135deg, #059669, var(--green)) !important;
+}
+
+.modal-download-btn:active {
+ transform: translateY(0);
+}
+
 .modal-body {
  padding: 20px;
 }
@@ -1173,11 +1183,6 @@ body.basic-mode .pro-only {
  margin-top: 20px;
  position: relative;
  overflow: hidden;
- cursor: grab;
-}
-
-.modal-photo-container.grabbing {
- cursor: grabbing;
 }
 
 .modal-photo-container img {
@@ -1187,64 +1192,13 @@ body.basic-mode .pro-only {
  object-fit: contain;
  border-radius: 8px;
  display: block;
- transition: transform 0.1s ease-out;
+ cursor: zoom-in;
+ transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
  transform-origin: center center;
 }
 
-.zoom-controls {
- position: absolute;
- top: 16px;
- right: 16px;
- display: flex;
- gap: 8px;
- z-index: 10;
-}
-
-.zoom-btn {
- background: rgba(0, 0, 0, 0.7);
- color: white;
- border: 1px solid rgba(255, 255, 255, 0.2);
- border-radius: 8px;
- width: 36px;
- height: 36px;
- font-size: 18px;
- font-weight: 700;
- cursor: pointer;
- transition: all 0.2s;
- display: flex;
- align-items: center;
- justify-content: center;
- backdrop-filter: blur(10px);
-}
-
-.zoom-btn:hover {
- background: rgba(0, 0, 0, 0.9);
- transform: scale(1.1);
-}
-
-.zoom-btn:active {
- transform: scale(0.95);
-}
-
-.zoom-info {
- position: absolute;
- bottom: 16px;
- left: 50%;
- transform: translateX(-50%);
- background: rgba(0, 0, 0, 0.7);
- color: white;
- padding: 6px 12px;
- border-radius: 6px;
- font-size: 12px;
- font-weight: 600;
- backdrop-filter: blur(10px);
- pointer-events: none;
- opacity: 0;
- transition: opacity 0.3s;
-}
-
-.zoom-info.show {
- opacity: 1;
+.modal-photo-container img.zoomed {
+ cursor: zoom-out;
 }
 
 .modal-photo-loading {
@@ -1273,32 +1227,7 @@ body.basic-mode .pro-only {
  margin: 0 auto 16px;
 }
 
-.currency-display {
- display: flex;
- align-items: center;
- justify-content: center;
- gap: 8px;
- margin-top: 12px;
- padding: 8px 16px;
- background: rgba(99, 102, 241, 0.08);
- border-radius: 8px;
- border: 1px solid rgba(99, 102, 241, 0.15);
-}
-
-.currency-icon {
- font-size: 18px;
- filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-.currency-value-brl {
- font-size: 15px;
- font-weight: 800;
- font-family: 'JetBrains Mono', monospace;
- color: var(--text);
- letter-spacing: 0.5px;
-}
-
-/* Remove CSS antigo do conversor */
+/* ========== SCROLLBAR ========== */
 ::-webkit-scrollbar {
  width: 8px;
  height: 8px;
@@ -1613,20 +1542,6 @@ body.basic-mode .pro-only {
   height: 35px;
   margin-bottom: 12px;
  }
- 
- .currency-display {
-  padding: 6px 12px;
-  margin-top: 10px;
-  gap: 6px;
- }
- 
- .currency-icon {
-  font-size: 16px;
- }
- 
- .currency-value-brl {
-  font-size: 13px;
- }
 }
 
 @media (max-width: 480px) {
@@ -1847,12 +1762,14 @@ body.basic-mode .pro-only {
    </div>
   </div>
   <div class="kpi pro-only">
-   <span>Total em Dólar</span>
-   <strong id="kDolar" style="color:var(--green)">$0.00</strong>
-   <div class="currency-display">
-    <span class="currency-icon">🇧🇷</span>
-    <span class="currency-value-brl" id="valorBRL">R$ 0,00</span>
+   <span>Total em <span id="currencyLabel">Dólar</span></span>
+   <div style="display: flex; align-items: center; gap: 12px;">
+    <strong id="kDolar" style="color:var(--green)">$0.00</strong>
+    <button id="currencyToggle" onclick="Dashboard.toggleCurrency()" style="background: transparent; border: 2px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 20px; transition: all 0.3s; display: flex; align-items: center;" title="Converter para Reais">
+     🇺🇸
+    </button>
    </div>
+   <small id="exchangeRateInfo" style="font-size: 10px; color: var(--muted); margin-top: 4px; display: none;"></small>
   </div>
  </div>
  
@@ -1903,7 +1820,12 @@ body.basic-mode .pro-only {
  <div class="modal-content">
   <div class="modal-header">
    <h2 id="modalTitle">📅 Carregando...</h2>
-   <button class="modal-close-btn" onclick="Dashboard.fecharModal()">×</button>
+   <div style="display: flex; gap: 8px;">
+    <button class="modal-download-btn" onclick="Dashboard.baixarFoto()" title="Baixar foto" style="background: linear-gradient(135deg, var(--green), #059669); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px;">
+     📥 Baixar
+    </button>
+    <button class="modal-close-btn" onclick="Dashboard.fecharModal()">×</button>
+   </div>
   </div>
   <div class="modal-body">
    <div class="modal-info-grid" id="modalInfoGrid"></div>
@@ -1931,20 +1853,14 @@ const Dashboard = {
  primeiraCarga: true,
  chartAcumulado: null,
  chartBar: null,
- cotacaoUSDtoBRL: 5.50,
- valorTotalUSD: 0,
- zoomLevel: 1,
- zoomPosX: 0,
- zoomPosY: 0,
- isDragging: false,
- startX: 0,
- startY: 0,
+ currencyMode: 'USD', // USD ou BRL
+ exchangeRate: 5.00, // Taxa padrão
  
  async init() {
   this.inicializarToggleMode();
+  await this.buscarCotacaoDolar();
   await this.carregarDados();
   this.atualizarPerformanceIndicator();
-  this.inicializarConversorMoeda();
  },
  
  async carregarDados() {
@@ -2180,12 +2096,8 @@ const Dashboard = {
   
   const kDolar = document.getElementById("kDolar");
   if (kDolar) {
-   kDolar.textContent = totalDolar.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+   kDolar.textContent = this.formatCurrency(totalDolar);
    kDolar.style.color = totalDolar >= 0 ? 'var(--green)' : 'var(--red)';
-   
-   // Atualiza valor em Real
-   this.valorTotalUSD = totalDolar;
-   this.atualizarValorReal();
   }
   
   const kGains = document.getElementById("kGains");
@@ -2498,182 +2410,111 @@ const Dashboard = {
   const modal = document.getElementById('tradePhotoModal');
   modal.classList.remove('active');
   document.body.style.overflow = 'auto';
+  this.zoomLevel = 1; // Reset zoom ao fechar
+ },
+ 
+ // Funções de zoom na imagem
+ zoomLevel: 1,
+ zoomStep: 0.5,
+ 
+ toggleImageZoom(event) {
+  const img = event.target;
+  if (!img || img.tagName !== 'IMG') return;
   
-  // Reset zoom
-  this.zoomLevel = 1;
-  this.zoomPosX = 0;
-  this.zoomPosY = 0;
+  if (this.zoomLevel === 1) {
+   this.zoomLevel = 2;
+   img.style.transform = 'scale(2)';
+   img.classList.add('zoomed');
+  } else {
+   this.zoomLevel = 1;
+   img.style.transform = 'scale(1)';
+   img.classList.remove('zoomed');
+  }
  },
  
- async inicializarConversorMoeda() {
-  // Busca cotação atual
-  await this.atualizarCotacao();
- },
- 
- async atualizarCotacao() {
+ // Funções de conversão de moeda
+ async buscarCotacaoDolar() {
   try {
    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
    const data = await response.json();
-   this.cotacaoUSDtoBRL = data.rates.BRL;
-   console.log('💱 Cotação USD → BRL:', this.cotacaoUSDtoBRL.toFixed(2));
+   this.exchangeRate = data.rates.BRL;
+   console.log('💱 Cotação atualizada: USD 1.00 = BRL ' + this.exchangeRate.toFixed(2));
   } catch (error) {
-   console.warn('⚠️ Erro ao buscar cotação, usando valor padrão:', this.cotacaoUSDtoBRL);
+   console.warn('⚠️ Erro ao buscar cotação, usando padrão:', this.exchangeRate);
   }
  },
  
- atualizarValorReal() {
-  const valorBRL = document.getElementById('valorBRL');
-  if (valorBRL) {
-   const valorEmReais = this.valorTotalUSD * this.cotacaoUSDtoBRL;
-   valorBRL.textContent = valorEmReais.toLocaleString('pt-BR', { 
-    style: 'currency', 
-    currency: 'BRL' 
-   });
-  }
- },
- 
- inicializarZoomFoto(container, img) {
-  // Adiciona controles de zoom
-  const controls = document.createElement('div');
-  controls.className = 'zoom-controls';
-  controls.innerHTML = `
-   <button class="zoom-btn" id="zoomIn" title="Zoom In (+)">+</button>
-   <button class="zoom-btn" id="zoomOut" title="Zoom Out (-)">−</button>
-   <button class="zoom-btn" id="zoomReset" title="Reset (0)">⟲</button>
-  `;
-  container.appendChild(controls);
+ toggleCurrency() {
+  this.currencyMode = this.currencyMode === 'USD' ? 'BRL' : 'USD';
   
-  // Info de zoom
-  const zoomInfo = document.createElement('div');
-  zoomInfo.className = 'zoom-info';
-  zoomInfo.textContent = '100%';
-  container.appendChild(zoomInfo);
+  const currencyToggle = document.getElementById('currencyToggle');
+  const currencyLabel = document.getElementById('currencyLabel');
+  const exchangeRateInfo = document.getElementById('exchangeRateInfo');
   
-  // Botões de zoom
-  document.getElementById('zoomIn').addEventListener('click', () => this.zoom(img, container, 0.2));
-  document.getElementById('zoomOut').addEventListener('click', () => this.zoom(img, container, -0.2));
-  document.getElementById('zoomReset').addEventListener('click', () => this.resetZoom(img, container));
-  
-  // Zoom com scroll do mouse
-  container.addEventListener('wheel', (e) => {
-   e.preventDefault();
-   const delta = e.deltaY > 0 ? -0.1 : 0.1;
-   this.zoom(img, container, delta);
-  }, { passive: false });
-  
-  // Pan (arrastar) - Mouse
-  container.addEventListener('mousedown', (e) => {
-   if (this.zoomLevel > 1) {
-    this.isDragging = true;
-    this.startX = e.clientX - this.zoomPosX;
-    this.startY = e.clientY - this.zoomPosY;
-    container.classList.add('grabbing');
-    e.preventDefault();
-   }
-  });
-  
-  container.addEventListener('mousemove', (e) => {
-   if (this.isDragging) {
-    this.zoomPosX = e.clientX - this.startX;
-    this.zoomPosY = e.clientY - this.startY;
-    this.atualizarTransform(img);
-   }
-  });
-  
-  container.addEventListener('mouseup', () => {
-   this.isDragging = false;
-   container.classList.remove('grabbing');
-  });
-  
-  container.addEventListener('mouseleave', () => {
-   this.isDragging = false;
-   container.classList.remove('grabbing');
-  });
-  
-  // Touch (mobile)
-  let lastTouchDistance = 0;
-  let lastTouchX = 0;
-  let lastTouchY = 0;
-  
-  container.addEventListener('touchstart', (e) => {
-   if (e.touches.length === 2) {
-    // Pinch zoom
-    const touch1 = e.touches[0];
-    const touch2 = e.touches[1];
-    lastTouchDistance = Math.hypot(
-     touch2.clientX - touch1.clientX,
-     touch2.clientY - touch1.clientY
-    );
-   } else if (e.touches.length === 1 && this.zoomLevel > 1) {
-    // Pan
-    this.isDragging = true;
-    lastTouchX = e.touches[0].clientX;
-    lastTouchY = e.touches[0].clientY;
-    this.startX = lastTouchX - this.zoomPosX;
-    this.startY = lastTouchY - this.zoomPosY;
-    container.classList.add('grabbing');
-   }
-  });
-  
-  container.addEventListener('touchmove', (e) => {
-   if (e.touches.length === 2) {
-    // Pinch zoom
-    e.preventDefault();
-    const touch1 = e.touches[0];
-    const touch2 = e.touches[1];
-    const distance = Math.hypot(
-     touch2.clientX - touch1.clientX,
-     touch2.clientY - touch1.clientY
-    );
-    const delta = (distance - lastTouchDistance) / 100;
-    this.zoom(img, container, delta);
-    lastTouchDistance = distance;
-   } else if (e.touches.length === 1 && this.isDragging) {
-    // Pan
-    e.preventDefault();
-    this.zoomPosX = e.touches[0].clientX - this.startX;
-    this.zoomPosY = e.touches[0].clientY - this.startY;
-    this.atualizarTransform(img);
-   }
-  }, { passive: false });
-  
-  container.addEventListener('touchend', () => {
-   this.isDragging = false;
-   container.classList.remove('grabbing');
-   lastTouchDistance = 0;
-  });
- },
- 
- zoom(img, container, delta) {
-  this.zoomLevel = Math.max(1, Math.min(5, this.zoomLevel + delta));
-  
-  if (this.zoomLevel === 1) {
-   this.zoomPosX = 0;
-   this.zoomPosY = 0;
+  if (this.currencyMode === 'BRL') {
+   currencyToggle.textContent = '🇧🇷';
+   currencyToggle.style.borderColor = 'var(--green)';
+   currencyToggle.style.background = 'rgba(16,185,129,0.1)';
+   currencyLabel.textContent = 'Reais';
+   exchangeRateInfo.textContent = `Cotação: R$ ${this.exchangeRate.toFixed(2)}`;
+   exchangeRateInfo.style.display = 'block';
+   currencyToggle.title = 'Converter para Dólar';
+  } else {
+   currencyToggle.textContent = '🇺🇸';
+   currencyToggle.style.borderColor = 'var(--border)';
+   currencyToggle.style.background = 'transparent';
+   currencyLabel.textContent = 'Dólar';
+   exchangeRateInfo.style.display = 'none';
+   currencyToggle.title = 'Converter para Reais';
   }
   
-  this.atualizarTransform(img);
-  this.mostrarZoomInfo(container);
+  // Atualiza os KPIs
+  const dadosFiltrados = this.obterDadosFiltrados();
+  this.renderizarKPIs(dadosFiltrados);
  },
  
- resetZoom(img, container) {
-  this.zoomLevel = 1;
-  this.zoomPosX = 0;
-  this.zoomPosY = 0;
-  this.atualizarTransform(img);
-  this.mostrarZoomInfo(container);
+ formatCurrency(value) {
+  if (this.currencyMode === 'BRL') {
+   const valueInBRL = value * this.exchangeRate;
+   return valueInBRL.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
  },
  
- atualizarTransform(img) {
-  img.style.transform = `scale(${this.zoomLevel}) translate(${this.zoomPosX / this.zoomLevel}px, ${this.zoomPosY / this.zoomLevel}px)`;
- },
- 
- mostrarZoomInfo(container) {
-  const zoomInfo = container.querySelector('.zoom-info');
-  if (zoomInfo) {
-   zoomInfo.textContent = `${Math.round(this.zoomLevel * 100)}%`;
-   zoomInfo.classList.add('show');
-   setTimeout(() => zoomInfo.classList.remove('show'), 1500);
+ // Função para baixar a foto
+ async baixarFoto() {
+  const img = document.querySelector('#modalPhotoContainer img');
+  const modalTitle = document.getElementById('modalTitle');
+  
+  if (!img || !img.src) {
+   alert('❌ Nenhuma foto carregada para baixar!');
+   return;
+  }
+  
+  try {
+   // Pega o título do modal para usar como nome do arquivo
+   const titulo = modalTitle.textContent.replace(/[^a-zA-Z0-9]/g, '_');
+   const nomeArquivo = `trade_${titulo}.png`;
+   
+   // Faz o download da imagem
+   const response = await fetch(img.src);
+   const blob = await response.blob();
+   const url = window.URL.createObjectURL(blob);
+   
+   const a = document.createElement('a');
+   a.href = url;
+   a.download = nomeArquivo;
+   document.body.appendChild(a);
+   a.click();
+   document.body.removeChild(a);
+   window.URL.revokeObjectURL(url);
+   
+   console.log('✅ Foto baixada com sucesso:', nomeArquivo);
+  } catch (error) {
+   console.error('❌ Erro ao baixar foto:', error);
+   
+   // Fallback: abre a imagem em nova aba
+   window.open(img.src, '_blank');
   }
  },
  
@@ -2751,17 +2592,7 @@ const Dashboard = {
      console.log(`✅ SUCESSO na tentativa ${tentativaAtual + 1}!`);
      console.log('🖼️ URL que funcionou:', urlAtual);
      console.log('📐 Dimensões:', img.width, 'x', img.height);
-     
-     container.innerHTML = `<img src="${urlAtual}" alt="Trade do dia ${dataStr}" crossorigin="anonymous" id="zoomableImage">`;
-     
-     // Inicializa zoom após imagem estar no DOM
-     setTimeout(() => {
-      const imgElement = document.getElementById('zoomableImage');
-      if (imgElement) {
-       Dashboard.resetZoom(imgElement, container);
-       Dashboard.inicializarZoomFoto(container, imgElement);
-      }
-     }, 100);
+     container.innerHTML = `<img src="${urlAtual}" alt="Trade do dia ${dataStr}" crossorigin="anonymous" onclick="Dashboard.toggleImageZoom(event)" title="Clique para dar zoom">`;
     };
     
     img.onerror = () => {
