@@ -670,6 +670,13 @@ canvas {
  margin-bottom: 32px;
 }
 
+.market-data-vertical {
+ display: flex;
+ flex-direction: column;
+ gap: 24px;
+ margin-bottom: 32px;
+}
+
 .market-card {
  background: var(--card-bg);
  border: 1px solid var(--border);
@@ -732,6 +739,16 @@ canvas {
  display: block;
  border: none;
  width: 100%;
+}
+
+.tradingview-widget-container {
+ width: 100%;
+ height: 100%;
+}
+
+.tradingview-widget-container__widget {
+ width: 100%;
+ height: 600px;
 }
 
 /* ========== CALENDAR ========== */
@@ -2252,53 +2269,6 @@ body.basic-mode .pro-only {
   </div>
  </div>
  
- </div><!-- FIM CONTEÚDO DASHBOARD -->
- 
- <!-- CONTEÚDO MERCADO -->
- <div id="contentMercado" class="tab-content">
-  <div class="market-data">
-   <div class="market-card">
-    <div class="market-header">
-     <h3>📅 Calendário Econômico</h3>
-     <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
-      Ver Completo →
-     </a>
-    </div>
-    <div class="market-content">
-     <iframe 
-      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&category=_employment,_economicActivity,_inflation,_credit,_centralBanks,_confidenceIndex,_balance,_Bonds&importance=2,3&features=datepicker,timezone&countries=5,6,37,72&calType=day&timeZone=23&lang=56"
-      width="100%" 
-      height="467" 
-      frameborder="0" 
-      allowtransparency="true" 
-      marginwidth="0" 
-      marginheight="0"
-      loading="lazy">
-     </iframe>
-    </div>
-   </div>
-   
-   <div class="market-card">
-    <div class="market-header">
-     <h3>🗺️ Mapa de Calor S&P500</h3>
-     <a href="https://finviz.com/map.ashx" target="_blank" class="market-link">
-      Ver Completo →
-     </a>
-    </div>
-    <div class="market-content">
-     <iframe 
-      src="https://finviz.com/map.ashx?t=sec" 
-      width="100%" 
-      height="467" 
-      frameborder="0" 
-      allowtransparency="true"
-      loading="lazy">
-     </iframe>
-    </div>
-   </div>
-  </div>
- </div><!-- FIM CONTEÚDO MERCADO -->
- 
  <div class="calendar-wrapper pro-only">
   <strong id="calendarTitle">📅 Calendário de Trading</strong>
   <div class="calendar-header">
@@ -2323,6 +2293,79 @@ body.basic-mode .pro-only {
    </table>
   </div>
  </div>
+ 
+ </div><!-- FIM CONTEÚDO DASHBOARD -->
+ 
+ <!-- CONTEÚDO MERCADO -->
+ <div id="contentMercado" class="tab-content">
+  <div class="market-data-vertical">
+   
+   <!-- CALENDÁRIO ECONÔMICO -->
+   <div class="market-card">
+    <div class="market-header">
+     <h3>📅 Calendário Econômico</h3>
+     <a href="https://br.tradingview.com/economic-calendar/" target="_blank" class="market-link">
+      Ver Completo →
+     </a>
+    </div>
+    <div class="market-content">
+     <!-- TradingView Widget BEGIN -->
+     <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+      {
+       "colorTheme": "dark",
+       "isTransparent": true,
+       "width": "100%",
+       "height": "600",
+       "locale": "br",
+       "importanceFilter": "0,1",
+       "countryFilter": "ar,au,br,ca,cn,fr,de,in,id,it,jp,kr,mx,ru,sa,za,tr,gb,us,eu"
+      }
+      </script>
+     </div>
+     <!-- TradingView Widget END -->
+    </div>
+   </div>
+   
+   <!-- MAPA DE CALOR -->
+   <div class="market-card">
+    <div class="market-header">
+     <h3>🗺️ Mapa de Calor - Mercado de Ações</h3>
+     <a href="https://br.tradingview.com/heatmap/stock/" target="_blank" class="market-link">
+      Ver Completo →
+     </a>
+    </div>
+    <div class="market-content">
+     <!-- TradingView Widget BEGIN -->
+     <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+      {
+       "exchanges": [],
+       "dataSource": "SPX500",
+       "grouping": "sector",
+       "blockSize": "market_cap_basic",
+       "blockColor": "change",
+       "locale": "br",
+       "symbolUrl": "",
+       "colorTheme": "dark",
+       "hasTopBar": true,
+       "isDataSetEnabled": true,
+       "isZoomEnabled": true,
+       "hasSymbolTooltip": true,
+       "width": "100%",
+       "height": "600"
+      }
+      </script>
+     </div>
+     <!-- TradingView Widget END -->
+    </div>
+   </div>
+   
+  </div>
+ </div><!-- FIM CONTEÚDO MERCADO -->
+
 </div>
 </div>
 
