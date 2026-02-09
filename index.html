@@ -1365,9 +1365,18 @@ body.basic-mode .pro-only {
  padding-top: 16px;
  border-top: 2px solid rgba(99, 102, 241, 0.2);
  text-align: center;
- font-size: 12px;
- color: #64748b;
- font-weight: 600;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ min-height: 60px;
+}
+
+.capture-footer img {
+ max-height: 50px;
+ max-width: 300px;
+ height: auto;
+ width: auto;
+ filter: brightness(1.1);
 }
 
 .modal-photo-loading {
@@ -2048,7 +2057,9 @@ body.basic-mode .pro-only {
  </div>
  <div class="capture-stats" id="captureStats"></div>
  <div class="capture-photo" id="capturePhoto"></div>
- <div class="capture-footer">NASDAQ PRO Trading Dashboard</div>
+ <div class="capture-footer" id="captureFooter">
+  <img src="logo.png" alt="Mentoria NasdaqPro" onerror="this.parentElement.innerHTML='<span style=\'color:#64748b;font-size:12px;font-weight:600\'>NASDAQ PRO Trading Dashboard</span>'">
+ </div>
 </div>
 
 <script>
@@ -2881,8 +2892,25 @@ const Dashboard = {
     throw new Error('Imagem não encontrada');
    }
    
-   // Aguarda imagem carregar
+   // Garante que a logo está carregada
+   const captureFooter = document.getElementById('captureFooter');
+   const logoImg = captureFooter.querySelector('img');
+   
+   if (logoImg && !logoImg.complete) {
+    await new Promise((resolve, reject) => {
+     logoImg.onload = resolve;
+     logoImg.onerror = () => {
+      console.warn('⚠️ Logo não carregada, usando texto');
+      resolve(); // Continua mesmo se logo falhar
+     };
+     setTimeout(resolve, 2000); // Timeout de 2s
+    });
+   }
+   
+   // Aguarda imagem do trade carregar
    await new Promise(resolve => setTimeout(resolve, 500));
+   
+   console.log('📸 Capturando card...');
    
    // Captura o card
    const captureCard = document.getElementById('captureCard');
