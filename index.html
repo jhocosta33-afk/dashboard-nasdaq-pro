@@ -90,6 +90,7 @@ body::before {
  flex-direction: column;
  flex-shrink: 0;
  position: relative;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar::before {
@@ -305,6 +306,7 @@ body::before {
  padding: 32px 40px;
  overflow-y: auto;
  overflow-x: hidden;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-main {
@@ -2304,27 +2306,21 @@ body.basic-mode .pro-only {
    <div class="market-card">
     <div class="market-header">
      <h3>📅 Calendário Econômico</h3>
-     <a href="https://br.tradingview.com/economic-calendar/" target="_blank" class="market-link">
+     <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
       Ver Completo →
      </a>
     </div>
     <div class="market-content">
-     <!-- TradingView Widget BEGIN -->
-     <div class="tradingview-widget-container">
-      <div class="tradingview-widget-container__widget"></div>
-      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-      {
-       "colorTheme": "dark",
-       "isTransparent": true,
-       "width": "100%",
-       "height": "600",
-       "locale": "br",
-       "importanceFilter": "0,1",
-       "countryFilter": "ar,au,br,ca,cn,fr,de,in,id,it,jp,kr,mx,ru,sa,za,tr,gb,us,eu"
-      }
-      </script>
-     </div>
-     <!-- TradingView Widget END -->
+     <iframe 
+      id="investingCalendar"
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=5,25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=day&timeZone=23&lang=56"
+      width="100%" 
+      height="600" 
+      frameborder="0"
+      allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen>
+     </iframe>
     </div>
    </div>
    
@@ -2338,7 +2334,7 @@ body.basic-mode .pro-only {
     </div>
     <div class="market-content">
      <!-- TradingView Widget BEGIN -->
-     <div class="tradingview-widget-container">
+     <div class="tradingview-widget-container" id="heatmapContainer">
       <div class="tradingview-widget-container__widget"></div>
       <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
       {
@@ -2430,6 +2426,21 @@ const Dashboard = {
   await this.carregarDados();
   this.atualizarPerformanceIndicator();
   this.inicializarConversorMoeda();
+  this.inicializarListenerAbaNavegador();
+ },
+ 
+ inicializarListenerAbaNavegador() {
+  // Detecta quando usuário volta para a aba do navegador
+  document.addEventListener('visibilitychange', () => {
+   if (!document.hidden) {
+    // Aba ficou visível
+    const abaMercadoAtiva = document.getElementById('contentMercado').classList.contains('active');
+    if (abaMercadoAtiva) {
+     console.log('👁️ Aba do navegador voltou a ficar visível - recarregando widgets...');
+     this.recarregarWidgetsMercado();
+    }
+   }
+  });
  },
  
  async carregarDados() {
@@ -3029,17 +3040,85 @@ const Dashboard = {
   const contentDashboard = document.getElementById('contentDashboard');
   const contentMercado = document.getElementById('contentMercado');
   
+  // Sidebar
+  const sidebar = document.querySelector('.sidebar');
+  
   if (aba === 'dashboard') {
+   // Ativa aba Dashboard
    tabDashboard.classList.add('active');
    tabMercado.classList.remove('active');
    contentDashboard.classList.add('active');
    contentMercado.classList.remove('active');
+   
+   // Mostra sidebar
+   if (sidebar) sidebar.style.display = 'flex';
+   
   } else if (aba === 'mercado') {
+   // Ativa aba Mercado
    tabMercado.classList.add('active');
    tabDashboard.classList.remove('active');
    contentMercado.classList.add('active');
    contentDashboard.classList.remove('active');
+   
+   // Esconde sidebar
+   if (sidebar) sidebar.style.display = 'none';
+   
+   // Recarrega widgets para evitar atraso
+   this.recarregarWidgetsMercado();
   }
+ },
+ 
+ recarregarWidgetsMercado() {
+  console.log('🔄 Recarregando widgets de mercado...');
+  
+  // Recarrega iframe do Investing
+  const investingCalendar = document.getElementById('investingCalendar');
+  if (investingCalendar) {
+   const src = investingCalendar.src;
+   investingCalendar.src = '';
+   setTimeout(() => {
+    investingCalendar.src = src;
+   }, 100);
+  }
+  
+  // Recarrega widget TradingView do mapa de calor
+  const heatmapContainer = document.getElementById('heatmapContainer');
+  if (heatmapContainer) {
+   const widgetDiv = heatmapContainer.querySelector('.tradingview-widget-container__widget');
+   if (widgetDiv) {
+    // Remove script antigo
+    const oldScript = heatmapContainer.querySelector('script[src*="embed-widget-stock-heatmap"]');
+    if (oldScript) oldScript.remove();
+    
+    // Limpa container
+    widgetDiv.innerHTML = '';
+    
+    // Recria script
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+     "exchanges": [],
+     "dataSource": "SPX500",
+     "grouping": "sector",
+     "blockSize": "market_cap_basic",
+     "blockColor": "change",
+     "locale": "br",
+     "symbolUrl": "",
+     "colorTheme": "dark",
+     "hasTopBar": true,
+     "isDataSetEnabled": true,
+     "isZoomEnabled": true,
+     "hasSymbolTooltip": true,
+     "width": "100%",
+     "height": "600"
+    });
+    heatmapContainer.appendChild(script);
+   }
+  }
+  
+  console.log('✅ Widgets recarregados');
  },
  
  inicializarZoomFoto(container, img) {
