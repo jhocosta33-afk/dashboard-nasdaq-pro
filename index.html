@@ -679,6 +679,14 @@ canvas {
  margin-bottom: 32px;
 }
 
+.market-data-horizontal {
+ display: grid;
+ grid-template-columns: 850px 1fr;
+ gap: 24px;
+ margin-bottom: 32px;
+ align-items: start;
+}
+
 .market-card {
  background: var(--card-bg);
  border: 1px solid var(--border);
@@ -693,6 +701,165 @@ canvas {
  transform: translateY(-4px);
  box-shadow: var(--shadow-lg);
  border-color: var(--border-bright);
+}
+
+.calendar-card {
+ width: 850px;
+}
+
+.calendar-content {
+ display: flex;
+ justify-content: center;
+ align-items: flex-start;
+}
+
+.heatmap-card {
+ width: 100%;
+ grid-column: 1 / -1;
+}
+
+/* ========== CARD NASDAQ ========== */
+.nasdaq-card {
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 16px;
+ padding: 20px;
+ box-shadow: var(--shadow);
+ animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+ max-height: 680px;
+ overflow-y: auto;
+}
+
+.nasdaq-header {
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ margin-bottom: 20px;
+ padding-bottom: 16px;
+ border-bottom: 2px solid var(--border);
+}
+
+.nasdaq-icon {
+ font-size: 24px;
+}
+
+.nasdaq-title {
+ font-size: 20px;
+ font-weight: 800;
+ color: var(--text);
+ font-family: 'Archivo', sans-serif;
+ flex: 1;
+}
+
+.nasdaq-refresh {
+ background: var(--blue);
+ border: none;
+ border-radius: 8px;
+ width: 36px;
+ height: 36px;
+ font-size: 16px;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+
+.nasdaq-refresh:hover {
+ background: var(--blue-bright);
+ transform: rotate(180deg);
+}
+
+.nasdaq-refresh:active {
+ transform: rotate(180deg) scale(0.9);
+}
+
+.nasdaq-stocks {
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+}
+
+.nasdaq-stock-item {
+ display: grid;
+ grid-template-columns: 100px 1fr auto 80px;
+ gap: 12px;
+ align-items: center;
+ padding: 12px;
+ background: rgba(99, 102, 241, 0.05);
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ transition: all 0.2s;
+}
+
+.nasdaq-stock-item:hover {
+ background: rgba(99, 102, 241, 0.1);
+ border-color: var(--border-bright);
+ transform: translateX(4px);
+}
+
+.nasdaq-stock-symbol {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ font-weight: 800;
+ font-size: 14px;
+ color: var(--text);
+ font-family: 'JetBrains Mono', monospace;
+}
+
+.nasdaq-stock-flag {
+ font-size: 16px;
+}
+
+.nasdaq-stock-price {
+ font-size: 16px;
+ font-weight: 700;
+ color: var(--text);
+ font-family: 'JetBrains Mono', monospace;
+}
+
+.nasdaq-stock-change {
+ font-size: 14px;
+ font-weight: 700;
+ font-family: 'JetBrains Mono', monospace;
+ padding: 4px 8px;
+ border-radius: 6px;
+}
+
+.nasdaq-stock-change.positive {
+ color: var(--green);
+ background: rgba(16, 185, 129, 0.1);
+}
+
+.nasdaq-stock-change.negative {
+ color: var(--red);
+ background: rgba(239, 68, 68, 0.1);
+}
+
+.nasdaq-stock-date {
+ font-size: 11px;
+ color: var(--text-dim);
+ text-align: right;
+}
+
+.nasdaq-loading {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 12px;
+ padding: 40px;
+ color: var(--text-dim);
+ font-size: 14px;
+}
+
+.spinner-small {
+ width: 20px;
+ height: 20px;
+ border: 2px solid var(--border);
+ border-top-color: var(--blue);
+ border-radius: 50%;
+ animation: spin 1s linear infinite;
 }
 
 .market-header {
@@ -1933,6 +2100,46 @@ body.basic-mode .pro-only {
   margin-bottom: 24px;
  }
  
+ .market-data-horizontal {
+  grid-template-columns: 1fr;
+  gap: 20px;
+ }
+ 
+ .calendar-card {
+  width: 100%;
+ }
+ 
+ .calendar-content iframe {
+  width: 100% !important;
+  height: 500px !important;
+ }
+ 
+ .nasdaq-card {
+  max-height: 500px;
+ }
+ 
+ .heatmap-card {
+  width: 100%;
+ }
+ 
+ .nasdaq-stock-item {
+  grid-template-columns: 80px 1fr auto 60px;
+  gap: 8px;
+  padding: 10px;
+ }
+ 
+ .nasdaq-stock-symbol {
+  font-size: 12px;
+ }
+ 
+ .nasdaq-stock-price {
+  font-size: 14px;
+ }
+ 
+ .nasdaq-stock-change {
+  font-size: 12px;
+ }
+ 
  .market-card {
   padding: 20px;
  }
@@ -2301,23 +2508,24 @@ body.basic-mode .pro-only {
  
  <!-- CONTEÚDO MERCADO -->
  <div id="contentMercado" class="tab-content">
-  <div class="market-data-vertical">
+  <div class="market-data-horizontal">
    
    <!-- CALENDÁRIO ECONÔMICO -->
-   <div class="market-card">
+   <div class="market-card calendar-card">
     <div class="market-header">
      <h3>📅 Calendário Econômico</h3>
      <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
       Ver Completo →
      </a>
     </div>
-    <div class="market-content">
+    <div class="market-content calendar-content">
      <iframe 
       id="investingCalendar"
-      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=5,25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=day&timeZone=23&lang=56"
-      width="100%" 
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=day&timeZone=23&lang=56"
+      width="850" 
       height="600" 
       frameborder="0"
+      scrolling="auto"
       allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
       referrerpolicy="strict-origin-when-cross-origin"
       allowfullscreen>
@@ -2325,42 +2533,60 @@ body.basic-mode .pro-only {
     </div>
    </div>
    
-   <!-- MAPA DE CALOR -->
-   <div class="market-card">
-    <div class="market-header">
-     <h3>🗺️ Mapa de Calor - NASDAQ 100</h3>
-     <a href="https://br.tradingview.com/heatmap/stock/" target="_blank" class="market-link">
-      Ver Completo →
-     </a>
+   <!-- CARD NASDAQ -->
+   <div class="nasdaq-card">
+    <div class="nasdaq-header">
+     <span class="nasdaq-icon">📊</span>
+     <span class="nasdaq-title">NASDAQ</span>
+     <button class="nasdaq-refresh" onclick="Dashboard.atualizarNasdaq()" title="Atualizar">
+      🔄
+     </button>
     </div>
-    <div class="market-content">
-     <!-- TradingView Widget BEGIN -->
-     <div class="tradingview-widget-container" id="heatmapContainer">
-      <div class="tradingview-widget-container__widget"></div>
-      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
-      {
-       "exchanges": [],
-       "dataSource": "NASDAQ100",
-       "grouping": "sector",
-       "blockSize": "market_cap_basic",
-       "blockColor": "change",
-       "locale": "br",
-       "symbolUrl": "",
-       "colorTheme": "dark",
-       "hasTopBar": true,
-       "isDataSetEnabled": true,
-       "isZoomEnabled": true,
-       "hasSymbolTooltip": true,
-       "width": "100%",
-       "height": "600"
-      }
-      </script>
+    <div class="nasdaq-stocks" id="nasdaqStocks">
+     <div class="nasdaq-loading">
+      <div class="spinner-small"></div>
+      Carregando...
      </div>
-     <!-- TradingView Widget END -->
     </div>
    </div>
    
   </div>
+  
+  <!-- MAPA DE CALOR -->
+  <div class="market-card heatmap-card">
+   <div class="market-header">
+    <h3>🗺️ Mapa de Calor - NASDAQ 100</h3>
+    <a href="https://br.tradingview.com/heatmap/stock/" target="_blank" class="market-link">
+     Ver Completo →
+    </a>
+   </div>
+   <div class="market-content">
+    <!-- TradingView Widget BEGIN -->
+    <div class="tradingview-widget-container" id="heatmapContainer">
+     <div class="tradingview-widget-container__widget"></div>
+     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+     {
+      "exchanges": [],
+      "dataSource": "NASDAQ100",
+      "grouping": "sector",
+      "blockSize": "market_cap_basic",
+      "blockColor": "change",
+      "locale": "br",
+      "symbolUrl": "",
+      "colorTheme": "dark",
+      "hasTopBar": true,
+      "isDataSetEnabled": true,
+      "isZoomEnabled": true,
+      "hasSymbolTooltip": true,
+      "width": "100%",
+      "height": "600"
+     }
+     </script>
+    </div>
+    <!-- TradingView Widget END -->
+   </div>
+  </div>
+  
  </div><!-- FIM CONTEÚDO MERCADO -->
 
 </div>
@@ -2429,6 +2655,60 @@ const Dashboard = {
   this.atualizarPerformanceIndicator();
   this.inicializarConversorMoeda();
   this.inicializarListenerAbaNavegador();
+  this.atualizarNasdaq();
+ },
+ 
+ async atualizarNasdaq() {
+  const container = document.getElementById('nasdaqStocks');
+  if (!container) return;
+  
+  console.log('📊 Atualizando NASDAQ...');
+  
+  container.innerHTML = `
+   <div class="nasdaq-loading">
+    <div class="spinner-small"></div>
+    Atualizando...
+   </div>
+  `;
+  
+  // Lista das top 10 ações do NASDAQ
+  const stocks = [
+   { symbol: 'AAPL', name: 'Apple' },
+   { symbol: 'MSFT', name: 'Microsoft' },
+   { symbol: 'NVDA', name: 'NVIDIA' },
+   { symbol: 'AMZN', name: 'Amazon' },
+   { symbol: 'META', name: 'Meta' },
+   { symbol: 'GOOG', name: 'Alphabet' },
+   { symbol: 'GOOGL', name: 'Alphabet' },
+   { symbol: 'TSLA', name: 'Tesla' },
+   { symbol: 'INTC', name: 'Intel' },
+   { symbol: 'AMD', name: 'AMD' }
+  ];
+  
+  let html = '';
+  
+  // Gera dados simulados (em produção, usar API real)
+  stocks.forEach(stock => {
+   const basePrice = Math.random() * 500 + 50;
+   const change = (Math.random() * 10 - 5).toFixed(2);
+   const changeClass = change >= 0 ? 'positive' : 'negative';
+   const changeSymbol = change >= 0 ? '+' : '';
+   
+   html += `
+    <div class="nasdaq-stock-item">
+     <div class="nasdaq-stock-symbol">
+      <span class="nasdaq-stock-flag">🇺🇸</span>
+      <span>${stock.symbol}</span>
+     </div>
+     <div class="nasdaq-stock-price">${basePrice.toFixed(2)}</div>
+     <div class="nasdaq-stock-change ${changeClass}">${changeSymbol}${change}%</div>
+     <div class="nasdaq-stock-date">${new Date().toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}</div>
+    </div>
+   `;
+  });
+  
+  container.innerHTML = html;
+  console.log('✅ NASDAQ atualizado');
  },
  
  inicializarListenerAbaNavegador() {
