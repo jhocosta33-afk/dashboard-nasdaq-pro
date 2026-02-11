@@ -735,32 +735,23 @@ canvas {
  overflow: hidden;
  background: var(--main-bg);
  border: 1px solid var(--border);
- display: flex;
- justify-content: center;
- align-items: center;
 }
 
 .market-content iframe {
  display: block;
  border: none;
  width: 100%;
- max-width: 1200px;
- margin: 0 auto;
+ height: 100%;
 }
 
 .tradingview-widget-container {
  width: 100%;
  height: 100%;
- display: flex;
- justify-content: center;
- align-items: center;
 }
 
 .tradingview-widget-container__widget {
  width: 100%;
  height: 600px;
- max-width: 1200px;
- margin: 0 auto;
 }
 
 /* ========== CALENDAR ========== */
@@ -2430,6 +2421,7 @@ const Dashboard = {
  startX: 0,
  startY: 0,
  tradeAtual: null,
+ intervaloAtualizacaoMercado: null,
  
  async init() {
   this.inicializarToggleMode();
@@ -3063,6 +3055,13 @@ const Dashboard = {
    // Mostra sidebar
    if (sidebar) sidebar.style.display = 'flex';
    
+   // Para atualização automática do mercado
+   if (this.intervaloAtualizacaoMercado) {
+    clearInterval(this.intervaloAtualizacaoMercado);
+    this.intervaloAtualizacaoMercado = null;
+    console.log('⏸️ Atualização automática pausada');
+   }
+   
   } else if (aba === 'mercado') {
    // Ativa aba Mercado
    tabMercado.classList.add('active');
@@ -3073,8 +3072,18 @@ const Dashboard = {
    // Esconde sidebar
    if (sidebar) sidebar.style.display = 'none';
    
-   // Recarrega widgets para evitar atraso
+   // Recarrega widgets imediatamente
    this.recarregarWidgetsMercado();
+   
+   // Inicia atualização automática a cada 1 minuto
+   if (this.intervaloAtualizacaoMercado) {
+    clearInterval(this.intervaloAtualizacaoMercado);
+   }
+   this.intervaloAtualizacaoMercado = setInterval(() => {
+    console.log('⏰ Atualização automática do mapa...');
+    this.recarregarWidgetsMercado();
+   }, 60000); // 60 segundos
+   console.log('▶️ Atualização automática iniciada (1 minuto)');
   }
  },
  
@@ -3091,41 +3100,46 @@ const Dashboard = {
    }, 100);
   }
   
-  // Recarrega widget TradingView do mapa de calor
+  // Recarrega widget TradingView do mapa de calor - MÉTODO FORÇADO
   const heatmapContainer = document.getElementById('heatmapContainer');
   if (heatmapContainer) {
-   const widgetDiv = heatmapContainer.querySelector('.tradingview-widget-container__widget');
-   if (widgetDiv) {
-    // Remove script antigo
-    const oldScript = heatmapContainer.querySelector('script[src*="embed-widget-stock-heatmap"]');
-    if (oldScript) oldScript.remove();
-    
-    // Limpa container
-    widgetDiv.innerHTML = '';
-    
-    // Recria script
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js';
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-     "exchanges": [],
-     "dataSource": "NASDAQ100",
-     "grouping": "sector",
-     "blockSize": "market_cap_basic",
-     "blockColor": "change",
-     "locale": "br",
-     "symbolUrl": "",
-     "colorTheme": "dark",
-     "hasTopBar": true,
-     "isDataSetEnabled": true,
-     "isZoomEnabled": true,
-     "hasSymbolTooltip": true,
-     "width": "100%",
-     "height": "600"
-    });
-    heatmapContainer.appendChild(script);
-   }
+   console.log('🗺️ Recriando widget TradingView...');
+   
+   // Remove TODO o conteúdo
+   heatmapContainer.innerHTML = '';
+   
+   // Recria estrutura completa
+   const widgetDiv = document.createElement('div');
+   widgetDiv.className = 'tradingview-widget-container__widget';
+   heatmapContainer.appendChild(widgetDiv);
+   
+   // Adiciona timestamp para forçar refresh
+   const timestamp = new Date().getTime();
+   
+   // Recria script com timestamp
+   const script = document.createElement('script');
+   script.type = 'text/javascript';
+   script.src = `https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js?t=${timestamp}`;
+   script.async = true;
+   script.innerHTML = JSON.stringify({
+    "exchanges": [],
+    "dataSource": "NASDAQ100",
+    "grouping": "sector",
+    "blockSize": "market_cap_basic",
+    "blockColor": "change",
+    "locale": "br",
+    "symbolUrl": "",
+    "colorTheme": "dark",
+    "hasTopBar": true,
+    "isDataSetEnabled": true,
+    "isZoomEnabled": true,
+    "hasSymbolTooltip": true,
+    "width": "100%",
+    "height": "600"
+   });
+   heatmapContainer.appendChild(script);
+   
+   console.log('✅ Widget TradingView recriado com timestamp:', timestamp);
   }
   
   console.log('✅ Widgets recarregados');
