@@ -681,7 +681,7 @@ canvas {
 
 .market-data-horizontal {
  display: grid;
- grid-template-columns: 850px 1fr;
+ grid-template-columns: 666px 1fr;
  gap: 24px;
  margin-bottom: 32px;
  align-items: start;
@@ -704,13 +704,15 @@ canvas {
 }
 
 .calendar-card {
- width: 850px;
+ width: auto;
+ flex-shrink: 0;
 }
 
 .calendar-content {
  display: flex;
- justify-content: center;
+ justify-content: flex-start;
  align-items: flex-start;
+ overflow: hidden;
 }
 
 .heatmap-card {
@@ -2409,8 +2411,8 @@ body.basic-mode .pro-only {
    <span class="tab-label">Dashboard</span>
   </button>
   <button class="tab-btn" id="tabMercado" onclick="Dashboard.mudarAba('mercado')">
-   <span class="tab-icon">🌎</span>
-   <span class="tab-label">Mercado</span>
+   <span class="tab-icon">📅</span>
+   <span class="tab-label">Calendário</span>
   </button>
  </div>
  
@@ -2519,16 +2521,14 @@ body.basic-mode .pro-only {
      </a>
     </div>
     <div class="market-content calendar-content">
+     <!-- Investing.com Widget - Calendário Econômico em Português -->
      <iframe 
       id="investingCalendar"
-      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=day&timeZone=23&lang=56"
-      width="850" 
-      height="600" 
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=day&timeZone=23&lang=12"
+      width="650" 
+      height="660" 
       frameborder="0"
-      scrolling="auto"
-      allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-      referrerpolicy="strict-origin-when-cross-origin"
-      allowfullscreen>
+      scrolling="yes">
      </iframe>
     </div>
    </div>
@@ -2552,42 +2552,7 @@ body.basic-mode .pro-only {
    
   </div>
   
-  <!-- MAPA DE CALOR -->
-  <div class="market-card heatmap-card">
-   <div class="market-header">
-    <h3>🗺️ Mapa de Calor - NASDAQ 100</h3>
-    <a href="https://br.tradingview.com/heatmap/stock/" target="_blank" class="market-link">
-     Ver Completo →
-    </a>
-   </div>
-   <div class="market-content">
-    <!-- TradingView Widget BEGIN -->
-    <div class="tradingview-widget-container" id="heatmapContainer">
-     <div class="tradingview-widget-container__widget"></div>
-     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
-     {
-      "exchanges": [],
-      "dataSource": "NASDAQ100",
-      "grouping": "sector",
-      "blockSize": "market_cap_basic",
-      "blockColor": "change",
-      "locale": "br",
-      "symbolUrl": "",
-      "colorTheme": "dark",
-      "hasTopBar": true,
-      "isDataSetEnabled": true,
-      "isZoomEnabled": true,
-      "hasSymbolTooltip": true,
-      "width": "100%",
-      "height": "600"
-     }
-     </script>
-    </div>
-    <!-- TradingView Widget END -->
-   </div>
-  </div>
-  
- </div><!-- FIM CONTEÚDO MERCADO -->
+ </div><!-- FIM CONTEÚDO CALENDÁRIO -->
 
 </div>
 </div>
@@ -3368,61 +3333,17 @@ const Dashboard = {
  },
  
  recarregarWidgetsMercado() {
-  console.log('🔄 Recarregando widgets de mercado...');
+  console.log('🔄 Recarregando calendário...');
   
-  // Recarrega iframe do Investing
   const investingCalendar = document.getElementById('investingCalendar');
   if (investingCalendar) {
    const src = investingCalendar.src;
    investingCalendar.src = '';
    setTimeout(() => {
     investingCalendar.src = src;
+    console.log('✅ Calendário recarregado');
    }, 100);
   }
-  
-  // Recarrega widget TradingView do mapa de calor - MÉTODO FORÇADO
-  const heatmapContainer = document.getElementById('heatmapContainer');
-  if (heatmapContainer) {
-   console.log('🗺️ Recriando widget TradingView...');
-   
-   // Remove TODO o conteúdo
-   heatmapContainer.innerHTML = '';
-   
-   // Recria estrutura completa
-   const widgetDiv = document.createElement('div');
-   widgetDiv.className = 'tradingview-widget-container__widget';
-   heatmapContainer.appendChild(widgetDiv);
-   
-   // Adiciona timestamp para forçar refresh
-   const timestamp = new Date().getTime();
-   
-   // Recria script com timestamp
-   const script = document.createElement('script');
-   script.type = 'text/javascript';
-   script.src = `https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js?t=${timestamp}`;
-   script.async = true;
-   script.innerHTML = JSON.stringify({
-    "exchanges": [],
-    "dataSource": "NASDAQ100",
-    "grouping": "sector",
-    "blockSize": "market_cap_basic",
-    "blockColor": "change",
-    "locale": "br",
-    "symbolUrl": "",
-    "colorTheme": "dark",
-    "hasTopBar": true,
-    "isDataSetEnabled": true,
-    "isZoomEnabled": true,
-    "hasSymbolTooltip": true,
-    "width": "100%",
-    "height": "600"
-   });
-   heatmapContainer.appendChild(script);
-   
-   console.log('✅ Widget TradingView recriado com timestamp:', timestamp);
-  }
-  
-  console.log('✅ Widgets recarregados');
  },
  
  inicializarZoomFoto(container, img) {
