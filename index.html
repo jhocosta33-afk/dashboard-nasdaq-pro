@@ -702,8 +702,20 @@ canvas {
 
 .calendar-content iframe {
  display: block;
- width: 100%;
  border: none;
+}
+
+/* Card do calendário centralizado */
+.calendar-wrapper-outer {
+ display: flex;
+ justify-content: center;
+ align-items: flex-start;
+ width: 100%;
+}
+
+.calendar-solo-card {
+ width: fit-content;
+ min-width: 750px;
 }
 
 .market-header {
@@ -2292,22 +2304,24 @@ body.basic-mode .pro-only {
  
  <!-- CONTEÚDO CALENDÁRIO -->
  <div id="contentMercado" class="tab-content">
-  <div class="market-card">
-   <div class="market-header">
-    <h3>📅 Calendário Econômico</h3>
-    <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
-     Ver Completo →
-    </a>
-   </div>
-   <div class="calendar-content">
-    <iframe 
-     id="investingCalendar"
-     src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=day&timeZone=23&lang=12"
-     width="100%"
-     height="700"
-     frameborder="0"
-     scrolling="yes">
-    </iframe>
+  <div class="calendar-wrapper-outer">
+   <div class="market-card calendar-solo-card">
+    <div class="market-header">
+     <h3>📅 Calendário Econômico</h3>
+     <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
+      Ver Completo →
+     </a>
+    </div>
+    <div class="calendar-content">
+     <iframe 
+      id="investingCalendar"
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=day&timeZone=23&lang=12"
+      width="700"
+      height="700"
+      frameborder="0"
+      scrolling="yes">
+     </iframe>
+    </div>
    </div>
   </div>
  </div><!-- FIM CONTEÚDO CALENDÁRIO -->
