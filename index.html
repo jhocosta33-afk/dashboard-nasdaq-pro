@@ -718,6 +718,34 @@ canvas {
  min-width: 750px;
 }
 
+.calendar-refresh-btn {
+ background: rgba(99, 102, 241, 0.15);
+ color: var(--blue);
+ border: 1px solid rgba(99, 102, 241, 0.3);
+ border-radius: 8px;
+ padding: 7px 14px;
+ font-size: 13px;
+ font-weight: 700;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ white-space: nowrap;
+}
+
+.calendar-refresh-btn:hover {
+ background: var(--blue);
+ color: white;
+ transform: scale(1.05);
+}
+
+.calendar-refresh-btn.loading {
+ opacity: 0.6;
+ pointer-events: none;
+ animation: spin 1s linear infinite;
+}
+
 .market-header {
  display: flex;
  align-items: center;
@@ -1932,16 +1960,47 @@ body.basic-mode .pro-only {
   margin-bottom: 24px;
  }
  
+ .calendar-wrapper-outer {
+  padding: 0;
+ }
+ 
+ .calendar-solo-card {
+  width: 100% !important;
+  min-width: unset !important;
+ }
+ 
+ .calendar-content {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+ }
+ 
  .calendar-content iframe {
   height: 500px !important;
+  min-width: 600px;
+ }
+ 
+ .market-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+ }
+ 
+ .market-header > div {
+  width: 100%;
+  justify-content: space-between;
+ }
+ 
+ .calendar-refresh-btn {
+  flex: 1;
+  justify-content: center;
  }
  
  .market-card {
-  padding: 20px;
+  padding: 16px;
  }
  
  .market-header h3 {
-  font-size: 16px;
+  font-size: 15px;
  }
  
  .market-link {
@@ -2307,15 +2366,20 @@ body.basic-mode .pro-only {
   <div class="calendar-wrapper-outer">
    <div class="market-card calendar-solo-card">
     <div class="market-header">
-     <h3>📅 Calendário Econômico</h3>
-     <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
-      Ver Completo →
-     </a>
+     <h3>📅 Calendário Econômico — 🇺🇸 EUA</h3>
+     <div style="display:flex;align-items:center;gap:12px;">
+      <button class="calendar-refresh-btn" onclick="Dashboard.atualizarCalendario()" title="Atualizar calendário">
+       🔄 Atualizar
+      </button>
+      <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
+       Ver Completo →
+      </a>
+     </div>
     </div>
     <div class="calendar-content">
      <iframe 
       id="investingCalendar"
-      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=day&timeZone=23&lang=12"
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=5&calType=day&timeZone=8&lang=12"
       width="700"
       height="700"
       frameborder="0"
@@ -2395,14 +2459,14 @@ const Dashboard = {
  },
  
  inicializarListenerAbaNavegador() {
-  // Detecta quando usuário volta para a aba do navegador
   document.addEventListener('visibilitychange', () => {
    if (!document.hidden) {
-    // Aba ficou visível
-    const abaMercadoAtiva = document.getElementById('contentMercado').classList.contains('active');
+    const abaMercadoAtiva = document.getElementById('contentMercado')?.classList.contains('active');
     if (abaMercadoAtiva) {
-     console.log('👁️ Aba do navegador voltou a ficar visível - recarregando widgets...');
-     this.recarregarWidgetsMercado();
+     // Pequeno delay para a página terminar de renderizar antes de recarregar
+     setTimeout(() => {
+      this.atualizarCalendario();
+     }, 500);
     }
    }
   });
@@ -2997,71 +3061,81 @@ const Dashboard = {
  },
  
  mudarAba(aba) {
-  // Atualiza botões
   const tabDashboard = document.getElementById('tabDashboard');
   const tabMercado = document.getElementById('tabMercado');
-  
-  // Atualiza conteúdo
   const contentDashboard = document.getElementById('contentDashboard');
   const contentMercado = document.getElementById('contentMercado');
-  
-  // Sidebar
   const sidebar = document.querySelector('.sidebar');
   
   if (aba === 'dashboard') {
-   // Ativa aba Dashboard
    tabDashboard.classList.add('active');
    tabMercado.classList.remove('active');
    contentDashboard.classList.add('active');
    contentMercado.classList.remove('active');
-   
-   // Mostra sidebar
    if (sidebar) sidebar.style.display = 'flex';
    
-   // Para atualização automática do mercado
    if (this.intervaloAtualizacaoMercado) {
     clearInterval(this.intervaloAtualizacaoMercado);
     this.intervaloAtualizacaoMercado = null;
-    console.log('⏸️ Atualização automática pausada');
    }
    
   } else if (aba === 'mercado') {
-   // Ativa aba Mercado
    tabMercado.classList.add('active');
    tabDashboard.classList.remove('active');
    contentMercado.classList.add('active');
    contentDashboard.classList.remove('active');
-   
-   // Esconde sidebar
    if (sidebar) sidebar.style.display = 'none';
    
-   // Recarrega widgets imediatamente
-   this.recarregarWidgetsMercado();
+   // Carrega o calendário na primeira vez
+   this.atualizarCalendario();
    
-   // Inicia atualização automática a cada 1 minuto
-   if (this.intervaloAtualizacaoMercado) {
-    clearInterval(this.intervaloAtualizacaoMercado);
-   }
+   // Atualização automática a cada 1 minuto
+   if (this.intervaloAtualizacaoMercado) clearInterval(this.intervaloAtualizacaoMercado);
    this.intervaloAtualizacaoMercado = setInterval(() => {
-    console.log('⏰ Atualização automática do mapa...');
-    this.recarregarWidgetsMercado();
-   }, 60000); // 60 segundos
-   console.log('▶️ Atualização automática iniciada (1 minuto)');
+    this.atualizarCalendario();
+   }, 60000);
   }
  },
  
- recarregarWidgetsMercado() {
-  console.log('🔄 Recarregando calendário...');
+ atualizarCalendario() {
+  const iframe = document.getElementById('investingCalendar');
+  if (!iframe) return;
   
-  const investingCalendar = document.getElementById('investingCalendar');
-  if (investingCalendar) {
-   const src = investingCalendar.src;
-   investingCalendar.src = '';
-   setTimeout(() => {
-    investingCalendar.src = src;
-    console.log('✅ Calendário recarregado');
-   }, 100);
+  const btn = document.querySelector('.calendar-refresh-btn');
+  if (btn) {
+   btn.textContent = '⏳ Atualizando...';
+   btn.classList.add('loading');
   }
+  
+  // Guarda src original
+  const src = 'https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=5&calType=day&timeZone=8&lang=12';
+  
+  // Remove o iframe completamente e recria — evita tela preta
+  const container = iframe.parentElement;
+  iframe.remove();
+  
+  const novoIframe = document.createElement('iframe');
+  novoIframe.id = 'investingCalendar';
+  novoIframe.src = src;
+  novoIframe.setAttribute('width', '700');
+  novoIframe.setAttribute('height', '700');
+  novoIframe.setAttribute('frameborder', '0');
+  novoIframe.setAttribute('scrolling', 'yes');
+  novoIframe.style.display = 'block';
+  novoIframe.style.border = 'none';
+  
+  novoIframe.onload = () => {
+   if (btn) {
+    btn.textContent = '🔄 Atualizar';
+    btn.classList.remove('loading');
+   }
+  };
+  
+  container.appendChild(novoIframe);
+ },
+ 
+ recarregarWidgetsMercado() {
+  this.atualizarCalendario();
  },
  
  inicializarZoomFoto(container, img) {
