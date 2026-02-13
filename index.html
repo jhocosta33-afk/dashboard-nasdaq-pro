@@ -1647,11 +1647,19 @@ body.basic-mode .pro-only {
   flex-direction: column;
  }
  
+ /* Logo fica no topo, sidebar abaixo dela */
+ .main-content {
+  order: 1;
+  padding: 20px 16px;
+ }
+
  .sidebar {
+  order: 2;
   width: 100%;
   border-right: none;
-  border-bottom: 1px solid var(--border);
-  padding: 20px 16px;
+  border-top: 1px solid var(--border);
+  border-bottom: none;
+  padding: 16px;
  }
  
  .sidebar::before {
@@ -1724,16 +1732,12 @@ body.basic-mode .pro-only {
   font-size: 16px;
  }
  
- .main-content {
-  padding: 20px 16px;
- }
- 
  .header-main {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
  }
  
- .header-main h1 {
-  font-size: 28px;
+ .header-logo {
+  max-height: 70px;
  }
  
  .performance-indicator {
@@ -2368,7 +2372,7 @@ body.basic-mode .pro-only {
     <div class="calendar-content">
      <iframe 
       id="investingCalendar"
-      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=5&calType=day&timeZone=8&lang=12"
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=5&calType=day&timeZone=12&lang=12"
       width="700"
       height="700"
       frameborder="0"
@@ -3078,11 +3082,8 @@ const Dashboard = {
    // Carrega o calendário na primeira vez
    this.atualizarCalendario();
    
-   // Atualização automática a cada 1 minuto
+   // Para qualquer intervalo anterior
    if (this.intervaloAtualizacaoMercado) clearInterval(this.intervaloAtualizacaoMercado);
-   this.intervaloAtualizacaoMercado = setInterval(() => {
-    this.atualizarCalendario();
-   }, 60000);
   }
  },
  
@@ -3097,7 +3098,7 @@ const Dashboard = {
   }
   
   // Guarda src original
-  const src = 'https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=5&calType=day&timeZone=8&lang=12';
+  const src = 'https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,timeselector,filters&countries=5&calType=day&timeZone=12&lang=12';
   
   // Remove o iframe completamente e recria — evita tela preta
   const container = iframe.parentElement;
