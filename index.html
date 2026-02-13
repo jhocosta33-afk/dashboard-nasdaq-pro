@@ -104,29 +104,18 @@ body::before {
  opacity: 0.5;
 }
 
-.logo {
- display: flex;
- align-items: center;
- justify-content: center;
- margin-bottom: 40px;
- padding: 20px;
- background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1));
- border-radius: 16px;
- border: 1px solid var(--border);
- transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.logo:hover {
- transform: translateY(-2px);
- box-shadow: var(--shadow-glow);
- border-color: var(--border-bright);
-}
-
-.logo img {
- max-height: 80px;
+.header-logo {
+ max-height: 90px;
  width: auto;
  max-width: 100%;
- filter: drop-shadow(0 4px 12px rgba(99,102,241,0.4));
+ display: block;
+ filter: drop-shadow(0 4px 20px rgba(99,102,241,0.35));
+ transition: all 0.3s;
+}
+
+.header-logo:hover {
+ filter: drop-shadow(0 6px 24px rgba(99,102,241,0.55));
+ transform: translateY(-2px);
 }
 
 .filters {
@@ -312,6 +301,9 @@ body::before {
 .header-main {
  margin-bottom: 24px;
  animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+ display: flex;
+ align-items: center;
+ justify-content: center;
 }
 
 @keyframes slideDown {
@@ -2211,9 +2203,6 @@ body.basic-mode .pro-only {
 <div class="dashboard-container">
 <!-- SIDEBAR -->
 <div class="sidebar">
- <div class="logo">
-  <img src="logo.png" alt="Mentoria NasdaqPro" onerror="this.style.display='none'">
- </div>
  
  <div class="filters">
   <div class="filter-group">
@@ -2254,7 +2243,7 @@ body.basic-mode .pro-only {
 <!-- MAIN CONTENT -->
 <div class="main-content">
  <div class="header-main">
-  <h1>Dashboard de Trading</h1>
+  <img src="logo.png" alt="Mentoria NasdaqPro" class="header-logo" onerror="this.style.display='none'">
  </div>
  
  <!-- ABAS DE NAVEGAÇÃO -->
@@ -2366,7 +2355,7 @@ body.basic-mode .pro-only {
   <div class="calendar-wrapper-outer">
    <div class="market-card calendar-solo-card">
     <div class="market-header">
-     <h3>📅 Calendário Econômico — 🇺🇸 EUA</h3>
+     <h3>📅 Calendário Econômico</h3>
      <div style="display:flex;align-items:center;gap:12px;">
       <button class="calendar-refresh-btn" onclick="Dashboard.atualizarCalendario()" title="Atualizar calendário">
        🔄 Atualizar
