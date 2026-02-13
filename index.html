@@ -1647,19 +1647,48 @@ body.basic-mode .pro-only {
   flex-direction: column;
  }
  
- /* Logo fica no topo, sidebar abaixo dela */
- .main-content {
-  order: 1;
-  padding: 20px 16px;
+ /* No mobile, a sidebar é movida para dentro do main-content por JS */
+ #sidebarDesktop {
+  display: none;
  }
-
- .sidebar {
-  order: 2;
+ 
+ /* Quando a sidebar é inserida no anchor, estiliza como bloco */
+ #sidebarMobileAnchor .sidebar {
+  display: flex !important;
   width: 100%;
   border-right: none;
-  border-top: 1px solid var(--border);
-  border-bottom: none;
+  border-radius: 12px;
+  border: 1px solid var(--border);
   padding: 16px;
+  margin-bottom: 20px;
+  position: static;
+  flex-direction: column;
+ }
+ 
+ #sidebarMobileAnchor .sidebar .filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+  animation: none;
+ }
+ 
+ #sidebarMobileAnchor .sidebar .filter-group { margin-bottom: 0; }
+ #sidebarMobileAnchor .sidebar .filter-group label { font-size: 11px; }
+ #sidebarMobileAnchor .sidebar .mode-toggle { margin-top: 0; margin-bottom: 14px; }
+ #sidebarMobileAnchor .sidebar .stats-sidebar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+ }
+ #sidebarMobileAnchor .sidebar .sidebar-stat { margin-bottom: 0; }
+ #sidebarMobileAnchor .sidebar::before { display: none; }
+ 
+ .main-content {
+  padding: 20px 16px;
  }
  
  .sidebar::before {
@@ -2205,8 +2234,9 @@ body.basic-mode .pro-only {
 </div>
 
 <div class="dashboard-container">
-<!-- SIDEBAR -->
-<div class="sidebar">
+
+<!-- SIDEBAR (desktop: esquerda | mobile: movida por JS) -->
+<div class="sidebar" id="sidebarDesktop">
  
  <div class="filters">
   <div class="filter-group">
@@ -2249,6 +2279,9 @@ body.basic-mode .pro-only {
  <div class="header-main">
   <img src="logo.png" alt="Mentoria NasdaqPro" class="header-logo" onerror="this.style.display='none'">
  </div>
+ 
+ <!-- ÂNCORA PARA A SIDEBAR NO MOBILE (sidebar é inserida aqui por JS) -->
+ <div id="sidebarMobileAnchor"></div>
  
  <!-- ABAS DE NAVEGAÇÃO -->
  <div class="tab-navigation">
@@ -2448,21 +2481,29 @@ const Dashboard = {
   await this.carregarDados();
   this.atualizarPerformanceIndicator();
   this.inicializarConversorMoeda();
-  this.inicializarListenerAbaNavegador();
+  this.inicializarSidebarMobile();
  },
  
- inicializarListenerAbaNavegador() {
-  document.addEventListener('visibilitychange', () => {
-   if (!document.hidden) {
-    const abaMercadoAtiva = document.getElementById('contentMercado')?.classList.contains('active');
-    if (abaMercadoAtiva) {
-     // Pequeno delay para a página terminar de renderizar antes de recarregar
-     setTimeout(() => {
-      this.atualizarCalendario();
-     }, 500);
-    }
+ inicializarSidebarMobile() {
+  const mover = () => {
+   const sidebar = document.getElementById('sidebarDesktop');
+   const anchor = document.getElementById('sidebarMobileAnchor');
+   const container = document.querySelector('.dashboard-container');
+   if (!sidebar || !anchor || !container) return;
+   
+   const isMobile = window.innerWidth <= 1024;
+   
+   if (isMobile && anchor.children.length === 0) {
+    // Move sidebar para dentro do anchor (logo + sidebar + abas + conteúdo)
+    anchor.appendChild(sidebar);
+   } else if (!isMobile && anchor.contains(sidebar)) {
+    // Devolve sidebar para o início do container
+    container.insertBefore(sidebar, container.firstChild);
    }
-  });
+  };
+  
+  mover();
+  window.addEventListener('resize', mover);
  },
  
  async carregarDados() {
