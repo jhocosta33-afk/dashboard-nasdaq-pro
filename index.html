@@ -37,6 +37,68 @@
  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
  --shadow-glow: 0 0 20px rgba(99,102,241,0.4);
+ 
+ /* Duração das animações */
+ --transition-fast: 0.15s;
+ --transition-normal: 0.3s;
+ --transition-slow: 0.5s;
+}
+
+/* ========== TEMA CLARO ========== */
+body.light-theme {
+ --sidebar-bg: #ffffff;
+ --main-bg: #f1f5f9;
+ --card-bg: #ffffff;
+ --card-hover: #f8fafc;
+ --border: rgba(99,102,241,0.2);
+ --border-bright: rgba(99,102,241,0.5);
+ --text: #0f172a;
+ --text-dim: #475569;
+ --muted: #94a3b8;
+ --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+ --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+ --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+ --shadow-glow: 0 0 20px rgba(99,102,241,0.25);
+}
+
+/* Tema Claro */
+[data-theme="light"] {
+ --sidebar-bg: #ffffff;
+ --main-bg: #f8fafc;
+ --card-bg: #ffffff;
+ --card-hover: #f1f5f9;
+ --border: rgba(99,102,241,0.2);
+ --border-bright: rgba(99,102,241,0.6);
+ --text: #1e293b;
+ --text-dim: #475569;
+ --muted: #94a3b8;
+ --green: #059669;
+ --green-glow: rgba(5,150,105,0.2);
+ --red: #dc2626;
+ --red-glow: rgba(220,38,38,0.2);
+ --yellow: #d97706;
+ --blue: #6366f1;
+ --blue-bright: #4f46e5;
+ --purple: #9333ea;
+ --orange: #ea580c;
+ --cyan: #0891b2;
+ 
+ --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+ --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+ --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+ --shadow-glow: 0 0 20px rgba(99,102,241,0.15);
+}
+
+[data-theme="light"] body {
+ background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+}
+
+[data-theme="light"] .sidebar::before {
+ opacity: 0.3;
+}
+
+[data-theme="light"] .modal-overlay {
+ background: rgba(15, 23, 42, 0.7);
 }
 
 * {
@@ -54,6 +116,7 @@ body {
  min-height: 100vh;
  overflow-x: hidden;
  position: relative;
+ transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 body::before {
@@ -303,7 +366,78 @@ body::before {
  animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
  display: flex;
  align-items: center;
+ justify-content: space-between;
+ position: relative;
+ gap: 20px;
+}
+
+.theme-toggle {
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 50%;
+ width: 48px;
+ height: 48px;
+ font-size: 24px;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ display: flex;
+ align-items: center;
  justify-content: center;
+ box-shadow: var(--shadow-sm);
+ position: relative;
+ overflow: hidden;
+}
+
+.theme-toggle:hover {
+ transform: scale(1.1) rotate(15deg);
+ box-shadow: var(--shadow-glow);
+ border-color: var(--blue);
+}
+
+.theme-toggle:active {
+ transform: scale(0.95);
+}
+
+.theme-toggle #themeIcon {
+ transition: all 0.3s;
+ display: inline-block;
+}
+
+.pdf-report-btn {
+ background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+ color: white;
+ border: none;
+ border-radius: 12px;
+ padding: 12px 24px;
+ font-size: 14px;
+ font-weight: 700;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ box-shadow: var(--shadow-md);
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ white-space: nowrap;
+}
+
+.pdf-report-btn:hover {
+ transform: translateY(-2px);
+ box-shadow: var(--shadow-lg);
+}
+
+.pdf-report-btn:active {
+ transform: translateY(0);
+}
+
+.pdf-report-btn.loading {
+ opacity: 0.7;
+ pointer-events: none;
+ animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+ 0%, 100% { opacity: 0.7; }
+ 50% { opacity: 1; }
 }
 
 @keyframes slideDown {
@@ -430,11 +564,12 @@ body::before {
  border: 1px solid var(--border);
  position: relative;
  overflow: hidden;
- transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
  min-height: 110px;
  display: flex;
  flex-direction: column;
  justify-content: space-between;
+ cursor: pointer;
 }
 
 .kpi::before {
@@ -444,20 +579,27 @@ body::before {
  left: 0;
  width: 100%;
  height: 3px;
- transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
  z-index: 0;
  pointer-events: none;
+ transform: scaleX(0);
+ transform-origin: left;
 }
 
 .kpi:hover {
- transform: translateY(-4px);
+ transform: translateY(-8px) scale(1.02);
  box-shadow: var(--shadow-lg);
  border-color: var(--border-bright);
 }
 
 .kpi:hover::before {
  height: 100%;
- opacity: 0.05;
+ opacity: 0.08;
+ transform: scaleX(1);
+}
+
+.kpi:active {
+ transform: translateY(-4px) scale(0.98);
 }
 
 .kpi-dias::before { background: var(--blue); }
@@ -1691,6 +1833,25 @@ body.basic-mode .pro-only {
   padding: 20px 16px;
  }
  
+ .header-main {
+  gap: 10px;
+ }
+ 
+ .theme-toggle {
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+ }
+ 
+ .pdf-report-btn {
+  padding: 10px 16px;
+  font-size: 12px;
+ }
+ 
+ .header-logo {
+  max-height: 70px;
+ }
+ 
  .sidebar::before {
   width: 100%;
   height: 1px;
@@ -2220,6 +2381,7 @@ body.basic-mode .pro-only {
  opacity: 1;
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -2277,7 +2439,13 @@ body.basic-mode .pro-only {
 <!-- MAIN CONTENT -->
 <div class="main-content">
  <div class="header-main">
+  <button class="theme-toggle" id="themeToggle" onclick="Dashboard.toggleTema()" title="Alternar tema">
+   <span id="themeIcon">🌙</span>
+  </button>
   <img src="logo.png" alt="Mentoria NasdaqPro" class="header-logo" onerror="this.style.display='none'">
+  <button class="pdf-report-btn" id="pdfReportBtn" onclick="Dashboard.gerarRelatorioPDF()" title="Gerar relatório PDF semanal">
+   📄 Relatório
+  </button>
  </div>
  
  <!-- ÂNCORA PARA A SIDEBAR NO MOBILE (sidebar é inserida aqui por JS) -->
@@ -2477,11 +2645,220 @@ const Dashboard = {
  intervaloAtualizacaoMercado: null,
  
  async init() {
+  this.carregarTema();
   this.inicializarToggleMode();
   await this.carregarDados();
   this.atualizarPerformanceIndicator();
   this.inicializarConversorMoeda();
   this.inicializarSidebarMobile();
+  this.inicializarGestosMobile();
+ },
+ 
+ carregarTema() {
+  const tema = localStorage.getItem('dashboard-tema') || 'dark';
+  document.documentElement.setAttribute('data-theme', tema);
+  this.atualizarIconeTema(tema);
+ },
+ 
+ toggleTema() {
+  const atual = document.documentElement.getAttribute('data-theme') || 'dark';
+  const novo = atual === 'dark' ? 'light' : 'dark';
+  
+  document.documentElement.setAttribute('data-theme', novo);
+  localStorage.setItem('dashboard-tema', novo);
+  this.atualizarIconeTema(novo);
+  
+  // Animação do botão
+  const btn = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+  if (btn && icon) {
+   icon.style.transform = 'rotate(360deg) scale(0)';
+   setTimeout(() => {
+    icon.textContent = novo === 'dark' ? '🌙' : '☀️';
+    icon.style.transform = 'rotate(0deg) scale(1)';
+   }, 150);
+  }
+ },
+ 
+ atualizarIconeTema(tema) {
+  const icon = document.getElementById('themeIcon');
+  if (icon) {
+   icon.textContent = tema === 'dark' ? '🌙' : '☀️';
+   icon.style.transition = 'transform 0.3s';
+  }
+ },
+ 
+ inicializarGestosMobile() {
+  let startX = 0;
+  let startY = 0;
+  const container = document.querySelector('.main-content');
+  if (!container) return;
+  
+  container.addEventListener('touchstart', (e) => {
+   startX = e.touches[0].clientX;
+   startY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  container.addEventListener('touchend', (e) => {
+   const endX = e.changedTouches[0].clientX;
+   const endY = e.changedTouches[0].clientY;
+   const diffX = startX - endX;
+   const diffY = startY - endY;
+   
+   // Swipe horizontal (ignorar se vertical)
+   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+    const dashActive = document.getElementById('contentDashboard').classList.contains('active');
+    
+    if (diffX > 0 && dashActive) {
+     // Swipe left: Dashboard → Calendário
+     this.mudarAba('mercado');
+    } else if (diffX < 0 && !dashActive) {
+     // Swipe right: Calendário → Dashboard
+     this.mudarAba('dashboard');
+    }
+   }
+  }, { passive: true });
+ },
+ 
+ async gerarRelatorioPDF() {
+  const btn = document.getElementById('pdfReportBtn');
+  if (!btn) return;
+  
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Gerando...';
+  
+  try {
+   const { jsPDF } = window.jspdf;
+   const pdf = new jsPDF('p', 'mm', 'a4');
+   const pageWidth = pdf.internal.pageSize.getWidth();
+   const pageHeight = pdf.internal.pageSize.getHeight();
+   
+   // Pega dados da semana atual
+   const hoje = new Date();
+   const semanaAtual = this.dados.filter(d => {
+    const diff = Math.floor((hoje - d.data) / (1000 * 60 * 60 * 24));
+    return diff <= 7 && diff >= 0;
+   });
+   
+   if (semanaAtual.length === 0) {
+    alert('Sem dados da última semana para gerar relatório');
+    return;
+   }
+   
+   // Cálculos
+   const totalPontos = semanaAtual.reduce((sum, d) => sum + d.pontos, 0);
+   const totalTrades = semanaAtual.reduce((sum, d) => sum + d.trades, 0);
+   const gains = semanaAtual.reduce((sum, d) => sum + d.gain, 0);
+   const stops = semanaAtual.reduce((sum, d) => sum + d.stop, 0);
+   const zeros = semanaAtual.reduce((sum, d) => sum + d.zero, 0);
+   const winRate = totalTrades > 0 ? Math.round((gains / totalTrades) * 100) : 0;
+   const melhorDia = Math.max(...semanaAtual.map(d => d.pontos));
+   const piorDia = Math.min(...semanaAtual.map(d => d.pontos));
+   
+   // Header
+   pdf.setFillColor(99, 102, 241);
+   pdf.rect(0, 0, pageWidth, 40, 'F');
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(24);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('RELATÓRIO SEMANAL', pageWidth / 2, 20, { align: 'center' });
+   pdf.setFontSize(12);
+   pdf.setFont(undefined, 'normal');
+   pdf.text(`${semanaAtual[0].dia} até ${semanaAtual[semanaAtual.length-1].dia}`, pageWidth / 2, 30, { align: 'center' });
+   
+   // Reset color
+   pdf.setTextColor(0, 0, 0);
+   let y = 55;
+   
+   // KPIs principais
+   pdf.setFontSize(16);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('📊 RESUMO DA SEMANA', 20, y);
+   y += 15;
+   
+   pdf.setFontSize(12);
+   pdf.setFont(undefined, 'normal');
+   
+   const kpis = [
+    ['Dias Operados', semanaAtual.length],
+    ['Total de Trades', totalTrades],
+    ['Pontos Totais', totalPontos > 0 ? `+${totalPontos}` : totalPontos],
+    ['Assertividade', `${winRate}%`],
+    ['Gains', gains],
+    ['Stops', stops],
+    ['Breakeven', zeros],
+    ['Melhor Dia', `+${melhorDia}`],
+    ['Pior Dia', piorDia]
+   ];
+   
+   kpis.forEach(([label, value]) => {
+    pdf.setFont(undefined, 'bold');
+    pdf.text(label + ':', 25, y);
+    pdf.setFont(undefined, 'normal');
+    pdf.text(String(value), 85, y);
+    y += 8;
+   });
+   
+   y += 10;
+   
+   // Tabela de operações
+   pdf.setFontSize(16);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('📋 OPERAÇÕES DIÁRIAS', 20, y);
+   y += 12;
+   
+   // Header da tabela
+   pdf.setFillColor(245, 245, 245);
+   pdf.rect(20, y - 7, pageWidth - 40, 10, 'F');
+   pdf.setFontSize(10);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('Data', 25, y);
+   pdf.text('Trades', 60, y);
+   pdf.text('Gains', 85, y);
+   pdf.text('Stops', 110, y);
+   pdf.text('0x0', 135, y);
+   pdf.text('Pontos', 155, y);
+   y += 10;
+   
+   pdf.setFont(undefined, 'normal');
+   semanaAtual.forEach((dia, idx) => {
+    if (idx % 2 === 0) {
+     pdf.setFillColor(250, 250, 250);
+     pdf.rect(20, y - 7, pageWidth - 40, 10, 'F');
+    }
+    
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(dia.dia, 25, y);
+    pdf.text(String(dia.trades), 60, y);
+    pdf.setTextColor(16, 185, 129);
+    pdf.text(String(dia.gain), 85, y);
+    pdf.setTextColor(239, 68, 68);
+    pdf.text(String(dia.stop), 110, y);
+    pdf.setTextColor(251, 191, 36);
+    pdf.text(String(dia.zero), 135, y);
+    
+    pdf.setTextColor(dia.pontos >= 0 ? 16 : 239, dia.pontos >= 0 ? 185 : 68, dia.pontos >= 0 ? 129 : 68);
+    pdf.text((dia.pontos >= 0 ? '+' : '') + dia.pontos, 155, y);
+    
+    y += 10;
+   });
+   
+   // Footer
+   pdf.setTextColor(150, 150, 150);
+   pdf.setFontSize(8);
+   pdf.text(`Gerado em ${new Date().toLocaleString('pt-BR')}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+   pdf.text('NASDAQ PRO Trading Dashboard', pageWidth / 2, pageHeight - 5, { align: 'center' });
+   
+   // Salvar
+   pdf.save(`relatorio-semanal-${hoje.toISOString().split('T')[0]}.pdf`);
+   
+  } catch (erro) {
+   console.error('Erro ao gerar PDF:', erro);
+   alert('Erro ao gerar relatório. Tente novamente.');
+  } finally {
+   btn.classList.remove('loading');
+   btn.textContent = '📄 Relatório';
+  }
  },
  
  inicializarSidebarMobile() {
@@ -2504,6 +2881,162 @@ const Dashboard = {
   
   mover();
   window.addEventListener('resize', mover);
+ },
+ 
+ inicializarTema() {
+  const temaSalvo = localStorage.getItem('dashboard-tema') || 'dark';
+  if (temaSalvo === 'light') {
+   document.body.classList.add('light-theme');
+   const icon = document.getElementById('themeIcon');
+   if (icon) icon.textContent = '☀️';
+  }
+ },
+ 
+ toggleTema() {
+  const body = document.body;
+  const icon = document.getElementById('themeIcon');
+  
+  body.classList.toggle('light-theme');
+  
+  if (body.classList.contains('light-theme')) {
+   if (icon) icon.textContent = '☀️';
+   localStorage.setItem('dashboard-tema', 'light');
+  } else {
+   if (icon) icon.textContent = '🌙';
+   localStorage.setItem('dashboard-tema', 'dark');
+  }
+ },
+ 
+ inicializarGestosMobile() {
+  const mainContent = document.querySelector('.main-content');
+  if (!mainContent) return;
+  
+  let touchStartX = 0;
+  let touchEndX = 0;
+  
+  mainContent.addEventListener('touchstart', (e) => {
+   touchStartX = e.changedTouches[0].screenX;
+  }, {passive: true});
+  
+  mainContent.addEventListener('touchend', (e) => {
+   touchEndX = e.changedTouches[0].screenX;
+   const diffX = touchEndX - touchStartX;
+   const minSwipe = 50;
+   
+   if (Math.abs(diffX) < minSwipe) return;
+   
+   const abaDashboard = document.getElementById('contentDashboard');
+   const abaMercado = document.getElementById('contentMercado');
+   
+   // Swipe direita -> Dashboard
+   if (diffX > 0 && abaMercado?.classList.contains('active')) {
+    this.mudarAba('dashboard');
+   }
+   
+   // Swipe esquerda -> Calendário
+   if (diffX < 0 && abaDashboard?.classList.contains('active')) {
+    this.mudarAba('mercado');
+   }
+  }, {passive: true});
+ },
+ 
+ async gerarRelatorioPDF() {
+  const btn = document.getElementById('pdfReportBtn');
+  if (!btn) return;
+  
+  const textoOriginal = btn.textContent;
+  btn.textContent = '⏳ Gerando...';
+  btn.classList.add('loading');
+  
+  try {
+   // Carrega jsPDF se ainda não estiver carregado
+   if (!window.jspdf) {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    document.head.appendChild(script);
+    await new Promise(resolve => script.onload = resolve);
+   }
+   
+   const { jsPDF } = window.jspdf;
+   const doc = new jsPDF();
+   
+   // Dados da última semana
+   const hoje = new Date();
+   const umaSemanaAtras = new Date(hoje);
+   umaSemanaAtras.setDate(hoje.getDate() - 7);
+   
+   const dadosSemana = this.dados.filter(d => d.data >= umaSemanaAtras && d.data <= hoje);
+   
+   // Calcula stats
+   const totalPontos = dadosSemana.reduce((acc, d) => acc + d.pontos, 0);
+   const totalTrades = dadosSemana.reduce((acc, d) => acc + d.trades, 0);
+   const gains = dadosSemana.reduce((acc, d) => acc + d.gain, 0);
+   const stops = dadosSemana.reduce((acc, d) => acc + d.stop, 0);
+   const winRate = totalTrades > 0 ? ((gains / totalTrades) * 100).toFixed(1) : 0;
+   
+   // Título
+   doc.setFontSize(22);
+   doc.setTextColor(99, 102, 241);
+   doc.text('Relatório Semanal - Trading', 20, 20);
+   
+   doc.setFontSize(11);
+   doc.setTextColor(100);
+   doc.text(`${umaSemanaAtras.toLocaleDateString('pt-BR')} a ${hoje.toLocaleDateString('pt-BR')}`, 20, 28);
+   
+   // Stats
+   doc.setFontSize(14);
+   doc.setTextColor(0);
+   doc.text('Resumo da Semana', 20, 42);
+   
+   doc.setFontSize(11);
+   let y = 52;
+   [
+    `Dias Operados: ${dadosSemana.length}`,
+    `Total de Trades: ${totalTrades}`,
+    `Pontos Totais: ${totalPontos > 0 ? '+' : ''}${totalPontos}`,
+    `Assertividade: ${winRate}%`,
+    `Gains: ${gains} | Stops: ${stops}`
+   ].forEach(stat => { doc.text(stat, 25, y); y += 8; });
+   
+   // Tabela
+   y += 10;
+   doc.setFontSize(12);
+   doc.text('Operações', 20, y);
+   y += 8;
+   
+   doc.setFontSize(9);
+   doc.text('Data', 20, y);
+   doc.text('Pontos', 60, y);
+   doc.text('Trades', 95, y);
+   doc.text('G', 125, y);
+   doc.text('S', 145, y);
+   doc.text('0x0', 165, y);
+   
+   dadosSemana.forEach(d => {
+    y += 6;
+    doc.text(d.dia, 20, y);
+    doc.text(d.pontos.toString(), 60, y);
+    doc.text(d.trades.toString(), 95, y);
+    doc.text(d.gain.toString(), 125, y);
+    doc.text(d.stop.toString(), 145, y);
+    doc.text(d.zero.toString(), 165, y);
+   });
+   
+   // Footer
+   doc.setFontSize(8);
+   doc.setTextColor(150);
+   doc.text('NASDAQ PRO Trading Dashboard', 20, 285);
+   
+   doc.save(`relatorio-${hoje.toISOString().split('T')[0]}.pdf`);
+   
+   btn.textContent = '✅ PDF Gerado!';
+   setTimeout(() => { btn.textContent = textoOriginal; btn.classList.remove('loading'); }, 2000);
+   
+  } catch (erro) {
+   console.error('Erro PDF:', erro);
+   btn.textContent = '❌ Erro';
+   setTimeout(() => { btn.textContent = textoOriginal; btn.classList.remove('loading'); }, 2000);
+  }
  },
  
  async carregarDados() {
