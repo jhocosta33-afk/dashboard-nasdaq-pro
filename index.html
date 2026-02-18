@@ -183,6 +183,23 @@ body::before {
  transform: translateY(-2px);
 }
 
+/* ========== HEADER DO REPORT (CAPTURA) ========== */
+.dashboard-header-report {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ padding: 20px 0 30px 0;
+ margin-bottom: 20px;
+ border-bottom: 1px solid var(--border);
+}
+
+.report-logo {
+ max-height: 80px;
+ width: auto;
+ max-width: 100%;
+ filter: drop-shadow(0 4px 20px rgba(99,102,241,0.4));
+}
+
 .filters {
  margin-bottom: 24px;
  animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2467,6 +2484,11 @@ body.basic-mode .pro-only {
  
  <!-- CONTEÚDO DASHBOARD -->
  <div id="contentDashboard" class="tab-content active">
+ 
+ <!-- HEADER DO DASHBOARD COM LOGO -->
+ <div class="dashboard-header-report">
+  <img src="logo.png" alt="Mentoria NasdaqPro" class="report-logo" onerror="this.style.display='none'">
+ </div>
  
  <div class="kpis">
   <div class="kpi kpi-dias">
