@@ -2445,8 +2445,8 @@ body.basic-mode .pro-only {
    <span id="themeIcon">🌙</span>
   </button>
   <img src="logo.png" alt="Mentoria NasdaqPro" class="header-logo" onerror="this.style.display='none'">
-  <button class="pdf-report-btn" id="pdfReportBtn" onclick="Dashboard.gerarRelatorioPDF()" title="Gerar relatório PDF semanal">
-   📄 Relatório
+  <button class="pdf-report-btn" id="pdfReportBtn" onclick="Dashboard.gerarRelatorioPDF()" title="Exportar dashboard como imagem PNG">
+   📸 Exportar Imagem
   </button>
  </div>
  
@@ -2738,16 +2738,6 @@ const Dashboard = {
     return;
    }
    
-   // Carrega jsPDF
-   if (!window.jspdf) {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    document.head.appendChild(script);
-    await new Promise(resolve => script.onload = resolve);
-   }
-   
-   const { jsPDF } = window.jspdf;
-   
    // Seleciona o conteúdo do dashboard (apenas a aba ativa)
    const dashboard = document.getElementById('contentDashboard');
    if (!dashboard || !dashboard.classList.contains('active')) {
@@ -2757,48 +2747,93 @@ const Dashboard = {
     return;
    }
    
+   // Lista de elementos para ocultar temporariamente
+   const elementosParaOcultar = [
+    '.charts', // Evolução de Performance + Distribuição de Resultados
+    '.table-card', // Histórico Detalhado de Operações
+    '.kpi:has(span:contains("Contratos por Trade"))',
+    '.kpi:has(span:contains("Total em Dólar"))'
+   ];
+   
+   // Oculta elementos usando seletores mais específicos
+   const kpis = document.querySelectorAll('.kpi');
+   const elementosOcultos = [];
+   
+   kpis.forEach(kpi => {
+    const span = kpi.querySelector('span');
+    if (span && (span.textContent.includes('Contratos por Trade') || span.textContent.includes('Total em Dólar'))) {
+     kpi.style.display = 'none';
+     elementosOcultos.push(kpi);
+    }
+   });
+   
+   // Oculta gráficos
+   const charts = dashboard.querySelector('.charts');
+   if (charts) {
+    charts.style.display = 'none';
+    elementosOcultos.push(charts);
+   }
+   
+   // Oculta tabela
+   const table = dashboard.querySelector('.table-card');
+   if (table) {
+    table.style.display = 'none';
+    elementosOcultos.push(table);
+   }
+   
    btn.textContent = '📸 Capturando...';
+   
+   // Pequeno delay para garantir que o DOM foi atualizado
+   await new Promise(resolve => setTimeout(resolve, 100));
    
    // Captura screenshot do dashboard
    const canvas = await html2canvas(dashboard, {
-    backgroundColor: '#050711',
+    backgroundColor: getComputedStyle(document.body).getPropertyValue('--main-bg') || '#050711',
     scale: 2, // Alta qualidade
     logging: false,
     useCORS: true,
     allowTaint: true,
     scrollY: -window.scrollY,
-    scrollX: -window.scrollX,
-    windowWidth: dashboard.scrollWidth,
-    windowHeight: dashboard.scrollHeight
+    scrollX: -window.scrollX
    });
    
-   btn.textContent = '📄 Gerando PDF...';
+   // Restaura elementos ocultos
+   elementosOcultos.forEach(el => {
+    if (el) el.style.display = '';
+   });
    
-   // Cria PDF
-   const imgData = canvas.toDataURL('image/png');
-   const imgWidth = 210; // A4 width em mm
-   const imgHeight = (canvas.height * imgWidth) / canvas.width;
+   btn.textContent = '💾 Salvando...';
    
-   // Se a imagem for maior que uma página, usa formato portrait ou landscape adequado
-   const pdf = imgHeight > 297 ? new jsPDF('p', 'mm', [imgWidth, imgHeight]) : new jsPDF('p', 'mm', 'a4');
-   
-   pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-   
-   // Nome do arquivo
-   const hoje = new Date();
-   const nomeArquivo = `dashboard-${hoje.toISOString().split('T')[0]}.pdf`;
-   
-   pdf.save(nomeArquivo);
-   
-   btn.textContent = '✅ PDF Gerado!';
-   setTimeout(() => {
-    btn.textContent = textoOriginal;
-    btn.classList.remove('loading');
-   }, 2000);
+   // Converte canvas para blob e baixa como PNG
+   canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const hoje = new Date();
+    const nomeArquivo = `dashboard-${hoje.toISOString().split('T')[0]}.png`;
+    
+    link.href = url;
+    link.download = nomeArquivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    btn.textContent = '✅ Imagem Salva!';
+    setTimeout(() => {
+     btn.textContent = textoOriginal;
+     btn.classList.remove('loading');
+    }, 2000);
+   }, 'image/png');
    
   } catch (erro) {
-   console.error('Erro ao gerar PDF:', erro);
-   alert('Erro ao gerar PDF. Detalhes no console.');
+   console.error('Erro ao gerar imagem:', erro);
+   alert('Erro ao gerar imagem. Detalhes no console.');
+   
+   // Garante que elementos voltam a aparecer mesmo em caso de erro
+   document.querySelectorAll('.kpi, .charts, .table-card').forEach(el => {
+    el.style.display = '';
+   });
+   
    btn.textContent = '❌ Erro';
    setTimeout(() => {
     btn.textContent = textoOriginal;
