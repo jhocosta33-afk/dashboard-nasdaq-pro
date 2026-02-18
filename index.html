@@ -2658,8 +2658,17 @@ const Dashboard = {
  
  carregarTema() {
   const tema = localStorage.getItem('dashboard-tema') || 'dark';
-  document.documentElement.setAttribute('data-theme', tema);
-  this.atualizarIconeTema(tema);
+  
+  if (tema === 'light') {
+   document.body.classList.add('light-theme');
+  } else {
+   document.body.classList.remove('light-theme');
+  }
+  
+  const icon = document.getElementById('themeIcon');
+  if (icon) {
+   icon.textContent = tema === 'dark' ? '🌙' : '☀️';
+  }
  },
  
  toggleTema() {
@@ -2677,14 +2686,6 @@ const Dashboard = {
     icon.textContent = tema === 'dark' ? '🌙' : '☀️';
     icon.style.transform = 'rotate(0deg) scale(1)';
    }, 150);
-  }
- },
- 
- atualizarIconeTema(tema) {
-  const icon = document.getElementById('themeIcon');
-  if (icon) {
-   icon.textContent = tema === 'dark' ? '🌙' : '☀️';
-   icon.style.transition = 'transform 0.3s';
   }
  },
  
@@ -2720,6 +2721,7 @@ const Dashboard = {
   }, { passive: true });
  },
  
+ 
  async gerarRelatorioPDF() {
   const btn = document.getElementById('pdfReportBtn');
   if (!btn) return;
@@ -2729,7 +2731,7 @@ const Dashboard = {
   btn.textContent = '⏳ Gerando...';
   
   try {
-   // Carrega jsPDF se necessário
+   // Carrega jsPDF
    if (!window.jspdf) {
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
@@ -2739,15 +2741,15 @@ const Dashboard = {
    
    const { jsPDF } = window.jspdf;
    const pdf = new jsPDF('p', 'mm', 'a4');
-   const pageWidth = pdf.internal.pageSize.getWidth();
-   const pageHeight = pdf.internal.pageSize.getHeight();
+   const pw = pdf.internal.pageSize.getWidth();
+   const ph = pdf.internal.pageSize.getHeight();
    
-   // Filtra dados da semana
+   // Dados da semana
    const hoje = new Date();
-   const umaSemanaAtras = new Date(hoje);
-   umaSemanaAtras.setDate(hoje.getDate() - 7);
+   const semanaAtras = new Date(hoje);
+   semanaAtras.setDate(hoje.getDate() - 7);
    
-   const dadosSemana = this.dados.filter(d => d.data >= umaSemanaAtras && d.data <= hoje);
+   const dadosSemana = this.dados.filter(d => d.data >= semanaAtras && d.data <= hoje);
    
    if (dadosSemana.length === 0) {
     alert('Sem dados da última semana');
@@ -2756,206 +2758,269 @@ const Dashboard = {
     return;
    }
    
-   // Stats
-   const totalPontos = dadosSemana.reduce((acc, d) => acc + d.pontos, 0);
-   const totalTrades = dadosSemana.reduce((acc, d) => acc + d.trades, 0);
-   const gains = dadosSemana.reduce((acc, d) => acc + d.gain, 0);
-   const stops = dadosSemana.reduce((acc, d) => acc + d.stop, 0);
-   const zeros = dadosSemana.reduce((acc, d) => acc + d.zero, 0);
+   // Cálculos
+   const totalPontos = dadosSemana.reduce((a, d) => a + d.pontos, 0);
+   const totalTrades = dadosSemana.reduce((a, d) => a + d.trades, 0);
+   const gains = dadosSemana.reduce((a, d) => a + d.gain, 0);
+   const stops = dadosSemana.reduce((a, d) => a + d.stop, 0);
+   const zeros = dadosSemana.reduce((a, d) => a + d.zero, 0);
    const winRate = totalTrades > 0 ? Math.round((gains / totalTrades) * 100) : 0;
    
-   // ========== HEADER AZUL ESCURO ==========
-   pdf.setFillColor(15, 23, 42); // Fundo azul escuro
-   pdf.rect(0, 0, pageWidth, 65, 'F');
-   
-   // Logo texto "Mentoria NasdaqPro"
-   pdf.setTextColor(200, 200, 200);
-   pdf.setFontSize(10);
-   pdf.text('Mentoria', pageWidth - 45, 12);
-   pdf.setTextColor(251, 191, 36); // Amarelo/dourado
-   pdf.setFontSize(12);
-   pdf.setFont(undefined, 'bold');
-   pdf.text('NasdaqPro', pageWidth - 45, 18);
-   
-   // Título RESUMO SEMANAL
-   pdf.setTextColor(255, 255, 255);
-   pdf.setFontSize(28);
-   pdf.setFont(undefined, 'bold');
-   pdf.text('RESUMO SEMANAL', pageWidth / 2, 45, { align: 'center' });
-   
-   // ========== DASHBOARD DE TRADING ==========
-   let y = 75;
+   // ===== HEADER AZUL ESCURO =====
    pdf.setFillColor(15, 23, 42);
-   pdf.rect(0, y, pageWidth, 15, 'F');
-   pdf.setTextColor(255, 255, 255);
-   pdf.setFontSize(14);
-   pdf.setFont(undefined, 'bold');
-   pdf.text('Dashboard de Trading', 15, y + 10);
+   pdf.rect(0, 0, pw, 55, 'F');
    
-   // Performance badge
-   const perfText = totalPontos >= 0 ? `Positiva (+${totalPontos})` : `Negativa (${totalPontos})`;
-   pdf.setFillColor(totalPontos >= 0 ? 16 : 239, totalPontos >= 0 ? 185 : 68, totalPontos >= 0 ? 129 : 68);
-   pdf.roundedRect(pageWidth - 65, y + 3, 50, 8, 2, 2, 'F');
-   pdf.setTextColor(255, 255, 255);
-   pdf.setFontSize(8);
-   pdf.text(`● Performance: ${perfText}`, pageWidth - 63, y + 8);
-   
-   // ========== KPIS EM CARDS ==========
-   y += 25;
-   const kpis = [
-    { label: 'DIAS OPERADOS', value: dadosSemana.length, color: [59, 130, 246] },
-    { label: 'TOTAL DE TRADES', value: totalTrades, color: [168, 85, 247] },
-    { label: 'PONTOS TOTAIS', value: totalPontos, color: [16, 185, 129] },
-    { label: 'ASSERTIVIDADE', value: `${winRate}%`, color: [251, 146, 60] }
-   ];
-   
-   const cardWidth = 42;
-   const cardHeight = 28;
-   const gap = 5;
-   const startX = 15;
-   
-   kpis.forEach((kpi, idx) => {
-    const x = startX + (idx * (cardWidth + gap));
-    
-    // Card background
-    pdf.setFillColor(31, 41, 55);
-    pdf.roundedRect(x, y, cardWidth, cardHeight, 2, 2, 'F');
-    
-    // Barra colorida no topo
-    pdf.setFillColor(...kpi.color);
-    pdf.roundedRect(x, y, cardWidth, 2, 1, 1, 'F');
-    
-    // Label
-    pdf.setTextColor(148, 163, 184);
-    pdf.setFontSize(7);
-    pdf.setFont(undefined, 'normal');
-    pdf.text(kpi.label, x + 3, y + 8);
-    
-    // Valor
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(18);
-    pdf.setFont(undefined, 'bold');
-    pdf.text(String(kpi.value), x + 3, y + 20);
-   });
-   
-   // ========== TABELA DE OPERAÇÕES ==========
-   y += cardHeight + 15;
-   pdf.setFillColor(31, 41, 55);
-   pdf.roundedRect(15, y, pageWidth - 30, 10, 2, 2, 'FD');
-   pdf.setTextColor(255, 255, 255);
+   // Logo
+   pdf.setTextColor(200, 200, 200);
+   pdf.setFontSize(9);
+   pdf.text('Mentoria', pw - 40, 10);
+   pdf.setTextColor(251, 191, 36);
    pdf.setFontSize(11);
    pdf.setFont(undefined, 'bold');
-   pdf.text('📋 Histórico Detalhado de Operações', 20, y + 7);
+   pdf.text('NasdaqPro', pw - 40, 15);
    
-   y += 15;
+   // Título
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(24);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('RESUMO SEMANAL', pw / 2, 35, { align: 'center' });
    
-   // Header da tabela
+   // ===== DASHBOARD HEADER =====
+   let y = 60;
+   pdf.setFillColor(15, 23, 42);
+   pdf.rect(0, y, pw, 12, 'F');
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(12);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('Dashboard de Trading', 15, y + 8);
+   
+   // Badge Performance
+   const perf = totalPontos >= 0 ? `Positiva (+${totalPontos})` : `Negativa (${totalPontos})`;
+   pdf.setFillColor(totalPontos >= 0 ? 16 : 239, totalPontos >= 0 ? 185 : 68, totalPontos >= 0 ? 129 : 68);
+   pdf.roundedRect(pw - 55, y + 2, 45, 7, 2, 2, 'F');
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(7);
+   pdf.text(`● Performance: ${perf}`, pw - 53, y + 6);
+   
+   // ===== KPI CARDS =====
+   y += 20;
+   const kpis = [
+    { label: 'DIAS OPERADOS', val: dadosSemana.length, color: [59, 130, 246] },
+    { label: 'TOTAL DE TRADES', val: totalTrades, color: [168, 85, 247] },
+    { label: 'PONTOS TOTAIS', val: totalPontos, color: [16, 185, 129] },
+    { label: 'ASSERTIVIDADE', val: `${winRate}%`, color: [251, 146, 60] }
+   ];
+   
+   const cw = 46, ch = 22, gap = 3, sx = 8;
+   kpis.forEach((k, i) => {
+    const x = sx + (i * (cw + gap));
+    pdf.setFillColor(31, 41, 55);
+    pdf.roundedRect(x, y, cw, ch, 2, 2, 'F');
+    pdf.setFillColor(...k.color);
+    pdf.rect(x, y, cw, 1.5, 'F');
+    
+    pdf.setTextColor(148, 163, 184);
+    pdf.setFontSize(6);
+    pdf.setFont(undefined, 'normal');
+    pdf.text(k.label, x + 2, y + 6);
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(16);
+    pdf.setFont(undefined, 'bold');
+    pdf.text(String(k.val), x + 2, y + 16);
+   });
+   
+   // ===== SEGUNDA LINHA DE KPIs =====
+   y += ch + 5;
+   const kpis2 = [
+    { label: 'GAINS', val: gains, color: [16, 185, 129] },
+    { label: 'STOPS', val: stops, color: [239, 68, 68] },
+    { label: 'BREAKEVEN', val: zeros, color: [251, 191, 36] }
+   ];
+   
+   kpis2.forEach((k, i) => {
+    const x = sx + (i * (cw + gap));
+    pdf.setFillColor(31, 41, 55);
+    pdf.roundedRect(x, y, cw, ch, 2, 2, 'F');
+    pdf.setFillColor(...k.color);
+    pdf.rect(x, y, cw, 1.5, 'F');
+    
+    pdf.setTextColor(148, 163, 184);
+    pdf.setFontSize(6);
+    pdf.setFont(undefined, 'normal');
+    pdf.text(k.label, x + 2, y + 6);
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(16);
+    pdf.setFont(undefined, 'bold');
+    pdf.text(String(k.val), x + 2, y + 16);
+   });
+   
+   // ===== TABELA =====
+   y += ch + 10;
    pdf.setFillColor(31, 41, 55);
-   pdf.rect(15, y, pageWidth - 30, 8, 'F');
-   pdf.setTextColor(139, 146, 188); // Roxo claro
-   pdf.setFontSize(8);
+   pdf.roundedRect(8, y, pw - 16, 8, 2, 2, 'F');
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(10);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('📋 Histórico Detalhado de Operações', 12, y + 5);
+   
+   y += 12;
+   
+   // Header tabela
+   pdf.setFillColor(31, 41, 55);
+   pdf.rect(8, y, pw - 16, 6, 'F');
+   pdf.setTextColor(139, 146, 188);
+   pdf.setFontSize(7);
    pdf.setFont(undefined, 'bold');
    
    const cols = [
-    { label: 'DATA', x: 20 },
-    { label: 'PONTOS', x: 50 },
-    { label: 'TRADES', x: 75 },
-    { label: 'GAIN', x: 95 },
-    { label: 'STOP', x: 115 },
-    { label: '0X0', x: 135 },
-    { label: 'ATIVO', x: 155 },
-    { label: 'SEMANA', x: 175 }
+    { label: 'DATA', x: 12 },
+    { label: 'PONTOS', x: 42 },
+    { label: 'TRADES', x: 65 },
+    { label: 'GAIN', x: 85 },
+    { label: 'STOP', x: 102 },
+    { label: '0X0', x: 119 },
+    { label: 'ATIVO', x: 136 },
+    { label: 'SEMANA', x: 160 }
    ];
    
-   cols.forEach(col => pdf.text(col.label, col.x, y + 5));
-   y += 10;
+   cols.forEach(c => pdf.text(c.label, c.x, y + 4));
+   y += 8;
    
-   // Linhas de dados
+   // Dados
    pdf.setFont(undefined, 'normal');
-   dadosSemana.forEach((dia, idx) => {
-    // Zebra striping
-    if (idx % 2 === 1) {
+   dadosSemana.forEach((d, i) => {
+    if (i % 2 === 1) {
      pdf.setFillColor(20, 26, 38);
-     pdf.rect(15, y - 2, pageWidth - 30, 7, 'F');
+     pdf.rect(8, y - 1, pw - 16, 6, 'F');
     }
     
-    // Data
     pdf.setTextColor(255, 255, 255);
-    pdf.text(dia.dia, 20, y + 3);
+    pdf.text(d.dia, 12, y + 3);
     
-    // Pontos (colorido)
-    const pontosColor = dia.pontos > 0 ? [16, 185, 129] : dia.pontos < 0 ? [239, 68, 68] : [148, 163, 184];
-    pdf.setTextColor(...pontosColor);
+    const pColor = d.pontos > 0 ? [16, 185, 129] : d.pontos < 0 ? [239, 68, 68] : [148, 163, 184];
+    pdf.setTextColor(...pColor);
     pdf.setFont(undefined, 'bold');
-    pdf.text((dia.pontos > 0 ? '+' : '') + dia.pontos, 50, y + 3);
+    pdf.text((d.pontos > 0 ? '+' : '') + d.pontos, 42, y + 3);
     pdf.setFont(undefined, 'normal');
     
-    // Trades
     pdf.setTextColor(255, 255, 255);
-    pdf.text(String(dia.trades), 75, y + 3);
+    pdf.text(String(d.trades), 65, y + 3);
     
-    // Gain (verde)
     pdf.setTextColor(16, 185, 129);
-    pdf.text(String(dia.gain), 95, y + 3);
+    pdf.text(String(d.gain), 85, y + 3);
     
-    // Stop (vermelho)
     pdf.setTextColor(239, 68, 68);
-    pdf.text(String(dia.stop), 115, y + 3);
+    pdf.text(String(d.stop), 102, y + 3);
     
-    // 0x0 (amarelo)
     pdf.setTextColor(251, 191, 36);
-    pdf.text(String(dia.zero), 135, y + 3);
+    pdf.text(String(d.zero), 119, y + 3);
     
-    // Ativo
     pdf.setTextColor(255, 255, 255);
-    pdf.text(dia.ativo || 'NASDAQ', 155, y + 3);
+    pdf.text(d.ativo || 'NASDAQ', 136, y + 3);
+    pdf.text(d.semana || '-', 160, y + 3);
     
-    // Semana
-    pdf.text(dia.semana || '-', 175, y + 3);
-    
-    y += 7;
+    y += 6;
    });
    
    // Linha TOTAL
-   y += 3;
+   y += 2;
    pdf.setFillColor(59, 130, 246);
-   pdf.rect(15, y - 2, pageWidth - 30, 8, 'F');
+   pdf.rect(8, y - 1, pw - 16, 7, 'F');
    pdf.setTextColor(255, 255, 255);
-   pdf.setFontSize(9);
+   pdf.setFontSize(8);
    pdf.setFont(undefined, 'bold');
-   pdf.text('TOTAL', 20, y + 3);
-   pdf.text(String(totalPontos), 50, y + 3);
-   pdf.text(String(totalTrades), 75, y + 3);
-   pdf.text(String(gains), 95, y + 3);
-   pdf.text(String(stops), 115, y + 3);
-   pdf.text(String(zeros), 135, y + 3);
+   pdf.text('TOTAL', 12, y + 3.5);
+   pdf.text(String(totalPontos), 42, y + 3.5);
+   pdf.text(String(totalTrades), 65, y + 3.5);
+   pdf.text(String(gains), 85, y + 3.5);
+   pdf.text(String(stops), 102, y + 3.5);
+   pdf.text(String(zeros), 119, y + 3.5);
    
-   // ========== CALENDÁRIO MENSAL (mini) ==========
-   y += 18;
-   if (y < pageHeight - 50) {
+   // ===== CALENDÁRIO MENSAL =====
+   y += 15;
+   if (y < ph - 60) {
     pdf.setFillColor(31, 41, 55);
-    pdf.roundedRect(15, y, pageWidth - 30, 8, 2, 2, 'F');
+    pdf.roundedRect(8, y, pw - 16, 8, 2, 2, 'F');
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(10);
     pdf.setFont(undefined, 'bold');
     
-    const mesAtual = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-    pdf.text(`📅 ${mesAtual.charAt(0).toUpperCase() + mesAtual.slice(1)}`, 20, y + 6);
+    const mesNome = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    pdf.text(`📅 ${mesNome.charAt(0).toUpperCase() + mesNome.slice(1)}`, 12, y + 5);
     
-    // Nota: Calendário visual completo seria muito complexo aqui
-    // Deixando apenas o header como indicador
+    y += 12;
+    
+    // Mini calendário - dias da semana
+    const diasSemana = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+    const cellW = (pw - 16) / 7;
+    
+    pdf.setFillColor(20, 26, 38);
+    pdf.rect(8, y, pw - 16, 5, 'F');
+    pdf.setTextColor(139, 146, 188);
+    pdf.setFontSize(6);
+    pdf.setFont(undefined, 'bold');
+    
+    diasSemana.forEach((dia, i) => {
+     pdf.text(dia, 8 + (i * cellW) + cellW / 2, y + 3.5, { align: 'center' });
+    });
+    
+    y += 6;
+    
+    // Dias do mês
+    const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    const diasNoMes = ultimoDia.getDate();
+    const diaSemanaInicio = primeiroDia.getDay();
+    
+    let dia = 1;
+    let row = 0;
+    
+    for (let semana = 0; semana < 6; semana++) {
+     for (let diaSem = 0; diaSem < 7; diaSem++) {
+      if (semana === 0 && diaSem < diaSemanaInicio) continue;
+      if (dia > diasNoMes) break;
+      
+      const x = 8 + (diaSem * cellW);
+      const yCell = y + (row * 5);
+      
+      // Verifica se tem operação neste dia
+      const dataAtual = new Date(hoje.getFullYear(), hoje.getMonth(), dia);
+      const temOperacao = this.dados.some(d => 
+       d.data.getDate() === dia && 
+       d.data.getMonth() === hoje.getMonth() &&
+       d.data.getFullYear() === hoje.getFullYear()
+      );
+      
+      if (temOperacao) {
+       pdf.setFillColor(59, 130, 246);
+       pdf.roundedRect(x + 1, yCell, cellW - 2, 4, 1, 1, 'F');
+       pdf.setTextColor(255, 255, 255);
+      } else {
+       pdf.setTextColor(148, 163, 184);
+      }
+      
+      pdf.setFontSize(6);
+      pdf.setFont(undefined, 'normal');
+      pdf.text(String(dia), x + cellW / 2, yCell + 3, { align: 'center' });
+      
+      dia++;
+     }
+     row++;
+     if (dia > diasNoMes) break;
+    }
    }
    
-   // ========== FOOTER ==========
+   // ===== FOOTER =====
    pdf.setTextColor(100, 116, 139);
-   pdf.setFontSize(8);
+   pdf.setFontSize(7);
    pdf.setFont(undefined, 'normal');
-   pdf.text(`← Voltar`, 15, pageHeight - 10);
-   pdf.text(`Gerado em ${hoje.toLocaleString('pt-BR')}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
+   pdf.text('← Voltar', 8, ph - 8);
+   pdf.text(`Gerado em ${hoje.toLocaleString('pt-BR')}`, pw / 2, ph - 5, { align: 'center' });
    
    // Salvar
-   const nomeArquivo = `resumo-semanal-${hoje.toISOString().split('T')[0]}.pdf`;
-   pdf.save(nomeArquivo);
+   pdf.save(`resumo-semanal-${hoje.toISOString().split('T')[0]}.pdf`);
    
    btn.textContent = '✅ PDF Gerado!';
    setTimeout(() => {
@@ -2964,7 +3029,7 @@ const Dashboard = {
    }, 2000);
    
   } catch (erro) {
-   console.error('Erro ao gerar PDF:', erro);
+   console.error('Erro PDF:', erro);
    btn.textContent = '❌ Erro';
    setTimeout(() => {
     btn.textContent = textoOriginal;
@@ -2972,7 +3037,6 @@ const Dashboard = {
    }, 2000);
   }
  },
- 
  inicializarSidebarMobile() {
   const mover = () => {
    const sidebar = document.getElementById('sidebarDesktop');
