@@ -152,7 +152,9 @@ body::before {
  display: flex;
  flex-direction: column;
  flex-shrink: 0;
- position: relative;
+ position: sticky;
+ top: 0;
+ max-height: 100vh;
  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -2661,20 +2663,18 @@ const Dashboard = {
  },
  
  toggleTema() {
-  const atual = document.documentElement.getAttribute('data-theme') || 'dark';
-  const novo = atual === 'dark' ? 'light' : 'dark';
-  
-  document.documentElement.setAttribute('data-theme', novo);
-  localStorage.setItem('dashboard-tema', novo);
-  this.atualizarIconeTema(novo);
-  
-  // Animação do botão
-  const btn = document.getElementById('themeToggle');
+  const body = document.body;
   const icon = document.getElementById('themeIcon');
-  if (btn && icon) {
+  
+  body.classList.toggle('light-theme');
+  
+  const tema = body.classList.contains('light-theme') ? 'light' : 'dark';
+  localStorage.setItem('dashboard-tema', tema);
+  
+  if (icon) {
    icon.style.transform = 'rotate(360deg) scale(0)';
    setTimeout(() => {
-    icon.textContent = novo === 'dark' ? '🌙' : '☀️';
+    icon.textContent = tema === 'dark' ? '🌙' : '☀️';
     icon.style.transform = 'rotate(0deg) scale(1)';
    }, 150);
   }
@@ -2724,140 +2724,252 @@ const Dashboard = {
   const btn = document.getElementById('pdfReportBtn');
   if (!btn) return;
   
+  const textoOriginal = btn.textContent;
   btn.classList.add('loading');
   btn.textContent = '⏳ Gerando...';
   
   try {
+   // Carrega jsPDF se necessário
+   if (!window.jspdf) {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    document.head.appendChild(script);
+    await new Promise(resolve => script.onload = resolve);
+   }
+   
    const { jsPDF } = window.jspdf;
    const pdf = new jsPDF('p', 'mm', 'a4');
    const pageWidth = pdf.internal.pageSize.getWidth();
    const pageHeight = pdf.internal.pageSize.getHeight();
    
-   // Pega dados da semana atual
+   // Filtra dados da semana
    const hoje = new Date();
-   const semanaAtual = this.dados.filter(d => {
-    const diff = Math.floor((hoje - d.data) / (1000 * 60 * 60 * 24));
-    return diff <= 7 && diff >= 0;
-   });
+   const umaSemanaAtras = new Date(hoje);
+   umaSemanaAtras.setDate(hoje.getDate() - 7);
    
-   if (semanaAtual.length === 0) {
-    alert('Sem dados da última semana para gerar relatório');
+   const dadosSemana = this.dados.filter(d => d.data >= umaSemanaAtras && d.data <= hoje);
+   
+   if (dadosSemana.length === 0) {
+    alert('Sem dados da última semana');
+    btn.classList.remove('loading');
+    btn.textContent = textoOriginal;
     return;
    }
    
-   // Cálculos
-   const totalPontos = semanaAtual.reduce((sum, d) => sum + d.pontos, 0);
-   const totalTrades = semanaAtual.reduce((sum, d) => sum + d.trades, 0);
-   const gains = semanaAtual.reduce((sum, d) => sum + d.gain, 0);
-   const stops = semanaAtual.reduce((sum, d) => sum + d.stop, 0);
-   const zeros = semanaAtual.reduce((sum, d) => sum + d.zero, 0);
+   // Stats
+   const totalPontos = dadosSemana.reduce((acc, d) => acc + d.pontos, 0);
+   const totalTrades = dadosSemana.reduce((acc, d) => acc + d.trades, 0);
+   const gains = dadosSemana.reduce((acc, d) => acc + d.gain, 0);
+   const stops = dadosSemana.reduce((acc, d) => acc + d.stop, 0);
+   const zeros = dadosSemana.reduce((acc, d) => acc + d.zero, 0);
    const winRate = totalTrades > 0 ? Math.round((gains / totalTrades) * 100) : 0;
-   const melhorDia = Math.max(...semanaAtual.map(d => d.pontos));
-   const piorDia = Math.min(...semanaAtual.map(d => d.pontos));
    
-   // Header
-   pdf.setFillColor(99, 102, 241);
-   pdf.rect(0, 0, pageWidth, 40, 'F');
+   // ========== HEADER AZUL ESCURO ==========
+   pdf.setFillColor(15, 23, 42); // Fundo azul escuro
+   pdf.rect(0, 0, pageWidth, 65, 'F');
+   
+   // Logo texto "Mentoria NasdaqPro"
+   pdf.setTextColor(200, 200, 200);
+   pdf.setFontSize(10);
+   pdf.text('Mentoria', pageWidth - 45, 12);
+   pdf.setTextColor(251, 191, 36); // Amarelo/dourado
+   pdf.setFontSize(12);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('NasdaqPro', pageWidth - 45, 18);
+   
+   // Título RESUMO SEMANAL
    pdf.setTextColor(255, 255, 255);
-   pdf.setFontSize(24);
+   pdf.setFontSize(28);
    pdf.setFont(undefined, 'bold');
-   pdf.text('RELATÓRIO SEMANAL', pageWidth / 2, 20, { align: 'center' });
-   pdf.setFontSize(12);
-   pdf.setFont(undefined, 'normal');
-   pdf.text(`${semanaAtual[0].dia} até ${semanaAtual[semanaAtual.length-1].dia}`, pageWidth / 2, 30, { align: 'center' });
+   pdf.text('RESUMO SEMANAL', pageWidth / 2, 45, { align: 'center' });
    
-   // Reset color
-   pdf.setTextColor(0, 0, 0);
-   let y = 55;
-   
-   // KPIs principais
-   pdf.setFontSize(16);
+   // ========== DASHBOARD DE TRADING ==========
+   let y = 75;
+   pdf.setFillColor(15, 23, 42);
+   pdf.rect(0, y, pageWidth, 15, 'F');
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(14);
    pdf.setFont(undefined, 'bold');
-   pdf.text('📊 RESUMO DA SEMANA', 20, y);
-   y += 15;
+   pdf.text('Dashboard de Trading', 15, y + 10);
    
-   pdf.setFontSize(12);
-   pdf.setFont(undefined, 'normal');
+   // Performance badge
+   const perfText = totalPontos >= 0 ? `Positiva (+${totalPontos})` : `Negativa (${totalPontos})`;
+   pdf.setFillColor(totalPontos >= 0 ? 16 : 239, totalPontos >= 0 ? 185 : 68, totalPontos >= 0 ? 129 : 68);
+   pdf.roundedRect(pageWidth - 65, y + 3, 50, 8, 2, 2, 'F');
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(8);
+   pdf.text(`● Performance: ${perfText}`, pageWidth - 63, y + 8);
    
+   // ========== KPIS EM CARDS ==========
+   y += 25;
    const kpis = [
-    ['Dias Operados', semanaAtual.length],
-    ['Total de Trades', totalTrades],
-    ['Pontos Totais', totalPontos > 0 ? `+${totalPontos}` : totalPontos],
-    ['Assertividade', `${winRate}%`],
-    ['Gains', gains],
-    ['Stops', stops],
-    ['Breakeven', zeros],
-    ['Melhor Dia', `+${melhorDia}`],
-    ['Pior Dia', piorDia]
+    { label: 'DIAS OPERADOS', value: dadosSemana.length, color: [59, 130, 246] },
+    { label: 'TOTAL DE TRADES', value: totalTrades, color: [168, 85, 247] },
+    { label: 'PONTOS TOTAIS', value: totalPontos, color: [16, 185, 129] },
+    { label: 'ASSERTIVIDADE', value: `${winRate}%`, color: [251, 146, 60] }
    ];
    
-   kpis.forEach(([label, value]) => {
-    pdf.setFont(undefined, 'bold');
-    pdf.text(label + ':', 25, y);
+   const cardWidth = 42;
+   const cardHeight = 28;
+   const gap = 5;
+   const startX = 15;
+   
+   kpis.forEach((kpi, idx) => {
+    const x = startX + (idx * (cardWidth + gap));
+    
+    // Card background
+    pdf.setFillColor(31, 41, 55);
+    pdf.roundedRect(x, y, cardWidth, cardHeight, 2, 2, 'F');
+    
+    // Barra colorida no topo
+    pdf.setFillColor(...kpi.color);
+    pdf.roundedRect(x, y, cardWidth, 2, 1, 1, 'F');
+    
+    // Label
+    pdf.setTextColor(148, 163, 184);
+    pdf.setFontSize(7);
     pdf.setFont(undefined, 'normal');
-    pdf.text(String(value), 85, y);
-    y += 8;
+    pdf.text(kpi.label, x + 3, y + 8);
+    
+    // Valor
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(18);
+    pdf.setFont(undefined, 'bold');
+    pdf.text(String(kpi.value), x + 3, y + 20);
    });
    
-   y += 10;
-   
-   // Tabela de operações
-   pdf.setFontSize(16);
+   // ========== TABELA DE OPERAÇÕES ==========
+   y += cardHeight + 15;
+   pdf.setFillColor(31, 41, 55);
+   pdf.roundedRect(15, y, pageWidth - 30, 10, 2, 2, 'FD');
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(11);
    pdf.setFont(undefined, 'bold');
-   pdf.text('📋 OPERAÇÕES DIÁRIAS', 20, y);
-   y += 12;
+   pdf.text('📋 Histórico Detalhado de Operações', 20, y + 7);
+   
+   y += 15;
    
    // Header da tabela
-   pdf.setFillColor(245, 245, 245);
-   pdf.rect(20, y - 7, pageWidth - 40, 10, 'F');
-   pdf.setFontSize(10);
+   pdf.setFillColor(31, 41, 55);
+   pdf.rect(15, y, pageWidth - 30, 8, 'F');
+   pdf.setTextColor(139, 146, 188); // Roxo claro
+   pdf.setFontSize(8);
    pdf.setFont(undefined, 'bold');
-   pdf.text('Data', 25, y);
-   pdf.text('Trades', 60, y);
-   pdf.text('Gains', 85, y);
-   pdf.text('Stops', 110, y);
-   pdf.text('0x0', 135, y);
-   pdf.text('Pontos', 155, y);
+   
+   const cols = [
+    { label: 'DATA', x: 20 },
+    { label: 'PONTOS', x: 50 },
+    { label: 'TRADES', x: 75 },
+    { label: 'GAIN', x: 95 },
+    { label: 'STOP', x: 115 },
+    { label: '0X0', x: 135 },
+    { label: 'ATIVO', x: 155 },
+    { label: 'SEMANA', x: 175 }
+   ];
+   
+   cols.forEach(col => pdf.text(col.label, col.x, y + 5));
    y += 10;
    
+   // Linhas de dados
    pdf.setFont(undefined, 'normal');
-   semanaAtual.forEach((dia, idx) => {
-    if (idx % 2 === 0) {
-     pdf.setFillColor(250, 250, 250);
-     pdf.rect(20, y - 7, pageWidth - 40, 10, 'F');
+   dadosSemana.forEach((dia, idx) => {
+    // Zebra striping
+    if (idx % 2 === 1) {
+     pdf.setFillColor(20, 26, 38);
+     pdf.rect(15, y - 2, pageWidth - 30, 7, 'F');
     }
     
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(dia.dia, 25, y);
-    pdf.text(String(dia.trades), 60, y);
+    // Data
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(dia.dia, 20, y + 3);
+    
+    // Pontos (colorido)
+    const pontosColor = dia.pontos > 0 ? [16, 185, 129] : dia.pontos < 0 ? [239, 68, 68] : [148, 163, 184];
+    pdf.setTextColor(...pontosColor);
+    pdf.setFont(undefined, 'bold');
+    pdf.text((dia.pontos > 0 ? '+' : '') + dia.pontos, 50, y + 3);
+    pdf.setFont(undefined, 'normal');
+    
+    // Trades
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(String(dia.trades), 75, y + 3);
+    
+    // Gain (verde)
     pdf.setTextColor(16, 185, 129);
-    pdf.text(String(dia.gain), 85, y);
+    pdf.text(String(dia.gain), 95, y + 3);
+    
+    // Stop (vermelho)
     pdf.setTextColor(239, 68, 68);
-    pdf.text(String(dia.stop), 110, y);
+    pdf.text(String(dia.stop), 115, y + 3);
+    
+    // 0x0 (amarelo)
     pdf.setTextColor(251, 191, 36);
-    pdf.text(String(dia.zero), 135, y);
+    pdf.text(String(dia.zero), 135, y + 3);
     
-    pdf.setTextColor(dia.pontos >= 0 ? 16 : 239, dia.pontos >= 0 ? 185 : 68, dia.pontos >= 0 ? 129 : 68);
-    pdf.text((dia.pontos >= 0 ? '+' : '') + dia.pontos, 155, y);
+    // Ativo
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(dia.ativo || 'NASDAQ', 155, y + 3);
     
-    y += 10;
+    // Semana
+    pdf.text(dia.semana || '-', 175, y + 3);
+    
+    y += 7;
    });
    
-   // Footer
-   pdf.setTextColor(150, 150, 150);
+   // Linha TOTAL
+   y += 3;
+   pdf.setFillColor(59, 130, 246);
+   pdf.rect(15, y - 2, pageWidth - 30, 8, 'F');
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(9);
+   pdf.setFont(undefined, 'bold');
+   pdf.text('TOTAL', 20, y + 3);
+   pdf.text(String(totalPontos), 50, y + 3);
+   pdf.text(String(totalTrades), 75, y + 3);
+   pdf.text(String(gains), 95, y + 3);
+   pdf.text(String(stops), 115, y + 3);
+   pdf.text(String(zeros), 135, y + 3);
+   
+   // ========== CALENDÁRIO MENSAL (mini) ==========
+   y += 18;
+   if (y < pageHeight - 50) {
+    pdf.setFillColor(31, 41, 55);
+    pdf.roundedRect(15, y, pageWidth - 30, 8, 2, 2, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(10);
+    pdf.setFont(undefined, 'bold');
+    
+    const mesAtual = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    pdf.text(`📅 ${mesAtual.charAt(0).toUpperCase() + mesAtual.slice(1)}`, 20, y + 6);
+    
+    // Nota: Calendário visual completo seria muito complexo aqui
+    // Deixando apenas o header como indicador
+   }
+   
+   // ========== FOOTER ==========
+   pdf.setTextColor(100, 116, 139);
    pdf.setFontSize(8);
-   pdf.text(`Gerado em ${new Date().toLocaleString('pt-BR')}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-   pdf.text('NASDAQ PRO Trading Dashboard', pageWidth / 2, pageHeight - 5, { align: 'center' });
+   pdf.setFont(undefined, 'normal');
+   pdf.text(`← Voltar`, 15, pageHeight - 10);
+   pdf.text(`Gerado em ${hoje.toLocaleString('pt-BR')}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
    
    // Salvar
-   pdf.save(`relatorio-semanal-${hoje.toISOString().split('T')[0]}.pdf`);
+   const nomeArquivo = `resumo-semanal-${hoje.toISOString().split('T')[0]}.pdf`;
+   pdf.save(nomeArquivo);
+   
+   btn.textContent = '✅ PDF Gerado!';
+   setTimeout(() => {
+    btn.textContent = textoOriginal;
+    btn.classList.remove('loading');
+   }, 2000);
    
   } catch (erro) {
    console.error('Erro ao gerar PDF:', erro);
-   alert('Erro ao gerar relatório. Tente novamente.');
-  } finally {
-   btn.classList.remove('loading');
-   btn.textContent = '📄 Relatório';
+   btn.textContent = '❌ Erro';
+   setTimeout(() => {
+    btn.textContent = textoOriginal;
+    btn.classList.remove('loading');
+   }, 2000);
   }
  },
  
@@ -2892,21 +3004,6 @@ const Dashboard = {
   }
  },
  
- toggleTema() {
-  const body = document.body;
-  const icon = document.getElementById('themeIcon');
-  
-  body.classList.toggle('light-theme');
-  
-  if (body.classList.contains('light-theme')) {
-   if (icon) icon.textContent = '☀️';
-   localStorage.setItem('dashboard-tema', 'light');
-  } else {
-   if (icon) icon.textContent = '🌙';
-   localStorage.setItem('dashboard-tema', 'dark');
-  }
- },
- 
  inicializarGestosMobile() {
   const mainContent = document.querySelector('.main-content');
   if (!mainContent) return;
@@ -2938,105 +3035,6 @@ const Dashboard = {
     this.mudarAba('mercado');
    }
   }, {passive: true});
- },
- 
- async gerarRelatorioPDF() {
-  const btn = document.getElementById('pdfReportBtn');
-  if (!btn) return;
-  
-  const textoOriginal = btn.textContent;
-  btn.textContent = '⏳ Gerando...';
-  btn.classList.add('loading');
-  
-  try {
-   // Carrega jsPDF se ainda não estiver carregado
-   if (!window.jspdf) {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    document.head.appendChild(script);
-    await new Promise(resolve => script.onload = resolve);
-   }
-   
-   const { jsPDF } = window.jspdf;
-   const doc = new jsPDF();
-   
-   // Dados da última semana
-   const hoje = new Date();
-   const umaSemanaAtras = new Date(hoje);
-   umaSemanaAtras.setDate(hoje.getDate() - 7);
-   
-   const dadosSemana = this.dados.filter(d => d.data >= umaSemanaAtras && d.data <= hoje);
-   
-   // Calcula stats
-   const totalPontos = dadosSemana.reduce((acc, d) => acc + d.pontos, 0);
-   const totalTrades = dadosSemana.reduce((acc, d) => acc + d.trades, 0);
-   const gains = dadosSemana.reduce((acc, d) => acc + d.gain, 0);
-   const stops = dadosSemana.reduce((acc, d) => acc + d.stop, 0);
-   const winRate = totalTrades > 0 ? ((gains / totalTrades) * 100).toFixed(1) : 0;
-   
-   // Título
-   doc.setFontSize(22);
-   doc.setTextColor(99, 102, 241);
-   doc.text('Relatório Semanal - Trading', 20, 20);
-   
-   doc.setFontSize(11);
-   doc.setTextColor(100);
-   doc.text(`${umaSemanaAtras.toLocaleDateString('pt-BR')} a ${hoje.toLocaleDateString('pt-BR')}`, 20, 28);
-   
-   // Stats
-   doc.setFontSize(14);
-   doc.setTextColor(0);
-   doc.text('Resumo da Semana', 20, 42);
-   
-   doc.setFontSize(11);
-   let y = 52;
-   [
-    `Dias Operados: ${dadosSemana.length}`,
-    `Total de Trades: ${totalTrades}`,
-    `Pontos Totais: ${totalPontos > 0 ? '+' : ''}${totalPontos}`,
-    `Assertividade: ${winRate}%`,
-    `Gains: ${gains} | Stops: ${stops}`
-   ].forEach(stat => { doc.text(stat, 25, y); y += 8; });
-   
-   // Tabela
-   y += 10;
-   doc.setFontSize(12);
-   doc.text('Operações', 20, y);
-   y += 8;
-   
-   doc.setFontSize(9);
-   doc.text('Data', 20, y);
-   doc.text('Pontos', 60, y);
-   doc.text('Trades', 95, y);
-   doc.text('G', 125, y);
-   doc.text('S', 145, y);
-   doc.text('0x0', 165, y);
-   
-   dadosSemana.forEach(d => {
-    y += 6;
-    doc.text(d.dia, 20, y);
-    doc.text(d.pontos.toString(), 60, y);
-    doc.text(d.trades.toString(), 95, y);
-    doc.text(d.gain.toString(), 125, y);
-    doc.text(d.stop.toString(), 145, y);
-    doc.text(d.zero.toString(), 165, y);
-   });
-   
-   // Footer
-   doc.setFontSize(8);
-   doc.setTextColor(150);
-   doc.text('NASDAQ PRO Trading Dashboard', 20, 285);
-   
-   doc.save(`relatorio-${hoje.toISOString().split('T')[0]}.pdf`);
-   
-   btn.textContent = '✅ PDF Gerado!';
-   setTimeout(() => { btn.textContent = textoOriginal; btn.classList.remove('loading'); }, 2000);
-   
-  } catch (erro) {
-   console.error('Erro PDF:', erro);
-   btn.textContent = '❌ Erro';
-   setTimeout(() => { btn.textContent = textoOriginal; btn.classList.remove('loading'); }, 2000);
-  }
  },
  
  async carregarDados() {
