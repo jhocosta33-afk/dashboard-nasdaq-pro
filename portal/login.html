@@ -262,13 +262,26 @@ form.addEventListener('submit', async (e) => {
     const userDoc = await db.collection('users').doc(user.uid).get();
 
     if (!userDoc.exists) {
-      throw new Error('Usuário não encontrado no banco de dados');
+      // Se não existe no Firestore, cria agora
+      await db.collection('users').doc(user.uid).set({
+        nome: user.displayName || user.email.split('@')[0],
+        email: user.email,
+        role: 'aluno',
+        aprovado: false,
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      mostrarAlerta('⏳ Conta criada. Aguarde aprovação do administrador.', 'warning');
+      await auth.signOut();
+      btnLogin.disabled = false;
+      btnLogin.textContent = 'Entrar';
+      return;
     }
 
     const userData = userDoc.data();
 
     // Verifica se é admin
     if (userData.role === 'admin') {
+      // Admin sempre tem acesso
       window.location.href = 'admin.html';
       return;
     }
