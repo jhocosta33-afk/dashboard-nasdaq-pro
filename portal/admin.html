@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Admin | Dashboard NASDAQ PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+  --bg: #020617;
+  --card: #0f172a;
+  --border: rgba(255,255,255,.1);
+  --text: #e5e7eb;
+  --text-muted: #94a3b8;
+  --accent: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --orange: #f97316;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo { font-size: 24px; }
+
+h1 {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.btn-logout {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-logout:hover { opacity: 0.8; }
+
+/* MAIN CONTAINER */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  white-space: nowrap;
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tab:hover { color: var(--text); }
+
+/* SECTION */
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+/* CARDS */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* FORMS */
+.form-group {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+input, textarea, select {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text);
+  font-family: inherit;
+  transition: all .2s;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.08);
+}
+
+.btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn:hover {
+  background: #16a34a;
+  transform: scale(1.02);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: var(--blue);
+}
+
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+}
+
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th {
+  text-align: left;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge.pending {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.badge.approved {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--accent);
+}
+
+.badge.admin {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--blue);
+}
+
+/* POSTS LIST */
+.posts-list {
+  display: grid;
+  gap: 16px;
+}
+
+.post-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+}
+
+.post-image {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.post-content {
+  flex: 1;
+}
+
+.post-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.post-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.post-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.post-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* UPLOAD PREVIEW */
+.upload-preview {
+  margin-top: 12px;
+  display: none;
+}
+
+.upload-preview img {
+  max-width: 200px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+/* ALERT */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  display: none;
+}
+
+.alert.success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--accent);
+}
+
+.alert.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--red);
+}
+
+/* LOADING */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .container { padding: 16px; }
+  .tabs { padding-bottom: 8px; }
+  .post-item { flex-direction: column; }
+  .post-image { width: 100%; height: 160px; }
+  table { font-size: 12px; }
+  th, td { padding: 8px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="logo">👑</span>
+    <h1>Painel Admin</h1>
+  </div>
+  <div class="user-info">
+    <span id="adminName">Admin</span>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<div class="container">
+  
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('posts')">📝 Posts</button>
+    <button class="tab" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
+    <button class="tab" onclick="switchTab('dashboard')">📊 Dashboard Mercado</button>
+  </div>
+
+  <!-- SEÇÃO: POSTS -->
+  <div id="posts-section" class="section active">
+    <div class="card">
+      <h2>✨ Criar Novo Post</h2>
+      
+      <div id="alert-post" class="alert"></div>
+
+      <form id="formPost">
+        <div class="form-group">
+          <label for="postTitulo">Título</label>
+          <input type="text" id="postTitulo" placeholder="Ex: Análise semanal do NASDAQ" required>
+        </div>
+
+        <div class="form-group">
+          <label for="postTexto">Texto</label>
+          <textarea id="postTexto" placeholder="Escreva o conteúdo do post..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="postCategoria">Categoria</label>
+          <select id="postCategoria">
+            <option value="analise">📈 Análise</option>
+            <option value="tutorial">🎓 Tutorial</option>
+            <option value="noticia">📰 Notícia</option>
+            <option value="link">🔗 Link Útil</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="postLink">Link (opcional)</label>
+          <input type="url" id="postLink" placeholder="https://exemplo.com">
+        </div>
+
+        <div class="form-group">
+          <label for="postImagemURL">URL da Imagem (opcional)</label>
+          <input type="url" id="postImagemURL" placeholder="https://exemplo.com/imagem.jpg">
+          <small style="color: var(--text-muted); font-size: 12px; display: block; margin-top: 4px;">
+            Cole o link de uma imagem da internet (ex: do Imgur, Google Drive público, etc)
+          </small>
+        </div>
+
+        <button type="submit" class="btn" id="btnPost">Publicar Post</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>📚 Posts Publicados</h2>
+      <div id="posts-list" class="posts-list">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Carregando posts...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: APROVAÇÕES -->
+  <div id="aprovacoes-section" class="section">
+    <div class="card">
+      <h2>👥 Alunos Pendentes</h2>
+      <div id="alert-aprovacao" class="alert"></div>
+      <div id="usuarios-pendentes">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Carregando usuários...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>✅ Alunos Aprovados</h2>
+      <div id="usuarios-aprovados">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Carregando usuários...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: DASHBOARD MERCADO -->
+  <div id="dashboard-section" class="section">
+    <div class="card">
+      <h2>📊 Dashboard do Mercado</h2>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">
+        Acesse o dashboard público de mercado
+      </p>
+      <a href="mercado.html" target="_blank" class="btn">
+        Abrir Dashboard NASDAQ
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+// ══════════════════════════════════════════════
+// VERIFICAÇÃO DE ACESSO
+// ══════════════════════════════════════════════
+verificarAutenticacao(async (user) => {
+  const isAdmin = await verificarAdmin(user.uid);
+  if (!isAdmin) {
+    alert('❌ Acesso negado. Apenas administradores.');
+    auth.signOut();
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  document.getElementById('adminName').textContent = user.displayName || user.email;
+  carregarPosts();
+  carregarUsuarios();
+});
+
+// ══════════════════════════════════════════════
+// FUNÇÕES AUXILIARES
+// ══════════════════════════════════════════════
+function switchTab(tabName) {
+  // Atualiza tabs
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  // Atualiza sections
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`${tabName}-section`).classList.add('active');
+}
+
+function logout() {
+  if (confirm('Deseja realmente sair?')) {
+    auth.signOut();
+    window.location.href = 'login.html';
+  }
+}
+
+function mostrarAlerta(id, mensagem, tipo) {
+  const alert = document.getElementById(id);
+  alert.textContent = mensagem;
+  alert.className = `alert ${tipo}`;
+  alert.style.display = 'block';
+  setTimeout(() => alert.style.display = 'none', 5000);
+}
+
+// ══════════════════════════════════════════════
+// POSTS
+// ══════════════════════════════════════════════
+
+document.getElementById('formPost').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const btnPost = document.getElementById('btnPost');
+  btnPost.disabled = true;
+  btnPost.textContent = 'Publicando...';
+
+  try {
+    const imagemURL = document.getElementById('postImagemURL').value.trim() || null;
+
+    // Salva post no Firestore
+    await db.collection('posts').add({
+      titulo: document.getElementById('postTitulo').value,
+      texto: document.getElementById('postTexto').value,
+      categoria: document.getElementById('postCategoria').value,
+      link: document.getElementById('postLink').value || null,
+      imagemURL: imagemURL,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+      autor: auth.currentUser.displayName || 'Admin'
+    });
+
+    mostrarAlerta('alert-post', '✅ Post publicado com sucesso!', 'success');
+    
+    // Limpa form
+    document.getElementById('formPost').reset();
+    
+    // Recarrega lista
+    carregarPosts();
+
+  } catch (error) {
+    console.error('Erro ao publicar:', error);
+    mostrarAlerta('alert-post', '❌ Erro ao publicar post', 'error');
+  }
+
+  btnPost.disabled = false;
+  btnPost.textContent = 'Publicar Post';
+});
+
+async function carregarPosts() {
+  const container = document.getElementById('posts-list');
+  
+  try {
+    const snapshot = await db.collection('posts')
+      .orderBy('criadoEm', 'desc')
+      .limit(20)
+      .get();
+
+    if (snapshot.empty) {
+      container.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Nenhum post publicado ainda.</p>';
+      return;
+    }
+
+    let html = '';
+    snapshot.forEach(doc => {
+      const post = doc.data();
+      const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Agora';
+      
+      html += `
+        <div class="post-item">
+          ${post.imagemURL ? `<img src="${post.imagemURL}" class="post-image" alt="${post.titulo}">` : ''}
+          <div class="post-content">
+            <div class="post-title">${post.titulo}</div>
+            <div class="post-text">${post.texto.substring(0, 150)}${post.texto.length > 150 ? '...' : ''}</div>
+            <div class="post-meta">
+              📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor}
+            </div>
+            <div class="post-actions">
+              <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">Excluir</button>
+            </div>
+          </div>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('Erro ao carregar posts:', error);
+    container.innerHTML = '<p style="color:var(--red)">Erro ao carregar posts</p>';
+  }
+}
+
+async function deletarPost(postId) {
+  if (!confirm('Deseja realmente excluir este post?')) return;
+
+  try {
+    await db.collection('posts').doc(postId).delete();
+    mostrarAlerta('alert-post', '✅ Post excluído', 'success');
+    carregarPosts();
+  } catch (error) {
+    console.error('Erro ao excluir:', error);
+    mostrarAlerta('alert-post', '❌ Erro ao excluir post', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════
+// USUÁRIOS
+// ══════════════════════════════════════════════
+async function carregarUsuarios() {
+  try {
+    const snapshot = await db.collection('users').get();
+    
+    let pendentes = '';
+    let aprovados = '';
+    
+    snapshot.forEach(doc => {
+      const user = doc.data();
+      if (user.role === 'admin') return;
+      
+      const html = `
+        <tr>
+          <td>${user.nome}</td>
+          <td>${user.email}</td>
+          <td><span class="badge ${user.aprovado ? 'approved' : 'pending'}">${user.aprovado ? 'Aprovado' : 'Pendente'}</span></td>
+          <td>
+            ${!user.aprovado ? `
+              <button class="btn btn-sm" onclick="aprovarUsuario('${doc.id}')">Aprovar</button>
+              <button class="btn btn-sm btn-danger" onclick="rejeitarUsuario('${doc.id}')">Rejeitar</button>
+            ` : `
+              <button class="btn btn-sm btn-danger" onclick="revogarAprovacao('${doc.id}')">Revogar</button>
+            `}
+          </td>
+        </tr>`;
+      
+      if (user.aprovado) {
+        aprovados += html;
+      } else {
+        pendentes += html;
+      }
+    });
+
+    document.getElementById('usuarios-pendentes').innerHTML = pendentes
+      ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${pendentes}</tbody></table>`
+      : '<p style="text-align:center;color:var(--text-muted)">Nenhum usuário pendente</p>';
+
+    document.getElementById('usuarios-aprovados').innerHTML = aprovados
+      ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${aprovados}</tbody></table>`
+      : '<p style="text-align:center;color:var(--text-muted)">Nenhum aluno aprovado ainda</p>';
+
+  } catch (error) {
+    console.error('Erro ao carregar usuários:', error);
+  }
+}
+
+async function aprovarUsuario(uid) {
+  try {
+    await db.collection('users').doc(uid).update({ aprovado: true });
+    mostrarAlerta('alert-aprovacao', '✅ Usuário aprovado!', 'success');
+    carregarUsuarios();
+  } catch (error) {
+    console.error('Erro:', error);
+    mostrarAlerta('alert-aprovacao', '❌ Erro ao aprovar', 'error');
+  }
+}
+
+async function rejeitarUsuario(uid) {
+  if (!confirm('Deseja rejeitar este usuário? Ele será excluído.')) return;
+  
+  try {
+    await db.collection('users').doc(uid).delete();
+    mostrarAlerta('alert-aprovacao', '✅ Usuário rejeitado', 'success');
+    carregarUsuarios();
+  } catch (error) {
+    console.error('Erro:', error);
+    mostrarAlerta('alert-aprovacao', '❌ Erro ao rejeitar', 'error');
+  }
+}
+
+async function revogarAprovacao(uid) {
+  if (!confirm('Deseja revogar a aprovação deste usuário?')) return;
+  
+  try {
+    await db.collection('users').doc(uid).update({ aprovado: false });
+    mostrarAlerta('alert-aprovacao', '✅ Aprovação revogada', 'success');
+    carregarUsuarios();
+  } catch (error) {
+    console.error('Erro:', error);
+    mostrarAlerta('alert-aprovacao', '❌ Erro ao revogar', 'error');
+  }
+}
+</script>
+
+</body>
+</html>
