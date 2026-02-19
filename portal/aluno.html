@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Área do Aluno | Dashboard NASDAQ PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+  --bg: #020617;
+  --card: #0f172a;
+  --border: rgba(255,255,255,.1);
+  --text: #e5e7eb;
+  --text-muted: #94a3b8;
+  --accent: #22c55e;
+  --blue: #3b82f6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo { font-size: 24px; }
+
+h1 {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.btn-logout {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-logout:hover {
+  background: var(--border);
+}
+
+/* CONTAINER */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* WELCOME BANNER */
+.welcome-banner {
+  background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.welcome-banner h2 {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.welcome-banner p {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+/* QUICK ACCESS */
+.quick-access {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.quick-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all .3s;
+  text-align: center;
+}
+
+.quick-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.quick-card-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.quick-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.quick-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* SECTION HEADER */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.filter-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+
+/* POSTS GRID */
+.posts-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.post-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all .3s;
+}
+
+.post-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.post-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: rgba(255,255,255,0.05);
+}
+
+.post-content {
+  padding: 20px;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.post-category {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(34,197,94,0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.post-date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.post-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.post-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.post-footer {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+  display: inline-block;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+}
+
+.btn-primary:hover {
+  background: #16a34a;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* LOADING */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .container { padding: 16px; }
+  .welcome-banner { padding: 24px; }
+  .welcome-banner h2 { font-size: 24px; }
+  .quick-access { grid-template-columns: 1fr; }
+  .section-header { flex-direction: column; align-items: start; gap: 12px; }
+  .filter-buttons { width: 100%; overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="logo">🧑‍🎓</span>
+    <h1>Área do Aluno</h1>
+  </div>
+  <div class="user-info">
+    <span id="userName">Aluno</span>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<div class="container">
+  
+  <!-- BANNER BEM-VINDO -->
+  <div class="welcome-banner">
+    <h2>Bem-vindo de volta! 👋</h2>
+    <p>Confira as últimas análises e conteúdos exclusivos</p>
+  </div>
+
+  <!-- ACESSO RÁPIDO -->
+  <div class="quick-access">
+    <div class="quick-card" onclick="location.href='mercado.html'">
+      <div class="quick-card-icon">📊</div>
+      <h3>Dashboard NASDAQ</h3>
+      <p>Mercado em tempo real</p>
+    </div>
+
+    <div class="quick-card" onclick="scrollToSection('posts')">
+      <div class="quick-card-icon">📚</div>
+      <h3>Conteúdos</h3>
+      <p>Análises e tutoriais</p>
+    </div>
+
+    <div class="quick-card" onclick="scrollToSection('posts')">
+      <div class="quick-card-icon">🔗</div>
+      <h3>Links Úteis</h3>
+      <p>Recursos e ferramentas</p>
+    </div>
+  </div>
+
+  <!-- POSTS -->
+  <div class="section-header" id="posts">
+    <h2>📰 Últimas Publicações</h2>
+    <div class="filter-buttons">
+      <button class="filter-btn active" onclick="filtrarPosts('todos')">Todos</button>
+      <button class="filter-btn" onclick="filtrarPosts('analise')">Análises</button>
+      <button class="filter-btn" onclick="filtrarPosts('tutorial')">Tutoriais</button>
+      <button class="filter-btn" onclick="filtrarPosts('noticia')">Notícias</button>
+      <button class="filter-btn" onclick="filtrarPosts('link')">Links</button>
+    </div>
+  </div>
+
+  <div id="posts-container" class="posts-grid">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando conteúdos...</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+// ══════════════════════════════════════════════
+// VERIFICAÇÃO DE ACESSO
+// ══════════════════════════════════════════════
+verificarAutenticacao(async (user) => {
+  const aprovado = await verificarAprovacao(user.uid);
+  if (!aprovado) {
+    alert('❌ Sua conta ainda não foi aprovada pelo administrador.');
+    auth.signOut();
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  document.getElementById('userName').textContent = user.displayName || 'Aluno';
+  carregarPosts();
+});
+
+// ══════════════════════════════════════════════
+// FUNÇÕES AUXILIARES
+// ══════════════════════════════════════════════
+function logout() {
+  if (confirm('Deseja realmente sair?')) {
+    auth.signOut();
+    window.location.href = 'login.html';
+  }
+}
+
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════════
+// POSTS
+// ══════════════════════════════════════════════
+let todosOsPosts = [];
+let categoriaAtual = 'todos';
+
+const categoriaIcons = {
+  analise: '📈',
+  tutorial: '🎓',
+  noticia: '📰',
+  link: '🔗'
+};
+
+async function carregarPosts() {
+  const container = document.getElementById('posts-container');
+  
+  try {
+    const snapshot = await db.collection('posts')
+      .orderBy('criadoEm', 'desc')
+      .limit(50)
+      .get();
+
+    if (snapshot.empty) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <h3>Nenhum conteúdo publicado ainda</h3>
+          <p>Os posts do administrador aparecerão aqui</p>
+        </div>`;
+      return;
+    }
+
+    todosOsPosts = [];
+    snapshot.forEach(doc => {
+      todosOsPosts.push({ id: doc.id, ...doc.data() });
+    });
+
+    renderizarPosts();
+
+  } catch (error) {
+    console.error('Erro ao carregar posts:', error);
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">⚠️</div>
+        <h3>Erro ao carregar conteúdos</h3>
+        <p>Tente recarregar a página</p>
+      </div>`;
+  }
+}
+
+function renderizarPosts() {
+  const container = document.getElementById('posts-container');
+  
+  const postsFiltrados = categoriaAtual === 'todos'
+    ? todosOsPosts
+    : todosOsPosts.filter(p => p.categoria === categoriaAtual);
+
+  if (postsFiltrados.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h3>Nenhum post nesta categoria</h3>
+        <p>Tente outra categoria</p>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  postsFiltrados.forEach(post => {
+    const data = post.criadoEm
+      ? post.criadoEm.toDate().toLocaleDateString('pt-BR', { 
+          day: '2-digit', 
+          month: 'short', 
+          year: 'numeric' 
+        })
+      : 'Agora';
+
+    const icon = categoriaIcons[post.categoria] || '📄';
+
+    html += `
+      <div class="post-card" data-categoria="${post.categoria}">
+        ${post.imagemURL ? `<img src="${post.imagemURL}" class="post-image" alt="${post.titulo}">` : ''}
+        <div class="post-content">
+          <div class="post-header">
+            <span class="post-category">${icon} ${post.categoria}</span>
+            <span class="post-date">${data}</span>
+          </div>
+          <h3 class="post-title">${post.titulo}</h3>
+          <p class="post-text">${post.texto}</p>
+          <div class="post-footer">
+            ${post.link ? `<a href="${post.link}" target="_blank" class="btn btn-primary">Acessar Link 🔗</a>` : ''}
+          </div>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function filtrarPosts(categoria) {
+  // Atualiza botões
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  categoriaAtual = categoria;
+  renderizarPosts();
+}
+</script>
+
+</body>
+</html>
