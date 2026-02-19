@@ -1,7 +1,6 @@
 // ============================================
 // CONFIGURAÇÃO DO FIREBASE
 // ============================================
-
 const firebaseConfig = {
   apiKey: "AIzaSyCABn9XHvjrFCbbeHT_0gHFaF5uGlKLUWM",
   authDomain: "dashboard-nasdaq-pro.firebaseapp.com",
@@ -17,10 +16,8 @@ firebase.initializeApp(firebaseConfig);
 // Exporta referências úteis
 const auth = firebase.auth();
 const db = firebase.firestore();
-// Storage desabilitado (requer plano pago)
-// const storage = firebase.storage();
 
-// Configurar persistência de sessão (login permanece após fechar navegador)
+// Configurar persistência de sessão
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
   .catch((error) => {
     console.error('Erro ao configurar persistência:', error);
@@ -39,16 +36,26 @@ function verificarAutenticacao(callback) {
 
 // Função auxiliar: Verificar se usuário foi aprovado
 async function verificarAprovacao(uid) {
-  const doc = await db.collection('users').doc(uid).get();
-  if (!doc.exists) return false;
-  return doc.data().aprovado === true;
+  try {
+    const doc = await db.collection('users').doc(uid).get();
+    if (!doc.exists) return false;
+    return doc.data().aprovado === true;
+  } catch (error) {
+    console.error('Erro ao verificar aprovação:', error);
+    return false;
+  }
 }
 
 // Função auxiliar: Verificar se é admin
 async function verificarAdmin(uid) {
-  const doc = await db.collection('users').doc(uid).get();
-  if (!doc.exists) return false;
-  return doc.data().role === 'admin';
+  try {
+    const doc = await db.collection('users').doc(uid).get();
+    if (!doc.exists) return false;
+    return doc.data().role === 'admin';
+  } catch (error) {
+    console.error('Erro ao verificar admin:', error);
+    return false;
+  }
 }
 
 console.log('✅ Firebase configurado e pronto para uso');
