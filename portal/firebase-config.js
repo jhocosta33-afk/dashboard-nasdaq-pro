@@ -20,6 +20,12 @@ const db = firebase.firestore();
 // Storage desabilitado (requer plano pago)
 // const storage = firebase.storage();
 
+// Configurar persistência de sessão (login permanece após fechar navegador)
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .catch((error) => {
+    console.error('Erro ao configurar persistência:', error);
+  });
+
 // Função auxiliar: Verificar se usuário está autenticado
 function verificarAutenticacao(callback) {
   auth.onAuthStateChanged(user => {
