@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Portal de Alunos | Dashboard NASDAQ PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+  --bg: #020617;
+  --card: #0f172a;
+  --border: rgba(255,255,255,.1);
+  --text: #e5e7eb;
+  --text-muted: #94a3b8;
+  --accent: #22c55e;
+  --blue: #3b82f6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+  text-align: center;
+}
+
+.logo {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+h1 {
+  font-size: 42px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: var(--text-muted);
+  margin-bottom: 48px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  transition: all .3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+.card:hover {
+  border-color: rgba(34, 197, 94, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.card p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:hover {
+  background: #16a34a;
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 48px;
+}
+
+.feature {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+}
+
+.feature-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.feature h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.feature p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.back-home {
+  display: inline-block;
+  margin-bottom: 32px;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all .2s;
+}
+
+.back-home:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  h1 { font-size: 32px; }
+  .subtitle { font-size: 16px; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .features { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="../" class="back-home">← Voltar ao Dashboard Principal</a>
+  
+  <div class="logo">🎓</div>
+  <h1>Portal de Alunos</h1>
+  <p class="subtitle">Área exclusiva com conteúdos e análises de mercado</p>
+
+  <div class="cards-grid">
+    
+    <!-- Card Área do Aluno -->
+    <div class="card" onclick="location.href='login.html'">
+      <div class="card-icon">🧑‍🎓</div>
+      <h2>Área do Aluno</h2>
+      <p>Login exclusivo para alunos aprovados. Acesse conteúdos, análises e material didático.</p>
+      <a href="login.html" class="btn">Fazer Login</a>
+    </div>
+
+    <!-- Card Cadastro -->
+    <div class="card" onclick="location.href='cadastro.html'">
+      <div class="card-icon">✨</div>
+      <h2>Novo por aqui?</h2>
+      <p>Cadastre-se e aguarde aprovação do administrador para acessar todo o conteúdo exclusivo.</p>
+      <a href="cadastro.html" class="btn btn-secondary">Criar Conta</a>
+    </div>
+
+    <!-- Card Dashboard NASDAQ -->
+    <div class="card" onclick="location.href='mercado.html'">
+      <div class="card-icon">📊</div>
+      <h2>Dashboard NASDAQ</h2>
+      <p>Acesse o mapa de ações e calendário econômico em tempo real disponível para todos.</p>
+      <a href="mercado.html" class="btn btn-secondary">Ver Dashboard</a>
+    </div>
+
+  </div>
+
+  <!-- Features -->
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">📈</div>
+      <h3>Análises Exclusivas</h3>
+      <p>Conteúdo profissional sobre o mercado</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎓</div>
+      <h3>Material Didático</h3>
+      <p>Tutoriais e guias completos</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔗</div>
+      <h3>Links Úteis</h3>
+      <p>Ferramentas e recursos selecionados</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <h3>Área Segura</h3>
+      <p>Login protegido com Firebase</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© 2025 Dashboard NASDAQ PRO • Portal de Alunos</p>
+  </div>
+</div>
+
+</body>
+</html>
