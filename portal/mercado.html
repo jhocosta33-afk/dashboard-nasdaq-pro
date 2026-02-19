@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Mercado | Dashboard NASDAQ PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+:root{
+  --bg:#020617;
+  --card:#0f172a;
+  --border:rgba(255,255,255,.1);
+  --text:#e5e7eb;
+  --text-muted:#94a3b8;
+  --accent:#22c55e;
+  --red:#ef4444;
+  --blue:#3b82f6;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding:16px;
+  min-height:100vh;
+}
+
+/* HEADER */
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.header-left { display:flex; align-items:center; gap:12px; }
+
+.icon-market {
+  font-size:28px;
+  animation:pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.1); }
+}
+
+h1 {
+  font-size:24px;
+  font-weight:700;
+  background:linear-gradient(135deg, var(--accent), var(--blue));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.status-bar {
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; color:var(--text-muted);
+}
+
+.status-dot {
+  width:8px; height:8px;
+  background:var(--accent);
+  border-radius:50%;
+  animation:blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,100%{ opacity:1; }
+  50%{ opacity:0.3; }
+}
+
+.voltar {
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:10px 20px;
+  border-radius:10px;
+  cursor:pointer;
+  color:var(--text);
+  text-decoration:none;
+  transition:all .3s ease;
+  font-size:14px; font-weight:500;
+  display:flex; align-items:center; gap:8px;
+}
+
+.voltar:hover {
+  background:var(--accent); color:#000;
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(34,197,94,0.3);
+}
+
+/* MAIN LAYOUT */
+.container {
+  display:grid;
+  grid-template-columns:1.4fr 1fr;
+  gap:20px;
+}
+
+.card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  height:calc(100vh - 150px);
+  display:flex;
+  flex-direction:column;
+  transition:all .3s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+.card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:2px;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity:0;
+  transition:opacity .3s ease;
+}
+
+.card:hover { border-color:rgba(34,197,94,0.3); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+.card:hover::before { opacity:1; }
+
+.card-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+
+.card h2 {
+  font-size:16px; font-weight:600;
+  color:var(--text);
+  display:flex; align-items:center; gap:8px;
+}
+
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(34,197,94,0.1);
+  color:var(--accent);
+  padding:4px 10px; border-radius:6px;
+  font-size:11px; font-weight:600;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+
+.widget-container {
+  flex:1; border-radius:12px;
+  overflow:hidden;
+  background:rgba(0,0,0,0.2);
+  position:relative;
+}
+
+iframe { width:100%; height:100%; border:none; }
+
+/* HEATMAP */
+.heatmap-scroll {
+  height:100%;
+  overflow-y:auto;
+  padding:8px;
+}
+
+.sector-group { margin-bottom:16px; }
+
+.sector-label {
+  font-size:10px; font-weight:700;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:8px;
+  padding:0 2px;
+}
+
+.heatmap-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));
+  gap:8px;
+}
+
+.heatmap-item {
+  border-radius:10px;
+  padding:12px;
+  cursor:pointer;
+  transition:all .25s ease;
+  min-height:100px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.heatmap-item:hover {
+  transform:scale(1.06);
+  z-index:10;
+  box-shadow:0 8px 24px rgba(0,0,0,0.5);
+  border-color:rgba(255,255,255,0.2);
+}
+
+.stock-symbol {
+  font-size:16px; font-weight:800;
+  color:#fff;
+  margin-bottom:2px;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+}
+
+.stock-name {
+  font-size:10px;
+  color:rgba(255,255,255,0.7);
+  margin-bottom:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.stock-price {
+  font-size:14px; font-weight:600;
+  color:#fff;
+  margin-bottom:4px;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+}
+
+.stock-change {
+  font-size:13px; font-weight:700;
+  color:#fff;
+  display:flex; align-items:center; gap:4px;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* LOADING / ERROR */
+.loading-container {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  height:100%; gap:16px;
+}
+
+.spinner {
+  width:40px; height:40px;
+  border:3px solid var(--border);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin { to{ transform:rotate(360deg); } }
+
+.loading-text { color:var(--text-muted); font-size:14px; }
+
+.error-box {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  height:100%; gap:12px; padding:20px; text-align:center;
+}
+
+.error-box .error-icon { font-size:32px; }
+.error-box p { color:var(--text-muted); font-size:13px; line-height:1.6; }
+
+.retry-btn {
+  background:var(--accent); color:#000;
+  border:none; padding:8px 20px;
+  border-radius:8px; cursor:pointer;
+  font-size:13px; font-weight:600;
+  transition:all .2s;
+}
+.retry-btn:hover { background:#16a34a; }
+
+/* FOOTER */
+.footer-info {
+  margin-top:12px; padding-top:12px;
+  border-top:1px solid var(--border);
+  display:flex; justify-content:space-between;
+  align-items:center;
+  font-size:11px; color:var(--text-muted);
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--accent); }
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .container { grid-template-columns:1fr; }
+  .card { height:calc(50vh - 80px); min-height:420px; }
+}
+
+@media(max-width:768px){
+  body { padding:12px; }
+  header { margin-bottom:16px; padding-bottom:12px; }
+  .header-left { flex:1; }
+  h1 { font-size:20px; }
+  .icon-market { font-size:24px; }
+  .status-bar { width:100%; order:3; padding-top:8px; border-top:1px solid var(--border); }
+  .voltar { padding:8px 16px; font-size:13px; }
+  .container { gap:16px; }
+  .card { height:calc(50vh - 60px); min-height:380px; padding:12px; }
+  .card h2 { font-size:14px; }
+  .badge { font-size:10px; padding:3px 8px; }
+  .heatmap-grid { grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:6px; }
+  .heatmap-item { min-height:90px; padding:10px; }
+  .footer-info { flex-direction:column; gap:6px; align-items:flex-start; font-size:10px; }
+}
+
+@media(max-width:480px){
+  h1 { font-size:18px; }
+  .card { min-height:340px; }
+  .heatmap-grid { grid-template-columns:repeat(auto-fill, minmax(95px, 1fr)); }
+  .heatmap-item { min-height:85px; padding:8px; }
+  .stock-symbol { font-size:14px; }
+}
+
+::selection { background:var(--accent); color:#000; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="icon-market">📊</span>
+    <h1>Mercado</h1>
+  </div>
+  <a href="index.html" class="voltar">← Dashboard</a>
+  <div class="status-bar">
+    <span class="status-dot"></span>
+    <span id="status-text">Carregando dados reais...</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- MAPA DE CALOR -->
+  <div class="card">
+    <div class="card-header">
+      <h2>🗺️ Mapa de Ações — NASDAQ 100</h2>
+      <span class="badge">● Tempo Real</span>
+    </div>
+    <div class="widget-container">
+      <div id="heatmap-container" class="heatmap-scroll">
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <div class="loading-text">Buscando cotações...</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-info">
+      <span id="api-source">💹 Buscando fonte...</span>
+      <span id="last-update">—</span>
+    </div>
+  </div>
+
+  <!-- CALENDÁRIO INVESTING.COM -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📅 Calendário Econômico</h2>
+      <span class="badge">● Hoje</span>
+    </div>
+    <div class="widget-container">
+      <iframe
+        id="calendar"
+        src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&countries=5,72,37,25,17,10,32,6,35,26,12,4,7&calType=day&timeZone=12&lang=12"
+        loading="lazy">
+      </iframe>
+    </div>
+    <div class="footer-info">
+      <span>📊 Investing.com • Eventos de Hoje</span>
+      <span>🔄 Atualiza a cada 2 min</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  AÇÕES POR SETOR
+// ─────────────────────────────────────────────
+const sectors = {
+  'Technology':    ['AAPL','MSFT','NVDA','AVGO','ORCL','ADBE','CSCO','AMD','QCOM','TXN','INTC','INTU'],
+  'Communication': ['GOOGL','META','NFLX','CMCSA'],
+  'Consumer':      ['AMZN','TSLA','COST','SBUX'],
+  'Healthcare':    ['AMGN','GILD'],
+  'Financial':     ['PYPL'],
+  'Defensive':     ['PEP']
+};
+
+const allSymbols = Object.values(sectors).flat();
+
+const stockNames = {
+  AAPL:'Apple',    MSFT:'Microsoft', NVDA:'NVIDIA',     GOOGL:'Alphabet',
+  AMZN:'Amazon',   META:'Meta',      TSLA:'Tesla',       AVGO:'Broadcom',
+  COST:'Costco',   NFLX:'Netflix',   AMD:'AMD',          PEP:'PepsiCo',
+  ADBE:'Adobe',    CSCO:'Cisco',     INTC:'Intel',       CMCSA:'Comcast',
+  ORCL:'Oracle',   QCOM:'Qualcomm',  AMGN:'Amgen',       GILD:'Gilead',
+  PYPL:'PayPal',   SBUX:'Starbucks', TXN:'Texas Inst.',  INTU:'Intuit'
+};
+
+// ─────────────────────────────────────────────
+//  FONTES DE DADOS
+// ─────────────────────────────────────────────
+
+// Fonte A: Yahoo Finance via corsproxy.io
+async function fetchYahoo(symbol) {
+  const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`;
+  const url  = `https://corsproxy.io/?${encodeURIComponent(yUrl)}`;
+  const res  = await fetch(url, { signal: AbortSignal.timeout(7000) });
+  const data = await res.json();
+  const meta = data.chart.result[0].meta;
+  const prev = meta.chartPreviousClose;
+  const curr = meta.regularMarketPrice;
+  const chg  = curr - prev;
+  return {
+    symbol, name: stockNames[symbol] || symbol,
+    price: curr.toFixed(2),
+    change: chg.toFixed(2),
+    changePercent: ((chg/prev)*100).toFixed(2)
+  };
+}
+
+// Fonte B: Stooq via corsproxy.io (CSV aberto)
+async function fetchStooq(symbol) {
+  const sUrl = `https://stooq.com/q/l/?s=${symbol.toLowerCase()}.us&f=sd2t2ohlcv&h&e=csv`;
+  const url  = `https://corsproxy.io/?${encodeURIComponent(sUrl)}`;
+  const res  = await fetch(url, { signal: AbortSignal.timeout(7000) });
+  const text = await res.text();
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) throw new Error('sem dados');
+  const c    = lines[1].split(',');
+  // Symbol,Date,Time,Open,High,Low,Close,Volume
+  const open  = parseFloat(c[3]);
+  const close = parseFloat(c[6]);
+  const chg   = close - open;
+  return {
+    symbol, name: stockNames[symbol] || symbol,
+    price: close.toFixed(2),
+    change: chg.toFixed(2),
+    changePercent: ((chg/open)*100).toFixed(2)
+  };
+}
+
+// Fetch com fallback automático A → B
+async function fetchStock(symbol) {
+  try       { return await fetchYahoo(symbol); }
+  catch (e1){ 
+    try     { return await fetchStooq(symbol); }
+    catch   { return null; }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CORES DO MAPA DE CALOR
+// ─────────────────────────────────────────────
+function heatColor(pct) {
+  const v = parseFloat(pct);
+  const t = Math.min(Math.abs(v) / 3, 1); // satura em ±3%
+  if (v >= 0) {
+    // verde escuro → verde vivo
+    const g = Math.round(90 + t * 110);
+    return `rgb(10, ${g}, 30)`;
+  } else {
+    // vermelho escuro → vermelho vivo
+    const r = Math.round(100 + t * 139);
+    return `rgb(${r}, 15, 15)`;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  RENDERIZAÇÃO DO MAPA
+// ─────────────────────────────────────────────
+function renderHeatmap(stockMap) {
+  const container = document.getElementById('heatmap-container');
+  let html = '';
+
+  for (const [sector, symbols] of Object.entries(sectors)) {
+    const items = symbols.map(s => stockMap[s]).filter(Boolean);
+    if (!items.length) continue;
+
+    items.sort((a,b) => parseFloat(b.changePercent) - parseFloat(a.changePercent));
+
+    html += `
+      <div class="sector-group">
+        <div class="sector-label">${sector}</div>
+        <div class="heatmap-grid">`;
+
+    for (const s of items) {
+      const isPos  = parseFloat(s.changePercent) >= 0;
+      const sign   = isPos ? '+' : '';
+      const bg     = heatColor(s.changePercent);
+      html += `
+        <div class="heatmap-item" style="background:${bg}"
+             title="${s.name} · $${s.price} (${sign}${s.changePercent}%)">
+          <div class="stock-symbol">${s.symbol}</div>
+          <div class="stock-name">${s.name}</div>
+          <div class="stock-price">$${s.price}</div>
+          <div class="stock-change">${isPos ? '▲' : '▼'} ${sign}${s.changePercent}%</div>
+        </div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  container.innerHTML = html || `
+    <div class="error-box">
+      <span class="error-icon">📭</span>
+      <p>Nenhum dado disponível.</p>
+    </div>`;
+}
+
+function showError() {
+  document.getElementById('heatmap-container').innerHTML = `
+    <div class="error-box">
+      <span class="error-icon">⚠️</span>
+      <p>Não foi possível carregar os dados.<br>Verifique sua conexão e tente novamente.</p>
+      <button class="retry-btn" onclick="loadAll()">Tentar novamente</button>
+    </div>`;
+  document.getElementById('status-text').textContent = 'Erro — clique para tentar novamente';
+}
+
+// ─────────────────────────────────────────────
+//  CARGA PRINCIPAL
+// ─────────────────────────────────────────────
+async function loadAll() {
+  document.getElementById('heatmap-container').innerHTML = `
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Buscando ${allSymbols.length} cotações reais...</div>
+    </div>`;
+  document.getElementById('status-text').textContent = 'Buscando dados...';
+
+  const results = await Promise.all(allSymbols.map(fetchStock));
+
+  const stockMap = {};
+  let loaded = 0;
+  results.forEach(s => { if (s) { stockMap[s.symbol] = s; loaded++; } });
+
+  if (loaded === 0) { showError(); return; }
+
+  renderHeatmap(stockMap);
+
+  const now = new Date();
+  const ts  = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+  document.getElementById('last-update').textContent  = `🔄 ${ts}`;
+  document.getElementById('api-source').textContent   = `💹 Dados reais • ${loaded} ações`;
+  document.getElementById('status-text').textContent  = `${loaded} ações carregadas • ${ts}`;
+}
+
+// ─────────────────────────────────────────────
+//  TIMER E VISIBILIDADE
+// ─────────────────────────────────────────────
+let timer;
+
+function startTimer() {
+  clearInterval(timer);
+  timer = setInterval(loadAll, 60000);
+  setInterval(() => {
+    const cal = document.getElementById('calendar');
+    if (cal) cal.src = cal.src;
+  }, 120000);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(timer);
+    document.getElementById('status-text').textContent = 'Pausado';
+  } else {
+    loadAll();
+    startTimer();
+  }
+});
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  document.body.style.opacity = '0';
+  document.body.style.transition = 'opacity .3s ease';
+  setTimeout(async () => {
+    await loadAll();
+    startTimer();
+    document.body.style.opacity = '1';
+  }, 300);
+});
+</script>
+</body>
+</html>
