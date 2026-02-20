@@ -519,6 +519,7 @@ td {
   <div class="tabs">
     <button class="tab active" onclick="switchTab('posts')">📝 Posts</button>
     <button class="tab" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
+    <button class="tab" onclick="switchTab('calendario')">📅 Calendário</button>
   </div>
 
   <!-- SEÇÃO: POSTS -->
@@ -610,6 +611,53 @@ td {
         <div class="loading">
           <div class="spinner"></div>
           <p>Carregando usuários...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: CALENDÁRIO -->
+  <div id="calendario-section" class="section">
+    <div class="card">
+      <h2>📅 Adicionar Calendário do Dia</h2>
+      <div id="alert-calendario" class="alert"></div>
+
+      <form id="formCalendario">
+        <div class="form-group">
+          <label for="calendarioData">Data do Calendário</label>
+          <input type="date" id="calendarioData" required style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+        </div>
+
+        <div class="form-group">
+          <label>Imagem do Calendário</label>
+          <div class="upload-area" id="uploadAreaCal" onclick="document.getElementById('fileInputCal').click()" style="cursor: pointer; border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; transition: all .3s;">
+            <input type="file" id="fileInputCal" accept="image/*" style="display:none" onchange="handleCalendarioFile(event)">
+            <div id="uploadPlaceholderCal">
+              <span style="font-size:48px">📅</span>
+              <p><strong>Arraste a imagem do calendário aqui</strong><br>ou clique para selecionar</p>
+              <small style="color:var(--text-muted)">JPG, PNG até 10MB</small>
+            </div>
+            <div id="uploadPreviewCal" style="display:none">
+              <img id="previewImgCal" src="" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 12px;">
+              <button type="button" class="btn-remove" onclick="event.stopPropagation(); removerImagemCal()">✕ Remover</button>
+            </div>
+            <div id="uploadProgressCal" style="display:none; text-align: center; padding: 40px;">
+              <div class="spinner"></div>
+              <p style="color: var(--text-muted);">Fazendo upload...</p>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="btnCalendario">Salvar Calendário</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>📚 Calendários Publicados</h2>
+      <div id="calendarios-list">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Carregando calendários...</p>
         </div>
       </div>
     </div>
@@ -1014,6 +1062,153 @@ async function revogarAprovacao(uid) {
     mostrarAlerta('alert-aprovacao', '❌ Erro ao revogar', 'error');
   }
 }
+
+// ══════════════════════════════════════════════
+// CALENDÁRIO
+// ══════════════════════════════════════════════
+let calendarioFile = null;
+
+function handleCalendarioFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert('❌ Por favor, selecione apenas imagens');
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    alert('❌ Imagem muito grande. Máximo 10MB');
+    return;
+  }
+
+  calendarioFile = file;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('previewImgCal').src = e.target.result;
+    document.getElementById('uploadPlaceholderCal').style.display = 'none';
+    document.getElementById('uploadPreviewCal').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerImagemCal() {
+  calendarioFile = null;
+  document.getElementById('fileInputCal').value = '';
+  document.getElementById('uploadPlaceholderCal').style.display = 'block';
+  document.getElementById('uploadPreviewCal').style.display = 'none';
+}
+
+document.getElementById('formCalendario').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!calendarioFile) {
+    mostrarAlerta('alert-calendario', '❌ Selecione uma imagem', 'error');
+    return;
+  }
+
+  const btnCalendario = document.getElementById('btnCalendario');
+  btnCalendario.disabled = true;
+  btnCalendario.textContent = 'Salvando...';
+
+  try {
+    document.getElementById('uploadPreviewCal').style.display = 'none';
+    document.getElementById('uploadProgressCal').style.display = 'block';
+
+    const imagemURL = await uploadImagemImgBB(calendarioFile);
+
+    const data = document.getElementById('calendarioData').value;
+
+    await db.collection('calendarios').doc(data).set({
+      data: data,
+      imagemURL: imagemURL,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+      autor: auth.currentUser.displayName || 'Admin'
+    });
+
+    mostrarAlerta('alert-calendario', '✅ Calendário salvo com sucesso!', 'success');
+    
+    document.getElementById('formCalendario').reset();
+    removerImagemCal();
+    carregarCalendarios();
+
+  } catch (error) {
+    console.error('Erro ao salvar calendário:', error);
+    mostrarAlerta('alert-calendario', '❌ Erro ao salvar calendário', 'error');
+    document.getElementById('uploadPreviewCal').style.display = 'block';
+    document.getElementById('uploadProgressCal').style.display = 'none';
+  }
+
+  btnCalendario.disabled = false;
+  btnCalendario.textContent = 'Salvar Calendário';
+});
+
+async function carregarCalendarios() {
+  const container = document.getElementById('calendarios-list');
+
+  try {
+    const snapshot = await db.collection('calendarios')
+      .orderBy('data', 'desc')
+      .limit(30)
+      .get();
+
+    if (snapshot.empty) {
+      container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;">Nenhum calendário publicado ainda.</p>';
+      return;
+    }
+
+    let html = '<div style="display:grid;gap:16px;">';
+    snapshot.forEach(doc => {
+      const cal = doc.data();
+      const dataFormatada = new Date(cal.data + 'T00:00:00').toLocaleDateString('pt-BR');
+
+      html += `
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;gap:16px;align-items:center;">
+          <img src="${cal.imagemURL}" style="width:120px;height:80px;object-fit:cover;border-radius:8px;">
+          <div style="flex:1;">
+            <strong style="font-size:16px;">📅 ${dataFormatada}</strong>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">Por ${cal.autor}</p>
+          </div>
+          <button class="btn btn-sm btn-danger" onclick="deletarCalendario('${doc.id}')">Excluir</button>
+        </div>`;
+    });
+    html += '</div>';
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('Erro ao carregar calendários:', error);
+    container.innerHTML = '<p style="color:var(--red)">Erro ao carregar calendários</p>';
+  }
+}
+
+async function deletarCalendario(id) {
+  if (!confirm('Deseja realmente excluir este calendário?')) return;
+
+  try {
+    await db.collection('calendarios').doc(id).delete();
+    mostrarAlerta('alert-calendario', '✅ Calendário excluído', 'success');
+    carregarCalendarios();
+  } catch (error) {
+    console.error('Erro ao excluir:', error);
+    mostrarAlerta('alert-calendario', '❌ Erro ao excluir', 'error');
+  }
+}
+
+// Carregar calendários quando trocar de aba
+window.switchTab = function(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`${tabName}-section`).classList.add('active');
+
+  if (tabName === 'calendario') {
+    carregarCalendarios();
+    document.getElementById('calendarioData').valueAsDate = new Date();
+  }
+};
 </script>
 
 </body>
