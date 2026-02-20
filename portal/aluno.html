@@ -209,6 +209,12 @@ h1 {
   height: 200px;
   object-fit: cover;
   background: rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: transform .2s;
+}
+
+.post-image:hover {
+  transform: scale(1.02);
 }
 
 .post-content {
@@ -308,6 +314,64 @@ h1 {
   to { transform: rotate(360deg); }
 }
 
+/* IMAGE MODAL */
+.image-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.95);
+  z-index: 10000;
+  cursor: pointer;
+  animation: fadeIn .3s ease;
+}
+
+.image-modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.image-modal img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 0 50px rgba(0,0,0,0.8);
+}
+
+.image-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-size: 32px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.image-modal-close:hover {
+  background: var(--red);
+  border-color: var(--red);
+  transform: rotate(90deg);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* EMPTY STATE */
 .empty-state {
   text-align: center;
@@ -378,6 +442,8 @@ h1 {
     <h2>📰 Últimas Publicações</h2>
     <div class="filter-buttons">
       <button class="filter-btn active" onclick="filtrarPosts('todos')">Todos</button>
+      <button class="filter-btn" onclick="filtrarPosts('sala-ao-vivo')">🔴 Sala ao Vivo</button>
+      <button class="filter-btn" onclick="filtrarPosts('materiais')">📚 Materiais</button>
       <button class="filter-btn" onclick="filtrarPosts('analise')">Análises</button>
       <button class="filter-btn" onclick="filtrarPosts('tutorial')">Tutoriais</button>
       <button class="filter-btn" onclick="filtrarPosts('noticia')">Notícias</button>
@@ -394,6 +460,12 @@ h1 {
 
 </div>
 
+<!-- MODAL DE IMAGEM -->
+<div class="image-modal" id="imageModal" onclick="fecharModal()">
+  <span class="image-modal-close">×</span>
+  <img id="modalImage" src="" alt="">
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -401,6 +473,25 @@ h1 {
 <script src="firebase-config.js"></script>
 
 <script>
+// ══════════════════════════════════════════════
+// MODAL DE IMAGEM
+// ══════════════════════════════════════════════
+function abrirModal(imagemUrl) {
+  document.getElementById('modalImage').src = imagemUrl;
+  document.getElementById('imageModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharModal() {
+  document.getElementById('imageModal').classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+// Fechar com ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') fecharModal();
+});
+
 // ══════════════════════════════════════════════
 // VERIFICAÇÃO DE ACESSO
 // ══════════════════════════════════════════════
@@ -438,10 +529,12 @@ let todosOsPosts = [];
 let categoriaAtual = 'todos';
 
 const categoriaIcons = {
-  analise: '📈',
-  tutorial: '🎓',
-  noticia: '📰',
-  link: '🔗'
+  'sala-ao-vivo': '🔴',
+  'materiais': '📚',
+  'analise': '📈',
+  'tutorial': '🎓',
+  'noticia': '📰',
+  'link': '🔗'
 };
 
 async function carregarPosts() {
@@ -512,7 +605,7 @@ function renderizarPosts() {
 
     html += `
       <div class="post-card" data-categoria="${post.categoria}">
-        ${post.imagemURL ? `<img src="${post.imagemURL}" class="post-image" alt="${post.titulo}">` : ''}
+        ${post.imagemURL ? `<img src="${post.imagemURL}" class="post-image" alt="${post.titulo}" onclick="abrirModal('${post.imagemURL}')">` : ''}
         <div class="post-content">
           <div class="post-header">
             <span class="post-category">${icon} ${post.categoria}</span>
