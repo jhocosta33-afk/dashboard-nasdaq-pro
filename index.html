@@ -2439,11 +2439,6 @@ body.basic-mode .pro-only {
   <span id="modeText">Modo Básico</span>
  </button>
  
- <a href="portal/" class="mode-toggle" style="text-decoration:none; margin-top:12px; background:linear-gradient(135deg, #22c55e, #3b82f6); color:#000; font-weight:700;">
-  <span>🎓</span>
-  <span>Portal do Aluno</span>
- </a>
- 
  <div class="stats-sidebar">
   <div class="sidebar-stat">
    <span>Assertividade</span>
@@ -3413,7 +3408,7 @@ const Dashboard = {
   this.atualizar();
  },
  
- abrirModal(dadosDia) {
+ async abrirModal(dadosDia) {
   console.log('📸 Abrindo modal com dados:', dadosDia);
   
   // Salva trade atual para download
@@ -3471,9 +3466,45 @@ const Dashboard = {
   
   modalInfoGrid.innerHTML = infoHTML;
   
-  console.log('🖼️ Carregando foto. ID:', dadosDia.fotoId);
+  // NOVA LÓGICA: Tenta buscar calendário econômico do Firestore primeiro
+  const dataFormatada = `${ano}-${dadosDia.mes}-${String(dia).padStart(2, '0')}`;
+  console.log('🔍 Buscando calendário para data:', dataFormatada);
   
-  // Carrega a foto (passa o ID da foto se existir)
+  try {
+   // Verifica se Firebase está disponível
+   if (typeof firebase !== 'undefined' && firebase.firestore) {
+    const db = firebase.firestore();
+    const calendarioDoc = await db.collection('calendarios').doc(dataFormatada).get();
+    
+    if (calendarioDoc.exists) {
+     const calendarioData = calendarioDoc.data();
+     console.log('✅ Calendário encontrado no Firestore!', calendarioData);
+     
+     // Mostra imagem do calendário econômico
+     modalPhotoContainer.innerHTML = `
+      <div style="text-align:center; padding:20px;">
+       <h3 style="margin-bottom:15px; color:var(--text);">📊 Calendário Econômico</h3>
+       <img src="${calendarioData.imagemURL}" 
+            alt="Calendário Econômico" 
+            style="max-width:100%; max-height:70vh; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+      </div>
+     `;
+     
+     // Mostra modal
+     modal.classList.add('active');
+     document.body.style.overflow = 'hidden';
+     console.log('✅ Modal aberto com calendário econômico');
+     return;
+    } else {
+     console.log('ℹ️ Calendário não encontrado no Firestore, carregando foto do trade...');
+    }
+   }
+  } catch (error) {
+   console.warn('⚠️ Erro ao buscar calendário do Firestore:', error);
+  }
+  
+  // Se não encontrou calendário, carrega foto normal do Google Drive
+  console.log('🖼️ Carregando foto do trade. ID:', dadosDia.fotoId);
   this.carregarFotoTrade(dadosDia.dia, modalPhotoContainer, dadosDia.fotoId);
   
   // Mostra modal
@@ -4141,5 +4172,27 @@ document.addEventListener('keydown', (e) => {
  }
 });
 </script>
+
+<!-- Firebase SDKs para calendário econômico -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script>
+// Configuração do Firebase (mesma do portal)
+const firebaseConfig = {
+  apiKey: "AIzaSyCABn9XHvjrFCbbeHT_0gHFaF5uGlKLUWM",
+  authDomain: "dashboard-nasdaq-pro.firebaseapp.com",
+  projectId: "dashboard-nasdaq-pro",
+  storageBucket: "dashboard-nasdaq-pro.firebasestorage.app",
+  messagingSenderId: "325405049429",
+  appId: "1:325405049429:web:a0289dc4f604fee1d20adc"
+};
+
+// Inicializa Firebase apenas se ainda não foi inicializado
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+  console.log('✅ Firebase inicializado para calendários econômicos');
+}
+</script>
+
 </body>
 </html>
