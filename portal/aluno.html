@@ -168,9 +168,9 @@ h1 {
 }
 
 .filter-btn {
-  background: var(--card);
+  background: rgba(255,255,255,0.05);
   border: 1px solid var(--border);
-  color: var(--text-muted);
+  color: var(--text);
   padding: 6px 14px;
   border-radius: 6px;
   font-size: 12px;
@@ -418,16 +418,16 @@ h1 {
 
   <!-- ACESSO RÁPIDO -->
   <div class="quick-access">
-    <div class="quick-card" onclick="location.href='mercado.html'">
-      <div class="quick-card-icon">📊</div>
-      <h3>Dashboard NASDAQ</h3>
-      <p>Mercado em tempo real</p>
-    </div>
-
     <div class="quick-card" onclick="scrollToSection('posts')">
       <div class="quick-card-icon">📚</div>
       <h3>Conteúdos</h3>
       <p>Análises e tutoriais</p>
+    </div>
+
+    <div class="quick-card" onclick="scrollToSection('posts')">
+      <div class="quick-card-icon">🔴</div>
+      <h3>Sala ao Vivo</h3>
+      <p>Transmissões e lives</p>
     </div>
 
     <div class="quick-card" onclick="scrollToSection('posts')">
