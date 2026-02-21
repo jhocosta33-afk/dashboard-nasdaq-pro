@@ -1068,10 +1068,43 @@ async function revogarAprovacao(uid) {
 // ══════════════════════════════════════════════
 let calendarioFile = null;
 
+// Configurar drag and drop para calendário
+const uploadAreaCal = document.getElementById('uploadAreaCal');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  uploadAreaCal.addEventListener(eventName, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+});
+
+['dragenter', 'dragover'].forEach(eventName => {
+  uploadAreaCal.addEventListener(eventName, () => {
+    uploadAreaCal.style.borderColor = 'var(--accent)';
+    uploadAreaCal.style.background = 'rgba(34,197,94,0.05)';
+  });
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+  uploadAreaCal.addEventListener(eventName, () => {
+    uploadAreaCal.style.borderColor = 'var(--border)';
+    uploadAreaCal.style.background = 'transparent';
+  });
+});
+
+uploadAreaCal.addEventListener('drop', (e) => {
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    processarArquivoCalendario(files[0]);
+  }
+});
+
 function handleCalendarioFile(event) {
   const file = event.target.files[0];
-  if (!file) return;
+  if (file) processarArquivoCalendario(file);
+}
 
+function processarArquivoCalendario(file) {
   if (!file.type.startsWith('image/')) {
     alert('❌ Por favor, selecione apenas imagens');
     return;
