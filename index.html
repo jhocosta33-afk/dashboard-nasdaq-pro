@@ -2439,6 +2439,11 @@ body.basic-mode .pro-only {
   <span id="modeText">Modo Básico</span>
  </button>
  
+ <a href="portal/" class="mode-toggle" style="text-decoration:none; margin-top:12px; background:linear-gradient(135deg, #22c55e, #3b82f6); color:#000; font-weight:700;">
+  <span>🎓</span>
+  <span>Portal do Aluno</span>
+ </a>
+ 
  <div class="stats-sidebar">
   <div class="sidebar-stat">
    <span>Assertividade</span>
@@ -2586,23 +2591,17 @@ body.basic-mode .pro-only {
     <div class="market-header">
      <h3>📅 Calendário Econômico</h3>
      <div style="display:flex;align-items:center;gap:12px;">
-      <button class="calendar-refresh-btn" onclick="Dashboard.atualizarCalendario()" title="Atualizar calendário">
+      <button class="calendar-refresh-btn" onclick="Dashboard.carregarCalendarioFirebase()" title="Atualizar calendário">
        🔄 Atualizar
       </button>
-      <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
-       Ver Completo →
-      </a>
+      <span id="calendarioDataAtual" style="font-size:13px;color:var(--muted);"></span>
      </div>
     </div>
-    <div class="calendar-content">
-     <iframe 
-      id="investingCalendar"
-      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone,timeselector,filters&countries=5,25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4&calType=day&timeZone=12&lang=12"
-      width="700"
-      height="700"
-      frameborder="0"
-      scrolling="yes">
-     </iframe>
+    <div class="calendar-content" id="calendarioContainer" style="min-height:700px;display:flex;align-items:center;justify-content:center;">
+     <div class="loading" style="text-align:center;">
+      <div class="spinner" style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
+      <p style="color:var(--muted);">Carregando calendário...</p>
+     </div>
     </div>
    </div>
   </div>
@@ -3408,7 +3407,7 @@ const Dashboard = {
   this.atualizar();
  },
  
- async abrirModal(dadosDia) {
+ abrirModal(dadosDia) {
   console.log('📸 Abrindo modal com dados:', dadosDia);
   
   // Salva trade atual para download
@@ -3466,45 +3465,9 @@ const Dashboard = {
   
   modalInfoGrid.innerHTML = infoHTML;
   
-  // NOVA LÓGICA: Tenta buscar calendário econômico do Firestore primeiro
-  const dataFormatada = `${ano}-${dadosDia.mes}-${String(dia).padStart(2, '0')}`;
-  console.log('🔍 Buscando calendário para data:', dataFormatada);
+  console.log('🖼️ Carregando foto. ID:', dadosDia.fotoId);
   
-  try {
-   // Verifica se Firebase está disponível
-   if (typeof firebase !== 'undefined' && firebase.firestore) {
-    const db = firebase.firestore();
-    const calendarioDoc = await db.collection('calendarios').doc(dataFormatada).get();
-    
-    if (calendarioDoc.exists) {
-     const calendarioData = calendarioDoc.data();
-     console.log('✅ Calendário encontrado no Firestore!', calendarioData);
-     
-     // Mostra imagem do calendário econômico
-     modalPhotoContainer.innerHTML = `
-      <div style="text-align:center; padding:20px;">
-       <h3 style="margin-bottom:15px; color:var(--text);">📊 Calendário Econômico</h3>
-       <img src="${calendarioData.imagemURL}" 
-            alt="Calendário Econômico" 
-            style="max-width:100%; max-height:70vh; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
-      </div>
-     `;
-     
-     // Mostra modal
-     modal.classList.add('active');
-     document.body.style.overflow = 'hidden';
-     console.log('✅ Modal aberto com calendário econômico');
-     return;
-    } else {
-     console.log('ℹ️ Calendário não encontrado no Firestore, carregando foto do trade...');
-    }
-   }
-  } catch (error) {
-   console.warn('⚠️ Erro ao buscar calendário do Firestore:', error);
-  }
-  
-  // Se não encontrou calendário, carrega foto normal do Google Drive
-  console.log('🖼️ Carregando foto do trade. ID:', dadosDia.fotoId);
+  // Carrega a foto (passa o ID da foto se existir)
   this.carregarFotoTrade(dadosDia.dia, modalPhotoContainer, dadosDia.fotoId);
   
   // Mostra modal
@@ -4173,11 +4136,11 @@ document.addEventListener('keydown', (e) => {
 });
 </script>
 
-<!-- Firebase SDKs para calendário econômico -->
+<!-- Firebase SDKs para Calendário -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script>
-// Configuração do Firebase (mesma do portal)
+// Configuração Firebase (mesma do portal)
 const firebaseConfig = {
   apiKey: "AIzaSyCABn9XHvjrFCbbeHT_0gHFaF5uGlKLUWM",
   authDomain: "dashboard-nasdaq-pro.firebaseapp.com",
@@ -4187,11 +4150,95 @@ const firebaseConfig = {
   appId: "1:325405049429:web:a0289dc4f604fee1d20adc"
 };
 
-// Inicializa Firebase apenas se ainda não foi inicializado
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-  console.log('✅ Firebase inicializado para calendários econômicos');
-}
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Carregar calendário do dia
+Dashboard.carregarCalendarioFirebase = async function() {
+  const container = document.getElementById('calendarioContainer');
+  const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  
+  // Atualiza data no header
+  const dataFormatada = new Date(hoje + 'T00:00:00').toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+  document.getElementById('calendarioDataAtual').textContent = dataFormatada;
+
+  try {
+    container.innerHTML = `
+      <div class="loading" style="text-align:center;padding:40px;">
+        <div class="spinner" style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
+        <p style="color:var(--muted);">Carregando calendário de ${dataFormatada}...</p>
+      </div>`;
+
+    const doc = await db.collection('calendarios').doc(hoje).get();
+
+    if (doc.exists && doc.data().imagemURL) {
+      const imagemURL = doc.data().imagemURL;
+      container.innerHTML = `
+        <div style="width:100%;max-width:1200px;margin:0 auto;">
+          <img 
+            src="${imagemURL}" 
+            alt="Calendário Econômico" 
+            style="width:100%;height:auto;border-radius:12px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.3);"
+            onclick="window.open('${imagemURL}', '_blank')"
+            title="Clique para abrir em tela cheia">
+          <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted);">
+            📸 Clique na imagem para ampliar
+          </p>
+        </div>`;
+    } else {
+      container.innerHTML = `
+        <div style="text-align:center;padding:60px 20px;">
+          <div style="font-size:64px;margin-bottom:16px;">📅</div>
+          <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">
+            Sem calendário para hoje
+          </h3>
+          <p style="color:var(--muted);margin-bottom:24px;">
+            O administrador ainda não publicou o calendário de ${dataFormatada}
+          </p>
+          <a href="portal/" style="display:inline-block;background:var(--blue);color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;transition:all .2s;">
+            Acessar Portal do Aluno
+          </a>
+        </div>`;
+    }
+
+  } catch (error) {
+    console.error('Erro ao carregar calendário:', error);
+    container.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;">
+        <div style="font-size:64px;margin-bottom:16px;">⚠️</div>
+        <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--red);">
+          Erro ao carregar calendário
+        </h3>
+        <p style="color:var(--muted);margin-bottom:24px;">
+          Não foi possível conectar ao banco de dados
+        </p>
+        <button onclick="Dashboard.carregarCalendarioFirebase()" style="background:var(--blue);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;">
+          🔄 Tentar Novamente
+        </button>
+      </div>`;
+  }
+};
+
+// Carregar calendário automaticamente ao trocar de aba
+const originalMudarAba = Dashboard.mudarAba;
+Dashboard.mudarAba = function(aba) {
+  originalMudarAba.call(Dashboard, aba);
+  if (aba === 'mercado') {
+    Dashboard.carregarCalendarioFirebase();
+  }
+};
+
+// Carregar calendário se a aba já estiver ativa no load
+window.addEventListener('load', () => {
+  if (document.getElementById('contentMercado')?.classList.contains('active')) {
+    Dashboard.carregarCalendarioFirebase();
+  }
+});
 </script>
 
 </body>
