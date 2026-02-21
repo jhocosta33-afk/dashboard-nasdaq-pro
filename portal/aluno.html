@@ -416,21 +416,21 @@ h1 {
     <p>Confira as últimas análises e conteúdos exclusivos</p>
   </div>
 
-  <!-- ACESSO RÁPIDO COM FILTROS -->
+  <!-- ACESSO RÁPIDO -->
   <div class="quick-access">
-    <div class="quick-card" onclick="filtrarEScroll('materiais')">
-      <div class="quick-card-icon">📚</div>
-      <h3>Conteúdos</h3>
-      <p>Análises e tutoriais</p>
-    </div>
-
-    <div class="quick-card" onclick="filtrarEScroll('sala-ao-vivo')">
+    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('sala-ao-vivo')">
       <div class="quick-card-icon">🔴</div>
       <h3>Sala ao Vivo</h3>
       <p>Transmissões e lives</p>
     </div>
 
-    <div class="quick-card" onclick="filtrarEScroll('link')">
+    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('materiais')">
+      <div class="quick-card-icon">📚</div>
+      <h3>Materiais</h3>
+      <p>Conteúdo educativo</p>
+    </div>
+
+    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('link')">
       <div class="quick-card-icon">🔗</div>
       <h3>Links Úteis</h3>
       <p>Recursos e ferramentas</p>
@@ -441,13 +441,13 @@ h1 {
   <div class="section-header" id="posts">
     <h2>📰 Últimas Publicações</h2>
     <div class="filter-buttons">
-      <button class="filter-btn active" data-filter="todos" onclick="filtrarPosts('todos')">Todos</button>
-      <button class="filter-btn" data-filter="sala-ao-vivo" onclick="filtrarPosts('sala-ao-vivo')">🔴 Sala ao Vivo</button>
-      <button class="filter-btn" data-filter="materiais" onclick="filtrarPosts('materiais')">📚 Materiais</button>
-      <button class="filter-btn" data-filter="analise" onclick="filtrarPosts('analise')">Análises</button>
-      <button class="filter-btn" data-filter="tutorial" onclick="filtrarPosts('tutorial')">Tutoriais</button>
-      <button class="filter-btn" data-filter="noticia" onclick="filtrarPosts('noticia')">Notícias</button>
-      <button class="filter-btn" data-filter="link" onclick="filtrarPosts('link')">Links</button>
+      <button class="filter-btn active" onclick="filtrarPosts('todos')">Todos</button>
+      <button class="filter-btn" onclick="filtrarPosts('sala-ao-vivo')">🔴 Sala ao Vivo</button>
+      <button class="filter-btn" onclick="filtrarPosts('materiais')">📚 Materiais</button>
+      <button class="filter-btn" onclick="filtrarPosts('analise')">Análises</button>
+      <button class="filter-btn" onclick="filtrarPosts('tutorial')">Tutoriais</button>
+      <button class="filter-btn" onclick="filtrarPosts('noticia')">Notícias</button>
+      <button class="filter-btn" onclick="filtrarPosts('link')">Links</button>
     </div>
   </div>
 
@@ -520,26 +520,6 @@ function logout() {
 
 function scrollToSection(id) {
   document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-}
-
-// Nova função que filtra E faz scroll
-function filtrarEScroll(categoria) {
-  // Rola até a seção de posts
-  scrollToSection('posts');
-  
-  // Aguarda um pouco e então filtra
-  setTimeout(() => {
-    // Atualiza botões
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.classList.remove('active');
-      if (btn.dataset.filter === categoria) {
-        btn.classList.add('active');
-      }
-    });
-    
-    categoriaAtual = categoria;
-    renderizarPosts();
-  }, 300);
 }
 
 // ══════════════════════════════════════════════
@@ -647,7 +627,9 @@ function filtrarPosts(categoria) {
   // Atualiza botões
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.remove('active');
-    if (btn.dataset.filter === categoria) {
+    // Ativa o botão correspondente à categoria
+    if (btn.textContent.toLowerCase().includes(categoria) || 
+        (categoria === 'todos' && btn.textContent === 'Todos')) {
       btn.classList.add('active');
     }
   });
