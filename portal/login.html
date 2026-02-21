@@ -241,6 +241,43 @@ input::placeholder {
 <script src="firebase-config.js"></script>
 
 <script>
+// ══════════════════════════════════════════════
+// VERIFICAR SE JÁ ESTÁ LOGADO (AUTO-LOGIN)
+// ══════════════════════════════════════════════
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    // Usuário já está logado, verificar se é admin ou aluno aprovado
+    try {
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        
+        // Se for admin, redireciona para admin
+        if (userData.role === 'admin') {
+          window.location.href = 'admin.html';
+          return;
+        }
+        
+        // Se for aluno aprovado, redireciona para área do aluno
+        if (userData.aprovado === true) {
+          window.location.href = 'aluno.html';
+          return;
+        }
+        
+        // Se não for aprovado, faz logout e mantém na página de login
+        await auth.signOut();
+      }
+    } catch (error) {
+      console.error('Erro ao verificar usuário:', error);
+    }
+  }
+  // Se não estiver logado, permanece na página de login normalmente
+});
+
+// ══════════════════════════════════════════════
+// FORMULÁRIO DE LOGIN
+// ══════════════════════════════════════════════
 const form = document.getElementById('loginForm');
 const alertBox = document.getElementById('alert');
 const btnLogin = document.getElementById('btnLogin');
