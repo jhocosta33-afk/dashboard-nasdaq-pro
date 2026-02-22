@@ -2591,17 +2591,23 @@ body.basic-mode .pro-only {
     <div class="market-header">
      <h3>📅 Calendário Econômico</h3>
      <div style="display:flex;align-items:center;gap:12px;">
-      <button class="calendar-refresh-btn" onclick="Dashboard.carregarCalendarioFirebase()" title="Atualizar calendário">
+      <button class="calendar-refresh-btn" onclick="Dashboard.atualizarCalendario()" title="Atualizar calendário">
        🔄 Atualizar
       </button>
-      <span id="calendarioDataAtual" style="font-size:13px;color:var(--muted);"></span>
+      <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
+       Ver Completo →
+      </a>
      </div>
     </div>
-    <div class="calendar-content" id="calendarioContainer" style="min-height:700px;display:flex;align-items:center;justify-content:center;">
-     <div class="loading" style="text-align:center;">
-      <div class="spinner" style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
-      <p style="color:var(--muted);">Carregando calendário...</p>
-     </div>
+    <div class="calendar-content">
+     <iframe 
+      id="investingCalendar"
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone,timeselector,filters&countries=5,25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4&calType=day&timeZone=12&lang=12"
+      width="700"
+      height="700"
+      frameborder="0"
+      scrolling="yes">
+     </iframe>
     </div>
    </div>
   </div>
@@ -4136,127 +4142,6 @@ document.addEventListener('keydown', (e) => {
 });
 </script>
 
-<!-- Firebase SDKs para Calendário -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script>
-// Configuração Firebase (mesma do portal)
-const firebaseConfig = {
-  apiKey: "AIzaSyCABn9XHvjrFCbbeHT_0gHFaF5uGlKLUWM",
-  authDomain: "dashboard-nasdaq-pro.firebaseapp.com",
-  projectId: "dashboard-nasdaq-pro",
-  storageBucket: "dashboard-nasdaq-pro.firebasestorage.app",
-  messagingSenderId: "325405049429",
-  appId: "1:325405049429:web:a0289dc4f604fee1d20adc"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// Carregar calendário do dia
-Dashboard.carregarCalendarioFirebase = async function() {
-  const container = document.getElementById('calendarioContainer');
-  
-  // Pega data no timezone local
-  const agora = new Date();
-  const hoje = agora.toLocaleDateString('en-CA'); // YYYY-MM-DD formato ISO mas data local
-  
-  console.log('🔍 Buscando calendário para:', hoje);
-  
-  // Atualiza data no header
-  const dataFormatada = agora.toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  });
-  document.getElementById('calendarioDataAtual').textContent = dataFormatada;
-
-  try {
-    container.innerHTML = `
-      <div class="loading" style="text-align:center;padding:40px;">
-        <div class="spinner" style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
-        <p style="color:var(--muted);">Carregando calendário de ${dataFormatada}...</p>
-      </div>`;
-
-    const doc = await db.collection('calendarios').doc(hoje).get();
-    
-    console.log('📄 Documento existe?', doc.exists);
-    if (doc.exists) console.log('📊 Dados:', doc.data());
-
-    if (doc.exists && doc.data().imagemURL) {
-      const imagemURL = doc.data().imagemURL;
-      console.log('✅ Imagem encontrada:', imagemURL);
-      
-      container.innerHTML = `
-        <div style="width:100%;max-width:1200px;margin:0 auto;">
-          <img 
-            src="${imagemURL}" 
-            alt="Calendário Econômico" 
-            style="width:100%;height:auto;border-radius:12px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.3);"
-            onclick="window.open('${imagemURL}', '_blank')"
-            title="Clique para abrir em tela cheia">
-          <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted);">
-            📸 Clique na imagem para ampliar • Data: ${hoje}
-          </p>
-        </div>`;
-    } else {
-      console.log('❌ Calendário não encontrado para:', hoje);
-      container.innerHTML = `
-        <div style="text-align:center;padding:60px 20px;">
-          <div style="font-size:64px;margin-bottom:16px;">📅</div>
-          <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">
-            Sem calendário para hoje
-          </h3>
-          <p style="color:var(--muted);margin-bottom:8px;">
-            O administrador ainda não publicou o calendário de ${dataFormatada}
-          </p>
-          <p style="color:var(--muted);font-size:12px;margin-bottom:24px;">
-            (Buscando data: ${hoje})
-          </p>
-          <a href="portal/login.html" style="display:inline-block;background:var(--blue);color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;transition:all .2s;">
-            Fazer Login
-          </a>
-        </div>`;
-    }
-
-  } catch (error) {
-    console.error('❌ Erro ao carregar calendário:', error);
-    container.innerHTML = `
-      <div style="text-align:center;padding:60px 20px;">
-        <div style="font-size:64px;margin-bottom:16px;">⚠️</div>
-        <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--red);">
-          Erro ao carregar calendário
-        </h3>
-        <p style="color:var(--muted);margin-bottom:8px;">
-          ${error.message}
-        </p>
-        <p style="color:var(--muted);font-size:12px;margin-bottom:24px;">
-          Abra o console (F12) para mais detalhes
-        </p>
-        <button onclick="Dashboard.carregarCalendarioFirebase()" style="background:var(--blue);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;">
-          🔄 Tentar Novamente
-        </button>
-      </div>`;
-  }
-};
-
-// Carregar calendário automaticamente ao trocar de aba
-const originalMudarAba = Dashboard.mudarAba;
-Dashboard.mudarAba = function(aba) {
-  originalMudarAba.call(Dashboard, aba);
-  if (aba === 'mercado') {
-    Dashboard.carregarCalendarioFirebase();
-  }
-};
-
-// Carregar calendário se a aba já estiver ativa no load
-window.addEventListener('load', () => {
-  if (document.getElementById('contentMercado')?.classList.contains('active')) {
-    Dashboard.carregarCalendarioFirebase();
-  }
-});
-</script>
 
 </body>
 </html>
