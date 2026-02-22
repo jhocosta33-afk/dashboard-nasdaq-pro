@@ -522,7 +522,7 @@ td {
   <div class="tabs">
     <button class="tab active" onclick="switchTab('posts')">📝 Posts</button>
     <button class="tab" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
-    <button class="tab" onclick="switchTab('calendario')">📅 Calendário</button>
+    <button class="tab" onclick="switchTab('planilha')">📊 Planilha & Fotos</button>
   </div>
 
   <!-- SEÇÃO: POSTS -->
@@ -561,23 +561,61 @@ td {
         </div>
 
         <div class="form-group">
-          <label for="postImagem">Imagem (opcional)</label>
-          <div class="upload-area" id="uploadArea">
-            <input type="file" id="postImagem" accept="image/*" style="display:none">
-            <div class="upload-placeholder" id="uploadPlaceholder">
-              <span style="font-size:48px">📷</span>
-              <p><strong>Arraste uma imagem aqui</strong><br>ou clique para selecionar</p>
-              <small style="color:var(--text-muted)">JPG, PNG, GIF até 10MB</small>
-            </div>
-            <div class="upload-preview" id="uploadPreview" style="display:none">
-              <img id="previewImg" src="" alt="Preview">
-              <button type="button" class="btn-remove-image" onclick="removerImagem()">❌ Remover</button>
-            </div>
-            <div class="upload-progress" id="uploadProgress" style="display:none">
-              <div class="spinner"></div>
-              <p>Fazendo upload...</p>
+          <label>Mídia (opcional)</label>
+          
+          <!-- Botões de escolha -->
+          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <button type="button" class="btn-tipo active" id="btnTipoImagem" onclick="mudarTipoMidia('imagem')" style="flex: 1; padding: 10px; border: 2px solid var(--accent); background: rgba(34,197,94,0.1); color: var(--accent); border-radius: 6px; font-weight: 600; cursor: pointer; transition: all .2s;">
+              📸 Imagem
+            </button>
+            <button type="button" class="btn-tipo" id="btnTipoVideo" onclick="mudarTipoMidia('video')" style="flex: 1; padding: 10px; border: 2px solid var(--border); background: rgba(255,255,255,0.05); color: var(--text); border-radius: 6px; font-weight: 600; cursor: pointer; transition: all .2s;">
+              🎥 Vídeo
+            </button>
+          </div>
+
+          <!-- Upload de IMAGEM -->
+          <div id="uploadAreaImagem" style="display: block;">
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="postImagem" accept="image/*" style="display:none">
+              <div class="upload-placeholder" id="uploadPlaceholder">
+                <span style="font-size:48px">📷</span>
+                <p><strong>Arraste uma imagem aqui</strong><br>ou clique para selecionar</p>
+                <small style="color:var(--text-muted)">JPG, PNG, GIF até 10MB</small>
+              </div>
+              <div class="upload-preview" id="uploadPreview" style="display:none">
+                <img id="previewImg" src="" alt="Preview">
+                <button type="button" class="btn-remove-image" onclick="removerImagem()">❌ Remover</button>
+              </div>
+              <div class="upload-progress" id="uploadProgress" style="display:none">
+                <div class="spinner"></div>
+                <p>Fazendo upload...</p>
+              </div>
             </div>
           </div>
+
+          <!-- Upload de VÍDEO -->
+          <div id="uploadAreaVideo" style="display: none;">
+            <div class="upload-area" id="uploadAreaVid">
+              <input type="file" id="postVideo" accept="video/*" style="display:none">
+              <div class="upload-placeholder" id="uploadPlaceholderVid">
+                <span style="font-size:48px">🎥</span>
+                <p><strong>Arraste um vídeo aqui</strong><br>ou clique para selecionar</p>
+                <small style="color:var(--text-muted)">MP4, MOV, AVI até 500MB</small>
+              </div>
+              <div class="upload-preview" id="uploadPreviewVid" style="display:none; text-align: center;">
+                <video id="previewVid" controls style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 12px;"></video>
+                <p id="videoInfo" style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;"></p>
+                <button type="button" class="btn-remove-image" onclick="removerVideo()">❌ Remover</button>
+              </div>
+              <div class="upload-progress" id="uploadProgressVid" style="display:none">
+                <div class="spinner"></div>
+                <p id="uploadProgressText">Fazendo upload do vídeo...</p>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="postMidiaURL">
+          <input type="hidden" id="postMidiaTipo">
         </div>
 
         <button type="submit" class="btn" id="btnPost">Publicar Post</button>
@@ -619,51 +657,68 @@ td {
     </div>
   </div>
 
-  <!-- SEÇÃO: CALENDÁRIO -->
-  <div id="calendario-section" class="section">
+  <!-- SEÇÃO: PLANILHA & FOTOS DE TRADES -->
+  <div id="planilha-section" class="section">
+    
+    <!-- Planilha Google Sheets -->
     <div class="card">
-      <h2>📅 Adicionar Calendário do Dia</h2>
-      <div id="alert-calendario" class="alert"></div>
+      <h2>📊 Planilha de Trades</h2>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">
+        Preencha os dados dos trades diretamente na planilha abaixo. O dashboard será atualizado automaticamente.
+      </p>
+      <div style="width: 100%; height: 600px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border);">
+        <iframe 
+          src="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit?usp=sharing&rm=minimal"
+          style="width: 100%; height: 100%; border: none;">
+        </iframe>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 12px;">
+        💡 Dica: Edite diretamente aqui ou <a href="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit" target="_blank" style="color: var(--accent);">abra em nova aba</a>
+      </p>
+    </div>
 
-      <form id="formCalendario">
+    <!-- Upload de Fotos de Trades -->
+    <div class="card">
+      <h2>📸 Fotos dos Trades</h2>
+      <div id="alert-foto-trade" class="alert"></div>
+      
+      <form id="formFotoTrade">
         <div class="form-group">
-          <label for="calendarioData">Data do Calendário</label>
-          <input type="date" id="calendarioData" required style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          <label for="diaDoTrade">Dia do Trade (1-31)</label>
+          <input 
+            type="number" 
+            id="diaDoTrade" 
+            min="1" 
+            max="31" 
+            required 
+            placeholder="Ex: 12"
+            style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
         </div>
 
         <div class="form-group">
-          <label>Imagem do Calendário</label>
-          <div class="upload-area" id="uploadAreaCal" onclick="document.getElementById('fileInputCal').click()" style="cursor: pointer; border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; transition: all .3s;">
-            <input type="file" id="fileInputCal" accept="image/*" style="display:none" onchange="handleCalendarioFile(event)">
-            <div id="uploadPlaceholderCal">
-              <span style="font-size:48px">📅</span>
-              <p><strong>Arraste a imagem do calendário aqui</strong><br>ou clique para selecionar</p>
+          <label>Foto do Trade</label>
+          <div class="upload-area" id="uploadAreaTrade" style="cursor: pointer; border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; transition: all .3s;">
+            <input type="file" id="fileInputTrade" accept="image/*" style="display:none">
+            <div id="uploadPlaceholderTrade">
+              <span style="font-size:48px">📸</span>
+              <p><strong>Arraste a foto do trade aqui</strong><br>ou clique para selecionar</p>
               <small style="color:var(--text-muted)">JPG, PNG até 10MB</small>
             </div>
-            <div id="uploadPreviewCal" style="display:none">
-              <img id="previewImgCal" src="" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 12px;">
-              <button type="button" class="btn-remove" onclick="event.stopPropagation(); removerImagemCal()">✕ Remover</button>
+            <div id="uploadPreviewTrade" style="display:none">
+              <img id="previewImgTrade" src="" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 12px;">
+              <button type="button" class="btn-remove" onclick="event.stopPropagation(); removerImagemTrade()">✕ Remover</button>
             </div>
-            <div id="uploadProgressCal" style="display:none; text-align: center; padding: 40px;">
+            <div id="uploadProgressTrade" style="display:none; text-align: center; padding: 40px;">
               <div class="spinner"></div>
-              <p style="color: var(--text-muted);">Fazendo upload...</p>
+              <p id="uploadProgressTextTrade" style="color: var(--text-muted);">Fazendo upload...</p>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn" id="btnCalendario">Salvar Calendário</button>
+        <button type="submit" class="btn" id="btnFotoTrade">Salvar Foto do Trade</button>
       </form>
     </div>
 
-    <div class="card">
-      <h2>📚 Calendários Publicados</h2>
-      <div id="calendarios-list">
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Carregando calendários...</p>
-        </div>
-      </div>
-    </div>
   </div>
 
 </div>
@@ -725,6 +780,26 @@ function mostrarAlerta(id, mensagem, tipo) {
 // ══════════════════════════════════════════════
 
 let imagemFile = null;
+let videoFile = null;
+let tipoMidiaAtual = 'imagem';
+
+// Alternar entre imagem e vídeo
+function mudarTipoMidia(tipo) {
+  tipoMidiaAtual = tipo;
+  
+  // Atualiza botões
+  document.getElementById('btnTipoImagem').style.border = tipo === 'imagem' ? '2px solid var(--accent)' : '2px solid var(--border)';
+  document.getElementById('btnTipoImagem').style.background = tipo === 'imagem' ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.05)';
+  document.getElementById('btnTipoImagem').style.color = tipo === 'imagem' ? 'var(--accent)' : 'var(--text)';
+  
+  document.getElementById('btnTipoVideo').style.border = tipo === 'video' ? '2px solid var(--accent)' : '2px solid var(--border)';
+  document.getElementById('btnTipoVideo').style.background = tipo === 'video' ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.05)';
+  document.getElementById('btnTipoVideo').style.color = tipo === 'video' ? 'var(--accent)' : 'var(--text)';
+  
+  // Mostra/esconde áreas
+  document.getElementById('uploadAreaImagem').style.display = tipo === 'imagem' ? 'block' : 'none';
+  document.getElementById('uploadAreaVideo').style.display = tipo === 'video' ? 'block' : 'none';
+}
 let imagemURL = null;
 
 // Configurar área de upload
@@ -808,6 +883,110 @@ function removerImagem() {
   previewImg.src = '';
 }
 
+// ══════════════════════════════════════════════
+// VÍDEO - DRAG & DROP
+// ══════════════════════════════════════════════
+const uploadAreaVid = document.getElementById('uploadAreaVid');
+const fileInputVid = document.getElementById('postVideo');
+const uploadPlaceholderVid = document.getElementById('uploadPlaceholderVid');
+const uploadPreviewVid = document.getElementById('uploadPreviewVid');
+const uploadProgressVid = document.getElementById('uploadProgressVid');
+const previewVid = document.getElementById('previewVid');
+
+// Drag and drop para vídeo
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  uploadAreaVid.addEventListener(eventName, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+});
+
+['dragenter', 'dragover'].forEach(eventName => {
+  uploadAreaVid.addEventListener(eventName, () => uploadAreaVid.classList.add('dragover'));
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+  uploadAreaVid.addEventListener(eventName, () => uploadAreaVid.classList.remove('dragover'));
+});
+
+uploadAreaVid.addEventListener('drop', (e) => {
+  const files = e.dataTransfer.files;
+  if (files.length > 0) handleVideoFile(files[0]);
+});
+
+uploadAreaVid.addEventListener('click', () => fileInputVid.click());
+
+fileInputVid.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) handleVideoFile(e.target.files[0]);
+});
+
+function handleVideoFile(file) {
+  if (!file.type.startsWith('video/')) {
+    alert('❌ Por favor, selecione apenas vídeos');
+    return;
+  }
+
+  if (file.size > 500 * 1024 * 1024) {
+    alert('❌ Vídeo muito grande. Máximo 500MB');
+    return;
+  }
+
+  videoFile = file;
+
+  // Mostra preview local
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewVid.src = e.target.result;
+    uploadPlaceholderVid.style.display = 'none';
+    uploadPreviewVid.style.display = 'block';
+    
+    // Info do vídeo
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    document.getElementById('videoInfo').textContent = `📹 ${file.name} (${sizeMB} MB)`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerVideo() {
+  videoFile = null;
+  fileInputVid.value = '';
+  uploadPlaceholderVid.style.display = 'block';
+  uploadPreviewVid.style.display = 'none';
+  previewVid.src = '';
+}
+
+// Upload de vídeo para Streamable
+async function uploadVideoStreamable(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    // Upload para Streamable (API pública)
+    const response = await fetch('https://api.streamable.com/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) throw new Error('Erro no upload');
+
+    const data = await response.json();
+    
+    // Retorna URL do Streamable
+    if (data.shortcode) {
+      return `https://streamable.com/${data.shortcode}`;
+    }
+    
+    throw new Error('Upload falhou');
+    
+  } catch (error) {
+    console.error('Erro no upload de vídeo:', error);
+    
+    // Fallback: converte para base64 (NÃO recomendado para vídeos grandes)
+    alert('⚠️ Falha no upload. Tente com vídeo menor ou use link do YouTube/Vimeo no campo "Link"');
+    throw error;
+  }
+}
+
 // Upload para ImgBB
 async function uploadImagemImgBB(file) {
   const formData = new FormData();
@@ -878,19 +1057,32 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
   btnPost.textContent = 'Publicando...';
 
   try {
-    let finalImagemURL = null;
+    let finalMidiaURL = null;
+    let midiaTipo = null;
 
-    // Se tem imagem, fazer upload
-    if (imagemFile) {
-      // Mostrar progresso
+    // Upload de IMAGEM
+    if (imagemFile && tipoMidiaAtual === 'imagem') {
       uploadPreview.style.display = 'none';
       uploadProgress.style.display = 'block';
 
-      finalImagemURL = await uploadImagemImgBB(imagemFile);
+      finalMidiaURL = await uploadImagemImgBB(imagemFile);
+      midiaTipo = 'imagem';
 
-      // Esconder progresso
       uploadProgress.style.display = 'none';
       uploadPreview.style.display = 'block';
+    }
+
+    // Upload de VÍDEO
+    if (videoFile && tipoMidiaAtual === 'video') {
+      uploadPreviewVid.style.display = 'none';
+      uploadProgressVid.style.display = 'block';
+      document.getElementById('uploadProgressText').textContent = 'Enviando vídeo... Pode demorar alguns segundos';
+
+      finalMidiaURL = await uploadVideoStreamable(videoFile);
+      midiaTipo = 'video';
+
+      uploadProgressVid.style.display = 'none';
+      uploadPreviewVid.style.display = 'block';
     }
 
     // Salva post no Firestore
@@ -899,7 +1091,8 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
       texto: document.getElementById('postTexto').value,
       categoria: document.getElementById('postCategoria').value,
       link: document.getElementById('postLink').value || null,
-      imagemURL: finalImagemURL,
+      midiaURL: finalMidiaURL,
+      midiaTipo: midiaTipo,
       criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
       autor: auth.currentUser.displayName || 'Admin'
     });
@@ -909,6 +1102,8 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
     // Limpa form
     document.getElementById('formPost').reset();
     removerImagem();
+    removerVideo();
+    mudarTipoMidia('imagem');
     
     // Recarrega lista
     carregarPosts();
@@ -943,14 +1138,26 @@ async function carregarPosts() {
       const post = doc.data();
       const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Agora';
       
+      // Mídia (imagem ou vídeo)
+      let midiaHTML = '';
+      if (post.midiaURL && post.midiaTipo === 'video') {
+        midiaHTML = `<div class="post-video" style="margin-bottom: 12px;">
+          <iframe src="${post.midiaURL}/e" frameborder="0" allowfullscreen style="width:100%;height:200px;border-radius:8px;"></iframe>
+        </div>`;
+      } else if (post.midiaURL || post.imagemURL) {
+        const imgURL = post.midiaURL || post.imagemURL;
+        midiaHTML = `<img src="${imgURL}" class="post-image" alt="${post.titulo}">`;
+      }
+      
       html += `
         <div class="post-item">
-          ${post.imagemURL ? `<img src="${post.imagemURL}" class="post-image" alt="${post.titulo}">` : ''}
+          ${midiaHTML}
           <div class="post-content">
             <div class="post-title">${post.titulo}</div>
             <div class="post-text">${post.texto.substring(0, 150)}${post.texto.length > 150 ? '...' : ''}</div>
             <div class="post-meta">
               📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor}
+              ${post.midiaTipo === 'video' ? ' • 🎥 Vídeo' : ''}
             </div>
             <div class="post-actions">
               <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">Excluir</button>
@@ -1067,47 +1274,48 @@ async function revogarAprovacao(uid) {
 }
 
 // ══════════════════════════════════════════════
-// CALENDÁRIO
+// FOTOS DE TRADES
 // ══════════════════════════════════════════════
-let calendarioFile = null;
+let tradeFile = null;
+const SPREADSHEET_ID = '1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10';
 
-// Configurar drag and drop para calendário
-const uploadAreaCal = document.getElementById('uploadAreaCal');
+// Configurar drag and drop para fotos de trades
+const uploadAreaTrade = document.getElementById('uploadAreaTrade');
+const fileInputTrade = document.getElementById('fileInputTrade');
 
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-  uploadAreaCal.addEventListener(eventName, (e) => {
+  uploadAreaTrade.addEventListener(eventName, (e) => {
     e.preventDefault();
     e.stopPropagation();
   });
 });
 
 ['dragenter', 'dragover'].forEach(eventName => {
-  uploadAreaCal.addEventListener(eventName, () => {
-    uploadAreaCal.style.borderColor = 'var(--accent)';
-    uploadAreaCal.style.background = 'rgba(34,197,94,0.05)';
+  uploadAreaTrade.addEventListener(eventName, () => {
+    uploadAreaTrade.style.borderColor = 'var(--accent)';
+    uploadAreaTrade.style.background = 'rgba(34,197,94,0.05)';
   });
 });
 
 ['dragleave', 'drop'].forEach(eventName => {
-  uploadAreaCal.addEventListener(eventName, () => {
-    uploadAreaCal.style.borderColor = 'var(--border)';
-    uploadAreaCal.style.background = 'transparent';
+  uploadAreaTrade.addEventListener(eventName, () => {
+    uploadAreaTrade.style.borderColor = 'var(--border)';
+    uploadAreaTrade.style.background = 'transparent';
   });
 });
 
-uploadAreaCal.addEventListener('drop', (e) => {
+uploadAreaTrade.addEventListener('drop', (e) => {
   const files = e.dataTransfer.files;
-  if (files.length > 0) {
-    processarArquivoCalendario(files[0]);
-  }
+  if (files.length > 0) processarArquivoTrade(files[0]);
 });
 
-function handleCalendarioFile(event) {
-  const file = event.target.files[0];
-  if (file) processarArquivoCalendario(file);
-}
+uploadAreaTrade.addEventListener('click', () => fileInputTrade.click());
 
-function processarArquivoCalendario(file) {
+fileInputTrade.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) processarArquivoTrade(e.target.files[0]);
+});
+
+function processarArquivoTrade(file) {
   if (!file.type.startsWith('image/')) {
     alert('❌ Por favor, selecione apenas imagens');
     return;
@@ -1118,138 +1326,115 @@ function processarArquivoCalendario(file) {
     return;
   }
 
-  calendarioFile = file;
+  tradeFile = file;
 
   const reader = new FileReader();
   reader.onload = (e) => {
-    document.getElementById('previewImgCal').src = e.target.result;
-    document.getElementById('uploadPlaceholderCal').style.display = 'none';
-    document.getElementById('uploadPreviewCal').style.display = 'block';
+    document.getElementById('previewImgTrade').src = e.target.result;
+    document.getElementById('uploadPlaceholderTrade').style.display = 'none';
+    document.getElementById('uploadPreviewTrade').style.display = 'block';
   };
   reader.readAsDataURL(file);
 }
 
-function removerImagemCal() {
-  calendarioFile = null;
-  document.getElementById('fileInputCal').value = '';
-  document.getElementById('uploadPlaceholderCal').style.display = 'block';
-  document.getElementById('uploadPreviewCal').style.display = 'none';
+function removerImagemTrade() {
+  tradeFile = null;
+  fileInputTrade.value = '';
+  document.getElementById('uploadPlaceholderTrade').style.display = 'block';
+  document.getElementById('uploadPreviewTrade').style.display = 'none';
 }
 
-document.getElementById('formCalendario').addEventListener('submit', async (e) => {
+// Upload de foto do trade
+document.getElementById('formFotoTrade').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  if (!calendarioFile) {
-    mostrarAlerta('alert-calendario', '❌ Selecione uma imagem', 'error');
+  if (!tradeFile) {
+    mostrarAlerta('alert-foto-trade', '❌ Selecione uma foto', 'error');
     return;
   }
 
-  const btnCalendario = document.getElementById('btnCalendario');
-  btnCalendario.disabled = true;
-  btnCalendario.textContent = 'Salvando...';
-
-  try {
-    document.getElementById('uploadPreviewCal').style.display = 'none';
-    document.getElementById('uploadProgressCal').style.display = 'block';
-
-    const imagemURL = await uploadImagemImgBB(calendarioFile);
-
-    const data = document.getElementById('calendarioData').value;
-    
-    console.log('📅 Salvando calendário:');
-    console.log('  Data:', data);
-    console.log('  Imagem URL:', imagemURL);
-
-    await db.collection('calendarios').doc(data).set({
-      data: data,
-      imagemURL: imagemURL,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-      autor: auth.currentUser.displayName || 'Admin'
-    });
-    
-    console.log('✅ Calendário salvo com sucesso no Firestore!');
-
-    mostrarAlerta('alert-calendario', '✅ Calendário salvo com sucesso!', 'success');
-    
-    document.getElementById('formCalendario').reset();
-    removerImagemCal();
-    carregarCalendarios();
-
-  } catch (error) {
-    console.error('Erro ao salvar calendário:', error);
-    mostrarAlerta('alert-calendario', '❌ Erro ao salvar calendário', 'error');
-    document.getElementById('uploadPreviewCal').style.display = 'block';
-    document.getElementById('uploadProgressCal').style.display = 'none';
+  const dia = parseInt(document.getElementById('diaDoTrade').value);
+  
+  if (dia < 1 || dia > 31) {
+    mostrarAlerta('alert-foto-trade', '❌ Dia inválido (1-31)', 'error');
+    return;
   }
 
-  btnCalendario.disabled = false;
-  btnCalendario.textContent = 'Salvar Calendário';
+  const btnFotoTrade = document.getElementById('btnFotoTrade');
+  btnFotoTrade.disabled = true;
+  btnFotoTrade.textContent = 'Enviando...';
+
+  try {
+    document.getElementById('uploadPreviewTrade').style.display = 'none';
+    document.getElementById('uploadProgressTrade').style.display = 'block';
+    document.getElementById('uploadProgressTextTrade').textContent = 'Fazendo upload para Google Drive...';
+
+    // Converte imagem para base64
+    const reader = new FileReader();
+    const base64Promise = new Promise((resolve) => {
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(tradeFile);
+    });
+    
+    const imagemBase64 = await base64Promise;
+    
+    // Pega data atual
+    const hoje = new Date();
+    const mes = hoje.getMonth() + 1;
+    const ano = hoje.getFullYear();
+
+    console.log('📸 Enviando foto do trade...');
+    console.log('  Dia:', dia);
+    console.log('  Mês:', mes);
+    console.log('  Ano:', ano);
+
+    // Envia para a API do Google Apps Script
+    const formData = new FormData();
+    formData.append('dia', dia);
+    formData.append('mes', mes);
+    formData.append('ano', ano);
+    formData.append('imagem', imagemBase64);
+
+    const response = await fetch('https://script.google.com/macros/s/AKfycbxoWjuzCEqo8k7KMkT7BTZrg4ouT9C-0uuWsMLcoVz1dWbrVEABusIz1Okm-oQ6aIBMJQ/exec', {
+      method: 'POST',
+      body: formData
+    });
+
+    const resultado = await response.json();
+
+    if (resultado.success) {
+      console.log('✅ Foto salva com sucesso!');
+      console.log('  ID da Foto:', resultado.fotoId);
+      console.log('  Nome:', resultado.nomeArquivo);
+      console.log('  Linha atualizada:', resultado.linha);
+      
+      mostrarAlerta('alert-foto-trade', `✅ Foto salva com sucesso! Google Drive atualizado e planilha sincronizada automaticamente.`, 'success');
+    } else {
+      throw new Error(resultado.error || 'Erro desconhecido');
+    }
+    
+    // Limpa form
+    document.getElementById('formFotoTrade').reset();
+    removerImagemTrade();
+
+  } catch (error) {
+    console.error('❌ Erro ao salvar foto:', error);
+    mostrarAlerta('alert-foto-trade', `❌ Erro ao salvar foto: ${error.message}`, 'error');
+    document.getElementById('uploadPreviewTrade').style.display = 'block';
+    document.getElementById('uploadProgressTrade').style.display = 'none';
+  }
+
+  btnFotoTrade.disabled = false;
+  btnFotoTrade.textContent = 'Salvar Foto do Trade';
 });
 
-async function carregarCalendarios() {
-  const container = document.getElementById('calendarios-list');
-
-  try {
-    const snapshot = await db.collection('calendarios')
-      .orderBy('data', 'desc')
-      .limit(30)
-      .get();
-
-    if (snapshot.empty) {
-      container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;">Nenhum calendário publicado ainda.</p>';
-      return;
-    }
-
-    let html = '<div style="display:grid;gap:16px;">';
-    snapshot.forEach(doc => {
-      const cal = doc.data();
-      const dataFormatada = new Date(cal.data + 'T00:00:00').toLocaleDateString('pt-BR');
-
-      html += `
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;gap:16px;align-items:center;">
-          <img src="${cal.imagemURL}" style="width:120px;height:80px;object-fit:cover;border-radius:8px;">
-          <div style="flex:1;">
-            <strong style="font-size:16px;">📅 ${dataFormatada}</strong>
-            <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">Por ${cal.autor}</p>
-          </div>
-          <button class="btn btn-sm btn-danger" onclick="deletarCalendario('${doc.id}')">Excluir</button>
-        </div>`;
-    });
-    html += '</div>';
-
-    container.innerHTML = html;
-
-  } catch (error) {
-    console.error('Erro ao carregar calendários:', error);
-    container.innerHTML = '<p style="color:var(--red)">Erro ao carregar calendários</p>';
-  }
-}
-
-async function deletarCalendario(id) {
-  if (!confirm('Deseja realmente excluir este calendário?')) return;
-
-  try {
-    await db.collection('calendarios').doc(id).delete();
-    mostrarAlerta('alert-calendario', '✅ Calendário excluído', 'success');
-    carregarCalendarios();
-  } catch (error) {
-    console.error('Erro ao excluir:', error);
-    mostrarAlerta('alert-calendario', '❌ Erro ao excluir', 'error');
-  }
-}
-
-// Carregar calendários quando trocar de aba
+// Switch de abas
 window.switchTab = function(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
   
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(`${tabName}-section`).classList.add('active');
-
-  if (tabName === 'calendario') {
-    carregarCalendarios();
-    document.getElementById('calendarioData').valueAsDate = new Date();
-  }
 };
 </script>
 
