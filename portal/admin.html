@@ -683,16 +683,51 @@ td {
       <div id="alert-foto-trade" class="alert"></div>
       
       <form id="formFotoTrade">
-        <div class="form-group">
-          <label for="diaDoTrade">Dia do Trade (1-31)</label>
-          <input 
-            type="number" 
-            id="diaDoTrade" 
-            min="1" 
-            max="31" 
-            required 
-            placeholder="Ex: 12"
-            style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="diaDoTrade">Dia</label>
+            <input 
+              type="number" 
+              id="diaDoTrade" 
+              min="1" 
+              max="31" 
+              required 
+              placeholder="12"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+
+          <div class="form-group">
+            <label for="mesDoTrade">Mês</label>
+            <select 
+              id="mesDoTrade" 
+              required
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+              <option value="1">Janeiro</option>
+              <option value="2">Fevereiro</option>
+              <option value="3">Março</option>
+              <option value="4">Abril</option>
+              <option value="5">Maio</option>
+              <option value="6">Junho</option>
+              <option value="7">Julho</option>
+              <option value="8">Agosto</option>
+              <option value="9">Setembro</option>
+              <option value="10">Outubro</option>
+              <option value="11">Novembro</option>
+              <option value="12">Dezembro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="anoDoTrade">Ano</label>
+            <input 
+              type="number" 
+              id="anoDoTrade" 
+              min="2020" 
+              max="2030" 
+              required 
+              placeholder="2026"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
         </div>
 
         <div class="form-group">
@@ -1354,6 +1389,8 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
   }
 
   const dia = parseInt(document.getElementById('diaDoTrade').value);
+  const mes = parseInt(document.getElementById('mesDoTrade').value);
+  const ano = parseInt(document.getElementById('anoDoTrade').value);
   
   if (dia < 1 || dia > 31) {
     mostrarAlerta('alert-foto-trade', '❌ Dia inválido (1-31)', 'error');
@@ -1377,11 +1414,6 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
     });
     
     const imagemBase64 = await base64Promise;
-    
-    // Pega data atual
-    const hoje = new Date();
-    const mes = hoje.getMonth() + 1;
-    const ano = hoje.getFullYear();
 
     console.log('📸 Enviando foto do trade...');
     console.log('  Dia:', dia);
@@ -1435,6 +1467,14 @@ window.switchTab = function(tabName) {
   
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(`${tabName}-section`).classList.add('active');
+  
+  // Auto-preenche data atual quando abre aba de planilha
+  if (tabName === 'planilha') {
+    const hoje = new Date();
+    document.getElementById('diaDoTrade').value = hoje.getDate();
+    document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
+    document.getElementById('anoDoTrade').value = hoje.getFullYear();
+  }
 };
 </script>
 
