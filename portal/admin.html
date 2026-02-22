@@ -1155,6 +1155,10 @@ document.getElementById('formCalendario').addEventListener('submit', async (e) =
     const imagemURL = await uploadImagemImgBB(calendarioFile);
 
     const data = document.getElementById('calendarioData').value;
+    
+    console.log('📅 Salvando calendário:');
+    console.log('  Data:', data);
+    console.log('  Imagem URL:', imagemURL);
 
     await db.collection('calendarios').doc(data).set({
       data: data,
@@ -1162,6 +1166,8 @@ document.getElementById('formCalendario').addEventListener('submit', async (e) =
       criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
       autor: auth.currentUser.displayName || 'Admin'
     });
+    
+    console.log('✅ Calendário salvo com sucesso no Firestore!');
 
     mostrarAlerta('alert-calendario', '✅ Calendário salvo com sucesso!', 'success');
     
