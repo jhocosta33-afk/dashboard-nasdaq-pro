@@ -229,7 +229,7 @@ input::placeholder {
     </div>
 
     <div class="back-link">
-      <a href="index.html">← Voltar para página inicial</a>
+      <a href="../">← Voltar ao Dashboard</a>
     </div>
   </div>
 </div>
@@ -244,6 +244,11 @@ input::placeholder {
 // ══════════════════════════════════════════════
 // VERIFICAR SE JÁ ESTÁ LOGADO (AUTO-LOGIN)
 // ══════════════════════════════════════════════
+
+// Mostrar loading durante verificação
+document.body.style.opacity = '0.5';
+document.body.style.pointerEvents = 'none';
+
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     // Usuário já está logado, verificar se é admin ou aluno aprovado
@@ -272,7 +277,10 @@ auth.onAuthStateChanged(async (user) => {
       console.error('Erro ao verificar usuário:', error);
     }
   }
-  // Se não estiver logado, permanece na página de login normalmente
+  
+  // Remove loading - usuário não está logado ou não foi aprovado
+  document.body.style.opacity = '1';
+  document.body.style.pointerEvents = 'auto';
 });
 
 // ══════════════════════════════════════════════
