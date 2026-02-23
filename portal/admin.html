@@ -660,21 +660,129 @@ td {
   <!-- SEÇÃO: PLANILHA & FOTOS DE TRADES -->
   <div id="planilha-section" class="section">
     
-    <!-- Planilha Google Sheets -->
+    <!-- Formulário de Dados do Trade -->
     <div class="card">
-      <h2>📊 Planilha de Trades</h2>
+      <h2>📊 Registrar Trade do Dia</h2>
       <p style="color: var(--text-muted); margin-bottom: 16px;">
-        Preencha os dados dos trades diretamente na planilha abaixo. O dashboard será atualizado automaticamente.
+        Preencha os dados do trade e a planilha será atualizada automaticamente.
       </p>
-      <div style="width: 100%; height: 600px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border);">
-        <iframe 
-          src="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit?usp=sharing&rm=minimal"
-          style="width: 100%; height: 100%; border: none;">
-        </iframe>
+      <div id="alert-trade-data" class="alert"></div>
+      
+      <form id="formTradeData">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label for="diaData">Dia</label>
+            <input 
+              type="number" 
+              id="diaData" 
+              min="1" 
+              max="31" 
+              required 
+              placeholder="12"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+
+          <div class="form-group">
+            <label for="mesData">Mês</label>
+            <select 
+              id="mesData" 
+              required
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+              <option value="1">Janeiro</option>
+              <option value="2">Fevereiro</option>
+              <option value="3">Março</option>
+              <option value="4">Abril</option>
+              <option value="5">Maio</option>
+              <option value="6">Junho</option>
+              <option value="7">Julho</option>
+              <option value="8">Agosto</option>
+              <option value="9">Setembro</option>
+              <option value="10">Outubro</option>
+              <option value="11">Novembro</option>
+              <option value="12">Dezembro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="anoData">Ano</label>
+            <input 
+              type="number" 
+              id="anoData" 
+              min="2020" 
+              max="2030" 
+              required 
+              placeholder="2026"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="pontos">Pontos</label>
+            <input 
+              type="number" 
+              id="pontos" 
+              required 
+              placeholder="Ex: 15 ou -10"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+
+          <div class="form-group">
+            <label for="trades">Total de Trades</label>
+            <input 
+              type="number" 
+              id="trades" 
+              min="0" 
+              required 
+              placeholder="Ex: 3"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+
+          <div class="form-group">
+            <label for="gains">Gains</label>
+            <input 
+              type="number" 
+              id="gains" 
+              min="0" 
+              required 
+              placeholder="Ex: 2"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+
+          <div class="form-group">
+            <label for="stops">Stops</label>
+            <input 
+              type="number" 
+              id="stops" 
+              min="0" 
+              required 
+              placeholder="Ex: 1"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+
+          <div class="form-group">
+            <label for="breakeven">Breakeven (0x0)</label>
+            <input 
+              type="number" 
+              id="breakeven" 
+              min="0" 
+              required 
+              placeholder="Ex: 0"
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="btnTradeData" style="margin-top: 16px;">Salvar na Planilha</button>
+      </form>
+
+      <div style="margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+          💡 <strong>Dica:</strong> Quer ver/editar a planilha completa?
+        </p>
+        <a href="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit" target="_blank" class="btn btn-secondary" style="display: inline-block; padding: 8px 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 13px;">
+          📊 Abrir Planilha no Google Sheets
+        </a>
       </div>
-      <p style="font-size: 12px; color: var(--text-muted); margin-top: 12px;">
-        💡 Dica: Edite diretamente aqui ou <a href="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit" target="_blank" style="color: var(--accent);">abra em nova aba</a>
-      </p>
     </div>
 
     <!-- Upload de Fotos de Trades -->
@@ -1460,6 +1568,77 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
   btnFotoTrade.textContent = 'Salvar Foto do Trade';
 });
 
+// ══════════════════════════════════════════════
+// FORMULÁRIO DE DADOS DO TRADE
+// ══════════════════════════════════════════════
+document.getElementById('formTradeData').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const btnTradeData = document.getElementById('btnTradeData');
+  btnTradeData.disabled = true;
+  btnTradeData.textContent = 'Salvando...';
+
+  try {
+    const dia = parseInt(document.getElementById('diaData').value);
+    const mes = parseInt(document.getElementById('mesData').value);
+    const ano = parseInt(document.getElementById('anoData').value);
+    const pontos = parseInt(document.getElementById('pontos').value);
+    const trades = parseInt(document.getElementById('trades').value);
+    const gains = parseInt(document.getElementById('gains').value);
+    const stops = parseInt(document.getElementById('stops').value);
+    const breakeven = parseInt(document.getElementById('breakeven').value);
+
+    console.log('📊 Salvando dados do trade...');
+    console.log('  Data:', `${dia}/${mes}/${ano}`);
+    console.log('  Pontos:', pontos);
+    console.log('  Trades:', trades);
+
+    // Envia para a API do Google Apps Script
+    const formData = new FormData();
+    formData.append('acao', 'salvarTrade');
+    formData.append('dia', dia);
+    formData.append('mes', mes);
+    formData.append('ano', ano);
+    formData.append('pontos', pontos);
+    formData.append('trades', trades);
+    formData.append('gains', gains);
+    formData.append('stops', stops);
+    formData.append('breakeven', breakeven);
+
+    const response = await fetch('https://script.google.com/macros/s/AKfycbxoWjuzCEqo8k7KMkT7BTZrg4ouT9C-0uuWsMLcoVz1dWbrVEABusIz1Okm-oQ6aIBMJQ/exec', {
+      method: 'POST',
+      body: formData
+    });
+
+    const resultado = await response.json();
+
+    if (resultado.success) {
+      console.log('✅ Dados salvos com sucesso!');
+      console.log('  Linha atualizada:', resultado.linha);
+      
+      mostrarAlerta('alert-trade-data', '✅ Dados salvos na planilha com sucesso!', 'success');
+      
+      // Limpa form
+      document.getElementById('formTradeData').reset();
+      
+      // Redefine data para hoje
+      const hoje = new Date();
+      document.getElementById('diaData').value = hoje.getDate();
+      document.getElementById('mesData').value = hoje.getMonth() + 1;
+      document.getElementById('anoData').value = hoje.getFullYear();
+    } else {
+      throw new Error(resultado.error || 'Erro desconhecido');
+    }
+
+  } catch (error) {
+    console.error('❌ Erro ao salvar:', error);
+    mostrarAlerta('alert-trade-data', `❌ Erro ao salvar: ${error.message}`, 'error');
+  }
+
+  btnTradeData.disabled = false;
+  btnTradeData.textContent = 'Salvar na Planilha';
+});
+
 // Switch de abas
 window.switchTab = function(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1471,6 +1650,13 @@ window.switchTab = function(tabName) {
   // Auto-preenche data atual quando abre aba de planilha
   if (tabName === 'planilha') {
     const hoje = new Date();
+    
+    // Formulário de dados do trade
+    document.getElementById('diaData').value = hoje.getDate();
+    document.getElementById('mesData').value = hoje.getMonth() + 1;
+    document.getElementById('anoData').value = hoje.getFullYear();
+    
+    // Formulário de foto
     document.getElementById('diaDoTrade').value = hoje.getDate();
     document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
     document.getElementById('anoDoTrade').value = hoje.getFullYear();
