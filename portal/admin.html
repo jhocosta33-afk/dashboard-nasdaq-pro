@@ -716,6 +716,28 @@ td {
           </div>
         </div>
 
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label for="semana">Semana do Mês (automático)</label>
+            <input 
+              type="text" 
+              id="semana" 
+              readonly
+              placeholder="Calculado automaticamente"
+              style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text-muted); cursor: not-allowed;">
+          </div>
+
+          <div class="form-group">
+            <label for="alvo">Ativo/Alvo</label>
+            <input 
+              type="text" 
+              id="alvo" 
+              required 
+              placeholder="Ex: NASDAQ, SP500, WIN..."
+              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);">
+          </div>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group">
             <label for="pontos">Pontos</label>
@@ -1571,6 +1593,26 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
 // ══════════════════════════════════════════════
 // FORMULÁRIO DE DADOS DO TRADE
 // ══════════════════════════════════════════════
+
+// Calcular semana do mês baseado no dia
+function calcularSemanaMes(dia) {
+  if (dia <= 7) return 'SEMANA 1';
+  if (dia <= 14) return 'SEMANA 2';
+  if (dia <= 21) return 'SEMANA 3';
+  if (dia <= 28) return 'SEMANA 4';
+  return 'SEMANA 5';
+}
+
+// Atualizar semana quando mudar o dia
+document.getElementById('diaData').addEventListener('input', (e) => {
+  const dia = parseInt(e.target.value);
+  if (dia >= 1 && dia <= 31) {
+    document.getElementById('semana').value = calcularSemanaMes(dia);
+  } else {
+    document.getElementById('semana').value = '';
+  }
+});
+
 document.getElementById('formTradeData').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -1582,6 +1624,8 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     const dia = parseInt(document.getElementById('diaData').value);
     const mes = parseInt(document.getElementById('mesData').value);
     const ano = parseInt(document.getElementById('anoData').value);
+    const semana = document.getElementById('semana').value.trim() || calcularSemanaMes(dia);
+    const alvo = document.getElementById('alvo').value.trim() || 'NASDAQ';
     const pontos = parseInt(document.getElementById('pontos').value);
     const trades = parseInt(document.getElementById('trades').value);
     const gains = parseInt(document.getElementById('gains').value);
@@ -1590,8 +1634,9 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
 
     console.log('📊 Salvando dados do trade...');
     console.log('  Data:', `${dia}/${mes}/${ano}`);
+    console.log('  Semana:', semana);
+    console.log('  Alvo:', alvo);
     console.log('  Pontos:', pontos);
-    console.log('  Trades:', trades);
 
     // Envia para a API do Google Apps Script
     const formData = new FormData();
@@ -1599,6 +1644,8 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     formData.append('dia', dia);
     formData.append('mes', mes);
     formData.append('ano', ano);
+    formData.append('semana', semana);
+    formData.append('alvo', alvo);
     formData.append('pontos', pontos);
     formData.append('trades', trades);
     formData.append('gains', gains);
@@ -1650,14 +1697,17 @@ window.switchTab = function(tabName) {
   // Auto-preenche data atual quando abre aba de planilha
   if (tabName === 'planilha') {
     const hoje = new Date();
+    const dia = hoje.getDate();
     
     // Formulário de dados do trade
-    document.getElementById('diaData').value = hoje.getDate();
+    document.getElementById('diaData').value = dia;
     document.getElementById('mesData').value = hoje.getMonth() + 1;
     document.getElementById('anoData').value = hoje.getFullYear();
+    document.getElementById('semana').value = calcularSemanaMes(dia);
+    document.getElementById('alvo').value = 'NASDAQ';
     
     // Formulário de foto
-    document.getElementById('diaDoTrade').value = hoje.getDate();
+    document.getElementById('diaDoTrade').value = dia;
     document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
     document.getElementById('anoDoTrade').value = hoje.getFullYear();
   }
