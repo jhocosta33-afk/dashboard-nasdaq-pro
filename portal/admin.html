@@ -1638,23 +1638,26 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     console.log('  Alvo:', alvo);
     console.log('  Pontos:', pontos);
 
-    // Envia para a API do Google Apps Script
-    const formData = new FormData();
-    formData.append('acao', 'salvarTrade');
-    formData.append('dia', dia);
-    formData.append('mes', mes);
-    formData.append('ano', ano);
-    formData.append('semana', semana);
-    formData.append('alvo', alvo);
-    formData.append('pontos', pontos);
-    formData.append('trades', trades);
-    formData.append('gains', gains);
-    formData.append('stops', stops);
-    formData.append('breakeven', breakeven);
+    // Envia para a API do Google Apps Script (URLSearchParams funciona melhor que FormData)
+    const params = new URLSearchParams();
+    params.append('acao', 'salvarTrade');
+    params.append('dia', dia);
+    params.append('mes', mes);
+    params.append('ano', ano);
+    params.append('semana', semana);
+    params.append('alvo', alvo);
+    params.append('pontos', pontos);
+    params.append('trades', trades);
+    params.append('gains', gains);
+    params.append('stops', stops);
+    params.append('breakeven', breakeven);
 
     const response = await fetch('https://script.google.com/macros/s/AKfycbxoWjuzCEqo8k7KMkT7BTZrg4ouT9C-0uuWsMLcoVz1dWbrVEABusIz1Okm-oQ6aIBMJQ/exec', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
     });
 
     const resultado = await response.json();
