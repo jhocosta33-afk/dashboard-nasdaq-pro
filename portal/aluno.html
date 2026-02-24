@@ -924,6 +924,8 @@ async function carregarComentarios(postId) {
       return;
     }
     
+    const user = auth.currentUser;
+    
     let html = '';
     snapshot.forEach(doc => {
       const comentario = doc.data();
@@ -936,6 +938,9 @@ async function carregarComentarios(postId) {
           })
         : 'Agora';
       
+      // Verifica se usuário pode deletar (próprio comentário)
+      const podeExcluir = user && comentario.autorId === user.uid;
+      
       html += `
         <div class="comentario-item">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -945,7 +950,10 @@ async function carregarComentarios(postId) {
               </span>
               ${comentario.autor}
             </strong>
-            <span style="font-size: 11px; color: var(--text-muted);">${data}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; color: var(--text-muted);">${data}</span>
+              ${podeExcluir ? `<button onclick="deletarComentario('${postId}', '${doc.id}')" style="background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.7; transition: opacity .2s;" title="Deletar comentário" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🗑️</button>` : ''}
+            </div>
           </div>
           <p style="margin: 0; line-height: 1.7; padding-left: 38px; color: var(--text);">${comentario.texto}</p>
         </div>`;
@@ -988,6 +996,22 @@ async function enviarComentario(postId) {
   } catch (error) {
     console.error('Erro ao enviar comentário:', error);
     alert('Erro ao enviar comentário');
+  }
+}
+
+// Deletar comentário
+async function deletarComentario(postId, comentarioId) {
+  if (!confirm('Tem certeza que deseja deletar este comentário?')) return;
+  
+  try {
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
+    
+    // Recarrega comentários
+    await carregarComentarios(postId);
+    
+  } catch (error) {
+    console.error('Erro ao deletar comentário:', error);
+    alert('Erro ao deletar comentário');
   }
 }
 
