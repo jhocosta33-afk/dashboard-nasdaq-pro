@@ -1651,6 +1651,8 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     params.append('gains', gains);
     params.append('stops', stops);
     params.append('breakeven', breakeven);
+    
+    console.log('📤 Enviando params:', params.toString());
 
     const response = await fetch('https://script.google.com/macros/s/AKfycbxoWjuzCEqo8k7KMkT7BTZrg4ouT9C-0uuWsMLcoVz1dWbrVEABusIz1Okm-oQ6aIBMJQ/exec', {
       method: 'POST',
@@ -1659,8 +1661,12 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
       },
       body: params.toString()
     });
-
-    const resultado = await response.json();
+    
+    console.log('📥 Response status:', response.status);
+    const textoResposta = await response.text();
+    console.log('📥 Response text:', textoResposta);
+    
+    const resultado = JSON.parse(textoResposta);
 
     if (resultado.success) {
       console.log('✅ Dados salvos com sucesso!');
