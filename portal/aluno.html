@@ -110,40 +110,44 @@ h1 {
 .quick-access {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
+  gap: 16px;
+  margin-bottom: 40px;
 }
 
 .quick-card {
-  background: var(--card);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 16px;
+  padding: 28px 24px;
   cursor: pointer;
-  transition: all .3s;
+  transition: all .3s ease;
   text-align: center;
 }
 
 .quick-card:hover {
   border-color: var(--accent);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(34,197,94,0.15);
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%);
 }
 
 .quick-card-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
+  font-size: 56px;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
 }
 
 .quick-card h3 {
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 8px;
+  color: var(--text);
 }
 
 .quick-card p {
   font-size: 13px;
   color: var(--text-muted);
+  line-height: 1.5;
 }
 
 /* SECTION HEADER */
@@ -151,81 +155,150 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .section-header h2 {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .filter-buttons {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .filter-btn {
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all .2s;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: var(--accent);
 }
 
 .filter-btn.active {
   background: var(--accent);
   color: #000;
   border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(34,197,94,0.3);
 }
 
 /* POSTS GRID */
 .posts-grid {
   display: grid;
-  gap: 20px;
+  gap: 24px;
+}
+
+/* RESPONSIVO - MOBILE */
+@media (max-width: 768px) {
+  .quick-access {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .quick-card {
+    padding: 20px;
+  }
+  
+  .quick-card-icon {
+    font-size: 48px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .section-header h2 {
+    font-size: 20px;
+  }
+  
+  .filter-buttons {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  
+  .filter-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  
+  .posts-grid {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .quick-card h3 {
+    font-size: 16px;
+  }
+  
+  .quick-card p {
+    font-size: 12px;
+  }
 }
 
 .post-card {
-  background: var(--card);
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   transition: all .3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .post-card:hover {
   border-color: var(--accent);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 32px rgba(34,197,94,0.15);
+  transform: translateY(-2px);
 }
 
 .post-image {
   width: 100%;
-  height: 200px;
+  height: 250px;
   object-fit: cover;
   background: rgba(255,255,255,0.05);
   cursor: pointer;
-  transition: transform .2s;
+  transition: transform .3s ease;
 }
 
 .post-image:hover {
-  transform: scale(1.02);
+  transform: scale(1.05);
 }
 
 .post-content {
-  padding: 20px;
+  padding: 24px;
 }
 
 .post-header {
   display: flex;
   justify-content: space-between;
-  align-items: start;
-  margin-bottom: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .post-category {
@@ -233,50 +306,179 @@ h1 {
   font-weight: 700;
   text-transform: uppercase;
   color: var(--accent);
-  background: rgba(34,197,94,0.1);
-  padding: 4px 10px;
-  border-radius: 6px;
+  background: rgba(34,197,94,0.15);
+  padding: 6px 12px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
 }
 
 .post-date {
   font-size: 12px;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.post-date::before {
+  content: '📅';
+  font-size: 14px;
 }
 
 .post-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   margin-bottom: 12px;
   color: var(--text);
+  line-height: 1.3;
 }
 
 .post-text {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 16px;
+  line-height: 1.8;
+  margin-bottom: 20px;
 }
 
 .post-footer {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 18px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all .2s;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border: none;
 }
 
 .btn-primary {
   background: var(--accent);
   color: #000;
+}
+
+.btn-primary:hover {
+  background: #1ea855;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* COMENTÁRIOS */
+.comentarios-section {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comentario-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  transition: all .2s;
+}
+
+.comentario-item:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(34,197,94,0.2);
+}
+
+.comentario-form textarea {
+  width: 100%;
+  min-height: 100px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all .2s;
+}
+
+.comentario-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+}
+
+.comentario-form textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* RESPONSIVO - MOBILE */
+@media (max-width: 768px) {
+  .post-card {
+    border-radius: 12px;
+  }
+  
+  .post-image {
+    height: 200px;
+  }
+  
+  .post-content {
+    padding: 16px;
+  }
+  
+  .post-title {
+    font-size: 18px;
+  }
+  
+  .post-text {
+    font-size: 14px;
+  }
+  
+  .post-footer {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+  }
+  
+  .comentario-item {
+    padding: 12px;
+  }
+  
+  .comentario-form textarea {
+    min-height: 80px;
+    font-size: 16px; /* Evita zoom no iOS */
+  }
 }
 
 .btn-primary:hover {
@@ -609,9 +811,26 @@ function renderizarPosts() {
 
     const icon = categoriaIcons[post.categoria] || '📄';
 
+    // Mídia (imagem ou vídeo)
+    let midiaHTML = '';
+    if (post.midiaURL && post.midiaTipo === 'video') {
+      midiaHTML = `
+        <div class="post-video" style="width:100%; aspect-ratio:16/9; margin-bottom: 12px;">
+          <iframe 
+            src="${post.midiaURL}/e" 
+            frameborder="0" 
+            allowfullscreen 
+            style="width:100%;height:100%;border-radius:8px;">
+          </iframe>
+        </div>`;
+    } else if (post.midiaURL || post.imagemURL) {
+      const imgURL = post.midiaURL || post.imagemURL;
+      midiaHTML = `<img src="${imgURL}" class="post-image" alt="${post.titulo}" onclick="abrirModal('${imgURL}')">`;
+    }
+
     html += `
-      <div class="post-card" data-categoria="${post.categoria}">
-        ${post.imagemURL ? `<img src="${post.imagemURL}" class="post-image" alt="${post.titulo}" onclick="abrirModal('${post.imagemURL}')">` : ''}
+      <div class="post-card" data-categoria="${post.categoria}" data-post-id="${post.id}">
+        ${midiaHTML}
         <div class="post-content">
           <div class="post-header">
             <span class="post-category">${icon} ${post.categoria}</span>
@@ -621,6 +840,34 @@ function renderizarPosts() {
           <p class="post-text">${post.texto}</p>
           <div class="post-footer">
             ${post.link ? `<a href="${post.link}" target="_blank" class="btn btn-primary">Acessar Link 🔗</a>` : ''}
+            <button class="btn btn-secondary" onclick="toggleComentarios('${post.id}')" style="margin-left: 8px;">
+              💬 Comentários (<span id="count-${post.id}">0</span>)
+            </button>
+          </div>
+          
+          <!-- SEÇÃO DE COMENTÁRIOS -->
+          <div class="comentarios-section" id="comentarios-${post.id}" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+            <div class="comentarios-lista" id="lista-${post.id}">
+              <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                Carregando comentários...
+              </div>
+            </div>
+            
+            <!-- FORM DE NOVO COMENTÁRIO -->
+            <div class="comentario-form" style="margin-top: 16px;">
+              <textarea 
+                id="texto-${post.id}" 
+                placeholder="Escreva seu comentário..." 
+                style="width: 100%; min-height: 80px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: inherit; resize: vertical;"
+              ></textarea>
+              <button 
+                class="btn btn-primary" 
+                onclick="enviarComentario('${post.id}')" 
+                style="margin-top: 8px;"
+              >
+                Enviar Comentário
+              </button>
+            </div>
           </div>
         </div>
       </div>`;
@@ -643,6 +890,129 @@ function filtrarPosts(categoria) {
   categoriaAtual = categoria;
   renderizarPosts();
 }
+
+// ══════════════════════════════════════════════
+// SISTEMA DE COMENTÁRIOS
+// ══════════════════════════════════════════════
+
+// Toggle mostrar/esconder comentários
+async function toggleComentarios(postId) {
+  const section = document.getElementById(`comentarios-${postId}`);
+  
+  if (section.style.display === 'none') {
+    section.style.display = 'block';
+    await carregarComentarios(postId);
+  } else {
+    section.style.display = 'none';
+  }
+}
+
+// Carregar comentários de um post
+async function carregarComentarios(postId) {
+  const lista = document.getElementById(`lista-${postId}`);
+  
+  try {
+    const snapshot = await db.collection('posts').doc(postId).collection('comentarios')
+      .orderBy('criadoEm', 'asc')
+      .get();
+    
+    // Atualiza contador
+    document.getElementById(`count-${postId}`).textContent = snapshot.size;
+    
+    if (snapshot.empty) {
+      lista.innerHTML = '<p style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhum comentário ainda. Seja o primeiro!</p>';
+      return;
+    }
+    
+    let html = '';
+    snapshot.forEach(doc => {
+      const comentario = doc.data();
+      const data = comentario.criadoEm 
+        ? comentario.criadoEm.toDate().toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : 'Agora';
+      
+      html += `
+        <div class="comentario-item">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="color: var(--accent); font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <span style="width: 32px; height: 32px; background: var(--accent); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
+                ${comentario.autor.charAt(0).toUpperCase()}
+              </span>
+              ${comentario.autor}
+            </strong>
+            <span style="font-size: 11px; color: var(--text-muted);">${data}</span>
+          </div>
+          <p style="margin: 0; line-height: 1.7; padding-left: 38px; color: var(--text);">${comentario.texto}</p>
+        </div>`;
+    });
+    
+    lista.innerHTML = html;
+    
+  } catch (error) {
+    console.error('Erro ao carregar comentários:', error);
+    lista.innerHTML = '<p style="text-align: center; color: var(--red);">Erro ao carregar comentários</p>';
+  }
+}
+
+// Enviar novo comentário
+async function enviarComentario(postId) {
+  const textarea = document.getElementById(`texto-${postId}`);
+  const texto = textarea.value.trim();
+  
+  if (!texto) {
+    alert('Digite um comentário!');
+    return;
+  }
+  
+  try {
+    const user = auth.currentUser;
+    
+    await db.collection('posts').doc(postId).collection('comentarios').add({
+      texto: texto,
+      autor: user.displayName || user.email.split('@')[0],
+      autorId: user.uid,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Limpa textarea
+    textarea.value = '';
+    
+    // Recarrega comentários
+    await carregarComentarios(postId);
+    
+  } catch (error) {
+    console.error('Erro ao enviar comentário:', error);
+    alert('Erro ao enviar comentário');
+  }
+}
+
+// Carregar contadores de comentários ao renderizar posts
+async function carregarContadores() {
+  for (const post of todosOsPosts) {
+    try {
+      const snapshot = await db.collection('posts').doc(post.id).collection('comentarios').get();
+      const countElement = document.getElementById(`count-${post.id}`);
+      if (countElement) {
+        countElement.textContent = snapshot.size;
+      }
+    } catch (error) {
+      console.error('Erro ao carregar contador:', error);
+    }
+  }
+}
+
+// Chama carregadores de contador depois de renderizar
+const originalRenderizarPosts = renderizarPosts;
+renderizarPosts = function() {
+  originalRenderizarPosts();
+  setTimeout(carregarContadores, 500);
+};
+
 </script>
 
 </body>
