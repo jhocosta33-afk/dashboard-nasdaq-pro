@@ -1557,7 +1557,7 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
     formData.append('ano', ano);
     formData.append('imagem', imagemBase64);
 
-    const response = await fetch('https://script.google.com/macros/s/AKfycbyWkBtErIe0TnDF3TeAlYEFFWVl02JeSIYjRvm3xRkIBordct4tm6gW9OfMxX8YsLv2gA/exec', {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbyT4hvp6QyNERHzSkNyIDHRfDUdgRKr0XDJie68oTwGyiL4XIBALFShsuLBzFcxIMCVnA/exec', {
       method: 'POST',
       body: formData
     });
@@ -1652,7 +1652,7 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     params.append('stops', stops);
     params.append('breakeven', breakeven);
 
-    const response = await fetch('https://script.google.com/macros/s/AKfycbyWkBtErIe0TnDF3TeAlYEFFWVl02JeSIYjRvm3xRkIBordct4tm6gW9OfMxX8YsLv2gA/exec', {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbyT4hvp6QyNERHzSkNyIDHRfDUdgRKr0XDJie68oTwGyiL4XIBALFShsuLBzFcxIMCVnA/exec', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
