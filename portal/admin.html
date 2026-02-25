@@ -1661,12 +1661,16 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     });
     
     const resultado = await response.json();
-    console.log('📥 Resposta:', resultado);
+    console.log('📥 Resposta completa:', JSON.stringify(resultado));
+    console.log('📥 resultado.success:', resultado.success);
+    console.log('📥 resultado.linha:', resultado.linha);
+    console.log('📥 resultado.data:', resultado.data);
 
     if (resultado.success) {
-      console.log('✅ Dados salvos na linha:', resultado.linha);
+      const linhaNumero = resultado.linha || 'desconhecida';
+      console.log('✅ Dados salvos na linha:', linhaNumero);
       
-      mostrarAlerta('alert-trade-data', `✅ Dados salvos com sucesso! (Planilha linha ${resultado.linha})`, 'success');
+      mostrarAlerta('alert-trade-data', `✅ Dados salvos com sucesso! (Planilha linha ${linhaNumero})`, 'success');
       
       // Limpa form
       document.getElementById('formTradeData').reset();
