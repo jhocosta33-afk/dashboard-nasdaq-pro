@@ -1570,23 +1570,7 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
       console.log('  Nome:', resultado.nomeArquivo);
       console.log('  Linha atualizada:', resultado.linha);
       
-      // Salvar fotoId no Firebase também
-      const docId = `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-      console.log('🔥 Salvando fotoId no Firebase...');
-      
-      try {
-        await db.collection('trades').doc(docId).set({
-          fotoId: resultado.fotoId,
-          fotoNome: resultado.nomeArquivo,
-          fotoURL: resultado.url,
-          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        console.log('✅ FotoId salvo no Firebase');
-      } catch (fbError) {
-        console.warn('⚠️ Erro ao salvar fotoId no Firebase:', fbError);
-      }
-      
-      mostrarAlerta('alert-foto-trade', `✅ Foto salva com sucesso! (Drive + Firebase + Planilha)`, 'success');
+      mostrarAlerta('alert-foto-trade', `✅ Foto salva com sucesso! (Drive + Planilha linha ${resultado.linha})`, 'success');
     } else {
       throw new Error(resultado.error || 'Erro desconhecido');
     }
@@ -1648,38 +1632,13 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     const stops = parseInt(document.getElementById('stops').value);
     const breakeven = parseInt(document.getElementById('breakeven').value);
 
-    console.log('📊 Salvando dados do trade...');
+    console.log('📊 Salvando dados do trade na planilha...');
     console.log('  Data:', `${dia}/${mes}/${ano}`);
     console.log('  Semana:', semana);
     console.log('  Alvo:', alvo);
     console.log('  Pontos:', pontos);
 
-    const dataFormatada = `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
-    const docId = `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`; // 2026-02-26
-
-    const dadosTrade = {
-      dia: dia,
-      mes: mes,
-      ano: ano,
-      data: dataFormatada,
-      semana: semana,
-      alvo: alvo,
-      pontos: pontos,
-      trades: trades,
-      gains: gains,
-      stops: stops,
-      breakeven: breakeven,
-      atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    // ========== 1. SALVAR NO FIREBASE (PRIMÁRIO - RÁPIDO) ==========
-    console.log('🔥 Salvando no Firebase...');
-    await db.collection('trades').doc(docId).set(dadosTrade, { merge: true });
-    console.log('✅ Firebase: OK');
-
-    // ========== 2. SALVAR NO GOOGLE SHEETS (BACKUP) ==========
-    console.log('📊 Salvando no Google Sheets (backup)...');
-    
+    // Envia para Google Sheets
     const params = new URLSearchParams();
     params.append('acao', 'salvarTrade');
     params.append('dia', dia);
@@ -1693,39 +1652,35 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     params.append('stops', stops);
     params.append('breakeven', breakeven);
 
-    try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbyWkBtErIe0TnDF3TeAlYEFFWVl02JeSIYjRvm3xRkIBordct4tm6gW9OfMxX8YsLv2gA/exec', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: params.toString()
-      });
-      
-      const resultado = await response.json();
-      
-      if (resultado.success) {
-        console.log('✅ Google Sheets: OK (linha ' + resultado.linha + ')');
-      } else {
-        console.warn('⚠️ Google Sheets falhou, mas dados estão salvos no Firebase');
-      }
-    } catch (sheetError) {
-      console.warn('⚠️ Erro no Google Sheets (backup), mas Firebase salvou:', sheetError);
-    }
+    const response = await fetch('https://script.google.com/macros/s/AKfycbyWkBtErIe0TnDF3TeAlYEFFWVl02JeSIYjRvm3xRkIBordct4tm6gW9OfMxX8YsLv2gA/exec', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
+    });
+    
+    const resultado = await response.json();
+    console.log('📥 Resposta:', resultado);
 
-    // ========== SUCESSO ==========
-    mostrarAlerta('alert-trade-data', '✅ Dados salvos com sucesso! (Firebase + Planilha)', 'success');
-    
-    // Limpa form
-    document.getElementById('formTradeData').reset();
-    
-    // Redefine data para hoje
-    const hoje = new Date();
-    document.getElementById('diaData').value = hoje.getDate();
-    document.getElementById('mesData').value = hoje.getMonth() + 1;
-    document.getElementById('anoData').value = hoje.getFullYear();
-    document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
-    document.getElementById('alvo').value = 'NASDAQ';
+    if (resultado.success) {
+      console.log('✅ Dados salvos na linha:', resultado.linha);
+      
+      mostrarAlerta('alert-trade-data', `✅ Dados salvos com sucesso! (Planilha linha ${resultado.linha})`, 'success');
+      
+      // Limpa form
+      document.getElementById('formTradeData').reset();
+      
+      // Redefine data para hoje
+      const hoje = new Date();
+      document.getElementById('diaData').value = hoje.getDate();
+      document.getElementById('mesData').value = hoje.getMonth() + 1;
+      document.getElementById('anoData').value = hoje.getFullYear();
+      document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
+      document.getElementById('alvo').value = 'NASDAQ';
+    } else {
+      throw new Error(resultado.error || 'Erro desconhecido');
+    }
 
   } catch (error) {
     console.error('❌ Erro ao salvar:', error);
