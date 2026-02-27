@@ -562,13 +562,12 @@ td {
   
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('posts')">📝 Criar Posts</button>
-    <button class="tab" onclick="switchTab('ver-posts')">👁️ Ver Posts</button>
+    <button class="tab active" onclick="switchTab('posts')">📝 Posts</button>
     <button class="tab" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
     <button class="tab" onclick="switchTab('planilha')">📊 Planilha & Fotos</button>
   </div>
 
-  <!-- SEÇÃO: POSTS -->
+  <!-- SEÇÃO: POSTS (CRIAR + VER) -->
   <div id="posts-section" class="section active">
     <div class="card">
       <h2>✨ Criar Novo Post</h2>
@@ -623,9 +622,13 @@ td {
               <button type="button" class="btn-remove-image" onclick="removerArquivoUniversal()">❌ Remover</button>
             </div>
             
-            <div class="upload-progress" id="uploadProgressUniversal" style="display:none; padding: 40px;">
+            <div class="upload-progress" id="uploadProgressUniversal" style="display:none; padding: 40px; text-align: center;">
               <div class="spinner"></div>
-              <p id="uploadProgressTextUniversal" style="margin-top: 12px; color: var(--text-muted);">Fazendo upload...</p>
+              <p id="uploadProgressTextUniversal" style="margin: 16px 0 12px 0; color: var(--text); font-weight: 600;">Fazendo upload...</p>
+              <div style="width: 100%; max-width: 400px; margin: 0 auto; background: rgba(255,255,255,0.1); height: 8px; border-radius: 10px; overflow: hidden;">
+                <div id="uploadProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent), #16a34a); transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent);"></div>
+              </div>
+              <p id="uploadProgressPercent" style="margin-top: 8px; font-size: 13px; color: var(--text-muted); font-weight: 600;">0%</p>
             </div>
           </div>
 
@@ -640,36 +643,6 @@ td {
     <div class="card">
       <h2>📚 Posts Publicados</h2>
       <div id="posts-list" class="posts-list">
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Carregando posts...</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SEÇÃO: VER POSTS (ADMIN) -->
-  <div id="ver-posts-section" class="section">
-    <div class="card">
-      <h2>👁️ Todos os Posts (com Comentários)</h2>
-      <p style="color: var(--text-muted); margin-bottom: 20px;">
-        Veja todos os posts publicados e interaja com os comentários dos alunos.
-      </p>
-      
-      <!-- Filtros -->
-      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-        <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Filtrar por categoria:</h3>
-        <div class="filter-buttons" style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="filter-btn active" onclick="filtrarPostsAdmin('todos')" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;">Todos</button>
-          <button class="filter-btn" onclick="filtrarPostsAdmin('sala-ao-vivo')">🔴 Sala ao Vivo</button>
-          <button class="filter-btn" onclick="filtrarPostsAdmin('materiais')">📚 Materiais</button>
-          <button class="filter-btn" onclick="filtrarPostsAdmin('analise')">📈 Análise</button>
-          <button class="filter-btn" onclick="filtrarPostsAdmin('tutorial')">🎓 Tutorial</button>
-          <button class="filter-btn" onclick="filtrarPostsAdmin('noticia')">📰 Notícia</button>
-        </div>
-      </div>
-      
-      <div id="posts-admin-list" class="posts-grid" style="display: grid; gap: 24px;">
         <div class="loading">
           <div class="spinner"></div>
           <p>Carregando posts...</p>
@@ -1205,14 +1178,32 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
       
       const sizeMB = (arquivoUniversal.size / (1024 * 1024)).toFixed(2);
       document.getElementById('uploadProgressTextUniversal').textContent = `Enviando ${sizeMB}MB para Google Drive...`;
+      
+      // Simular progresso (barra animada)
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressPercent = document.getElementById('uploadProgressPercent');
+      let progress = 0;
+      
+      const progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        progressBar.style.width = progress + '%';
+        progressPercent.textContent = Math.round(progress) + '%';
+      }, 200);
 
       try {
         // TUDO vai para Google Drive agora (imagem, vídeo, PDF, ZIP, etc)
         finalMidiaURL = await uploadArquivoGoogleDrive(arquivoUniversal);
         midiaTipo = tipoArquivo; // imagem, video ou pdf
         
+        // Completar progresso
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        progressPercent.textContent = '100%';
+        
         console.log('✅ Arquivo enviado para Google Drive:', finalMidiaURL);
       } catch (error) {
+        clearInterval(progressInterval);
         console.error('❌ Erro no upload:', error);
         throw error;
       }
