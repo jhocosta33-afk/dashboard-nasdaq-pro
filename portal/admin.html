@@ -1302,13 +1302,49 @@ async function carregarPosts() {
               ${post.midiaTipo === 'pdf' ? ' • 📄 Arquivo' : ''}
             </div>
             <div class="post-actions">
+              <button class="btn btn-sm" onclick="toggleComentariosAdmin('${doc.id}')" style="background: var(--blue); color: #fff; margin-right: 8px;">💬 Comentários (<span id="count-admin-${doc.id}">0</span>)</button>
               <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">Excluir</button>
+            </div>
+            
+            <!-- SEÇÃO DE COMENTÁRIOS -->
+            <div class="comentarios-section" id="comentarios-admin-${doc.id}" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+              <div class="comentarios-lista" id="lista-admin-${doc.id}">
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                  Carregando comentários...
+                </div>
+              </div>
+              
+              <!-- FORM DE NOVO COMENTÁRIO (ADMIN) -->
+              <div class="comentario-form" style="margin-top: 16px;">
+                <textarea 
+                  id="texto-admin-${doc.id}" 
+                  placeholder="Escreva seu comentário como admin..." 
+                  style="width: 100%; min-height: 80px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: inherit; font-size: 14px; resize: vertical;"
+                ></textarea>
+                <button 
+                  class="btn btn-sm" 
+                  onclick="enviarComentarioAdmin('${doc.id}')" 
+                  style="margin-top: 8px; background: var(--accent); color: #000;"
+                >
+                  Enviar Comentário
+                </button>
+              </div>
             </div>
           </div>
         </div>`;
     });
 
     container.innerHTML = html;
+    
+    // Carregar contadores de comentários
+    setTimeout(async () => {
+      const snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').limit(20).get();
+      for (const doc of snapshot.docs) {
+        const comentariosSnap = await db.collection('posts').doc(doc.id).collection('comentarios').get();
+        const countElement = document.getElementById(`count-admin-${doc.id}`);
+        if (countElement) countElement.textContent = comentariosSnap.size;
+      }
+    }, 500);
 
   } catch (error) {
     console.error('Erro ao carregar posts:', error);
@@ -1316,11 +1352,121 @@ async function carregarPosts() {
   }
 }
 
+
+// ══════════════════════════════════════════════
+// COMENTÁRIOS NA LISTA DE POSTS
+// ══════════════════════════════════════════════
+
+async function toggleComentariosAdmin(postId) {
+  const section = document.getElementById(`comentarios-admin-${postId}`);
+  if (section.style.display === 'none') {
+    section.style.display = 'block';
+    await carregarComentariosAdminList(postId);
+  } else {
+    section.style.display = 'none';
+  }
+}
+
+async function carregarComentariosAdminList(postId) {
+  const lista = document.getElementById(`lista-admin-${postId}`);
+  try {
+    const snapshot = await db.collection('posts').doc(postId).collection('comentarios')
+      .orderBy('criadoEm', 'asc').get();
+    const countElement = document.getElementById(`count-admin-${postId}`);
+    if (countElement) countElement.textContent = snapshot.size;
+    if (snapshot.empty) {
+      lista.innerHTML = '<p style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhum comentário ainda.</p>';
+      return;
+    }
+    let html = '';
+    snapshot.forEach(doc => {
+      const comentario = doc.data();
+      const data = comentario.criadoEm ? comentario.criadoEm.toDate().toLocaleString('pt-BR', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}) : 'Agora';
+      html += `<div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="color: var(--accent); font-size: 13px;">${comentario.autor}</strong>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; color: var(--text-muted);">${data}</span>
+              <button onclick="deletarComentarioAdminList('${postId}', '${doc.id}')" style="background: none; border: none; color: var(--red); cursor: pointer; font-size: 14px; padding: 4px; opacity: 0.7;" title="Deletar">🗑️</button>
+            </div>
+          </div>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; color: var(--text);">${comentario.texto}</p>
+        </div>`;
+    });
+    lista.innerHTML = html;
+  } catch (error) {
+    console.error('Erro:', error);
+    lista.innerHTML = '<p style="color: var(--red);">Erro ao carregar</p>';
+  }
+}
+
+async function enviarComentarioAdmin(postId) {
+  const textarea = document.getElementById(`texto-admin-${postId}`);
+  const texto = textarea.value.trim();
+  if (!texto) { alert('Digite um comentário!'); return; }
+  try {
+    const user = auth.currentUser;
+    await db.collection('posts').doc(postId).collection('comentarios').add({
+      texto, autor: user.displayName || 'Admin', autorId: user.uid,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    textarea.value = '';
+    await carregarComentariosAdminList(postId);
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('Erro ao enviar comentário');
+  }
+}
+
+async function deletarComentarioAdminList(postId, comentarioId) {
+  if (!confirm('Deletar este comentário?')) return;
+  try {
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
+    await carregarComentariosAdminList(postId);
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('Erro ao deletar');
+  }
+}
+
+
 async function deletarPost(postId) {
   if (!confirm('Deseja realmente excluir este post?')) return;
 
   try {
+    // Buscar dados do post antes de deletar
+    const postDoc = await db.collection('posts').doc(postId).get();
+    const postData = postDoc.data();
+    
+    // Deletar do Firestore
     await db.collection('posts').doc(postId).delete();
+    
+    // Se tinha arquivo no Drive, tentar deletar (mas não bloquear se falhar)
+    if (postData && postData.midiaURL && postData.midiaURL.includes('drive.google.com')) {
+      try {
+        const fileIdMatch = postData.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (fileIdMatch) {
+          const fileId = fileIdMatch[1];
+          
+          // Chamar Apps Script para deletar arquivo
+          const params = new URLSearchParams();
+          params.append('acao', 'deletarArquivo');
+          params.append('fileId', fileId);
+          
+          await fetch('https://script.google.com/macros/s/AKfycbxp_oeOJcpv-YqaQLVk3lb7DMsuHdbLdkKO32c0rezjEmPa7pQy06JzHOdoOga43l-R/exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+          });
+          
+          console.log('🗑️ Arquivo deletado do Drive:', fileId);
+        }
+      } catch (driveError) {
+        console.log('⚠️ Não foi possível deletar arquivo do Drive:', driveError);
+        // Não mostrar erro pro usuário, post já foi deletado
+      }
+    }
+    
     mostrarAlerta('alert-post', '✅ Post excluído', 'success');
     carregarPosts();
   } catch (error) {
