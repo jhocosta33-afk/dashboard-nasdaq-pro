@@ -822,27 +822,37 @@ function renderizarPosts() {
     if (post.midiaURL && post.midiaTipo === 'video') {
       // Vídeo - suporta Google Drive e Streamable
       let videoEmbedURL = post.midiaURL;
+      let downloadURL = post.midiaURL;
       
-      // Se for Google Drive, extrair ID e usar player do Drive
+      // Se for Google Drive, extrair ID
       if (post.midiaURL.includes('drive.google.com')) {
         const fileIdMatch = post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (fileIdMatch) {
-          videoEmbedURL = `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+          const fileId = fileIdMatch[1];
+          videoEmbedURL = `https://drive.google.com/file/d/${fileId}/preview`;
+          downloadURL = `https://drive.google.com/uc?export=download&id=${fileId}`;
         }
       } else if (post.midiaURL.includes('streamable.com')) {
-        // Streamable
         videoEmbedURL = post.midiaURL + '/e';
       }
       
       midiaHTML = `
-        <div class="post-video" style="width:100%; max-height: 300px; aspect-ratio:16/9; margin: 16px 0; background: #000; border-radius: 12px; overflow: hidden;">
-          <iframe 
-            src="${videoEmbedURL}" 
-            frameborder="0" 
-            allowfullscreen 
-            allow="autoplay"
-            style="width:100%;height:100%;">
-          </iframe>
+        <div style="margin: 16px 0;">
+          <div class="post-video" style="width:100%; max-height: 300px; aspect-ratio:16/9; background: #000; border-radius: 12px; overflow: hidden; position: relative;">
+            <iframe 
+              src="${videoEmbedURL}" 
+              frameborder="0" 
+              allowfullscreen 
+              allow="autoplay"
+              style="width:100%;height:100%;">
+            </iframe>
+          </div>
+          <p style="text-align: center; margin-top: 8px; font-size: 12px; color: var(--text-muted);">
+            Vídeo não carrega? 
+            <a href="${downloadURL}" download style="color: var(--accent); font-weight: 600; text-decoration: none;">
+              📥 Baixar vídeo
+            </a>
+          </p>
         </div>`;
     } else if (post.midiaURL && post.midiaTipo === 'pdf') {
       // Arquivo (PDF, ZIP, etc) - Download direto
