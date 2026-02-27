@@ -609,7 +609,7 @@ td {
           </p>
           
           <div class="upload-area" id="uploadAreaUniversal" style="border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all .3s; background: rgba(255,255,255,0.02);">
-            <input type="file" id="postArquivo" accept="*" style="display:none">
+            <input type="file" id="postArquivo" accept="*" multiple style="display:none">
             
             <div class="upload-placeholder" id="uploadPlaceholderUniversal">
               <span style="font-size:64px">📎</span>
@@ -997,6 +997,9 @@ uploadAreaUniversal.addEventListener('drop', (e) => {
 });
 
 fileInputUniversal.addEventListener('change', (e) => {
+  if (e.target.files.length > 1) {
+    alert(`⚠️ Você selecionou ${e.target.files.length} arquivos.\n\nPor enquanto, apenas o primeiro arquivo será enviado.\n\n💡 Dica: Crie posts separados para cada arquivo ou comprima tudo em um ZIP.`);
+  }
   if (e.target.files.length > 0) handleArquivoUniversal(e.target.files[0]);
 });
 
@@ -1974,161 +1977,3 @@ function filtrarPostsAdmin(categoria) {
   renderizarPostsAdmin();
 }
 
-async function toggleComentariosAdmin(postId) {
-  const section = document.getElementById(`comentarios-${postId}`);
-  
-  if (section.style.display === 'none') {
-    section.style.display = 'block';
-    await carregarComentariosAdmin(postId);
-  } else {
-    section.style.display = 'none';
-  }
-}
-
-async function carregarComentariosAdmin(postId) {
-  const lista = document.getElementById(`lista-${postId}`);
-  
-  try {
-    const snapshot = await db.collection('posts').doc(postId).collection('comentarios')
-      .orderBy('criadoEm', 'asc')
-      .get();
-    
-    document.getElementById(`count-${postId}`).textContent = snapshot.size;
-    
-    if (snapshot.empty) {
-      lista.innerHTML = '<p style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhum comentário ainda. Seja o primeiro!</p>';
-      return;
-    }
-    
-    const user = auth.currentUser;
-    
-    let html = '';
-    snapshot.forEach(doc => {
-      const comentario = doc.data();
-      const data = comentario.criadoEm 
-        ? comentario.criadoEm.toDate().toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        : 'Agora';
-      
-      // Admin pode deletar QUALQUER comentário
-      const podeExcluir = true;
-      
-      html += `
-        <div class="comentario-item" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 16px; border-radius: 12px; margin-bottom: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <strong style="color: var(--accent); font-size: 14px; display: flex; align-items: center; gap: 6px;">
-              <span style="width: 32px; height: 32px; background: var(--accent); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
-                ${comentario.autor.charAt(0).toUpperCase()}
-              </span>
-              ${comentario.autor}
-            </strong>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 11px; color: var(--text-muted);">${data}</span>
-              ${podeExcluir ? `<button onclick="deletarComentarioAdmin('${postId}', '${doc.id}')" style="background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.7; transition: opacity .2s;" title="Deletar comentário">🗑️</button>` : ''}
-            </div>
-          </div>
-          <p style="margin: 0; line-height: 1.7; padding-left: 38px; color: var(--text);">${comentario.texto}</p>
-        </div>`;
-    });
-    
-    lista.innerHTML = html;
-    
-  } catch (error) {
-    console.error('Erro ao carregar comentários:', error);
-    lista.innerHTML = '<p style="text-align: center; color: var(--red);">Erro ao carregar comentários</p>';
-  }
-}
-
-async function enviarComentarioAdmin(postId) {
-  const textarea = document.getElementById(`texto-${postId}`);
-  const texto = textarea.value.trim();
-  
-  if (!texto) {
-    alert('Digite um comentário!');
-    return;
-  }
-  
-  try {
-    const user = auth.currentUser;
-    
-    await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto: texto,
-      autor: user.displayName || 'Admin',
-      autorId: user.uid,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    
-    textarea.value = '';
-    await carregarComentariosAdmin(postId);
-    
-  } catch (error) {
-    console.error('Erro ao enviar comentário:', error);
-    alert('Erro ao enviar comentário');
-  }
-}
-
-async function deletarComentarioAdmin(postId, comentarioId) {
-  if (!confirm('Tem certeza que deseja deletar este comentário?')) return;
-  
-  try {
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
-    await carregarComentariosAdmin(postId);
-  } catch (error) {
-    console.error('Erro ao deletar comentário:', error);
-    alert('Erro ao deletar comentário');
-  }
-}
-
-async function carregarContadoresAdmin() {
-  for (const post of todosOsPostsAdmin) {
-    try {
-      const snapshot = await db.collection('posts').doc(post.id).collection('comentarios').get();
-      const countElement = document.getElementById(`count-${post.id}`);
-      if (countElement) {
-        countElement.textContent = snapshot.size;
-      }
-    } catch (error) {
-      console.error('Erro ao carregar contador:', error);
-    }
-  }
-}
-
-// Switch de abas
-window.switchTab = function(tabName) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(`${tabName}-section`).classList.add('active');
-  
-  // Carregar posts quando abrir aba "Ver Posts"
-  if (tabName === 'ver-posts') {
-    carregarPostsAdmin();
-  }
-  
-  // Auto-preenche data atual quando abre aba de planilha
-  if (tabName === 'planilha') {
-    const hoje = new Date();
-    const dia = hoje.getDate();
-    
-    // Formulário de dados do trade
-    document.getElementById('diaData').value = dia;
-    document.getElementById('mesData').value = hoje.getMonth() + 1;
-    document.getElementById('anoData').value = hoje.getFullYear();
-    document.getElementById('semana').value = calcularSemanaMes(dia);
-    document.getElementById('alvo').value = 'NASDAQ';
-    
-    // Formulário de foto
-    document.getElementById('diaDoTrade').value = dia;
-    document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
-    document.getElementById('anoDoTrade').value = hoje.getFullYear();
-  }
-};
-</script>
-
-</body>
-</html>
