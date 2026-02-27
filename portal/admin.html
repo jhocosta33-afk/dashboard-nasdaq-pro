@@ -605,7 +605,7 @@ td {
         <div class="form-group">
           <label>Arquivo/Mídia (opcional)</label>
           <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
-            📎 Qualquer arquivo (imagens, vídeos, PDFs, ZIPs, indicadores, etc) - Até 100MB
+            📎 Qualquer arquivo (imagens, vídeos, PDFs, ZIPs, indicadores, etc) - Até 500MB
           </p>
           
           <div class="upload-area" id="uploadAreaUniversal" style="border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all .3s; background: rgba(255,255,255,0.02);">
@@ -614,7 +614,7 @@ td {
             <div class="upload-placeholder" id="uploadPlaceholderUniversal">
               <span style="font-size:64px">📎</span>
               <p style="margin: 16px 0 8px 0;"><strong>Arraste qualquer arquivo aqui</strong><br>ou clique para selecionar</p>
-              <small style="color:var(--text-muted)">Qualquer tipo de arquivo - Até 100MB</small>
+              <small style="color:var(--text-muted)">Qualquer tipo de arquivo - Até 500MB</small>
             </div>
             
             <div class="upload-preview" id="uploadPreviewUniversal" style="display:none;">
@@ -1002,8 +1002,8 @@ fileInputUniversal.addEventListener('change', (e) => {
 
 function handleArquivoUniversal(file) {
   // Validar tamanho (100MB)
-  if (file.size > 100 * 1024 * 1024) {
-    alert('❌ Arquivo muito grande. Máximo 100MB');
+  if (file.size > 500 * 1024 * 1024) {
+    alert('❌ Arquivo muito grande. Máximo 500MB');
     return;
   }
 
@@ -1276,8 +1276,20 @@ async function carregarPosts() {
       // Mídia (imagem, vídeo ou PDF)
       let midiaHTML = '';
       if (post.midiaURL && post.midiaTipo === 'video') {
-        midiaHTML = `<div class="post-video" style="margin-bottom: 12px;">
-          <iframe src="${post.midiaURL}/e" frameborder="0" allowfullscreen style="width:100%;height:200px;border-radius:8px;"></iframe>
+        // Vídeo - suporta Google Drive e Streamable
+        let videoEmbedURL = post.midiaURL;
+        
+        if (post.midiaURL.includes('drive.google.com')) {
+          const fileIdMatch = post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
+          if (fileIdMatch) {
+            videoEmbedURL = `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+          }
+        } else if (post.midiaURL.includes('streamable.com')) {
+          videoEmbedURL = post.midiaURL + '/e';
+        }
+        
+        midiaHTML = `<div class="post-video" style="width:100%; aspect-ratio:16/9; margin-bottom: 12px; background: #000; border-radius: 8px; overflow: hidden;">
+          <iframe src="${videoEmbedURL}" frameborder="0" allowfullscreen allow="autoplay" style="width:100%;height:100%;"></iframe>
         </div>`;
       } else if (post.midiaURL && post.midiaTipo === 'pdf') {
         midiaHTML = `<div style="margin-bottom: 12px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; text-align: center;">
@@ -1303,7 +1315,7 @@ async function carregarPosts() {
             </div>
             <div class="post-actions">
               <button class="btn btn-sm" onclick="toggleComentariosAdmin('${doc.id}')" style="background: var(--blue); color: #fff; margin-right: 8px;">💬 Comentários (<span id="count-admin-${doc.id}">0</span>)</button>
-              <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">Excluir</button>
+              <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">🗑️ Excluir Post</button>
             </div>
             
             <!-- SEÇÃO DE COMENTÁRIOS -->
