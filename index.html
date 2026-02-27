@@ -2,1053 +2,4146 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Área do Aluno | Dashboard NASDAQ PRO</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard NASDAQ PRO - Premium Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#050711">
+<meta name="mobile-web-app-capable" content="yes">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #020617;
-  --card: #0f172a;
-  --border: rgba(255,255,255,.1);
-  --text: #e5e7eb;
-  --text-muted: #94a3b8;
-  --accent: #22c55e;
-  --blue: #3b82f6;
+ --sidebar-bg: #0a0d1a;
+ --main-bg: #050711;
+ --card-bg: #0f1420;
+ --card-hover: #161b2e;
+ --border: rgba(99,102,241,0.15);
+ --border-bright: rgba(99,102,241,0.4);
+ --text: #f8fafc;
+ --text-dim: #cbd5e1;
+ --muted: #64748b;
+ --green: #10b981;
+ --green-glow: rgba(16,185,129,0.3);
+ --red: #ef4444;
+ --red-glow: rgba(239,68,68,0.3);
+ --yellow: #fbbf24;
+ --blue: #6366f1;
+ --blue-bright: #818cf8;
+ --purple: #a855f7;
+ --orange: #f97316;
+ --cyan: #06b6d4;
+ 
+ --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+ --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+ --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+ --shadow-glow: 0 0 20px rgba(99,102,241,0.4);
+ 
+ /* Duração das animações */
+ --transition-fast: 0.15s;
+ --transition-normal: 0.3s;
+ --transition-slow: 0.5s;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ========== TEMA CLARO ========== */
+body.light-theme {
+ --sidebar-bg: #ffffff;
+ --main-bg: #f1f5f9;
+ --card-bg: #ffffff;
+ --card-hover: #f8fafc;
+ --border: rgba(99,102,241,0.2);
+ --border-bright: rgba(99,102,241,0.5);
+ --text: #0f172a;
+ --text-dim: #475569;
+ --muted: #94a3b8;
+ --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+ --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+ --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+ --shadow-glow: 0 0 20px rgba(99,102,241,0.25);
+}
+
+/* Tema Claro */
+[data-theme="light"] {
+ --sidebar-bg: #ffffff;
+ --main-bg: #f8fafc;
+ --card-bg: #ffffff;
+ --card-hover: #f1f5f9;
+ --border: rgba(99,102,241,0.2);
+ --border-bright: rgba(99,102,241,0.6);
+ --text: #1e293b;
+ --text-dim: #475569;
+ --muted: #94a3b8;
+ --green: #059669;
+ --green-glow: rgba(5,150,105,0.2);
+ --red: #dc2626;
+ --red-glow: rgba(220,38,38,0.2);
+ --yellow: #d97706;
+ --blue: #6366f1;
+ --blue-bright: #4f46e5;
+ --purple: #9333ea;
+ --orange: #ea580c;
+ --cyan: #0891b2;
+ 
+ --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+ --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+ --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+ --shadow-glow: 0 0 20px rgba(99,102,241,0.15);
+}
+
+[data-theme="light"] body {
+ background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+}
+
+[data-theme="light"] .sidebar::before {
+ opacity: 0.3;
+}
+
+[data-theme="light"] .modal-overlay {
+ background: rgba(15, 23, 42, 0.7);
+}
+
+* {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+}
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  min-height: 100vh;
+ font-family: 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+ background: var(--main-bg);
+ color: var(--text);
+ display: flex;
+ justify-content: center;
+ min-height: 100vh;
+ overflow-x: hidden;
+ position: relative;
+ transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* HEADER */
-header {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+body::before {
+ content: '';
+ position: fixed;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: 
+  radial-gradient(circle at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 50%),
+  radial-gradient(circle at 80% 80%, rgba(168,85,247,0.08) 0%, transparent 50%);
+ pointer-events: none;
+ z-index: 0;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.dashboard-container {
+ display: flex;
+ max-width: 1800px;
+ width: 100%;
+ min-height: 100vh;
+ position: relative;
+ z-index: 1;
 }
 
-.logo { font-size: 24px; }
-
-h1 {
-  font-size: 20px;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* ========== SIDEBAR ========== */
+.sidebar {
+ width: 280px;
+ background: var(--sidebar-bg);
+ padding: 32px 20px;
+ border-right: 1px solid var(--border);
+ overflow-y: auto;
+ display: flex;
+ flex-direction: column;
+ flex-shrink: 0;
+ position: sticky;
+ top: 0;
+ max-height: 100vh;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
+.sidebar::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ right: 0;
+ width: 1px;
+ height: 100%;
+ background: linear-gradient(180deg, transparent, var(--blue), transparent);
+ opacity: 0.5;
 }
 
-.btn-logout {
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
+.header-logo {
+ max-height: 90px;
+ width: auto;
+ max-width: 100%;
+ display: block;
+ filter: drop-shadow(0 4px 20px rgba(99,102,241,0.35));
+ transition: all 0.3s;
 }
 
-.btn-logout:hover {
-  background: var(--border);
+.header-logo:hover {
+ filter: drop-shadow(0 6px 24px rgba(99,102,241,0.55));
+ transform: translateY(-2px);
 }
 
-/* CONTAINER */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
+/* ========== HEADER DO REPORT (CAPTURA) ========== */
+.dashboard-header-report {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ padding: 20px 0 30px 0;
+ margin-bottom: 20px;
+ border-bottom: 1px solid var(--border);
 }
 
-/* WELCOME BANNER */
-.welcome-banner {
-  background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1));
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 32px;
-  margin-bottom: 32px;
-  text-align: center;
+.report-logo {
+ max-height: 80px;
+ width: auto;
+ max-width: 100%;
+ filter: drop-shadow(0 4px 20px rgba(99,102,241,0.4));
 }
 
-.welcome-banner h2 {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 12px;
+.filters {
+ margin-bottom: 24px;
+ animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.welcome-banner p {
-  font-size: 16px;
-  color: var(--text-muted);
+@keyframes slideInLeft {
+ from {
+  opacity: 0;
+  transform: translateX(-20px);
+ }
+ to {
+  opacity: 1;
+  transform: translateX(0);
+ }
 }
 
-/* QUICK ACCESS */
-.quick-access {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
-  margin-bottom: 40px;
+.filter-group {
+ margin-bottom: 20px;
 }
 
-.quick-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 28px 24px;
-  cursor: pointer;
-  transition: all .3s ease;
-  text-align: center;
+.filter-group label {
+ display: block;
+ font-size: 12px;
+ text-transform: uppercase;
+ letter-spacing: 1.5px;
+ color: var(--text-dim);
+ margin-bottom: 10px;
+ font-weight: 700;
 }
 
-.quick-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(34,197,94,0.15);
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%);
+.filter-group select {
+ width: 100%;
+ background: var(--card-bg);
+ color: var(--text);
+ border: 1px solid var(--border);
+ padding: 14px 16px;
+ border-radius: 12px;
+ font-size: 15px;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ font-family: 'JetBrains Mono', monospace;
 }
 
-.quick-card-icon {
-  font-size: 56px;
-  margin-bottom: 16px;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+.filter-group select:hover {
+ border-color: var(--blue-bright);
+ background: var(--card-hover);
+ transform: translateY(-1px);
 }
 
-.quick-card h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--text);
+.filter-group select:focus {
+ outline: none;
+ border-color: var(--blue);
+ box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
 }
 
-.quick-card p {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.5;
+.filter-group select:disabled {
+ opacity: 0.4;
+ cursor: not-allowed;
+ transform: none;
 }
 
-/* SECTION HEADER */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.section-header h2 {
-  font-size: 24px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.filter-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.filter-btn {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
-  white-space: nowrap;
-}
-
-.filter-btn:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: var(--accent);
-}
-
-.filter-btn.active {
-  background: var(--accent);
-  color: #000;
-  border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(34,197,94,0.3);
-}
-
-/* POSTS GRID */
-.posts-grid {
-  display: grid;
-  gap: 24px;
-}
-
-/* RESPONSIVO - MOBILE */
-@media (max-width: 768px) {
-  .quick-access {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .quick-card {
-    padding: 20px;
-  }
-  
-  .quick-card-icon {
-    font-size: 48px;
-  }
-  
-  .section-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  
-  .section-header h2 {
-    font-size: 20px;
-  }
-  
-  .filter-buttons {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
-  }
-  
-  .filter-btn {
-    padding: 8px 14px;
-    font-size: 12px;
-  }
-  
-  .posts-grid {
-    gap: 16px;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 16px;
-  }
-  
-  .quick-card h3 {
-    font-size: 16px;
-  }
-  
-  .quick-card p {
-    font-size: 12px;
-  }
-}
-
-.post-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all .3s;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.post-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 8px 32px rgba(34,197,94,0.15);
-  transform: translateY(-2px);
-}
-
-.post-image {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-  background: rgba(255,255,255,0.05);
-  cursor: pointer;
-  transition: transform .3s ease;
-}
-
-.post-image:hover {
-  transform: scale(1.05);
-}
-
-.post-content {
-  padding: 24px;
-}
-
-.post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.post-category {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(34,197,94,0.15);
-  padding: 6px 12px;
-  border-radius: 8px;
-  letter-spacing: 0.5px;
-}
-
-.post-date {
-  font-size: 12px;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.post-date::before {
-  content: '📅';
-  font-size: 14px;
-}
-
-.post-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: var(--text);
-  line-height: 1.3;
-}
-
-.post-text {
-  font-size: 15px;
-  color: var(--text-muted);
-  line-height: 1.8;
-  margin-bottom: 20px;
-}
-
-.post-footer {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.btn {
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: none;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: #000;
-}
-
-.btn-primary:hover {
-  background: #1ea855;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(34,197,94,0.3);
-}
-
-.btn-secondary {
-  background: rgba(255,255,255,0.08);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
-
-/* COMENTÁRIOS */
-.comentarios-section {
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.comentario-item {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  transition: all .2s;
-}
-
-.comentario-item:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(34,197,94,0.2);
-}
-
-.comentario-form textarea {
-  width: 100%;
-  min-height: 100px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 1.6;
-  resize: vertical;
-  transition: all .2s;
-}
-
-.comentario-form textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
-}
-
-.comentario-form textarea::placeholder {
-  color: var(--text-muted);
-}
-
-/* RESPONSIVO - MOBILE */
-@media (max-width: 768px) {
-  .post-card {
-    border-radius: 12px;
-  }
-  
-  .post-image {
-    height: 200px;
-  }
-  
-  .post-content {
-    padding: 16px;
-  }
-  
-  .post-title {
-    font-size: 18px;
-  }
-  
-  .post-text {
-    font-size: 14px;
-  }
-  
-  .post-footer {
-    flex-direction: column;
-  }
-  
-  .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px;
-  }
-  
-  .comentario-item {
-    padding: 12px;
-  }
-  
-  .comentario-form textarea {
-    min-height: 80px;
-    font-size: 16px; /* Evita zoom no iOS */
-  }
-}
-
-.btn-primary:hover {
-  background: #16a34a;
-}
-
-.btn-secondary {
-  background: rgba(255,255,255,0.05);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-  background: rgba(255,255,255,0.08);
-}
-
-/* LOADING */
-.loading {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* IMAGE MODAL */
-.image-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.95);
-  z-index: 10000;
-  cursor: pointer;
-  animation: fadeIn .3s ease;
-}
-
-.image-modal.active {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.image-modal img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 0 50px rgba(0,0,0,0.8);
-}
-
-.image-modal-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(255,255,255,0.1);
-  border: 2px solid rgba(255,255,255,0.3);
-  color: #fff;
-  font-size: 32px;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all .2s;
-}
-
-.image-modal-close:hover {
-  background: var(--red);
-  border-color: var(--red);
-  transform: rotate(90deg);
+.stats-sidebar {
+ margin-top: 24px;
+ padding-top: 24px;
+ border-top: 1px solid var(--border);
+ animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+ from { opacity: 0; }
+ to { opacity: 1; }
 }
 
-/* EMPTY STATE */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
+.sidebar-stat {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 14px;
+ margin-bottom: 10px;
+ background: rgba(99,102,241,0.05);
+ border-radius: 10px;
+ font-size: 14px;
+ transition: all 0.2s;
 }
 
-.empty-state-icon {
-  font-size: 64px;
+.sidebar-stat:hover {
+ background: rgba(99,102,241,0.1);
+ transform: translateX(4px);
+}
+
+.sidebar-stat span:first-child {
+ color: var(--text-dim);
+ font-weight: 600;
+}
+
+.sidebar-stat span:last-child {
+ color: var(--text);
+ font-weight: 800;
+ font-family: 'JetBrains Mono', monospace;
+ font-size: 15px;
+}
+
+.mode-toggle {
+ width: 100%;
+ background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+ color: white;
+ border: none;
+ padding: 18px 20px;
+ border-radius: 14px;
+ font-weight: 800;
+ font-size: 15px;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ display: grid;
+ grid-template-columns: 20px 1fr;
+ align-items: center;
+ justify-items: center;
+ gap: 0;
+ letter-spacing: 1px;
+ position: relative;
+ overflow: hidden;
+ box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+}
+
+.mode-toggle span {
+ display: inline-block;
+}
+
+.mode-toggle #modeIcon {
+ font-size: 18px;
+ line-height: 1;
+ justify-self: end;
+}
+
+.mode-toggle #modeText {
+ font-size: 15px;
+ font-weight: 800;
+ letter-spacing: 1px;
+ justify-self: start;
+ margin-left: 8px;
+}
+
+.mode-toggle::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: -100%;
+ width: 100%;
+ height: 100%;
+ background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+ transition: left 0.5s;
+}
+
+.mode-toggle:hover::before {
+ left: 100%;
+}
+
+.mode-toggle:hover {
+ transform: translateY(-3px);
+ box-shadow: 0 12px 28px rgba(99,102,241,0.5);
+}
+
+.mode-toggle:active {
+ transform: translateY(-1px);
+}
+
+.mode-toggle.basic {
+ background: linear-gradient(135deg, var(--cyan) 0%, var(--blue) 100%);
+}
+
+/* ========== MAIN CONTENT ========== */
+.main-content {
+ flex: 1;
+ padding: 32px 40px;
+ overflow-y: auto;
+ overflow-x: hidden;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-main {
+ margin-bottom: 24px;
+ animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ position: relative;
+ gap: 20px;
+}
+
+.theme-toggle {
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 50%;
+ width: 48px;
+ height: 48px;
+ font-size: 24px;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ box-shadow: var(--shadow-sm);
+ position: relative;
+ overflow: hidden;
+}
+
+.theme-toggle:hover {
+ transform: scale(1.1) rotate(15deg);
+ box-shadow: var(--shadow-glow);
+ border-color: var(--blue);
+}
+
+.theme-toggle:active {
+ transform: scale(0.95);
+}
+
+.theme-toggle #themeIcon {
+ transition: all 0.3s;
+ display: inline-block;
+}
+
+.pdf-report-btn {
+ background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+ color: white;
+ border: none;
+ border-radius: 12px;
+ padding: 12px 24px;
+ font-size: 14px;
+ font-weight: 700;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ box-shadow: var(--shadow-md);
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ white-space: nowrap;
+}
+
+.pdf-report-btn:hover {
+ transform: translateY(-2px);
+ box-shadow: var(--shadow-lg);
+}
+
+.pdf-report-btn:active {
+ transform: translateY(0);
+}
+
+.pdf-report-btn.loading {
+ opacity: 0.7;
+ pointer-events: none;
+ animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+ 0%, 100% { opacity: 0.7; }
+ 50% { opacity: 1; }
+}
+
+@keyframes slideDown {
+ from {
+  opacity: 0;
+  transform: translateY(-20px);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
+
+/* ========== SISTEMA DE ABAS ========== */
+.tab-navigation {
+ display: flex;
+ gap: 12px;
+ margin-bottom: 32px;
+ border-bottom: 2px solid var(--border);
+ padding-bottom: 0;
+}
+
+.tab-btn {
+ background: transparent;
+ border: none;
+ border-bottom: 3px solid transparent;
+ padding: 14px 24px;
+ font-size: 15px;
+ font-weight: 700;
+ color: var(--text-dim);
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ position: relative;
+ margin-bottom: -2px;
+}
+
+.tab-icon {
+ font-size: 18px;
+ transition: transform 0.3s;
+}
+
+.tab-label {
+ font-family: 'Archivo', sans-serif;
+ letter-spacing: 0.5px;
+}
+
+.tab-btn:hover {
+ color: var(--text);
+ border-bottom-color: rgba(99, 102, 241, 0.3);
+}
+
+.tab-btn:hover .tab-icon {
+ transform: scale(1.15);
+}
+
+.tab-btn.active {
+ color: var(--blue-bright);
+ border-bottom-color: var(--blue);
+ background: linear-gradient(180deg, transparent 0%, rgba(99, 102, 241, 0.05) 100%);
+}
+
+.tab-btn.active .tab-icon {
+ animation: pulse 2s infinite;
+}
+
+.tab-content {
+ display: none;
+ animation: fadeIn 0.4s ease-out;
+}
+
+.tab-content.active {
+ display: block;
+}
+
+@keyframes fadeIn {
+ from {
+  opacity: 0;
+  transform: translateY(10px);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
+
+.header-main h1 {
+ font-size: 40px;
+ font-weight: 900;
+ margin-bottom: 0;
+ background: linear-gradient(135deg, var(--text) 0%, var(--blue-bright) 100%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ letter-spacing: -1px;
+}
+
+/* ========== KPIs ========== */
+.kpis {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+ gap: 20px;
+ margin-bottom: 32px;
+ animation: staggerIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes staggerIn {
+ from {
+  opacity: 0;
+  transform: translateY(20px);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
+
+.kpi {
+ background: var(--card-bg);
+ padding: 24px;
+ border-radius: 16px;
+ border: 1px solid var(--border);
+ position: relative;
+ overflow: hidden;
+ transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+ min-height: 110px;
+ display: flex;
+ flex-direction: column;
+ justify-content: space-between;
+ cursor: pointer;
+}
+
+.kpi::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 3px;
+ transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+ z-index: 0;
+ pointer-events: none;
+ transform: scaleX(0);
+ transform-origin: left;
+}
+
+.kpi:hover {
+ transform: translateY(-8px) scale(1.02);
+ box-shadow: var(--shadow-lg);
+ border-color: var(--border-bright);
+}
+
+.kpi:hover::before {
+ height: 100%;
+ opacity: 0.08;
+ transform: scaleX(1);
+}
+
+.kpi:active {
+ transform: translateY(-4px) scale(0.98);
+}
+
+.kpi-dias::before { background: var(--blue); }
+.kpi-trades::before { background: var(--purple); }
+.kpi-pontos::before { background: var(--green); }
+.kpi-acc::before { background: var(--orange); }
+.kpi-gains::before { background: var(--green); }
+.kpi-stops::before { background: var(--red); }
+.kpi-zero::before { background: var(--yellow); }
+
+.kpi span {
+ display: block;
+ font-size: 12px;
+ text-transform: uppercase;
+ letter-spacing: 1.5px;
+ color: var(--text-dim);
+ font-weight: 700;
+ margin-bottom: 12px;
+ opacity: 0.95;
+ position: relative;
+ z-index: 1;
+}
+
+.kpi strong {
+ display: block;
+ font-size: 36px;
+ font-weight: 900;
+ line-height: 1;
+ font-family: 'JetBrains Mono', monospace;
+ letter-spacing: -1px;
+ position: relative;
+ z-index: 1;
+}
+
+.kpi input {
+ background: var(--main-bg);
+ color: var(--text);
+ border: 2px solid var(--blue);
+ border-radius: 10px;
+ padding: 12px;
+ font-size: 24px;
+ font-weight: 800;
+ width: 100%;
+ margin-top: 8px;
+ text-align: center;
+ font-family: 'JetBrains Mono', monospace;
+ transition: all 0.2s;
+ cursor: text;
+}
+
+.kpi input:focus {
+ outline: none;
+ border-color: var(--blue-bright);
+ box-shadow: 0 0 0 4px rgba(99,102,241,0.2);
+}
+
+.kpi input:hover {
+ border-color: var(--blue-bright);
+}
+
+.kpi input::placeholder {
+ color: var(--muted);
+ opacity: 0.5;
+}
+
+.contratos-control {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 12px;
+ margin-top: 8px;
+ position: relative;
+ z-index: 10;
+}
+
+.btn-control {
+ background: var(--blue);
+ color: white;
+ border: none;
+ border-radius: 8px;
+ width: 40px;
+ height: 40px;
+ font-size: 24px;
+ font-weight: 800;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ pointer-events: auto;
+ z-index: 10;
+ position: relative;
+}
+
+.btn-control:hover {
+ background: var(--blue-bright);
+ transform: scale(1.1);
+ box-shadow: 0 4px 12px rgba(99,102,241,0.5);
+}
+
+.btn-control:active {
+ transform: scale(0.95);
+ box-shadow: 0 2px 6px rgba(99,102,241,0.5);
+}
+
+.valor-contratos {
+ background: var(--main-bg);
+ color: var(--text);
+ border: 2px solid var(--blue);
+ border-radius: 10px;
+ padding: 8px 24px;
+ font-size: 28px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ min-width: 80px;
+ text-align: center;
+ user-select: none;
+}
+
+/* ========== CHARTS ========== */
+.charts {
+ display: grid;
+ grid-template-columns: 2fr 1fr;
+ gap: 20px;
+ margin-bottom: 32px;
+ animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+@keyframes fadeInUp {
+ from {
+  opacity: 0;
+  transform: translateY(30px);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
+
+.chart-card {
+ background: var(--card-bg);
+ padding: 28px;
+ border-radius: 16px;
+ border: 1px solid var(--border);
+ display: flex;
+ flex-direction: column;
+ height: 460px;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ position: relative;
+ overflow: hidden;
+}
+
+.chart-card::after {
+ content: '';
+ position: absolute;
+ top: -50%;
+ left: -50%;
+ width: 200%;
+ height: 200%;
+ background: radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%);
+ opacity: 0;
+ transition: opacity 0.5s;
+}
+
+.chart-card:hover::after {
+ opacity: 1;
+}
+
+.chart-card:hover {
+ border-color: var(--border-bright);
+ box-shadow: var(--shadow-md);
+}
+
+.chart-card h3 {
+ font-size: 18px;
+ margin-bottom: 20px;
+ font-weight: 700;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ color: var(--text-dim);
+ letter-spacing: -0.5px;
+ position: relative;
+ z-index: 1;
+}
+
+.chart-wrap {
+ flex: 1;
+ position: relative;
+ min-height: 0;
+ z-index: 1;
+}
+
+canvas {
+ width: 100% !important;
+ height: 100% !important;
+}
+
+/* ========== MARKET DATA (CALENDÁRIO & HEATMAP) ========== */
+.market-data {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+ gap: 24px;
+ margin-bottom: 32px;
+}
+
+.market-data-vertical {
+ display: flex;
+ flex-direction: column;
+ gap: 24px;
+ margin-bottom: 32px;
+}
+
+.market-card {
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 16px;
+ padding: 24px;
+ box-shadow: var(--shadow);
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+ margin-bottom: 32px;
+}
+
+.market-card:hover {
+ transform: translateY(-2px);
+ box-shadow: var(--shadow-lg);
+ border-color: var(--border-bright);
+}
+
+.calendar-content {
+ width: 100%;
+}
+
+.calendar-content iframe {
+ display: block;
+ border: none;
+}
+
+/* Card do calendário centralizado */
+.calendar-wrapper-outer {
+ display: flex;
+ justify-content: center;
+ align-items: flex-start;
+ width: 100%;
+}
+
+.calendar-solo-card {
+ width: fit-content;
+ min-width: 750px;
+}
+
+.calendar-refresh-btn {
+ background: rgba(99, 102, 241, 0.15);
+ color: var(--blue);
+ border: 1px solid rgba(99, 102, 241, 0.3);
+ border-radius: 8px;
+ padding: 7px 14px;
+ font-size: 13px;
+ font-weight: 700;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ white-space: nowrap;
+}
+
+.calendar-refresh-btn:hover {
+ background: var(--blue);
+ color: white;
+ transform: scale(1.05);
+}
+
+.calendar-refresh-btn.loading {
+ opacity: 0.6;
+ pointer-events: none;
+ animation: spin 1s linear infinite;
+}
+
+.market-header {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-bottom: 20px;
+ padding-bottom: 16px;
+ border-bottom: 2px solid var(--border);
+}
+
+.market-header h3 {
+ font-size: 18px;
+ font-weight: 800;
+ color: var(--text);
+ margin: 0;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+}
+
+.market-link {
+ font-size: 13px;
+ font-weight: 700;
+ color: var(--blue);
+ text-decoration: none;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ gap: 4px;
+}
+
+.market-link:hover {
+ color: var(--blue-bright);
+ transform: translateX(4px);
+}
+
+/* ========== CALENDAR ========== */
+.calendar-wrapper {
+ margin-bottom: 32px;
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 16px;
+ padding: 24px;
+ animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+ transition: all 0.3s;
+}
+
+.calendar-wrapper:hover {
+ border-color: var(--border-bright);
+}
+
+.calendar-wrapper > strong {
+ display: block;
+ margin-bottom: 24px;
+ font-size: 18px;
+ font-weight: 700;
+ color: var(--text-dim);
+}
+
+#calendarTitle {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 12px;
+}
+
+#calendarTitle span {
+ flex: 1;
+ text-align: center;
+}
+
+.back-to-months-btn {
+ background: var(--blue);
+ color: white;
+ border: none;
+ border-radius: 8px;
+ padding: 8px 16px;
+ font-size: 13px;
+ font-weight: 700;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ white-space: nowrap;
+}
+
+.back-to-months-btn:hover {
+ background: var(--blue-bright);
+ transform: translateX(-3px);
+}
+
+.back-to-months-btn:active {
+ transform: translateX(-1px);
+}
+
+.calendar-header {
+ display: grid;
+ grid-template-columns: repeat(7, 1fr);
+ margin-bottom: 16px;
+ text-align: center;
+ color: var(--text-dim);
+ font-size: 14px;
+ font-weight: 800;
+ text-transform: uppercase;
+ letter-spacing: 1.5px;
+}
+
+.calendar-grid {
+ display: grid;
+ grid-template-columns: repeat(7, 1fr);
+ gap: 8px;
+}
+
+.calendar-grid:has(.month-card) {
+ grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+ gap: 12px;
+}
+
+/* Month Cards (quando "Todos os meses" está selecionado) */
+.month-card {
+ background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
+ border: 2px solid var(--border);
+ border-radius: 12px;
+ padding: 16px;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ gap: 8px;
+ min-height: 100px;
+}
+
+.month-card:hover {
+ transform: translateY(-4px) scale(1.02);
+ box-shadow: var(--shadow-lg);
+ border-color: var(--blue-bright);
+}
+
+.month-card.positive {
+ background: linear-gradient(135deg, rgba(16,185,129,0.1), var(--card-bg));
+ border-color: rgba(16,185,129,0.4);
+}
+
+.month-card.positive:hover {
+ box-shadow: 0 8px 32px var(--green-glow);
+ border-color: var(--green);
+}
+
+.month-card.negative {
+ background: linear-gradient(135deg, rgba(239,68,68,0.1), var(--card-bg));
+ border-color: rgba(239,68,68,0.4);
+}
+
+.month-card.negative:hover {
+ box-shadow: 0 8px 32px var(--red-glow);
+ border-color: var(--red);
+}
+
+.month-name {
+ font-size: 14px;
+ font-weight: 800;
+ color: var(--text);
+ text-transform: uppercase;
+ letter-spacing: 0.5px;
+}
+
+.month-points {
+ font-size: 32px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ line-height: 1;
+}
+
+.month-info {
+ font-size: 11px;
+ color: var(--text-dim);
+ font-weight: 600;
+}
+
+.day {
+ position: relative;
+ background: linear-gradient(135deg, rgba(15,20,32,0.8), var(--card-bg));
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ min-height: 75px;
+ padding: 6px;
+ padding-bottom: 26px;
+ display: flex;
+ flex-direction: column;
+ justify-content: flex-start;
+ gap: 2px;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ cursor: default;
+}
+
+.day.clickable {
+ cursor: pointer;
+}
+
+.day.clickable::after {
+ content: '📸';
+ position: absolute;
+ top: 6px;
+ right: 6px;
+ font-size: 12px;
+ opacity: 0;
+ transition: opacity 0.3s;
+}
+
+.day.clickable:hover::after {
+ opacity: 0.7;
+}
+
+.day.positive {
+ background: linear-gradient(135deg, rgba(16,185,129,0.08), var(--card-bg));
+ border-color: rgba(16,185,129,0.3);
+}
+
+.day.negative {
+ background: linear-gradient(135deg, rgba(239,68,68,0.08), var(--card-bg));
+ border-color: rgba(239,68,68,0.3);
+}
+
+.day:hover:not(.empty) {
+ transform: translateY(-4px) scale(1.02);
+ box-shadow: var(--shadow-lg);
+ border-color: var(--blue-bright);
+ z-index: 10;
+}
+
+.day.positive:hover {
+ box-shadow: 0 8px 32px var(--green-glow);
+}
+
+.day.negative:hover {
+ box-shadow: 0 8px 32px var(--red-glow);
+}
+
+.day-number {
+ font-size: 11px;
+ color: var(--muted);
+ font-weight: 700;
+ font-family: 'JetBrains Mono', monospace;
+}
+
+.day-points {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 22px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ margin-top: 1px;
+ margin-bottom: 4px;
+}
+
+.day-info {
+ font-size: 10px;
+ color: var(--text-dim);
+ text-align: center;
+ line-height: 1.4;
+ font-weight: 600;
+}
+
+.day-badge {
+ position: absolute;
+ bottom: 4px;
+ left: 50%;
+ transform: translateX(-50%);
+ background: rgba(0,0,0,0.95);
+ backdrop-filter: blur(10px);
+ border: 1px solid var(--border-bright);
+ border-radius: 6px;
+ padding: 4px 8px;
+ font-size: 9px;
+ white-space: nowrap;
+ opacity: 0;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ font-weight: 700;
+ font-family: 'JetBrains Mono', monospace;
+ letter-spacing: 0.3px;
+ z-index: 100;
+ pointer-events: none;
+}
+
+.day:hover .day-badge {
+ opacity: 1;
+}
+
+.empty {
+ background: transparent;
+ border: none;
+ cursor: default;
+}
+
+/* ========== TABLE ========== */
+.table-card {
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 16px;
+ padding: 28px;
+ margin-bottom: 32px;
+ animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+ transition: all 0.3s;
+}
+
+.table-card:hover {
+ border-color: var(--border-bright);
+}
+
+.table-card > strong {
+ display: block;
+ margin-bottom: 24px;
+ font-size: 18px;
+ font-weight: 700;
+ color: var(--text-dim);
+}
+
+.table-wrap {
+ overflow-x: auto;
+ border-radius: 12px;
+}
+
+table {
+ width: 100%;
+ min-width: 900px;
+ border-collapse: separate;
+ border-spacing: 0;
+}
+
+thead {
+ background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1));
+}
+
+th {
+ color: var(--blue-bright);
+ font-weight: 700;
+ font-size: 13px;
+ padding: 18px 14px;
+ text-align: center;
+ text-transform: uppercase;
+ letter-spacing: 1.5px;
+ border-bottom: 2px solid var(--border-bright);
+}
+
+td {
+ padding: 16px 14px;
+ border-bottom: 1px solid var(--border);
+ text-align: center;
+ font-size: 14px;
+ font-weight: 600;
+ font-family: 'JetBrains Mono', monospace;
+}
+
+thead th:first-child,
+tbody td:first-child {
+ text-align: left;
+ padding-left: 20px;
+ font-family: 'Archivo', sans-serif;
+}
+
+tr.total {
+ background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(99,102,241,0.08));
+ font-weight: 800;
+}
+
+tr.total td {
+ border-bottom: none;
+ padding: 20px 14px;
+ font-size: 15px;
+}
+
+tbody tr {
+ transition: all 0.2s;
+}
+
+tbody tr:hover {
+ background: rgba(99,102,241,0.08);
+ transform: scale(1.01);
+}
+
+/* ========== MODO BÁSICO ========== */
+body.basic-mode .pro-only {
+ display: none !important;
+}
+
+/* ========== LOADING ========== */
+.loading-overlay {
+ position: fixed;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: var(--main-bg);
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ z-index: 9999;
+ opacity: 1;
+ transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.loading-overlay.hidden {
+ opacity: 0;
+ pointer-events: none;
+}
+
+.spinner {
+ width: 70px;
+ height: 70px;
+ border: 4px solid var(--border);
+ border-top-color: var(--blue);
+ border-bottom-color: var(--purple);
+ border-radius: 50%;
+ animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+ margin-bottom: 24px;
+}
+
+@keyframes spin {
+ to { transform: rotate(360deg); }
+}
+
+.loading-text {
+ color: var(--text-dim);
+ font-size: 14px;
+ font-weight: 600;
+ letter-spacing: 2px;
+ text-transform: uppercase;
+ animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+ 0%, 100% { opacity: 0.5; }
+ 50% { opacity: 1; }
+}
+
+/* ========== PERFORMANCE INDICATOR ========== */
+.performance-indicator {
+ position: fixed;
+ top: 20px;
+ right: 20px;
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 12px;
+ padding: 12px 16px;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ font-size: 13px;
+ font-weight: 700;
+ z-index: 100;
+ opacity: 0;
+ animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) 1s forwards;
+ box-shadow: var(--shadow-md);
+}
+
+@keyframes slideInRight {
+ from {
+  opacity: 0;
+  transform: translateX(100px);
+ }
+ to {
+  opacity: 1;
+  transform: translateX(0);
+ }
+}
+
+.performance-dot {
+ width: 10px;
+ height: 10px;
+ border-radius: 50%;
+ animation: glow 2s ease-in-out infinite;
+}
+
+.performance-dot.positive { background: var(--green); }
+.performance-dot.negative { background: var(--red); }
+.performance-dot.neutral { background: var(--yellow); }
+
+@keyframes glow {
+ 0%, 100% { box-shadow: 0 0 5px currentColor; }
+ 50% { box-shadow: 0 0 20px currentColor; }
+}
+
+/* ========== MODAL DE FOTO DO TRADE ========== */
+.trade-photo-modal {
+ position: fixed;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: rgba(0, 0, 0, 0.95);
+ display: none;
+ align-items: center;
+ justify-content: center;
+ z-index: 10000;
+ padding: 20px;
+ backdrop-filter: blur(10px);
+ animation: fadeIn 0.3s ease-out;
+}
+
+.trade-photo-modal.active {
+ display: flex;
+}
+
+.modal-content {
+ background: var(--card-bg);
+ border: 2px solid var(--border-bright);
+ border-radius: 20px;
+ max-width: 650px;
+ width: 100%;
+ max-height: 85vh;
+ overflow-y: auto;
+ position: relative;
+ box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+ animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+ from {
+  opacity: 0;
+  transform: translateY(50px) scale(0.9);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+ }
+}
+
+.modal-header {
+ padding: 18px 20px;
+ border-bottom: 1px solid var(--border);
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+}
+
+.modal-header h2 {
+ font-size: 20px;
+ font-weight: 800;
+ color: var(--text);
+ display: flex;
+ align-items: center;
+ gap: 10px;
+}
+
+.modal-close-btn {
+ background: var(--red);
+ color: white;
+ border: none;
+ border-radius: 50%;
+ width: 36px;
+ height: 36px;
+ font-size: 22px;
+ font-weight: 800;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ line-height: 1;
+}
+
+.modal-close-btn:hover {
+ background: #dc2626;
+ transform: rotate(90deg) scale(1.1);
+}
+
+.modal-body {
+ padding: 20px;
+}
+
+.modal-info-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+ gap: 12px;
+ margin-bottom: 20px;
+}
+
+.modal-info-item {
+ background: rgba(99, 102, 241, 0.05);
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ padding: 12px;
+ text-align: center;
+}
+
+.modal-info-item label {
+ display: block;
+ font-size: 11px;
+ text-transform: uppercase;
+ letter-spacing: 0.5px;
+ color: var(--text-dim);
+ margin-bottom: 6px;
+ font-weight: 700;
+}
+
+.modal-info-item .value {
+ font-size: 22px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ color: var(--text);
+}
+
+.modal-info-item.positive .value {
+ color: var(--green);
+}
+
+.modal-info-item.negative .value {
+ color: var(--red);
+}
+
+.modal-photo-container {
+ background: var(--main-bg);
+ border: 2px solid var(--border);
+ border-radius: 12px;
+ padding: 12px;
+ margin-top: 20px;
+ position: relative;
+ overflow: hidden;
+ cursor: grab;
+}
+
+.modal-photo-container.grabbing {
+ cursor: grabbing;
+}
+
+.modal-photo-container img {
+ width: 100%;
+ height: auto;
+ max-height: 400px;
+ object-fit: contain;
+ border-radius: 8px;
+ display: block;
+ transition: transform 0.1s ease-out;
+ transform-origin: center center;
+}
+
+.zoom-controls {
+ position: absolute;
+ top: 16px;
+ right: 16px;
+ display: flex;
+ gap: 8px;
+ z-index: 10;
+}
+
+.zoom-btn {
+ background: rgba(0, 0, 0, 0.7);
+ color: white;
+ border: 1px solid rgba(255, 255, 255, 0.2);
+ border-radius: 8px;
+ width: 36px;
+ height: 36px;
+ font-size: 18px;
+ font-weight: 700;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ backdrop-filter: blur(10px);
+}
+
+.zoom-btn:hover {
+ background: rgba(0, 0, 0, 0.9);
+ transform: scale(1.1);
+}
+
+.zoom-btn:active {
+ transform: scale(0.95);
+}
+
+.zoom-info {
+ position: absolute;
+ bottom: 16px;
+ left: 50%;
+ transform: translateX(-50%);
+ background: rgba(0, 0, 0, 0.7);
+ color: white;
+ padding: 6px 12px;
+ border-radius: 6px;
+ font-size: 12px;
+ font-weight: 600;
+ backdrop-filter: blur(10px);
+ pointer-events: none;
+ opacity: 0;
+ transition: opacity 0.3s;
+}
+
+.zoom-info.show {
+ opacity: 1;
+}
+
+.download-btn {
+ position: absolute;
+ top: 16px;
+ left: 16px;
+ background: var(--green);
+ color: white;
+ border: none;
+ border-radius: 8px;
+ padding: 10px 16px;
+ font-size: 14px;
+ font-weight: 700;
+ cursor: pointer;
+ transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ z-index: 10;
+ backdrop-filter: blur(10px);
+ box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.download-btn:hover {
+ background: #10b981;
+ transform: translateY(-2px);
+ box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+}
+
+.download-btn:active {
+ transform: translateY(0);
+}
+
+.download-btn.downloading {
+ background: var(--blue);
+ pointer-events: none;
+}
+
+/* Card de captura (invisível, usado apenas para screenshot) */
+.capture-card {
+ position: fixed;
+ top: -10000px;
+ left: -10000px;
+ background: linear-gradient(135deg, #0f1420 0%, #1a1f35 100%);
+ border: 2px solid rgba(99, 102, 241, 0.3);
+ border-radius: 20px;
+ padding: 24px;
+ width: 900px;
+ box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.capture-header {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ margin-bottom: 20px;
+ padding-bottom: 16px;
+ border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+}
+
+.capture-header-icon {
+ font-size: 28px;
+}
+
+.capture-header-title {
+ font-size: 22px;
+ font-weight: 800;
+ color: #e2e8f0;
+ font-family: 'Archivo', sans-serif;
+}
+
+.capture-stats {
+ display: grid;
+ grid-template-columns: repeat(5, 1fr);
+ gap: 12px;
+ margin-bottom: 20px;
+}
+
+.capture-stat {
+ background: rgba(99, 102, 241, 0.08);
+ border: 1px solid rgba(99, 102, 241, 0.15);
+ border-radius: 12px;
+ padding: 14px;
+ text-align: center;
+}
+
+.capture-stat-label {
+ font-size: 11px;
+ text-transform: uppercase;
+ letter-spacing: 1px;
+ color: #94a3b8;
+ margin-bottom: 8px;
+ font-weight: 700;
+}
+
+.capture-stat-value {
+ font-size: 24px;
+ font-weight: 900;
+ font-family: 'JetBrains Mono', monospace;
+ color: #e2e8f0;
+}
+
+.capture-photo {
+ border-radius: 12px;
+ overflow: hidden;
+ border: 2px solid rgba(99, 102, 241, 0.2);
+}
+
+.capture-photo img {
+ width: 100%;
+ height: auto;
+ display: block;
+}
+
+.capture-footer {
+ margin-top: 16px;
+ padding-top: 16px;
+ border-top: 2px solid rgba(99, 102, 241, 0.2);
+ text-align: center;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ min-height: 60px;
+}
+
+.capture-footer img {
+ max-height: 50px;
+ max-width: 300px;
+ height: auto;
+ width: auto;
+ filter: brightness(1.1);
+}
+
+.modal-photo-loading {
+ text-align: center;
+ padding: 40px 20px;
+ color: var(--text-dim);
+ font-size: 14px;
+ font-weight: 600;
+}
+
+.modal-photo-error {
+ text-align: center;
+ padding: 40px 20px;
+ color: var(--red);
+ font-size: 14px;
+ font-weight: 600;
+}
+
+.modal-photo-spinner {
+ width: 40px;
+ height: 40px;
+ border: 3px solid var(--border);
+ border-top-color: var(--blue);
+ border-radius: 50%;
+ animation: spin 1s linear infinite;
+ margin: 0 auto 16px;
+}
+
+.currency-display {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 8px;
+ margin-top: 12px;
+ padding: 8px 16px;
+ background: rgba(99, 102, 241, 0.08);
+ border-radius: 8px;
+ border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.currency-icon {
+ font-size: 18px;
+ filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.currency-value-brl {
+ font-size: 15px;
+ font-weight: 800;
+ font-family: 'JetBrains Mono', monospace;
+ color: var(--text);
+ letter-spacing: 0.5px;
+}
+
+/* Remove CSS antigo do conversor */
+::-webkit-scrollbar {
+ width: 8px;
+ height: 8px;
+}
+
+::-webkit-scrollbar-track {
+ background: var(--main-bg);
+}
+
+::-webkit-scrollbar-thumb {
+ background: var(--border-bright);
+ border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+ background: var(--blue);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1200px) {
+ .charts {
+  grid-template-columns: 1fr;
+ }
+}
+
+@media (max-width: 1024px) {
+ .dashboard-container {
+  flex-direction: column;
+ }
+ 
+ /* No mobile, a sidebar é movida para dentro do main-content por JS */
+ #sidebarDesktop {
+  display: none;
+ }
+ 
+ /* Quando a sidebar é inserida no anchor, estiliza como bloco */
+ #sidebarMobileAnchor .sidebar {
+  display: flex !important;
+  width: 100%;
+  border-right: none;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 20px;
+  position: static;
+  flex-direction: column;
+ }
+ 
+ #sidebarMobileAnchor .sidebar .filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+  animation: none;
+ }
+ 
+ #sidebarMobileAnchor .sidebar .filter-group { margin-bottom: 0; }
+ #sidebarMobileAnchor .sidebar .filter-group label { font-size: 11px; }
+ #sidebarMobileAnchor .sidebar .mode-toggle { margin-top: 0; margin-bottom: 14px; }
+ #sidebarMobileAnchor .sidebar .stats-sidebar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+ }
+ #sidebarMobileAnchor .sidebar .sidebar-stat { margin-bottom: 0; }
+ #sidebarMobileAnchor .sidebar::before { display: none; }
+ 
+ .main-content {
+  padding: 20px 16px;
+ }
+ 
+ .header-main {
+  gap: 10px;
+ }
+ 
+ .theme-toggle {
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+ }
+ 
+ .pdf-report-btn {
+  padding: 10px 16px;
+  font-size: 12px;
+ }
+ 
+ .header-logo {
+  max-height: 70px;
+ }
+ 
+ .sidebar::before {
+  width: 100%;
+  height: 1px;
+  top: auto;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, var(--blue), transparent);
+ }
+ 
+ .logo {
+  margin-bottom: 20px;
+  padding: 16px;
+ }
+ 
+ .logo img {
+  max-height: 60px;
+ }
+ 
+ .filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
   margin-bottom: 16px;
+ }
+ 
+ .filter-group {
+  margin-bottom: 0;
+ }
+ 
+ .filter-group label {
+  font-size: 11px;
+  margin-bottom: 6px;
+ }
+ 
+ .filter-group select {
+  padding: 10px 12px;
+  font-size: 13px;
+ }
+ 
+ .stats-sidebar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+ }
+ 
+ .sidebar-stat {
+  margin-bottom: 0;
+  padding: 10px;
+  font-size: 12px;
+ }
+ 
+ .sidebar-stat span:last-child {
+  font-size: 13px;
+ }
+ 
+ .mode-toggle {
+  padding: 14px 16px;
+  font-size: 13px;
+  margin-top: 16px;
+ }
+ 
+ .mode-toggle #modeText {
+  font-size: 13px;
+ }
+ 
+ .mode-toggle #modeIcon {
+  font-size: 16px;
+ }
+ 
+ .header-main {
+  margin-bottom: 20px;
+ }
+ 
+ .header-logo {
+  max-height: 70px;
+ }
+ 
+ .performance-indicator {
+  top: 12px;
+  right: 12px;
+  font-size: 11px;
+  padding: 8px 12px;
+ }
 }
 
-/* RESPONSIVE */
 @media (max-width: 768px) {
-  .container { padding: 16px; }
-  .welcome-banner { padding: 24px; }
-  .welcome-banner h2 { font-size: 24px; }
-  .quick-access { grid-template-columns: 1fr; }
-  .section-header { flex-direction: column; align-items: start; gap: 12px; }
-  .filter-buttons { width: 100%; overflow-x: auto; }
+ .kpis {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+ }
+ 
+ .kpi {
+  min-height: 90px;
+  padding: 16px;
+ }
+ 
+ .kpi span {
+  font-size: 10px;
+  margin-bottom: 8px;
+ }
+ 
+ .kpi strong {
+  font-size: 28px;
+ }
+ 
+ .calendar-grid {
+  gap: 6px;
+ }
+ 
+ .day {
+  min-height: 70px;
+  padding: 6px;
+  padding-bottom: 24px;
+  border-radius: 10px;
+ }
+ 
+ .day-number {
+  font-size: 11px;
+ }
+ 
+ .day-points {
+  font-size: 20px;
+  margin-top: 1px;
+  margin-bottom: 3px;
+ }
+ 
+ .day-info {
+  font-size: 9px;
+  line-height: 1.3;
+ }
+ 
+ .day-badge {
+  font-size: 8px;
+  padding: 3px 6px;
+  bottom: 3px;
+ }
+ 
+ .chart-card {
+  height: 300px;
+  padding: 20px;
+ }
+ 
+ .chart-card h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
+ }
+ 
+ .calendar-wrapper {
+  padding: 16px;
+ }
+ 
+ .calendar-wrapper > strong,
+ #calendarTitle {
+  font-size: 16px;
+  margin-bottom: 16px;
+ }
+ 
+ .calendar-header {
+  font-size: 12px;
+  margin-bottom: 12px;
+ }
+ 
+ .back-to-months-btn {
+  font-size: 12px;
+  padding: 6px 12px;
+ }
+ 
+ .month-card {
+  min-height: 90px;
+  padding: 14px;
+  gap: 6px;
+ }
+ 
+ .month-name {
+  font-size: 13px;
+ }
+ 
+ .month-points {
+  font-size: 28px;
+ }
+ 
+ .month-info {
+  font-size: 10px;
+ }
+ 
+ .table-card {
+  padding: 20px 16px;
+ }
+ 
+ .table-card > strong {
+  font-size: 16px;
+  margin-bottom: 16px;
+ }
+ 
+ table {
+  min-width: 700px;
+ }
+ 
+ th {
+  font-size: 11px;
+  padding: 12px 10px;
+ }
+ 
+ td {
+  font-size: 12px;
+  padding: 12px 10px;
+ }
+ 
+ /* Modal menor em mobile */
+ .modal-content {
+  max-width: 95%;
+  max-height: 90vh;
+ }
+ 
+ .modal-header {
+  padding: 14px 16px;
+ }
+ 
+ .modal-header h2 {
+  font-size: 16px;
+  gap: 8px;
+ }
+ 
+ .modal-close-btn {
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+ }
+ 
+ .modal-body {
+  padding: 16px;
+ }
+ 
+ .modal-info-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+ }
+ 
+ .modal-info-item {
+  padding: 10px;
+ }
+ 
+ .modal-info-item label {
+  font-size: 10px;
+  margin-bottom: 4px;
+ }
+ 
+ .modal-info-item .value {
+  font-size: 18px;
+ }
+ 
+ .modal-photo-container {
+  padding: 10px;
+  margin-top: 16px;
+ }
+ 
+ .modal-photo-container img {
+  max-height: 300px;
+ }
+ 
+ .modal-photo-loading,
+ .modal-photo-error {
+  padding: 30px 16px;
+  font-size: 13px;
+ }
+ 
+ .modal-photo-spinner {
+  width: 35px;
+  height: 35px;
+  margin-bottom: 12px;
+ }
+ 
+ .currency-display {
+  padding: 6px 12px;
+  margin-top: 10px;
+  gap: 6px;
+ }
+ 
+ .currency-icon {
+  font-size: 16px;
+ }
+ 
+ .currency-value-brl {
+  font-size: 13px;
+ }
+ 
+ .market-data {
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+ }
+ 
+ .calendar-wrapper-outer {
+  padding: 0;
+ }
+ 
+ .calendar-solo-card {
+  width: 100% !important;
+  min-width: unset !important;
+ }
+ 
+ .calendar-content {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+ }
+ 
+ .calendar-content iframe {
+  height: 500px !important;
+  min-width: 600px;
+ }
+ 
+ .market-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+ }
+ 
+ .market-header > div {
+  width: 100%;
+  justify-content: space-between;
+ }
+ 
+ .calendar-refresh-btn {
+  flex: 1;
+  justify-content: center;
+ }
+ 
+ .market-card {
+  padding: 16px;
+ }
+ 
+ .market-header h3 {
+  font-size: 15px;
+ }
+ 
+ .market-link {
+  font-size: 12px;
+ }
+ 
+ .market-content iframe {
+  height: 400px !important;
+ }
+ 
+ .tab-navigation {
+  gap: 8px;
+  margin-bottom: 24px;
+ }
+ 
+ .tab-btn {
+  padding: 12px 20px;
+  font-size: 14px;
+ }
+ 
+ .tab-icon {
+  font-size: 16px;
+ }
+ 
+ .tab-label {
+  font-size: 14px;
+ }
+}
+
+@media (max-width: 480px) {
+ .kpis {
+  grid-template-columns: 1fr;
+  gap: 10px;
+ }
+ 
+ .kpi {
+  min-height: 80px;
+  padding: 14px;
+ }
+ 
+ .header-main h1 {
+  font-size: 24px;
+ }
+ 
+ .performance-indicator {
+  position: relative;
+  top: 0;
+  right: 0;
+  margin-bottom: 16px;
+  justify-content: flex-start;
+ }
+ 
+ .filters {
+  grid-template-columns: 1fr;
+  gap: 10px;
+ }
+ 
+ .stats-sidebar {
+  grid-template-columns: 1fr;
+  gap: 8px;
+ }
+ 
+ .day {
+  min-height: 65px;
+  padding: 5px;
+  padding-bottom: 20px;
+ }
+ 
+ .day-points {
+  font-size: 18px;
+ }
+ 
+ .day-info {
+  font-size: 8px;
+ }
+ 
+ .calendar-header {
+  font-size: 11px;
+ }
+ 
+ .chart-card {
+  height: 250px;
+  padding: 16px;
+ }
+ 
+ .chart-card h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+ }
+ 
+ .modal-content {
+  max-width: 98%;
+  border-radius: 16px;
+ }
+ 
+ .modal-header h2 {
+  font-size: 14px;
+ }
+ 
+ .modal-info-grid {
+  grid-template-columns: 1fr;
+  gap: 8px;
+ }
+ 
+ .modal-photo-container img {
+  max-height: 250px;
+ }
+ 
+ .contratos-control {
+  gap: 8px;
+ }
+ 
+ .btn-control {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+ }
+ 
+ .valor-contratos {
+  font-size: 24px;
+  padding: 6px 18px;
+  min-width: 70px;
+ }
+ 
+ .market-data {
+  gap: 16px;
+ }
+ 
+ .market-card {
+  padding: 16px;
+ }
+ 
+ .market-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+ }
+ 
+ .market-header h3 {
+  font-size: 14px;
+ }
+ 
+ .market-link {
+  font-size: 11px;
+ }
+ 
+ .market-content iframe {
+  height: 350px !important;
+ }
+ 
+ .tab-navigation {
+  gap: 6px;
+  margin-bottom: 20px;
+ }
+ 
+ .tab-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  gap: 6px;
+ }
+ 
+ .tab-icon {
+  font-size: 15px;
+ }
+ 
+ .tab-label {
+  font-size: 13px;
+ }
+}
+
+/* ========== TOOLTIP ========== */
+.tooltip {
+ position: absolute;
+ background: rgba(0,0,0,0.95);
+ color: var(--text);
+ padding: 12px 16px;
+ border-radius: 8px;
+ font-size: 12px;
+ font-weight: 600;
+ pointer-events: none;
+ opacity: 0;
+ transition: opacity 0.2s;
+ z-index: 1000;
+ border: 1px solid var(--border-bright);
+ backdrop-filter: blur(10px);
+ white-space: nowrap;
+}
+
+.tooltip.show {
+ opacity: 1;
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
-<header>
-  <div class="header-left">
-    <span class="logo">🧑‍🎓</span>
-    <h1>Área do Aluno</h1>
-  </div>
-  <div class="user-info">
-    <span id="userName">Aluno</span>
-    <button class="btn-logout" onclick="logout()">Sair</button>
-  </div>
-</header>
-
-<div class="container">
-  
-  <!-- BANNER BEM-VINDO -->
-  <div class="welcome-banner">
-    <h2>Bem-vindo de volta! 👋</h2>
-    <p>Confira as últimas análises e conteúdos exclusivos</p>
-  </div>
-
-  <!-- ACESSO RÁPIDO -->
-  <div class="quick-access">
-    <div class="quick-card" onclick="window.location.href='../'">
-      <div class="quick-card-icon">📊</div>
-      <h3>Dashboard Principal</h3>
-      <p>Análise de trades e mercado</p>
-    </div>
-
-    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('sala-ao-vivo')">
-      <div class="quick-card-icon">🔴</div>
-      <h3>Sala ao Vivo</h3>
-      <p>Transmissões e lives</p>
-    </div>
-
-    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('materiais')">
-      <div class="quick-card-icon">📚</div>
-      <h3>Materiais</h3>
-      <p>Conteúdo educativo</p>
-    </div>
-
-    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('link')">
-      <div class="quick-card-icon">🔗</div>
-      <h3>Links Úteis</h3>
-      <p>Recursos e ferramentas</p>
-    </div>
-  </div>
-
-  <!-- POSTS -->
-  <div class="section-header" id="posts">
-    <h2>📰 Últimas Publicações</h2>
-    <div class="filter-buttons">
-      <button class="filter-btn active" onclick="filtrarPosts('todos')">Todos</button>
-      <button class="filter-btn" onclick="filtrarPosts('sala-ao-vivo')">🔴 Sala ao Vivo</button>
-      <button class="filter-btn" onclick="filtrarPosts('materiais')">📚 Materiais</button>
-      <button class="filter-btn" onclick="filtrarPosts('analise')">Análises</button>
-      <button class="filter-btn" onclick="filtrarPosts('tutorial')">Tutoriais</button>
-      <button class="filter-btn" onclick="filtrarPosts('noticia')">Notícias</button>
-      <button class="filter-btn" onclick="filtrarPosts('link')">Links</button>
-    </div>
-  </div>
-
-  <div id="posts-container" class="posts-grid">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Carregando conteúdos...</p>
-    </div>
-  </div>
-
+<div class="loading-overlay" id="loading">
+ <div class="spinner"></div>
+ <div class="loading-text">Carregando Dashboard...</div>
 </div>
 
-<!-- MODAL DE IMAGEM -->
-<div class="image-modal" id="imageModal" onclick="fecharModal()">
-  <span class="image-modal-close">×</span>
-  <img id="modalImage" src="" alt="">
+<div class="performance-indicator" id="perfIndicator" style="display: none;">
+ <div class="performance-dot neutral"></div>
+ <span id="perfText">Carregando...</span>
 </div>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<div class="dashboard-container">
+
+<!-- SIDEBAR (desktop: esquerda | mobile: movida por JS) -->
+<div class="sidebar" id="sidebarDesktop">
+ 
+ <div class="filters">
+  <div class="filter-group">
+   <label>📅 Ano</label>
+   <select id="filtroAno"></select>
+  </div>
+  <div class="filter-group">
+   <label>📆 Mês</label>
+   <select id="filtroMes"></select>
+  </div>
+  <div class="filter-group">
+   <label>📊 Semana</label>
+   <select id="filtroSemana"></select>
+  </div>
+ </div>
+ 
+ <button class="mode-toggle basic" id="toggleMode">
+  <span id="modeIcon">📊</span>
+  <span id="modeText">Modo Básico</span>
+ </button>
+ 
+ <a href="portal/login.html" class="mode-toggle" style="text-decoration:none; margin-top:12px; background:linear-gradient(135deg, #22c55e, #3b82f6); color:#000; font-weight:700;">
+  <span>🎓</span>
+  <span>Portal do Aluno</span>
+ </a>
+ 
+ <div class="stats-sidebar">
+  <div class="sidebar-stat">
+   <span>Assertividade</span>
+   <span id="sidebarWinRate">0%</span>
+  </div>
+  <div class="sidebar-stat">
+   <span>Melhor Dia</span>
+   <span id="sidebarBestDay">0</span>
+  </div>
+  <div class="sidebar-stat">
+   <span>Pior Dia</span>
+   <span id="sidebarWorstDay">0</span>
+  </div>
+ </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+ <div class="header-main">
+  <button class="theme-toggle" id="themeToggle" onclick="Dashboard.toggleTema()" title="Alternar tema">
+   <span id="themeIcon">🌙</span>
+  </button>
+  <img src="logo.png" alt="Mentoria NasdaqPro" class="header-logo" onerror="this.style.display='none'">
+  <button class="pdf-report-btn" id="pdfReportBtn" onclick="Dashboard.gerarRelatorioPDF()" title="Exportar dashboard como imagem PNG">
+   📸 Exportar Imagem
+  </button>
+ </div>
+ 
+ <!-- ÂNCORA PARA A SIDEBAR NO MOBILE (sidebar é inserida aqui por JS) -->
+ <div id="sidebarMobileAnchor"></div>
+ 
+ <!-- ABAS DE NAVEGAÇÃO -->
+ <div class="tab-navigation">
+  <button class="tab-btn active" id="tabDashboard" onclick="Dashboard.mudarAba('dashboard')">
+   <span class="tab-icon">📊</span>
+   <span class="tab-label">Dashboard</span>
+  </button>
+  <button class="tab-btn" id="tabMercado" onclick="Dashboard.mudarAba('mercado')">
+   <span class="tab-icon">📅</span>
+   <span class="tab-label">Calendário</span>
+  </button>
+ </div>
+ 
+ <!-- CONTEÚDO DASHBOARD -->
+ <div id="contentDashboard" class="tab-content active">
+ 
+ <!-- HEADER DO DASHBOARD COM LOGO -->
+ <div class="dashboard-header-report">
+  <img src="logo.png" alt="Mentoria NasdaqPro" class="report-logo" onerror="this.style.display='none'">
+ </div>
+ 
+ <div class="kpis">
+  <div class="kpi kpi-dias">
+   <span>Dias Operados</span>
+   <strong id="kDias">0</strong>
+  </div>
+  <div class="kpi kpi-trades">
+   <span>Total de Trades</span>
+   <strong id="kTrades">0</strong>
+  </div>
+  <div class="kpi kpi-pontos">
+   <span>Pontos Totais</span>
+   <strong id="kPontos">0</strong>
+  </div>
+  <div class="kpi kpi-acc">
+   <span>Assertividade</span>
+   <strong id="kAcc">0%</strong>
+  </div>
+  <div class="kpi kpi-gains pro-only">
+   <span>Gains</span>
+   <strong id="kGains" style="color:var(--green)">0</strong>
+  </div>
+  <div class="kpi kpi-stops pro-only">
+   <span>Stops</span>
+   <strong id="kStops" style="color:var(--red)">0</strong>
+  </div>
+  <div class="kpi kpi-zero pro-only">
+   <span>Breakeven (0x0)</span>
+   <strong id="kZero" style="color:var(--yellow)">0</strong>
+  </div>
+  <div class="kpi pro-only">
+   <span>Contratos por Trade</span>
+   <div class="contratos-control">
+    <button id="btnMenos" class="btn-control">-</button>
+    <div id="valorContratos" class="valor-contratos">0</div>
+    <button id="btnMais" class="btn-control">+</button>
+   </div>
+  </div>
+  <div class="kpi pro-only">
+   <span>Total em Dólar</span>
+   <strong id="kDolar" style="color:var(--green)">$0.00</strong>
+   <div class="currency-display">
+    <span class="currency-icon">🇧🇷</span>
+    <span class="currency-value-brl" id="valorBRL">R$ 0,00</span>
+   </div>
+  </div>
+ </div>
+ 
+ <div class="charts pro-only">
+  <div class="chart-card">
+   <h3>📈 Evolução de Performance</h3>
+   <div class="chart-wrap">
+    <canvas id="chartAcumulado"></canvas>
+   </div>
+  </div>
+  <div class="chart-card">
+   <h3>📊 Distribuição de Resultados</h3>
+   <div class="chart-wrap">
+    <canvas id="chartBar"></canvas>
+   </div>
+  </div>
+ </div>
+ 
+ <div class="calendar-wrapper pro-only">
+  <strong id="calendarTitle">📅 Calendário de Trading</strong>
+  <div class="calendar-header">
+   <div>Dom</div><div>Seg</div><div>Ter</div>
+   <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+  </div>
+  <div class="calendar-grid" id="calendar"></div>
+ </div>
+ 
+ <div class="table-card">
+  <strong>📋 Histórico Detalhado de Operações</strong>
+  <div class="table-wrap">
+   <table>
+    <thead>
+     <tr>
+      <th>Data</th><th>Pontos</th><th>Trades</th>
+      <th>Gain</th><th>Stop</th><th>0x0</th>
+      <th>Ativo</th><th>Semana</th>
+     </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+   </table>
+  </div>
+ </div>
+ 
+ </div><!-- FIM CONTEÚDO DASHBOARD -->
+ 
+ <!-- CONTEÚDO CALENDÁRIO -->
+ <div id="contentMercado" class="tab-content">
+  <div class="calendar-wrapper-outer">
+   <div class="market-card calendar-solo-card">
+    <div class="market-header">
+     <h3>📅 Calendário Econômico</h3>
+     <div style="display:flex;align-items:center;gap:12px;">
+      <button class="calendar-refresh-btn" onclick="Dashboard.atualizarCalendario()" title="Atualizar calendário">
+       🔄 Atualizar
+      </button>
+      <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">
+       Ver Completo →
+      </a>
+     </div>
+    </div>
+    <div class="calendar-content">
+     <iframe 
+      id="investingCalendar"
+      src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone,timeselector,filters&countries=5,25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4&calType=day&timeZone=12&lang=12"
+      width="700"
+      height="700"
+      frameborder="0"
+      scrolling="yes">
+     </iframe>
+    </div>
+   </div>
+  </div>
+ </div><!-- FIM CONTEÚDO CALENDÁRIO -->
+
+</div>
+</div>
+
+<!-- MODAL DE FOTO DO TRADE -->
+<div class="trade-photo-modal" id="tradePhotoModal">
+ <div class="modal-content">
+  <div class="modal-header">
+   <h2 id="modalTitle">📅 Carregando...</h2>
+   <button class="modal-close-btn" onclick="Dashboard.fecharModal()">×</button>
+  </div>
+  <div class="modal-body">
+   <div class="modal-info-grid" id="modalInfoGrid"></div>
+   <div class="modal-photo-container" id="modalPhotoContainer">
+    <div class="modal-photo-loading">
+     <div class="modal-photo-spinner"></div>
+     Carregando foto...
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- CARD INVISÍVEL PARA CAPTURA -->
+<div class="capture-card" id="captureCard">
+ <div class="capture-header">
+  <span class="capture-header-icon" id="captureIcon">📅</span>
+  <span class="capture-header-title" id="captureTitle">Carregando...</span>
+ </div>
+ <div class="capture-stats" id="captureStats"></div>
+ <div class="capture-photo" id="capturePhoto"></div>
+ <div class="capture-footer" id="captureFooter">
+  <img src="logo.png" alt="Mentoria NasdaqPro" onerror="this.parentElement.innerHTML='<span style=\'color:#64748b;font-size:12px;font-weight:600\'>NASDAQ PRO Trading Dashboard</span>'">
+ </div>
+</div>
 
 <script>
-// ══════════════════════════════════════════════
-// MODAL DE IMAGEM
-// ══════════════════════════════════════════════
-function abrirModal(imagemUrl) {
-  document.getElementById('modalImage').src = imagemUrl;
-  document.getElementById('imageModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function fecharModal() {
-  document.getElementById('imageModal').classList.remove('active');
-  document.body.style.overflow = 'auto';
-}
-
-// Fechar com ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') fecharModal();
-});
-
-// ══════════════════════════════════════════════
-// VERIFICAÇÃO DE ACESSO
-// ══════════════════════════════════════════════
-verificarAutenticacao(async (user) => {
-  const aprovado = await verificarAprovacao(user.uid);
-  if (!aprovado) {
-    alert('❌ Sua conta ainda não foi aprovada pelo administrador.');
-    auth.signOut();
-    window.location.href = 'login.html';
-    return;
-  }
-  
-  document.getElementById('userName').textContent = user.displayName || 'Aluno';
-  carregarPosts();
-});
-
-// ══════════════════════════════════════════════
-// FUNÇÕES AUXILIARES
-// ══════════════════════════════════════════════
-function logout() {
-  if (confirm('Deseja realmente sair?')) {
-    auth.signOut();
-    window.location.href = 'login.html';
-  }
-}
-
-function scrollToSection(id) {
-  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-}
-
-// ══════════════════════════════════════════════
-// POSTS
-// ══════════════════════════════════════════════
-let todosOsPosts = [];
-let categoriaAtual = 'todos';
-
-const categoriaIcons = {
-  'sala-ao-vivo': '🔴',
-  'materiais': '📚',
-  'analise': '📈',
-  'tutorial': '🎓',
-  'noticia': '📰',
-  'link': '🔗'
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbyybCny81vfVXQHmtlkKEOHHJ6xJ_pKSG_4ndkK0tH-YocrFeWY7qL41TS1IfvRQjLSbLIILV56OV/pub?output=csv";
+const GOOGLE_DRIVE_FOLDER_ID = "13wSi9sB3nDbQcF0oYDF1ZxWtLVNNrroh";
+const nomesMeses = {
+ "01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril",
+ "05":"Maio","06":"Junho","07":"Julho","08":"Agosto",
+ "09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"
 };
 
-async function carregarPosts() {
-  const container = document.getElementById('posts-container');
+const Dashboard = {
+ dados: [],
+ primeiraCarga: true,
+ chartAcumulado: null,
+ chartBar: null,
+ cotacaoUSDtoBRL: 5.50,
+ valorTotalUSD: 0,
+ zoomLevel: 1,
+ zoomPosX: 0,
+ zoomPosY: 0,
+ isDragging: false,
+ startX: 0,
+ startY: 0,
+ tradeAtual: null,
+ intervaloAtualizacaoMercado: null,
+ 
+ async init() {
+  this.carregarTema();
+  this.inicializarToggleMode();
+  await this.carregarDados();
+  this.atualizarPerformanceIndicator();
+  this.inicializarConversorMoeda();
+  this.inicializarSidebarMobile();
+  this.inicializarGestosMobile();
+ },
+ 
+ carregarTema() {
+  const tema = localStorage.getItem('dashboard-tema') || 'dark';
   
-  try {
-    const snapshot = await db.collection('posts')
-      .orderBy('criadoEm', 'desc')
-      .limit(50)
-      .get();
-
-    if (snapshot.empty) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-state-icon">📭</div>
-          <h3>Nenhum conteúdo publicado ainda</h3>
-          <p>Os posts do administrador aparecerão aqui</p>
-        </div>`;
-      return;
-    }
-
-    todosOsPosts = [];
-    snapshot.forEach(doc => {
-      todosOsPosts.push({ id: doc.id, ...doc.data() });
-    });
-
-    renderizarPosts();
-
-  } catch (error) {
-    console.error('Erro ao carregar posts:', error);
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">⚠️</div>
-        <h3>Erro ao carregar conteúdos</h3>
-        <p>Tente recarregar a página</p>
-      </div>`;
-  }
-}
-
-function renderizarPosts() {
-  const container = document.getElementById('posts-container');
-  
-  const postsFiltrados = categoriaAtual === 'todos'
-    ? todosOsPosts
-    : todosOsPosts.filter(p => p.categoria === categoriaAtual);
-
-  if (postsFiltrados.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">🔍</div>
-        <h3>Nenhum post nesta categoria</h3>
-        <p>Tente outra categoria</p>
-      </div>`;
-    return;
-  }
-
-  let html = '';
-  postsFiltrados.forEach(post => {
-    const data = post.criadoEm
-      ? post.criadoEm.toDate().toLocaleDateString('pt-BR', { 
-          day: '2-digit', 
-          month: 'short', 
-          year: 'numeric' 
-        })
-      : 'Agora';
-
-    const icon = categoriaIcons[post.categoria] || '📄';
-
-    // Mídia (imagem, vídeo ou arquivo)
-    let midiaHTML = '';
-    if (post.midiaURL && post.midiaTipo === 'video') {
-      midiaHTML = `
-        <div class="post-video" style="width:100%; aspect-ratio:16/9; margin-bottom: 12px;">
-          <iframe 
-            src="${post.midiaURL}/e" 
-            frameborder="0" 
-            allowfullscreen 
-            style="width:100%;height:100%;border-radius:8px;">
-          </iframe>
-        </div>`;
-    } else if (post.midiaURL && post.midiaTipo === 'pdf') {
-      // Arquivo (PDF, ZIP, etc)
-      midiaHTML = `
-        <div style="padding: 24px; background: rgba(255,255,255,0.05); border-radius: 12px; text-align: center; margin-bottom: 16px; border: 2px solid var(--border);">
-          <span style="font-size: 64px;">📎</span>
-          <p style="margin: 16px 0 8px 0; font-weight: 600; font-size: 16px; color: var(--text);">Arquivo Anexado</p>
-          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Clique no botão abaixo para baixar</p>
-          <a href="${post.midiaURL}" target="_blank" download class="btn" style="display: inline-block; padding: 12px 24px; background: var(--accent); color: #000; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all .2s;">
-            📥 Baixar Arquivo
-          </a>
-        </div>`;
-    } else if (post.midiaURL || post.imagemURL) {
-      const imgURL = post.midiaURL || post.imagemURL;
-      midiaHTML = `<img src="${imgURL}" class="post-image" alt="${post.titulo}" onclick="abrirModal('${imgURL}')">`;
-    }
-
-    html += `
-      <div class="post-card" data-categoria="${post.categoria}" data-post-id="${post.id}">
-        ${midiaHTML}
-        <div class="post-content">
-          <div class="post-header">
-            <span class="post-category">${icon} ${post.categoria}</span>
-            <span class="post-date">${data}</span>
-          </div>
-          <h3 class="post-title">${post.titulo}</h3>
-          <p class="post-text">${post.texto}</p>
-          <div class="post-footer">
-            ${post.link ? `<a href="${post.link}" target="_blank" class="btn btn-primary">Acessar Link 🔗</a>` : ''}
-            <button class="btn btn-secondary" onclick="toggleComentarios('${post.id}')" style="margin-left: 8px;">
-              💬 Comentários (<span id="count-${post.id}">0</span>)
-            </button>
-          </div>
-          
-          <!-- SEÇÃO DE COMENTÁRIOS -->
-          <div class="comentarios-section" id="comentarios-${post.id}" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
-            <div class="comentarios-lista" id="lista-${post.id}">
-              <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-                Carregando comentários...
-              </div>
-            </div>
-            
-            <!-- FORM DE NOVO COMENTÁRIO -->
-            <div class="comentario-form" style="margin-top: 16px;">
-              <textarea 
-                id="texto-${post.id}" 
-                placeholder="Escreva seu comentário..." 
-                style="width: 100%; min-height: 80px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: inherit; resize: vertical;"
-              ></textarea>
-              <button 
-                class="btn btn-primary" 
-                onclick="enviarComentario('${post.id}')" 
-                style="margin-top: 8px;"
-              >
-                Enviar Comentário
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>`;
-  });
-
-  container.innerHTML = html;
-}
-
-function filtrarPosts(categoria) {
-  // Atualiza botões
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.classList.remove('active');
-    // Ativa o botão correspondente à categoria
-    if (btn.textContent.toLowerCase().includes(categoria) || 
-        (categoria === 'todos' && btn.textContent === 'Todos')) {
-      btn.classList.add('active');
-    }
-  });
-  
-  categoriaAtual = categoria;
-  renderizarPosts();
-}
-
-// ══════════════════════════════════════════════
-// SISTEMA DE COMENTÁRIOS
-// ══════════════════════════════════════════════
-
-// Toggle mostrar/esconder comentários
-async function toggleComentarios(postId) {
-  const section = document.getElementById(`comentarios-${postId}`);
-  
-  if (section.style.display === 'none') {
-    section.style.display = 'block';
-    await carregarComentarios(postId);
+  if (tema === 'light') {
+   document.body.classList.add('light-theme');
   } else {
-    section.style.display = 'none';
+   document.body.classList.remove('light-theme');
   }
-}
-
-// Carregar comentários de um post
-async function carregarComentarios(postId) {
-  const lista = document.getElementById(`lista-${postId}`);
+  
+  const icon = document.getElementById('themeIcon');
+  if (icon) {
+   icon.textContent = tema === 'dark' ? '🌙' : '☀️';
+  }
+ },
+ 
+ toggleTema() {
+  const body = document.body;
+  const icon = document.getElementById('themeIcon');
+  
+  body.classList.toggle('light-theme');
+  
+  const tema = body.classList.contains('light-theme') ? 'light' : 'dark';
+  localStorage.setItem('dashboard-tema', tema);
+  
+  if (icon) {
+   icon.style.transform = 'rotate(360deg) scale(0)';
+   setTimeout(() => {
+    icon.textContent = tema === 'dark' ? '🌙' : '☀️';
+    icon.style.transform = 'rotate(0deg) scale(1)';
+   }, 150);
+  }
+ },
+ 
+ inicializarGestosMobile() {
+  let startX = 0;
+  let startY = 0;
+  const container = document.querySelector('.main-content');
+  if (!container) return;
+  
+  container.addEventListener('touchstart', (e) => {
+   startX = e.touches[0].clientX;
+   startY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  container.addEventListener('touchend', (e) => {
+   const endX = e.changedTouches[0].clientX;
+   const endY = e.changedTouches[0].clientY;
+   const diffX = startX - endX;
+   const diffY = startY - endY;
+   
+   // Swipe horizontal (ignorar se vertical)
+   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+    const dashActive = document.getElementById('contentDashboard').classList.contains('active');
+    
+    if (diffX > 0 && dashActive) {
+     // Swipe left: Dashboard → Calendário
+     this.mudarAba('mercado');
+    } else if (diffX < 0 && !dashActive) {
+     // Swipe right: Calendário → Dashboard
+     this.mudarAba('dashboard');
+    }
+   }
+  }, { passive: true });
+ },
+ 
+ 
+ async gerarRelatorioPDF() {
+  const btn = document.getElementById('pdfReportBtn');
+  if (!btn) return;
+  
+  const textoOriginal = btn.textContent;
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Capturando...';
   
   try {
-    const snapshot = await db.collection('posts').doc(postId).collection('comentarios')
-      .orderBy('criadoEm', 'asc')
-      .get();
-    
-    // Atualiza contador
-    document.getElementById(`count-${postId}`).textContent = snapshot.size;
-    
-    if (snapshot.empty) {
-      lista.innerHTML = '<p style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhum comentário ainda. Seja o primeiro!</p>';
-      return;
-    }
-    
-    const user = auth.currentUser;
-    
-    let html = '';
-    snapshot.forEach(doc => {
-      const comentario = doc.data();
-      const data = comentario.criadoEm 
-        ? comentario.criadoEm.toDate().toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        : 'Agora';
-      
-      // Verifica se usuário pode deletar (próprio comentário)
-      const podeExcluir = user && comentario.autorId === user.uid;
-      
-      html += `
-        <div class="comentario-item">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <strong style="color: var(--accent); font-size: 14px; display: flex; align-items: center; gap: 6px;">
-              <span style="width: 32px; height: 32px; background: var(--accent); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
-                ${comentario.autor.charAt(0).toUpperCase()}
-              </span>
-              ${comentario.autor}
-            </strong>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 11px; color: var(--text-muted);">${data}</span>
-              ${podeExcluir ? `<button onclick="deletarComentario('${postId}', '${doc.id}')" style="background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.7; transition: opacity .2s;" title="Deletar comentário" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">🗑️</button>` : ''}
-            </div>
-          </div>
-          <p style="margin: 0; line-height: 1.7; padding-left: 38px; color: var(--text);">${comentario.texto}</p>
-        </div>`;
-    });
-    
-    lista.innerHTML = html;
-    
-  } catch (error) {
-    console.error('Erro ao carregar comentários:', error);
-    lista.innerHTML = '<p style="text-align: center; color: var(--red);">Erro ao carregar comentários</p>';
-  }
-}
-
-// Enviar novo comentário
-async function enviarComentario(postId) {
-  const textarea = document.getElementById(`texto-${postId}`);
-  const texto = textarea.value.trim();
-  
-  if (!texto) {
-    alert('Digite um comentário!');
+   // Garante que html2canvas está carregado
+   if (!window.html2canvas) {
+    console.error('html2canvas não está carregado');
+    alert('Erro ao carregar biblioteca de captura. Recarregue a página.');
     return;
-  }
-  
-  try {
-    const user = auth.currentUser;
-    
-    await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto: texto,
-      autor: user.displayName || user.email.split('@')[0],
-      autorId: user.uid,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    
-    // Limpa textarea
-    textarea.value = '';
-    
-    // Recarrega comentários
-    await carregarComentarios(postId);
-    
-  } catch (error) {
-    console.error('Erro ao enviar comentário:', error);
-    alert('Erro ao enviar comentário');
-  }
-}
-
-// Deletar comentário
-async function deletarComentario(postId, comentarioId) {
-  if (!confirm('Tem certeza que deseja deletar este comentário?')) return;
-  
-  try {
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
-    
-    // Recarrega comentários
-    await carregarComentarios(postId);
-    
-  } catch (error) {
-    console.error('Erro ao deletar comentário:', error);
-    alert('Erro ao deletar comentário');
-  }
-}
-
-// Carregar contadores de comentários ao renderizar posts
-async function carregarContadores() {
-  for (const post of todosOsPosts) {
-    try {
-      const snapshot = await db.collection('posts').doc(post.id).collection('comentarios').get();
-      const countElement = document.getElementById(`count-${post.id}`);
-      if (countElement) {
-        countElement.textContent = snapshot.size;
-      }
-    } catch (error) {
-      console.error('Erro ao carregar contador:', error);
+   }
+   
+   // Seleciona o conteúdo do dashboard (apenas a aba ativa)
+   const dashboard = document.getElementById('contentDashboard');
+   if (!dashboard || !dashboard.classList.contains('active')) {
+    alert('Abra a aba Dashboard para gerar o relatório');
+    btn.classList.remove('loading');
+    btn.textContent = textoOriginal;
+    return;
+   }
+   
+   // Lista de elementos para ocultar temporariamente
+   const elementosParaOcultar = [
+    '.charts', // Evolução de Performance + Distribuição de Resultados
+    '.table-card', // Histórico Detalhado de Operações
+    '.kpi:has(span:contains("Contratos por Trade"))',
+    '.kpi:has(span:contains("Total em Dólar"))'
+   ];
+   
+   // Oculta elementos usando seletores mais específicos
+   const kpis = document.querySelectorAll('.kpi');
+   const elementosOcultos = [];
+   
+   kpis.forEach(kpi => {
+    const span = kpi.querySelector('span');
+    if (span && (span.textContent.includes('Contratos por Trade') || span.textContent.includes('Total em Dólar'))) {
+     kpi.style.display = 'none';
+     elementosOcultos.push(kpi);
     }
+   });
+   
+   // Oculta gráficos
+   const charts = dashboard.querySelector('.charts');
+   if (charts) {
+    charts.style.display = 'none';
+    elementosOcultos.push(charts);
+   }
+   
+   // Oculta tabela
+   const table = dashboard.querySelector('.table-card');
+   if (table) {
+    table.style.display = 'none';
+    elementosOcultos.push(table);
+   }
+   
+   btn.textContent = '📸 Capturando...';
+   
+   // Pequeno delay para garantir que o DOM foi atualizado
+   await new Promise(resolve => setTimeout(resolve, 100));
+   
+   // Captura screenshot do dashboard
+   const canvas = await html2canvas(dashboard, {
+    backgroundColor: getComputedStyle(document.body).getPropertyValue('--main-bg') || '#050711',
+    scale: 2, // Alta qualidade
+    logging: false,
+    useCORS: true,
+    allowTaint: true,
+    scrollY: -window.scrollY,
+    scrollX: -window.scrollX
+   });
+   
+   // Restaura elementos ocultos
+   elementosOcultos.forEach(el => {
+    if (el) el.style.display = '';
+   });
+   
+   btn.textContent = '💾 Salvando...';
+   
+   // Converte canvas para blob e baixa como PNG
+   canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const hoje = new Date();
+    const nomeArquivo = `dashboard-${hoje.toISOString().split('T')[0]}.png`;
+    
+    link.href = url;
+    link.download = nomeArquivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    btn.textContent = '✅ Imagem Salva!';
+    setTimeout(() => {
+     btn.textContent = textoOriginal;
+     btn.classList.remove('loading');
+    }, 2000);
+   }, 'image/png');
+   
+  } catch (erro) {
+   console.error('Erro ao gerar imagem:', erro);
+   alert('Erro ao gerar imagem. Detalhes no console.');
+   
+   // Garante que elementos voltam a aparecer mesmo em caso de erro
+   document.querySelectorAll('.kpi, .charts, .table-card').forEach(el => {
+    el.style.display = '';
+   });
+   
+   btn.textContent = '❌ Erro';
+   setTimeout(() => {
+    btn.textContent = textoOriginal;
+    btn.classList.remove('loading');
+   }, 2000);
   }
-}
+ },
 
-// Chama carregadores de contador depois de renderizar
-const originalRenderizarPosts = renderizarPosts;
-renderizarPosts = function() {
-  originalRenderizarPosts();
-  setTimeout(carregarContadores, 500);
+ inicializarSidebarMobile() {
+  const mover = () => {
+   const sidebar = document.getElementById('sidebarDesktop');
+   const anchor = document.getElementById('sidebarMobileAnchor');
+   const container = document.querySelector('.dashboard-container');
+   if (!sidebar || !anchor || !container) return;
+   
+   const isMobile = window.innerWidth <= 1024;
+   
+   if (isMobile && anchor.children.length === 0) {
+    // Move sidebar para dentro do anchor (logo + sidebar + abas + conteúdo)
+    anchor.appendChild(sidebar);
+   } else if (!isMobile && anchor.contains(sidebar)) {
+    // Devolve sidebar para o início do container
+    container.insertBefore(sidebar, container.firstChild);
+   }
+  };
+  
+  mover();
+  window.addEventListener('resize', mover);
+ },
+ 
+ inicializarTema() {
+  const temaSalvo = localStorage.getItem('dashboard-tema') || 'dark';
+  if (temaSalvo === 'light') {
+   document.body.classList.add('light-theme');
+   const icon = document.getElementById('themeIcon');
+   if (icon) icon.textContent = '☀️';
+  }
+ },
+ 
+ inicializarGestosMobile() {
+  const mainContent = document.querySelector('.main-content');
+  if (!mainContent) return;
+  
+  let touchStartX = 0;
+  let touchEndX = 0;
+  
+  mainContent.addEventListener('touchstart', (e) => {
+   touchStartX = e.changedTouches[0].screenX;
+  }, {passive: true});
+  
+  mainContent.addEventListener('touchend', (e) => {
+   touchEndX = e.changedTouches[0].screenX;
+   const diffX = touchEndX - touchStartX;
+   const minSwipe = 50;
+   
+   if (Math.abs(diffX) < minSwipe) return;
+   
+   const abaDashboard = document.getElementById('contentDashboard');
+   const abaMercado = document.getElementById('contentMercado');
+   
+   // Swipe direita -> Dashboard
+   if (diffX > 0 && abaMercado?.classList.contains('active')) {
+    this.mudarAba('dashboard');
+   }
+   
+   // Swipe esquerda -> Calendário
+   if (diffX < 0 && abaDashboard?.classList.contains('active')) {
+    this.mudarAba('mercado');
+   }
+  }, {passive: true});
+ },
+ 
+ async carregarDados() {
+  try {
+   const response = await fetch(CSV_URL);
+   if (!response.ok) throw new Error('Erro ao carregar dados');
+   const texto = await response.text();
+   this.processarCSV(texto);
+   
+   setTimeout(() => {
+    document.getElementById('loading').classList.add('hidden');
+   }, 500);
+  } catch (erro) {
+   console.error('Erro:', erro);
+   alert('Erro ao carregar dados. Por favor, tente novamente.');
+   document.getElementById('loading').classList.add('hidden');
+  }
+ },
+ 
+ processarCSV(texto) {
+  const linhas = texto.trim().split(/\r?\n/);
+  linhas.shift();
+  
+  this.dados = linhas.map(linha => {
+   const cols = linha.split(",");
+   const [d, m, a] = cols[0].split("/");
+   return {
+    dia: cols[0],
+    data: new Date(a, m-1, d),
+    semana: cols[1],
+    ativo: cols[2],
+    ano: a,
+    mes: m,
+    pontos: +cols[3] || 0,
+    trades: +cols[4] || 0,
+    gain: +cols[5] || 0,
+    stop: +cols[6] || 0,
+    zero: +cols[7] || 0,
+    fotoId: cols[8] || "" // Coluna 8: ID da foto do Google Drive
+   };
+  }).filter(Boolean);
+  
+  this.inicializarFiltros();
+  
+  setTimeout(() => {
+   this.inicializarCalculadora();
+  }, 100);
+ },
+ 
+ inicializarFiltros() {
+  const anos = [...new Set(this.dados.map(d => d.ano))].sort();
+  filtroAno.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join("");
+  
+  const anoAtual = new Date().getFullYear().toString();
+  filtroAno.value = anos.includes(anoAtual) ? anoAtual : anos[anos.length-1];
+  
+  filtroAno.onchange = () => {
+   this.primeiraCarga = false;
+   this.inicializarMeses();
+   this.atualizar();
+  };
+  
+  this.inicializarMeses();
+ },
+ 
+ inicializarMeses() {
+  const meses = [...new Set(this.dados.filter(d => d.ano === filtroAno.value).map(d => d.mes))];
+  filtroMes.innerHTML = '<option value="ALL">Todos os meses</option>' +
+   meses.map(m => `<option value="${m}">${nomesMeses[m]}</option>`).join("");
+  
+  const mesAtual = (new Date().getMonth()+1).toString().padStart(2,"0");
+  
+  // Na primeira carga, seleciona o mês atual (não "Todos os meses")
+  if (this.primeiraCarga && meses.includes(mesAtual)) {
+   filtroMes.value = mesAtual;
+   filtroSemana.disabled = false;
+  } else if (!this.primeiraCarga) {
+   filtroMes.value = "ALL";
+   filtroSemana.disabled = true;
+  }
+  
+  filtroMes.onchange = () => {
+   this.primeiraCarga = false;
+   
+   if (filtroMes.value === "ALL") {
+    filtroSemana.disabled = true;
+    filtroSemana.value = "ALL";
+   } else {
+    filtroSemana.disabled = false;
+   }
+   
+   this.inicializarSemanas();
+   this.atualizar();
+  };
+  
+  if (filtroMes.value === "ALL") {
+   filtroSemana.disabled = true;
+  }
+  
+  this.inicializarSemanas();
+ },
+ 
+ inicializarSemanas() {
+  const semanas = [...new Set(
+   this.dados.filter(d =>
+    d.ano === filtroAno.value &&
+    (filtroMes.value === "ALL" || d.mes === filtroMes.value)
+   ).map(d => d.semana)
+  )].sort((a,b) => a-b);
+  
+  filtroSemana.innerHTML = '<option value="ALL">Todas as semanas</option>' +
+   semanas.map(s => `<option value="${s}">${s}</option>`).join("");
+  
+  // Na primeira carga, sempre deixa em "Todas as semanas" para mostrar o mês completo
+  filtroSemana.value = "ALL";
+  
+  filtroSemana.onchange = () => {
+   this.primeiraCarga = false;
+   this.atualizar();
+  };
+  
+  this.atualizar();
+ },
+ 
+ inicializarCalculadora() {
+  setTimeout(() => {
+   const btnMais = document.getElementById('btnMais');
+   const btnMenos = document.getElementById('btnMenos');
+   const valorDiv = document.getElementById('valorContratos');
+   
+   if (!btnMais || !btnMenos || !valorDiv) {
+    return;
+   }
+   
+   let valor = 0;
+   
+   btnMais.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    valor++;
+    valorDiv.textContent = valor;
+    Dashboard.atualizar();
+   });
+   
+   btnMenos.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (valor > 0) {
+     valor--;
+     valorDiv.textContent = valor;
+     Dashboard.atualizar();
+    }
+   });
+  }, 500);
+ },
+ 
+ inicializarToggleMode() {
+  const toggleBtn = document.getElementById('toggleMode');
+  const modeIcon = document.getElementById('modeIcon');
+  const modeText = document.getElementById('modeText');
+  let isProMode = false;
+  
+  document.body.classList.add('basic-mode');
+  toggleBtn.classList.remove('pro');
+  toggleBtn.classList.add('basic');
+  modeIcon.textContent = '📊';
+  modeText.textContent = 'Modo Básico';
+  
+  if (toggleBtn) {
+   toggleBtn.addEventListener('click', () => {
+    isProMode = !isProMode;
+    
+    if (isProMode) {
+     document.body.classList.remove('basic-mode');
+     toggleBtn.classList.add('pro');
+     toggleBtn.classList.remove('basic');
+     modeIcon.textContent = '⚡';
+     modeText.textContent = 'Modo Pro';
+     
+     setTimeout(() => {
+      this.inicializarCalculadora();
+     }, 100);
+    } else {
+     document.body.classList.add('basic-mode');
+     toggleBtn.classList.remove('pro');
+     toggleBtn.classList.add('basic');
+     modeIcon.textContent = '📊';
+     modeText.textContent = 'Modo Básico';
+    }
+   });
+  }
+ },
+ 
+ obterDadosFiltrados() {
+  return this.dados.filter(d =>
+   d.ano === filtroAno.value &&
+   (filtroMes.value === "ALL" || d.mes === filtroMes.value) &&
+   (filtroSemana.value === "ALL" || d.semana === filtroSemana.value)
+  );
+ },
+ 
+ atualizar() {
+  const dadosFiltrados = this.obterDadosFiltrados();
+  this.renderizarKPIs(dadosFiltrados);
+  this.renderizarTabela(dadosFiltrados);
+  this.renderizarGraficos(dadosFiltrados);
+  this.renderizarCalendario(dadosFiltrados);
+  this.atualizarSidebarStats(dadosFiltrados);
+  this.atualizarPerformanceIndicator(dadosFiltrados);
+ },
+ 
+ renderizarKPIs(dados) {
+  const totais = dados.reduce((acc, d) => ({
+   trades: acc.trades + d.trades,
+   pontos: acc.pontos + d.pontos,
+   gain: acc.gain + d.gain,
+   stop: acc.stop + d.stop,
+   zero: acc.zero + d.zero
+  }), { trades: 0, pontos: 0, gain: 0, stop: 0, zero: 0 });
+  
+  const operacoes = totais.gain + totais.stop;
+  const assertividade = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
+  const diasOperados = dados.filter(d => d.trades > 0).length;
+  
+  const valorContratosDiv = document.getElementById('valorContratos');
+  const contratos = valorContratosDiv ? parseInt(valorContratosDiv.textContent) || 0 : 0;
+  const totalDolar = totais.pontos * contratos * 2;
+  
+  document.getElementById("kDias").textContent = diasOperados;
+  document.getElementById("kTrades").textContent = totais.trades;
+  document.getElementById("kPontos").textContent = totais.pontos;
+  document.getElementById("kAcc").textContent = assertividade + "%";
+  
+  const kDolar = document.getElementById("kDolar");
+  if (kDolar) {
+   kDolar.textContent = totalDolar.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+   kDolar.style.color = totalDolar >= 0 ? 'var(--green)' : 'var(--red)';
+   
+   // Atualiza valor em Real
+   this.valorTotalUSD = totalDolar;
+   this.atualizarValorReal();
+  }
+  
+  const kGains = document.getElementById("kGains");
+  const kStops = document.getElementById("kStops");
+  const kZero = document.getElementById("kZero");
+  
+  if (kGains) kGains.textContent = totais.gain;
+  if (kStops) kStops.textContent = totais.stop;
+  if (kZero) kZero.textContent = totais.zero;
+ },
+ 
+ atualizarSidebarStats(dados) {
+  const totais = dados.reduce((acc, d) => ({
+   pontos: acc.pontos + d.pontos,
+   gain: acc.gain + d.gain,
+   stop: acc.stop + d.stop
+  }), { pontos: 0, gain: 0, stop: 0 });
+  
+  const diasOperados = dados.filter(d => d.trades > 0).length;
+  const operacoes = totais.gain + totais.stop;
+  const winRate = operacoes ? Math.round((totais.gain / operacoes) * 100) : 0;
+  
+  const pontosPorDia = dados.filter(d => d.trades > 0).map(d => d.pontos);
+  const melhorDia = pontosPorDia.length ? Math.max(...pontosPorDia) : 0;
+  const piorDia = pontosPorDia.length ? Math.min(...pontosPorDia) : 0;
+  
+  const sidebarWinRate = document.getElementById('sidebarWinRate');
+  const sidebarBestDay = document.getElementById('sidebarBestDay');
+  const sidebarWorstDay = document.getElementById('sidebarWorstDay');
+  
+  if (sidebarWinRate) sidebarWinRate.textContent = winRate + '%';
+  if (sidebarBestDay) {
+   sidebarBestDay.textContent = melhorDia;
+   sidebarBestDay.style.color = 'var(--green)';
+  }
+  if (sidebarWorstDay) {
+   sidebarWorstDay.textContent = piorDia;
+   sidebarWorstDay.style.color = piorDia < 0 ? 'var(--red)' : 'var(--text)';
+  }
+ },
+ 
+ atualizarPerformanceIndicator(dados = []) {
+  const perfIndicator = document.getElementById('perfIndicator');
+  const perfText = document.getElementById('perfText');
+  const perfDot = perfIndicator?.querySelector('.performance-dot');
+  
+  if (!perfIndicator || !dados.length) {
+   if (perfIndicator) perfIndicator.style.display = 'none';
+   return;
+  }
+  
+  const totais = dados.reduce((acc, d) => acc + d.pontos, 0);
+  
+  perfIndicator.style.display = 'flex';
+  
+  if (totais > 0) {
+   perfText.textContent = `Performance: Positiva (+${totais})`;
+   perfDot.className = 'performance-dot positive';
+  } else if (totais < 0) {
+   perfText.textContent = `Performance: Negativa (${totais})`;
+   perfDot.className = 'performance-dot negative';
+  } else {
+   perfText.textContent = 'Performance: Neutro';
+   perfDot.className = 'performance-dot neutral';
+  }
+ },
+ 
+ renderizarTabela(dados) {
+  let html = '';
+  let tot = {p:0, t:0, g:0, s:0, z:0};
+  
+  dados.forEach(d => {
+   tot.p += d.pontos; tot.t += d.trades;
+   tot.g += d.gain; tot.s += d.stop; tot.z += d.zero;
+   
+   html += `
+    <tr>
+     <td>${d.dia}</td>
+     <td style="color:${d.pontos<0?'var(--red)':'var(--green)'};font-weight:800">${d.pontos}</td>
+     <td>${d.trades}</td>
+     <td style="color:var(--green)">${d.gain}</td>
+     <td style="color:var(--red)">${d.stop}</td>
+     <td style="color:var(--yellow)">${d.zero}</td>
+     <td>${d.ativo}</td>
+     <td>${d.semana}</td>
+    </tr>`;
+  });
+  
+  html += `
+   <tr class="total">
+    <td>TOTAL</td>
+    <td style="color:${tot.p<0?'var(--red)':'var(--green)'}">${tot.p}</td>
+    <td>${tot.t}</td>
+    <td style="color:var(--green)">${tot.g}</td>
+    <td style="color:var(--red)">${tot.s}</td>
+    <td style="color:var(--yellow)">${tot.z}</td>
+    <td colspan="2"></td>
+   </tr>`;
+  
+  document.getElementById('tbody').innerHTML = html;
+ },
+ 
+ renderizarGraficos(dados) {
+  let saldo = 0;
+  const labels = [];
+  const acumulado = [0];
+  
+  dados.forEach(d => {
+   saldo += d.pontos;
+   labels.push(d.dia);
+   acumulado.push(saldo);
+  });
+  
+  if (this.chartAcumulado) this.chartAcumulado.destroy();
+  if (this.chartBar) this.chartBar.destroy();
+  
+  const ctxAc = document.getElementById('chartAcumulado');
+  const ctxBar = document.getElementById('chartBar');
+  
+  if (ctxAc) {
+   this.chartAcumulado = new Chart(ctxAc, {
+    type: 'line',
+    data: {
+     labels: ['Início', ...labels],
+     datasets: [{
+      label: 'Pontos Acumulados',
+      data: acumulado,
+      borderColor: '#6366f1',
+      backgroundColor: (context) => {
+       const ctx = context.chart.ctx;
+       const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+       gradient.addColorStop(0, 'rgba(99,102,241,0.3)');
+       gradient.addColorStop(1, 'rgba(99,102,241,0.01)');
+       return gradient;
+      },
+      fill: true,
+      tension: 0.4,
+      borderWidth: 3,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      pointBackgroundColor: '#6366f1',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2
+     }]
+    },
+    options: {
+     responsive: true,
+     maintainAspectRatio: false,
+     interaction: {
+      intersect: false,
+      mode: 'index'
+     },
+     plugins: {
+      legend: { display: false },
+      tooltip: {
+       backgroundColor: 'rgba(0,0,0,0.9)',
+       titleColor: '#fff',
+       bodyColor: '#e5e7eb',
+       borderColor: '#6366f1',
+       borderWidth: 1,
+       padding: 12,
+       displayColors: false,
+       callbacks: {
+        title: (items) => items[0].label,
+        label: (item) => `Acumulado: ${item.formattedValue} pts`
+       }
+      }
+     },
+     scales: {
+      y: {
+       ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } },
+       grid: { color: 'rgba(255,255,255,0.05)' }
+      },
+      x: {
+       ticks: { 
+        color: '#cbd5e1', 
+        maxRotation: 45, 
+        font: { size: 11, weight: '600' }
+       },
+       grid: { display: false }
+      }
+     }
+    }
+   });
+  }
+  
+  if (ctxBar) {
+   const totalGain = dados.reduce((a,b) => a+b.gain, 0);
+   const totalStop = dados.reduce((a,b) => a+b.stop, 0);
+   const totalZero = dados.reduce((a,b) => a+b.zero, 0);
+   
+   this.chartBar = new Chart(ctxBar, {
+    type: 'doughnut',
+    data: {
+     labels: ['Gains', 'Stops', 'Breakeven'],
+     datasets: [{
+      data: [totalGain, totalStop, totalZero],
+      backgroundColor: ['#10b981', '#ef4444', '#fbbf24'],
+      borderColor: '#0f1420',
+      borderWidth: 3,
+      hoverOffset: 10
+     }]
+    },
+    options: {
+     responsive: true,
+     maintainAspectRatio: false,
+     plugins: {
+      legend: {
+       display: true,
+       position: 'bottom',
+       labels: {
+        color: '#9ca3af',
+        padding: 16,
+        font: { size: 12, weight: '600' }
+       }
+      },
+      tooltip: {
+       backgroundColor: 'rgba(0,0,0,0.9)',
+       titleColor: '#fff',
+       bodyColor: '#e5e7eb',
+       borderColor: '#6366f1',
+       borderWidth: 1,
+       padding: 12,
+       callbacks: {
+        label: (item) => `${item.label}: ${item.formattedValue} operações`
+       }
+      }
+     }
+    }
+   });
+  }
+ },
+ 
+ voltarParaMeses() {
+  filtroMes.value = "ALL";
+  filtroSemana.disabled = true;
+  filtroSemana.value = "ALL";
+  this.primeiraCarga = false;
+  this.atualizar();
+ },
+ 
+ abrirModal(dadosDia) {
+  console.log('📸 Abrindo modal com dados:', dadosDia);
+  
+  // Salva trade atual para download
+  this.tradeAtual = dadosDia;
+  
+  const modal = document.getElementById('tradePhotoModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalInfoGrid = document.getElementById('modalInfoGrid');
+  const modalPhotoContainer = document.getElementById('modalPhotoContainer');
+  
+  if (!modal || !modalTitle || !modalInfoGrid || !modalPhotoContainer) {
+   console.error('❌ Elementos do modal não encontrados');
+   return;
+  }
+  
+  // Formata a data
+  const data = new Date(dadosDia.data);
+  const dia = data.getDate();
+  const mes = nomesMeses[dadosDia.mes];
+  const ano = dadosDia.ano;
+  
+  console.log('📅 Data formatada:', `${dia} de ${mes} de ${ano}`);
+  
+  // Atualiza título
+  modalTitle.textContent = `📅 ${dia} de ${mes} de ${ano}`;
+  
+  // Monta grid de informações
+  let infoHTML = `
+   <div class="modal-info-item ${dadosDia.pontos > 0 ? 'positive' : dadosDia.pontos < 0 ? 'negative' : ''}">
+    <label>Pontos</label>
+    <div class="value">${dadosDia.pontos > 0 ? '+' : ''}${dadosDia.pontos}</div>
+   </div>
+   <div class="modal-info-item">
+    <label>Trades</label>
+    <div class="value">${dadosDia.trades}</div>
+   </div>
+   <div class="modal-info-item positive">
+    <label>Gains</label>
+    <div class="value">${dadosDia.gain}</div>
+   </div>
+   <div class="modal-info-item negative">
+    <label>Stops</label>
+    <div class="value">${dadosDia.stop}</div>
+   </div>
+  `;
+  
+  if (dadosDia.zero > 0) {
+   infoHTML += `
+    <div class="modal-info-item">
+     <label>Breakeven</label>
+     <div class="value" style="color: var(--yellow)">${dadosDia.zero}</div>
+    </div>
+   `;
+  }
+  
+  modalInfoGrid.innerHTML = infoHTML;
+  
+  console.log('🖼️ Carregando foto. ID:', dadosDia.fotoId);
+  
+  // Carrega a foto (passa o ID da foto se existir)
+  this.carregarFotoTrade(dadosDia.dia, modalPhotoContainer, dadosDia.fotoId);
+  
+  // Mostra modal
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  console.log('✅ Modal aberto com sucesso');
+ },
+ 
+ fecharModal() {
+  const modal = document.getElementById('tradePhotoModal');
+  modal.classList.remove('active');
+  document.body.style.overflow = 'auto';
+  
+  // Reset zoom
+  this.zoomLevel = 1;
+  this.zoomPosX = 0;
+  this.zoomPosY = 0;
+ },
+ 
+ async inicializarConversorMoeda() {
+  // Busca cotação atual
+  await this.atualizarCotacao();
+ },
+ 
+ async atualizarCotacao() {
+  try {
+   const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+   const data = await response.json();
+   this.cotacaoUSDtoBRL = data.rates.BRL;
+   console.log('💱 Cotação USD → BRL:', this.cotacaoUSDtoBRL.toFixed(2));
+  } catch (error) {
+   console.warn('⚠️ Erro ao buscar cotação, usando valor padrão:', this.cotacaoUSDtoBRL);
+  }
+ },
+ 
+ atualizarValorReal() {
+  const valorBRL = document.getElementById('valorBRL');
+  if (valorBRL) {
+   const valorEmReais = this.valorTotalUSD * this.cotacaoUSDtoBRL;
+   valorBRL.textContent = valorEmReais.toLocaleString('pt-BR', { 
+    style: 'currency', 
+    currency: 'BRL' 
+   });
+  }
+ },
+ 
+ mudarAba(aba) {
+  const tabDashboard = document.getElementById('tabDashboard');
+  const tabMercado = document.getElementById('tabMercado');
+  const contentDashboard = document.getElementById('contentDashboard');
+  const contentMercado = document.getElementById('contentMercado');
+  const sidebar = document.querySelector('.sidebar');
+  
+  if (aba === 'dashboard') {
+   tabDashboard.classList.add('active');
+   tabMercado.classList.remove('active');
+   contentDashboard.classList.add('active');
+   contentMercado.classList.remove('active');
+   if (sidebar) sidebar.style.display = 'flex';
+   
+   if (this.intervaloAtualizacaoMercado) {
+    clearInterval(this.intervaloAtualizacaoMercado);
+    this.intervaloAtualizacaoMercado = null;
+   }
+   
+  } else if (aba === 'mercado') {
+   tabMercado.classList.add('active');
+   tabDashboard.classList.remove('active');
+   contentMercado.classList.add('active');
+   contentDashboard.classList.remove('active');
+   if (sidebar) sidebar.style.display = 'none';
+   
+   // Carrega o calendário na primeira vez
+   this.atualizarCalendario();
+   
+   // Para qualquer intervalo anterior
+   if (this.intervaloAtualizacaoMercado) clearInterval(this.intervaloAtualizacaoMercado);
+  }
+ },
+ 
+ atualizarCalendario() {
+  const iframe = document.getElementById('investingCalendar');
+  if (!iframe) return;
+  
+  const btn = document.querySelector('.calendar-refresh-btn');
+  if (btn) {
+   btn.textContent = '⏳ Atualizando...';
+   btn.classList.add('loading');
+  }
+  
+  // Guarda src original
+  const src = 'https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone,timeselector,filters&countries=5,25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4&calType=day&timeZone=12&lang=12';
+  
+  // Remove o iframe completamente e recria — evita tela preta
+  const container = iframe.parentElement;
+  iframe.remove();
+  
+  const novoIframe = document.createElement('iframe');
+  novoIframe.id = 'investingCalendar';
+  novoIframe.src = src;
+  novoIframe.setAttribute('width', '700');
+  novoIframe.setAttribute('height', '700');
+  novoIframe.setAttribute('frameborder', '0');
+  novoIframe.setAttribute('scrolling', 'yes');
+  novoIframe.style.display = 'block';
+  novoIframe.style.border = 'none';
+  
+  novoIframe.onload = () => {
+   if (btn) {
+    btn.textContent = '🔄 Atualizar';
+    btn.classList.remove('loading');
+   }
+  };
+  
+  container.appendChild(novoIframe);
+ },
+ 
+ recarregarWidgetsMercado() {
+  this.atualizarCalendario();
+ },
+ 
+ inicializarZoomFoto(container, img) {
+  // Adiciona botão de download
+  const downloadBtn = document.createElement('button');
+  downloadBtn.className = 'download-btn';
+  downloadBtn.innerHTML = '<span>📥</span><span>Baixar Foto</span>';
+  downloadBtn.onclick = () => this.baixarFoto();
+  container.appendChild(downloadBtn);
+  
+  // Adiciona controles de zoom
+  const controls = document.createElement('div');
+  controls.className = 'zoom-controls';
+  controls.innerHTML = `
+   <button class="zoom-btn" id="zoomIn" title="Zoom In (+)">+</button>
+   <button class="zoom-btn" id="zoomOut" title="Zoom Out (-)">−</button>
+   <button class="zoom-btn" id="zoomReset" title="Reset (0)">⟲</button>
+  `;
+  container.appendChild(controls);
+  
+  // Info de zoom
+  const zoomInfo = document.createElement('div');
+  zoomInfo.className = 'zoom-info';
+  zoomInfo.textContent = '100%';
+  container.appendChild(zoomInfo);
+  
+  // Botões de zoom
+  document.getElementById('zoomIn').addEventListener('click', () => this.zoom(img, container, 0.2));
+  document.getElementById('zoomOut').addEventListener('click', () => this.zoom(img, container, -0.2));
+  document.getElementById('zoomReset').addEventListener('click', () => this.resetZoom(img, container));
+  
+  // Zoom com scroll do mouse
+  container.addEventListener('wheel', (e) => {
+   e.preventDefault();
+   const delta = e.deltaY > 0 ? -0.1 : 0.1;
+   this.zoom(img, container, delta);
+  }, { passive: false });
+  
+  // Pan (arrastar) - Mouse
+  container.addEventListener('mousedown', (e) => {
+   if (this.zoomLevel > 1) {
+    this.isDragging = true;
+    this.startX = e.clientX - this.zoomPosX;
+    this.startY = e.clientY - this.zoomPosY;
+    container.classList.add('grabbing');
+    e.preventDefault();
+   }
+  });
+  
+  container.addEventListener('mousemove', (e) => {
+   if (this.isDragging) {
+    this.zoomPosX = e.clientX - this.startX;
+    this.zoomPosY = e.clientY - this.startY;
+    this.atualizarTransform(img);
+   }
+  });
+  
+  container.addEventListener('mouseup', () => {
+   this.isDragging = false;
+   container.classList.remove('grabbing');
+  });
+  
+  container.addEventListener('mouseleave', () => {
+   this.isDragging = false;
+   container.classList.remove('grabbing');
+  });
+  
+  // Touch (mobile)
+  let lastTouchDistance = 0;
+  let lastTouchX = 0;
+  let lastTouchY = 0;
+  
+  container.addEventListener('touchstart', (e) => {
+   if (e.touches.length === 2) {
+    // Pinch zoom
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    lastTouchDistance = Math.hypot(
+     touch2.clientX - touch1.clientX,
+     touch2.clientY - touch1.clientY
+    );
+   } else if (e.touches.length === 1 && this.zoomLevel > 1) {
+    // Pan
+    this.isDragging = true;
+    lastTouchX = e.touches[0].clientX;
+    lastTouchY = e.touches[0].clientY;
+    this.startX = lastTouchX - this.zoomPosX;
+    this.startY = lastTouchY - this.zoomPosY;
+    container.classList.add('grabbing');
+   }
+  });
+  
+  container.addEventListener('touchmove', (e) => {
+   if (e.touches.length === 2) {
+    // Pinch zoom
+    e.preventDefault();
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    const distance = Math.hypot(
+     touch2.clientX - touch1.clientX,
+     touch2.clientY - touch1.clientY
+    );
+    const delta = (distance - lastTouchDistance) / 100;
+    this.zoom(img, container, delta);
+    lastTouchDistance = distance;
+   } else if (e.touches.length === 1 && this.isDragging) {
+    // Pan
+    e.preventDefault();
+    this.zoomPosX = e.touches[0].clientX - this.startX;
+    this.zoomPosY = e.touches[0].clientY - this.startY;
+    this.atualizarTransform(img);
+   }
+  }, { passive: false });
+  
+  container.addEventListener('touchend', () => {
+   this.isDragging = false;
+   container.classList.remove('grabbing');
+   lastTouchDistance = 0;
+  });
+ },
+ 
+ zoom(img, container, delta) {
+  this.zoomLevel = Math.max(1, Math.min(5, this.zoomLevel + delta));
+  
+  if (this.zoomLevel === 1) {
+   this.zoomPosX = 0;
+   this.zoomPosY = 0;
+  }
+  
+  this.atualizarTransform(img);
+  this.mostrarZoomInfo(container);
+ },
+ 
+ resetZoom(img, container) {
+  this.zoomLevel = 1;
+  this.zoomPosX = 0;
+  this.zoomPosY = 0;
+  this.atualizarTransform(img);
+  this.mostrarZoomInfo(container);
+ },
+ 
+ atualizarTransform(img) {
+  img.style.transform = `scale(${this.zoomLevel}) translate(${this.zoomPosX / this.zoomLevel}px, ${this.zoomPosY / this.zoomLevel}px)`;
+ },
+ 
+ mostrarZoomInfo(container) {
+  const zoomInfo = container.querySelector('.zoom-info');
+  if (zoomInfo) {
+   zoomInfo.textContent = `${Math.round(this.zoomLevel * 100)}%`;
+   zoomInfo.classList.add('show');
+   setTimeout(() => zoomInfo.classList.remove('show'), 1500);
+  }
+ },
+ 
+ async baixarFoto() {
+  if (!this.tradeAtual) {
+   alert('❌ Nenhum trade selecionado');
+   return;
+  }
+  
+  const btn = document.querySelector('.download-btn');
+  if (btn) {
+   btn.classList.add('downloading');
+   btn.innerHTML = '<span>⏳</span><span>Gerando...</span>';
+  }
+  
+  try {
+   // Preenche o card de captura
+   const data = new Date(this.tradeAtual.data);
+   const dia = data.getDate();
+   const mes = nomesMeses[this.tradeAtual.mes];
+   const ano = this.tradeAtual.ano;
+   
+   document.getElementById('captureIcon').textContent = '📅';
+   document.getElementById('captureTitle').textContent = `${dia} de ${mes} de ${ano}`;
+   
+   // Preenche stats
+   const captureStats = document.getElementById('captureStats');
+   captureStats.innerHTML = `
+    <div class="capture-stat">
+     <div class="capture-stat-label">PONTOS</div>
+     <div class="capture-stat-value" style="color:${this.tradeAtual.pontos < 0 ? '#ef4444' : this.tradeAtual.pontos > 0 ? '#10b981' : '#94a3b8'}">
+      ${this.tradeAtual.pontos > 0 ? '+' : ''}${this.tradeAtual.pontos}
+     </div>
+    </div>
+    <div class="capture-stat">
+     <div class="capture-stat-label">TRADES</div>
+     <div class="capture-stat-value">${this.tradeAtual.trades}</div>
+    </div>
+    <div class="capture-stat">
+     <div class="capture-stat-label">GAINS</div>
+     <div class="capture-stat-value" style="color:#10b981">${this.tradeAtual.gain}</div>
+    </div>
+    <div class="capture-stat">
+     <div class="capture-stat-label">STOPS</div>
+     <div class="capture-stat-value" style="color:#ef4444">${this.tradeAtual.stop}</div>
+    </div>
+    <div class="capture-stat">
+     <div class="capture-stat-label">BREAKEVEN</div>
+     <div class="capture-stat-value" style="color:#f59e0b">${this.tradeAtual.zero}</div>
+    </div>
+   `;
+   
+   // Pega a imagem do modal
+   const modalImg = document.querySelector('#modalPhotoContainer img');
+   const capturePhoto = document.getElementById('capturePhoto');
+   
+   if (modalImg) {
+    capturePhoto.innerHTML = `<img src="${modalImg.src}" crossorigin="anonymous">`;
+   } else {
+    throw new Error('Imagem não encontrada');
+   }
+   
+   // Garante que a logo está carregada
+   const captureFooter = document.getElementById('captureFooter');
+   const logoImg = captureFooter.querySelector('img');
+   
+   if (logoImg && !logoImg.complete) {
+    await new Promise((resolve, reject) => {
+     logoImg.onload = resolve;
+     logoImg.onerror = () => {
+      console.warn('⚠️ Logo não carregada, usando texto');
+      resolve(); // Continua mesmo se logo falhar
+     };
+     setTimeout(resolve, 2000); // Timeout de 2s
+    });
+   }
+   
+   // Aguarda imagem do trade carregar
+   await new Promise(resolve => setTimeout(resolve, 500));
+   
+   console.log('📸 Capturando card...');
+   
+   // Captura o card
+   const captureCard = document.getElementById('captureCard');
+   const canvas = await html2canvas(captureCard, {
+    backgroundColor: null,
+    scale: 2,
+    logging: false,
+    useCORS: true,
+    allowTaint: true
+   });
+   
+   // Download
+   const link = document.createElement('a');
+   const dataStr = this.tradeAtual.dia.replace(/\//g, '-');
+   link.download = `trade-${dataStr}.png`;
+   link.href = canvas.toDataURL('image/png');
+   link.click();
+   
+   console.log('✅ Foto baixada com sucesso!');
+   
+  } catch (error) {
+   console.error('❌ Erro ao baixar foto:', error);
+   alert('❌ Erro ao gerar imagem. Tente novamente.');
+  } finally {
+   if (btn) {
+    btn.classList.remove('downloading');
+    btn.innerHTML = '<span>📥</span><span>Baixar Foto</span>';
+   }
+  }
+ },
+ 
+ carregarFotoTrade(dataStr, container, fotoId) {
+  const [dia, mes, ano] = dataStr.split('/');
+  const nomeArquivo = `${dia}-${mes}-${ano}`;
+  
+  console.log('====== DEBUG FOTO ======');
+  console.log('📅 Data:', dataStr);
+  console.log('📝 Nome arquivo:', nomeArquivo);
+  console.log('🆔 ID recebido:', fotoId);
+  console.log('🔍 ID tipo:', typeof fotoId);
+  console.log('📏 ID length:', fotoId ? fotoId.length : 0);
+  console.log('✂️ ID trimmed:', fotoId ? fotoId.trim() : 'VAZIO');
+  
+  container.innerHTML = `
+   <div class="modal-photo-loading">
+    <div class="modal-photo-spinner"></div>
+    Carregando foto...
+   </div>
+  `;
+  
+  // Se tiver ID da foto (da planilha), usa direto
+  if (fotoId && fotoId.trim()) {
+   const idLimpo = fotoId.trim();
+   
+   // Testa 3 URLs diferentes do Google Drive
+   const urls = [
+    `https://drive.google.com/uc?export=view&id=${idLimpo}`,
+    `https://drive.google.com/thumbnail?id=${idLimpo}&sz=w1000`,
+    `https://lh3.googleusercontent.com/d/${idLimpo}`
+   ];
+   
+   console.log('📸 Tentando URLs:');
+   urls.forEach((u, i) => console.log(`   ${i+1}. ${u}`));
+   
+   let tentativaAtual = 0;
+   
+   const tentarProximaURL = () => {
+    if (tentativaAtual >= urls.length) {
+     console.error('❌ TODAS AS URLs falharam!');
+     console.error('🔴 ID usado:', idLimpo);
+     console.error('');
+     console.error('🔧 CHECKLIST:');
+     console.error('1. Foto está compartilhada como "Qualquer pessoa com o link"?');
+     console.error('2. ID está correto?');
+     console.error('3. Arquivo existe no Drive?');
+     
+     container.innerHTML = `
+      <div class="modal-photo-error">
+       ❌ Não foi possível carregar a foto<br>
+       <small style="font-size: 11px; opacity: 0.7; margin-top: 10px; display: block; line-height: 1.5;">
+        <strong>ID testado:</strong><br>
+        <code style="background: rgba(255,0,0,0.2); padding: 2px 6px; border-radius: 4px; font-size: 10px; word-break: break-all;">${idLimpo}</code><br><br>
+        <strong>Verifique:</strong><br>
+        1️⃣ Foto está como "Qualquer pessoa com o link"<br>
+        2️⃣ ID está correto na planilha<br>
+        3️⃣ Arquivo não foi deletado<br><br>
+        <strong>Teste você mesmo:</strong><br>
+        Cole este link no navegador:<br>
+        <code style="font-size: 9px; word-break: break-all;">drive.google.com/file/d/${idLimpo}/view</code>
+       </small>
+      </div>
+     `;
+     return;
+    }
+    
+    const urlAtual = urls[tentativaAtual];
+    console.log(`🔄 Tentativa ${tentativaAtual + 1}/${urls.length}: ${urlAtual}`);
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = () => {
+     console.log(`✅ SUCESSO na tentativa ${tentativaAtual + 1}!`);
+     console.log('🖼️ URL que funcionou:', urlAtual);
+     console.log('📐 Dimensões:', img.width, 'x', img.height);
+     
+     container.innerHTML = `<img src="${urlAtual}" alt="Trade do dia ${dataStr}" crossorigin="anonymous" id="zoomableImage">`;
+     
+     // Inicializa zoom após imagem estar no DOM
+     setTimeout(() => {
+      const imgElement = document.getElementById('zoomableImage');
+      if (imgElement) {
+       Dashboard.resetZoom(imgElement, container);
+       Dashboard.inicializarZoomFoto(container, imgElement);
+      }
+     }, 100);
+    };
+    
+    img.onerror = () => {
+     console.warn(`⚠️ Falha na tentativa ${tentativaAtual + 1}`);
+     tentativaAtual++;
+     tentarProximaURL();
+    };
+    
+    img.src = urlAtual;
+   };
+   
+   tentarProximaURL();
+   
+  } else {
+   console.warn('⚠️ NENHUM ID FORNECIDO');
+   console.warn('Verifique se a coluna FOTO_ID tem valor na planilha');
+   
+   container.innerHTML = `
+    <div class="modal-photo-error">
+     📷 Nenhuma foto configurada<br>
+     <small style="font-size: 11px; opacity: 0.8; margin-top: 10px; display: block;">
+      O ID da foto não está na planilha.<br><br>
+      <strong>Como adicionar:</strong><br>
+      1. Coluna <strong>FOTO_ID</strong> (coluna I)<br>
+      2. Cole o ID da foto do Google Drive<br>
+      3. Menu: <strong>📸 Fotos → Sincronizar</strong>
+     </small>
+    </div>
+   `;
+  }
+  
+  console.log('========================');
+ },
+ 
+ renderizarCalendario(dados) {
+  const grid = document.getElementById("calendar");
+  const calendarTitle = document.getElementById("calendarTitle");
+  
+  if (!grid) return;
+  
+  grid.innerHTML = "";
+  
+  // Se estiver em "Todos os meses", mostra seletor de meses
+  if (filtroMes.value === "ALL") {
+   if (calendarTitle) {
+    calendarTitle.textContent = `📅 Selecione um Mês`;
+   }
+   
+   // Pega todos os meses disponíveis para o ano selecionado
+   const mesesDisponiveis = [...new Set(
+    this.dados
+     .filter(d => d.ano === filtroAno.value)
+     .map(d => d.mes)
+   )].sort();
+   
+   // Cria cards clicáveis para cada mês
+   mesesDisponiveis.forEach(mesNum => {
+    const nomeMes = nomesMeses[mesNum];
+    const dadosDoMes = this.dados.filter(d => d.ano === filtroAno.value && d.mes === mesNum);
+    const totalPontos = dadosDoMes.reduce((acc, d) => acc + d.pontos, 0);
+    const diasOperados = dadosDoMes.filter(d => d.trades > 0).length;
+    
+    const mesCard = document.createElement('div');
+    mesCard.className = 'month-card';
+    if (totalPontos > 0) mesCard.classList.add('positive');
+    if (totalPontos < 0) mesCard.classList.add('negative');
+    
+    mesCard.innerHTML = `
+     <div class="month-name">${nomeMes}</div>
+     <div class="month-points" style="color:${totalPontos<0?'var(--red)':totalPontos>0?'var(--green)':'var(--muted)'}">
+      ${totalPontos > 0 ? '+' : ''}${totalPontos}
+     </div>
+     <div class="month-info">${diasOperados} dia${diasOperados !== 1 ? 's' : ''}</div>
+    `;
+    
+    mesCard.onclick = () => {
+     filtroMes.value = mesNum;
+     this.primeiraCarga = false;
+     filtroSemana.disabled = false;
+     this.inicializarSemanas();
+     this.atualizar();
+    };
+    
+    grid.appendChild(mesCard);
+   });
+   
+   return;
+  }
+  
+  // Se um mês específico está selecionado, mostra o calendário normal
+  if (!dados.length) return;
+  
+  let base = dados.find(d => d.mes === filtroMes.value) || dados[0];
+  
+  const ano = base.data.getFullYear();
+  const mes = base.data.getMonth();
+  const primeiro = new Date(ano, mes, 1);
+  const ultimo = new Date(ano, mes+1, 0);
+  
+  // Atualiza o título com o nome do mês e botão de voltar
+  const mesStr = (mes + 1).toString().padStart(2, "0");
+  const nomeMes = nomesMeses[mesStr] || "";
+  if (calendarTitle) {
+   calendarTitle.innerHTML = `
+    <button class="back-to-months-btn" onclick="Dashboard.voltarParaMeses()" title="Voltar para seleção de meses">
+     ← Voltar
+    </button>
+    <span>📅 ${nomeMes} ${ano}</span>
+    <div></div>
+   `;
+  }
+  
+  for (let i = 0; i < primeiro.getDay(); i++) {
+   const emptyDay = document.createElement('div');
+   emptyDay.className = 'day empty';
+   grid.appendChild(emptyDay);
+  }
+  
+  for (let d = 1; d <= ultimo.getDate(); d++) {
+   const data = new Date(ano, mes, d);
+   const r = dados.find(x => x.data.toDateString() === data.toDateString());
+   
+   const dayDiv = document.createElement('div');
+   dayDiv.className = 'day';
+   
+   let pts = "";
+   let info = "";
+   let badge = "";
+   
+   if (r) {
+    pts = r.pontos;
+    if (pts > 0) dayDiv.classList.add('positive');
+    if (pts < 0) dayDiv.classList.add('negative');
+    
+    let primeiraLinha = `${r.trades} trade${r.trades !== 1 ? 's' : ''}`;
+    
+    let segundaLinha = [];
+    if (r.gain > 0) segundaLinha.push(`${r.gain} gain${r.gain !== 1 ? 's' : ''}`);
+    if (r.stop > 0) segundaLinha.push(`${r.stop} stop${r.stop !== 1 ? 's' : ''}`);
+    if (r.zero > 0) segundaLinha.push(`${r.zero} 0x0`);
+    
+    if (segundaLinha.length > 0) {
+     info = `${primeiraLinha}<br>${segundaLinha.join(' • ')}`;
+    } else {
+     info = primeiraLinha;
+    }
+    
+    badge = `<div class="day-badge">${r.semana} • ${r.ativo}</div>`;
+    
+    // Adiciona evento de clique apenas se houver trades E foto
+    if (r.trades > 0 && r.fotoId && r.fotoId.toString().trim() !== '') {
+     dayDiv.classList.add('clickable');
+     dayDiv.style.cursor = 'pointer';
+     
+     // Adiciona evento de clique
+     dayDiv.addEventListener('click', () => {
+      Dashboard.abrirModal(r);
+     });
+    }
+   }
+   
+   // Monta o HTML interno
+   const ptsDisplay = r && r.trades > 0 ? (pts === 0 ? '0' : pts) : (pts || "");
+   const ptsColor = pts < 0 ? 'var(--red)' : pts > 0 ? 'var(--green)' : 'var(--muted)';
+   
+   dayDiv.innerHTML = `
+    <div class="day-number">${d}</div>
+    <div class="day-points" style="color:${ptsColor}">
+     ${ptsDisplay}
+    </div>
+    <div class="day-info">${info}</div>
+    ${badge}
+   `;
+   
+   grid.appendChild(dayDiv);
+  }
+ }
 };
 
+Dashboard.init();
+
+// Fechar modal ao clicar fora
+document.getElementById('tradePhotoModal')?.addEventListener('click', (e) => {
+ if (e.target.id === 'tradePhotoModal') {
+  Dashboard.fecharModal();
+ }
+});
+
+// Fechar modal com ESC e alternar modo com Ctrl+M
+document.addEventListener('keydown', (e) => {
+ if (e.key === 'Escape') {
+  Dashboard.fecharModal();
+ }
+ if (e.ctrlKey && e.key === 'm') {
+  e.preventDefault();
+  document.getElementById('toggleMode')?.click();
+ }
+});
 </script>
+
 
 </body>
 </html>
