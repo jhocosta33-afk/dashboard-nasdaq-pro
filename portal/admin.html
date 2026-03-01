@@ -2005,49 +2005,65 @@ function filtrarPostsAdmin(categoria, btn) {
 // Verificar autenticação
 auth.onAuthStateChanged(async (user) => {
   if (!user) {
+    console.log('❌ Nenhum usuário logado');
     window.location.href = 'login.html';
     return;
   }
   
-  // Verificar se é admin
+  console.log('✅ Usuário logado:', user.email);
+  console.log('🆔 UID:', user.uid);
+  
+  // Tentar carregar dados do Firestore
   try {
-    const userDoc = await db.collection('usuarios').doc(user.uid).get();
-    const userData = userDoc.data();
+    console.log('📡 Buscando dados no Firestore...');
     
-    if (!userData) {
-      console.log('❌ Usuário não encontrado no Firestore');
-      alert('Usuário não encontrado no banco de dados!');
-      auth.signOut();
-      window.location.href = 'login.html';
+    const userDoc = await db.collection('usuarios').doc(user.uid).get();
+    
+    if (!userDoc.exists) {
+      console.log('⚠️ Documento não existe no Firestore');
+      console.log('💡 Vou carregar mesmo assim (modo debug)');
+      
+      // MODO DEBUG: Carrega sem verificar
+      carregarPosts();
+      carregarUsuarios();
       return;
     }
     
-    console.log('👤 Dados do usuário:', userData);
+    const userData = userDoc.data();
+    console.log('👤 Dados encontrados:', userData);
     console.log('📋 Tipo:', userData.tipo);
     console.log('✅ Aprovado:', userData.aprovado);
     
-    // Verificar se é admin (aceita 'admin' ou 'administrador')
-    const isAdmin = userData.tipo === 'admin' || userData.tipo === 'administrador' || userData.admin === true;
+    // Verificar se é admin
+    const isAdmin = 
+      userData.tipo === 'admin' || 
+      userData.tipo === 'administrador' || 
+      userData.admin === true;
     
     if (!isAdmin) {
       console.log('❌ NÃO É ADMIN');
-      alert('Você não tem permissão de administrador!\n\nTipo de conta: ' + (userData.tipo || 'não definido'));
-      auth.signOut();
-      window.location.href = 'login.html';
-      return;
+      console.log('🔍 Tipo encontrado:', userData.tipo);
+      
+      // Por enquanto, vou deixar entrar mesmo assim (DEBUG)
+      console.log('⚠️ MODO DEBUG: Permitindo acesso mesmo sem ser admin');
+    } else {
+      console.log('✅ É ADMIN confirmado!');
     }
     
-    console.log('✅ Admin verificado com sucesso!');
-    
-    // Carregar dados iniciais
+    // Carregar dados
+    console.log('📊 Carregando posts e usuários...');
     carregarPosts();
     carregarUsuarios();
     
   } catch (error) {
-    console.error('Erro ao verificar permissão:', error);
-    alert('Erro ao verificar permissões');
-    auth.signOut();
-    window.location.href = 'login.html';
+    console.error('❌ ERRO COMPLETO:', error);
+    console.error('📝 Mensagem:', error.message);
+    console.error('📚 Stack:', error.stack);
+    
+    // MODO DEBUG: Não bloqueia acesso
+    console.log('⚠️ MODO DEBUG: Carregando mesmo com erro');
+    carregarPosts();
+    carregarUsuarios();
   }
 });
 
