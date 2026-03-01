@@ -820,11 +820,11 @@ function renderizarPosts() {
     // Mídia (imagem, vídeo ou arquivo)
     let midiaHTML = '';
     if (post.midiaURL && post.midiaTipo === 'video') {
-      // Vídeo - suporta Google Drive e Streamable
+      // Vídeo - Google Drive com iframe
       let videoEmbedURL = post.midiaURL;
       let downloadURL = post.midiaURL;
       
-      // Se for Google Drive, extrair ID
+      // Se for Google Drive, usar /preview para embedar
       if (post.midiaURL.includes('drive.google.com')) {
         const fileIdMatch = post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (fileIdMatch) {
@@ -838,20 +838,18 @@ function renderizarPosts() {
       
       midiaHTML = `
         <div style="margin: 16px 0;">
-          <div class="post-video" style="width:100%; max-height: 300px; aspect-ratio:16/9; background: #000; border-radius: 12px; overflow: hidden; position: relative;">
+          <div class="post-video" style="position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 12px; overflow: hidden;">
             <iframe 
               src="${videoEmbedURL}" 
               frameborder="0" 
               allowfullscreen 
-              allow="autoplay"
-              style="width:100%;height:100%;">
+              allow="autoplay; fullscreen"
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
             </iframe>
           </div>
           <p style="text-align: center; margin-top: 8px; font-size: 12px; color: var(--text-muted);">
-            Vídeo não carrega? 
-            <a href="${downloadURL}" download style="color: var(--accent); font-weight: 600; text-decoration: none;">
-              📥 Baixar vídeo
-            </a>
+            Vídeo não aparece? Verifique as permissões no 
+            <a href="${post.midiaURL}" target="_blank" style="color: var(--accent); font-weight: 600;">Google Drive</a>
           </p>
         </div>`;
     } else if (post.midiaURL && post.midiaTipo === 'pdf') {
