@@ -877,7 +877,7 @@ function renderizarPosts() {
         </div>`;
     } else if (post.midiaURL || post.imagemURL) {
       const imgURL = post.midiaURL || post.imagemURL;
-      midiaHTML = `<img src="${imgURL}" class="post-image" alt="${post.titulo}" onclick="abrirModal('${imgURL}')">`;
+      midiaHTML = `<img src="${imgURL}" class="post-image" alt="Post" onclick="abrirModal('${imgURL}')">`;
     }
 
     html += `
