@@ -820,7 +820,7 @@ function renderizarPosts() {
     // Mídia (imagem, vídeo ou arquivo)
     let midiaHTML = '';
     if (post.midiaURL && post.midiaTipo === 'video') {
-      // Vídeo - Google Drive com iframe
+      // Vídeo - Google Drive com fallback automático
       let videoEmbedURL = post.midiaURL;
       let downloadURL = post.midiaURL;
       
@@ -836,9 +836,10 @@ function renderizarPosts() {
         videoEmbedURL = post.midiaURL + '/e';
       }
       
+      // Card com iframe E botão de fallback
       midiaHTML = `
         <div style="margin: 16px 0;">
-          <div class="post-video" style="position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 12px; overflow: hidden;">
+          <div class="post-video" id="video-${post.id}" style="position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 12px; overflow: hidden;">
             <iframe 
               src="${videoEmbedURL}" 
               frameborder="0" 
@@ -846,12 +847,34 @@ function renderizarPosts() {
               allow="autoplay; fullscreen"
               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
             </iframe>
+            
+            <!-- Loader que aparece se iframe não carregar -->
+            <div id="loader-${post.id}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); opacity: 1; transition: opacity 0.3s;">
+              <div style="width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              <p style="color: #fff; margin-top: 16px; font-size: 13px;">Carregando vídeo...</p>
+            </div>
           </div>
-          <p style="text-align: center; margin-top: 8px; font-size: 12px; color: var(--text-muted);">
-            Vídeo não aparece? Verifique as permissões no 
-            <a href="${post.midiaURL}" target="_blank" style="color: var(--accent); font-weight: 600;">Google Drive</a>
-          </p>
-        </div>`;
+          
+          <!-- Botões sempre visíveis -->
+          <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
+            <a href="${post.midiaURL}" target="_blank" class="btn" style="padding: 8px 16px; background: rgba(59,130,246,0.2); color: #60a5fa; border: 2px solid #60a5fa; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600;">
+              ▶️ Abrir no Drive
+            </a>
+            <a href="${downloadURL}" download class="btn" style="padding: 8px 16px; background: var(--accent); color: #000; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 700;">
+              📥 Baixar
+            </a>
+          </div>
+        </div>
+        
+        <script>
+        // Esconder loader após 3 segundos (vídeo deve ter carregado)
+        setTimeout(() => {
+          const loader = document.getElementById('loader-${post.id}');
+          if (loader) loader.style.opacity = '0';
+          setTimeout(() => { if (loader) loader.style.display = 'none'; }, 300);
+        }, 3000);
+        </script>
+      `;
     } else if (post.midiaURL && post.midiaTipo === 'pdf') {
       // Arquivo (PDF, ZIP, etc) - Download direto
       // Extrair ID do arquivo do Google Drive
