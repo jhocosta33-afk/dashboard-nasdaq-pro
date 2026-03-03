@@ -16,273 +16,75 @@
   --red: #ef4444;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  min-height: 100vh;
-}
-header {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 100; }
 .header-left { display: flex; align-items: center; gap: 12px; }
-.logo { font-size: 24px; }
-h1 {
-  font-size: 20px;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
-.btn-logout {
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
-}
+.btn-logout { background: var(--card); color: var(--text); border: 1px solid var(--border); padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
 .btn-logout:hover { background: rgba(255,255,255,0.08); }
 .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-.welcome-banner {
-  background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1));
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 32px;
-  margin-bottom: 32px;
-  text-align: center;
-}
+.welcome-banner { background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1)); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 32px; text-align: center; }
 .welcome-banner h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
 .welcome-banner p { font-size: 15px; color: var(--text-muted); }
-.quick-access {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 40px;
-}
-.quick-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
-  cursor: pointer;
-  transition: all .3s ease;
-  text-align: center;
-}
-.quick-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(34,197,94,0.15);
-}
+.quick-access { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 40px; }
+.quick-card { background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%); border: 1px solid var(--border); border-radius: 16px; padding: 24px; cursor: pointer; transition: all .3s ease; text-align: center; }
+.quick-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(34,197,94,0.15); }
 .quick-card-icon { font-size: 40px; margin-bottom: 12px; }
 .quick-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
 .quick-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
 .section-header h2 { font-size: 22px; font-weight: 700; }
 .filter-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-.filter-btn {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
-  white-space: nowrap;
-}
+.filter-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; }
 .filter-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
 .filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 .posts-grid { display: grid; gap: 24px; }
-.post-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all .3s;
-}
-.post-card:hover {
-  border-color: rgba(34,197,94,0.4);
-  box-shadow: 0 8px 32px rgba(34,197,94,0.1);
-  transform: translateY(-2px);
-}
+.post-card { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: all .3s; }
+.post-card:hover { border-color: rgba(34,197,94,0.4); box-shadow: 0 8px 32px rgba(34,197,94,0.1); transform: translateY(-2px); }
 .post-content { padding: 24px; }
-.post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.post-category {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(34,197,94,0.15);
-  padding: 6px 12px;
-  border-radius: 20px;
-}
+.post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.post-category { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent); background: rgba(34,197,94,0.15); padding: 6px 12px; border-radius: 20px; }
 .post-date { font-size: 12px; color: var(--text-muted); }
 .post-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
 .post-text { font-size: 15px; color: var(--text-muted); line-height: 1.8; margin-bottom: 20px; white-space: pre-wrap; }
-.post-media-img {
-  width: 100%;
-  max-height: 400px;
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  transition: all .3s;
-  display: block;
-}
+.post-video-wrap { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+.post-video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+.post-media-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 10px; margin-bottom: 16px; cursor: pointer; transition: all .3s; display: block; }
 .post-media-img:hover { transform: scale(1.01); filter: brightness(1.05); }
-.post-video-wrap {
-  position: relative;
-  width: 100%;
-  padding-bottom: 56.25%;
-  background: #000;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-.post-video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.post-file-box {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  margin-bottom: 16px;
-}
+.post-file-box { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
 .post-file-icon { font-size: 36px; }
 .post-file-info { flex: 1; }
 .post-file-info strong { display: block; font-size: 14px; margin-bottom: 4px; }
 .post-file-info span { font-size: 12px; color: var(--text-muted); }
 .post-footer { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.btn {
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: none;
-}
+.btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border: none; }
 .btn-primary { background: var(--accent); color: #000; }
 .btn-primary:hover { background: #16a34a; transform: translateY(-1px); }
 .btn-secondary { background: rgba(255,255,255,0.07); color: var(--text); border: 1px solid var(--border); }
 .btn-secondary:hover { background: rgba(255,255,255,0.12); border-color: var(--accent); }
-.comentarios-section {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-  animation: slideDown 0.3s ease;
-}
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.comentario-item {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  padding: 14px 16px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
+.comentarios-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); animation: slideDown 0.3s ease; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.comentario-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 14px 16px; border-radius: 10px; margin-bottom: 10px; }
 .comentario-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
 .comentario-autor { font-size: 13px; font-weight: 700; color: var(--accent); }
 .comentario-data { font-size: 11px; color: var(--text-muted); }
 .comentario-texto { font-size: 14px; color: var(--text); line-height: 1.6; }
 .comentario-form { margin-top: 16px; }
-.comentario-form textarea {
-  width: 100%;
-  min-height: 90px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 14px;
-  resize: vertical;
-  transition: all .2s;
-}
-.comentario-form textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
-}
+.comentario-form textarea { width: 100%; min-height: 90px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: inherit; font-size: 14px; resize: vertical; transition: all .2s; }
+.comentario-form textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34,197,94,0.1); }
 .comentario-form textarea::placeholder { color: var(--text-muted); }
 .comentario-form-footer { display: flex; justify-content: flex-end; margin-top: 8px; }
 .loading { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-.spinner {
-  width: 40px; height: 40px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
-}
+.spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
 .empty-state-icon { font-size: 56px; margin-bottom: 16px; }
-.image-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.95);
-  z-index: 10000;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
+.image-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; cursor: pointer; align-items: center; justify-content: center; padding: 20px; }
 .image-modal.active { display: flex; animation: fadeIn .2s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.image-modal img {
-  max-width: 100%; max-height: 90vh;
-  object-fit: contain; border-radius: 8px;
-}
-.image-modal-close {
-  position: absolute; top: 16px; right: 16px;
-  background: rgba(255,255,255,0.1);
-  border: 2px solid rgba(255,255,255,0.2);
-  color: #fff; font-size: 28px;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .2s;
-}
+.image-modal img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+.image-modal-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: #fff; font-size: 28px; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; }
 .image-modal-close:hover { background: var(--red); transform: rotate(90deg); }
 @media (max-width: 768px) {
   .container { padding: 16px; }
@@ -293,16 +95,14 @@ h1 {
   .post-footer { flex-direction: column; }
   .btn { width: 100%; justify-content: center; }
 }
-@media (max-width: 480px) {
-  .quick-access { grid-template-columns: 1fr; }
-}
+@media (max-width: 480px) { .quick-access { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-left">
-    <span class="logo">🧑‍🎓</span>
+    <span style="font-size:24px;">🧑‍🎓</span>
     <h1>Área do Aluno</h1>
   </div>
   <div class="user-info">
@@ -354,10 +154,7 @@ h1 {
   </div>
 
   <div id="posts-container" class="posts-grid">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Carregando conteúdos...</p>
-    </div>
+    <div class="loading"><div class="spinner"></div><p>Carregando conteúdos...</p></div>
   </div>
 </div>
 
@@ -385,115 +182,94 @@ const categoriaLabels = {
   'link':         '🔗 Link'
 };
 
-// ── AUTENTICAÇÃO ──────────────────────────────
+// ── AUTENTICAÇÃO ──
 auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    window.location.href = 'login.html';
-    return;
-  }
+  if (!user) { window.location.href = 'login.html'; return; }
   try {
     const userDoc = await db.collection('users').doc(user.uid).get();
-    if (!userDoc.exists) {
-      await auth.signOut();
-      window.location.href = 'login.html';
-      return;
-    }
+    if (!userDoc.exists) { await auth.signOut(); window.location.href = 'login.html'; return; }
     const userData = userDoc.data();
-
-    if (userData.role === 'admin') {
-      window.location.href = 'admin.html';
-      return;
-    }
+    if (userData.role === 'admin') { window.location.href = 'admin.html'; return; }
     if (userData.aprovado !== true) {
-      alert('⏳ Sua conta ainda aguarda aprovação do administrador.');
-      await auth.signOut();
-      window.location.href = 'login.html';
-      return;
+      alert('⏳ Sua conta ainda aguarda aprovação.');
+      await auth.signOut(); window.location.href = 'login.html'; return;
     }
-
-    usuarioAtual = {
-      uid: user.uid,
-      nome: userData.nome || user.displayName || user.email.split('@')[0]
-    };
+    usuarioAtual = { uid: user.uid, nome: userData.nome || user.displayName || user.email.split('@')[0] };
     document.getElementById('userName').textContent = usuarioAtual.nome;
-    document.getElementById('welcomeMsg').textContent =
-      `Bem-vindo de volta, ${usuarioAtual.nome.split(' ')[0]}! 👋`;
-
+    document.getElementById('welcomeMsg').textContent = `Bem-vindo de volta, ${usuarioAtual.nome.split(' ')[0]}! 👋`;
     carregarPosts();
   } catch (err) {
-    console.error('Erro ao verificar usuário:', err);
+    console.error('Erro auth:', err);
     usuarioAtual = { uid: user.uid, nome: user.displayName || 'Aluno' };
     carregarPosts();
   }
 });
 
-// ── CARREGAR POSTS DO FIRESTORE ───────────────
+// ── CARREGAR POSTS DO FIRESTORE ──
 async function carregarPosts() {
   const container = document.getElementById('posts-container');
   try {
-    const snapshot = await db.collection('posts')
-      .orderBy('criadoEm', 'desc')
-      .get();
-
+    const snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').get();
     todosOsPosts = [];
     snapshot.forEach(doc => todosOsPosts.push({ id: doc.id, ...doc.data() }));
-    console.log(`✅ ${todosOsPosts.length} posts carregados`);
     renderizarPosts();
   } catch (err) {
-    console.error('❌ Erro ao carregar posts:', err);
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">⚠️</div>
-        <p>Erro ao carregar publicações. Tente recarregar a página.</p>
-      </div>`;
+    console.error('Erro posts:', err);
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Erro ao carregar. Tente recarregar a página.</p></div>`;
   }
 }
 
-// ── RENDERIZAR ────────────────────────────────
+// ── RENDERIZAR ──
 function renderizarPosts() {
   const container = document.getElementById('posts-container');
-  const posts = filtroAtual === 'todos'
-    ? todosOsPosts
-    : todosOsPosts.filter(p => p.categoria === filtroAtual);
-
+  const posts = filtroAtual === 'todos' ? todosOsPosts : todosOsPosts.filter(p => p.categoria === filtroAtual);
   if (posts.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">📭</div>
-        <p>${todosOsPosts.length === 0
-          ? 'Nenhuma publicação ainda.'
-          : 'Nenhuma publicação nesta categoria.'}</p>
-      </div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><p>${todosOsPosts.length === 0 ? 'Nenhuma publicação ainda.' : 'Nenhuma publicação nesta categoria.'}</p></div>`;
     return;
   }
   container.innerHTML = posts.map(montarPostHTML).join('');
 }
 
 function montarPostHTML(post) {
-  const data = post.criadoEm
-    ? post.criadoEm.toDate().toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' })
-    : '';
+  const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' }) : '';
   const catLabel = categoriaLabels[post.categoria] || post.categoria || 'Geral';
 
   let midiaHTML = '';
-  if (post.midiaURL) {
-    if (post.midiaTipo === 'video') {
-      let embedURL = post.midiaURL;
-      const driveMatch = post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (driveMatch) embedURL = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
-      else if (post.midiaURL.includes('streamable.com') && !post.midiaURL.includes('/e')) embedURL += '/e';
-      midiaHTML = `<div class="post-video-wrap"><iframe src="${embedURL}" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe></div>`;
-    } else if (post.midiaTipo === 'pdf') {
+
+  // 1. YouTube (prioridade máxima) ✅
+  if (post.youtubeEmbedURL) {
+    midiaHTML = `
+      <div class="post-video-wrap">
+        <iframe
+          src="${post.youtubeEmbedURL}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>`;
+
+  // 2. Vídeo Drive (fallback)
+  } else if (post.midiaURL && post.midiaTipo === 'video') {
+    const driveMatch = post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveMatch) {
       midiaHTML = `
-        <div class="post-file-box">
-          <span class="post-file-icon">📄</span>
-          <div class="post-file-info"><strong>Arquivo Anexado</strong><span>Clique para baixar</span></div>
-          <a href="${post.midiaURL}" target="_blank" class="btn btn-primary">📥 Baixar</a>
-        </div>`;
-    } else {
-      midiaHTML = `<img src="${post.midiaURL}" alt="${post.titulo}" class="post-media-img"
-        onclick="abrirImagemModal('${post.midiaURL}')" loading="lazy" onerror="this.style.display='none'">`;
+        <div class="post-video-wrap">
+          <iframe src="https://drive.google.com/file/d/${driveMatch[1]}/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;text-align:center;">⚠️ Se o vídeo não carregar, pode ainda estar sendo processado.</p>`;
     }
+
+  // 3. PDF
+  } else if (post.midiaURL && post.midiaTipo === 'pdf') {
+    midiaHTML = `
+      <div class="post-file-box">
+        <span class="post-file-icon">📄</span>
+        <div class="post-file-info"><strong>Arquivo Anexado</strong><span>Clique para baixar</span></div>
+        <a href="${post.midiaURL}" target="_blank" class="btn btn-primary">📥 Baixar</a>
+      </div>`;
+
+  // 4. Imagem
+  } else if (post.midiaURL) {
+    midiaHTML = `<img src="${post.midiaURL}" alt="${post.titulo}" class="post-media-img" onclick="abrirImagemModal('${post.midiaURL}')" loading="lazy" onerror="this.style.display='none'">`;
   }
 
   return `
@@ -514,9 +290,7 @@ function montarPostHTML(post) {
         </div>
         <div id="comentarios-${post.id}" style="display:none;" class="comentarios-section">
           <div id="lista-${post.id}">
-            <div class="loading" style="padding:20px;">
-              <div class="spinner" style="width:24px;height:24px;border-width:2px;"></div>
-            </div>
+            <div class="loading" style="padding:20px;"><div class="spinner" style="width:24px;height:24px;border-width:2px;"></div></div>
           </div>
           <div class="comentario-form">
             <textarea id="textarea-${post.id}" placeholder="Escreva seu comentário..."></textarea>
@@ -529,7 +303,7 @@ function montarPostHTML(post) {
     </div>`;
 }
 
-// ── FILTRO ────────────────────────────────────
+// ── FILTRO ──
 function aplicarFiltro(categoria, btnEl) {
   filtroAtual = categoria;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -537,81 +311,54 @@ function aplicarFiltro(categoria, btnEl) {
     btnEl.classList.add('active');
   } else {
     document.querySelectorAll('.filter-btn').forEach(b => {
-      if (b.textContent.toLowerCase().replace(/\s/g,'').includes(categoria.replace('-','')))
-        b.classList.add('active');
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + categoria + "'")) b.classList.add('active');
     });
   }
   document.getElementById('posts-topo').scrollIntoView({ behavior: 'smooth' });
   renderizarPosts();
 }
 
-// ── COMENTÁRIOS ───────────────────────────────
+// ── COMENTÁRIOS ──
 async function toggleComentarios(postId) {
-  const section = document.getElementById(`comentarios-${postId}`);
-  const aberto = section.style.display !== 'none';
-  section.style.display = aberto ? 'none' : 'block';
-  if (!aberto) await carregarComentarios(postId);
+  const section = document.getElementById('comentarios-' + postId);
+  if (section.style.display === 'none') { section.style.display = 'block'; await carregarComentarios(postId); }
+  else section.style.display = 'none';
 }
 
 async function carregarComentarios(postId) {
-  const lista  = document.getElementById(`lista-${postId}`);
-  const countEl = document.getElementById(`count-${postId}`);
+  const lista = document.getElementById('lista-' + postId);
+  const countEl = document.getElementById('count-' + postId);
   try {
-    const snap = await db.collection('posts').doc(postId)
-      .collection('comentarios').orderBy('criadoEm', 'asc').get();
-
-    if (countEl) countEl.textContent = snap.size > 0 ? `(${snap.size})` : '';
-
-    if (snap.empty) {
-      lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px;">Nenhum comentário ainda. Seja o primeiro!</p>';
-      return;
-    }
+    const snap = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','asc').get();
+    if (countEl) countEl.textContent = snap.size > 0 ? '(' + snap.size + ')' : '';
+    if (snap.empty) { lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px;">Nenhum comentário ainda. Seja o primeiro!</p>'; return; }
     let html = '';
     snap.forEach(doc => {
       const c = doc.data();
-      const d = c.criadoEm
-        ? c.criadoEm.toDate().toLocaleString('pt-BR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
-        : '';
-      html += `
-        <div class="comentario-item">
-          <div class="comentario-header">
-            <span class="comentario-autor">${c.autor || 'Aluno'}</span>
-            <span class="comentario-data">${d}</span>
-          </div>
-          <p class="comentario-texto">${c.texto}</p>
-        </div>`;
+      const d = c.criadoEm ? c.criadoEm.toDate().toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+      html += `<div class="comentario-item"><div class="comentario-header"><span class="comentario-autor">${c.autor||'Aluno'}</span><span class="comentario-data">${d}</span></div><p class="comentario-texto">${c.texto}</p></div>`;
     });
     lista.innerHTML = html;
-  } catch (err) {
-    console.error('Erro comentários:', err);
-    lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>';
-  }
+  } catch (err) { lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>'; }
 }
 
 async function enviarComentario(postId) {
   if (!usuarioAtual) { alert('Você precisa estar logado.'); return; }
-  const textarea = document.getElementById(`textarea-${postId}`);
+  const textarea = document.getElementById('textarea-' + postId);
   const texto = textarea.value.trim();
   if (!texto) { textarea.focus(); return; }
   try {
     textarea.disabled = true;
     await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto,
-      autor: usuarioAtual.nome,
-      autorId: usuarioAtual.uid,
+      texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid,
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
-    textarea.value = '';
-    textarea.disabled = false;
+    textarea.value = ''; textarea.disabled = false;
     await carregarComentarios(postId);
-  } catch (err) {
-    console.error('Erro enviar comentário:', err);
-    alert('Erro ao enviar. Tente novamente.');
-    textarea.disabled = false;
-  }
+  } catch (err) { alert('Erro ao enviar. Tente novamente.'); textarea.disabled = false; }
 }
 
-// ── MODAL IMAGEM ──────────────────────────────
+// ── MODAL IMAGEM ──
 function abrirImagemModal(url) {
   document.getElementById('modalImage').src = url;
   document.getElementById('imageModal').classList.add('active');
@@ -621,12 +368,9 @@ function fecharImagemModal() {
   document.getElementById('modalImage').src = '';
 }
 
-// ── LOGOUT ────────────────────────────────────
+// ── LOGOUT ──
 async function fazerLogout() {
-  if (confirm('Deseja sair da sua conta?')) {
-    await auth.signOut();
-    window.location.href = 'login.html';
-  }
+  if (confirm('Deseja sair da sua conta?')) { await auth.signOut(); window.location.href = 'login.html'; }
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharImagemModal(); });
