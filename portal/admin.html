@@ -17,109 +17,29 @@
   --orange: #f97316;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  min-height: 100vh;
-}
-header {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 100; }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .logo { font-size: 24px; }
-h1 {
-  font-size: 20px;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
-.btn-logout {
-  background: var(--red);
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
-}
+.btn-logout { background: var(--red); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
 .btn-logout:hover { opacity: 0.8; }
 .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
-.tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-}
-.tab {
-  padding: 12px 20px;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all .2s;
-  white-space: nowrap;
-}
+.tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tab { padding: 12px 20px; border: none; background: none; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .tab:hover { color: var(--text); }
 .section { display: none; }
 .section.active { display: block; }
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
 .card h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 .form-group { margin-bottom: 16px; }
 label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
-input, textarea, select {
-  width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 14px;
-  color: var(--text);
-  font-family: inherit;
-  transition: all .2s;
-}
+input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text); font-family: inherit; transition: all .2s; }
 textarea { resize: vertical; min-height: 100px; }
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: rgba(255,255,255,0.08);
-}
-.btn {
-  background: var(--accent);
-  color: #000;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .2s;
-}
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.08); }
+.btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
 .btn:hover { background: #16a34a; transform: scale(1.02); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .btn-secondary { background: var(--blue); color: #fff; }
@@ -128,90 +48,33 @@ input:focus, textarea:focus, select:focus {
 .btn-danger:hover { background: #dc2626; }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th {
-  text-align: left;
-  padding: 12px;
-  background: rgba(255,255,255,0.03);
-  border-bottom: 1px solid var(--border);
-  font-weight: 600;
-  font-size: 12px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
+th { text-align: left; padding: 12px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-muted); }
 td { padding: 12px; border-bottom: 1px solid var(--border); }
-.badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
+.badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .badge.pending { background: rgba(251,191,36,0.1); color: #fbbf24; }
 .badge.approved { background: rgba(34,197,94,0.1); color: var(--accent); }
-.badge.admin { background: rgba(59,130,246,0.1); color: var(--blue); }
 .posts-list { display: grid; gap: 16px; }
-.post-item {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
-  display: flex;
-  gap: 16px;
-}
+.post-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; gap: 16px; }
 .post-image { width: 120px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
 .post-content { flex: 1; }
 .post-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
 .post-text { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.5; }
 .post-meta { font-size: 12px; color: var(--text-muted); }
-.post-actions { display: flex; gap: 8px; margin-top: 8px; }
-.upload-area {
-  border: 2px dashed var(--border);
-  border-radius: 12px;
-  padding: 30px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .3s ease;
-  background: rgba(255,255,255,0.02);
-}
+.post-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all .3s ease; background: rgba(255,255,255,0.02); }
 .upload-area:hover { border-color: var(--accent); background: rgba(34,197,94,0.05); }
 .upload-area.dragover { border-color: var(--accent); background: rgba(34,197,94,0.1); transform: scale(1.02); }
-.upload-placeholder p { margin: 12px 0 8px 0; color: var(--text); }
-.upload-preview { position: relative; }
-.upload-preview img { max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border); }
-.btn-remove-image {
-  background: var(--red); color: #fff; border: none;
-  padding: 8px 16px; border-radius: 6px; font-size: 13px;
-  font-weight: 600; cursor: pointer; transition: all .2s;
-}
+.btn-remove-image { background: var(--red); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
 .btn-remove-image:hover { opacity: 0.8; }
-.upload-progress { padding: 30px; text-align: center; }
-.upload-progress p { margin-top: 12px; color: var(--text-muted); }
-.alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  display: none;
-}
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; }
 .alert.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--accent); }
 .alert.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
 .loading { text-align: center; padding: 40px; color: var(--text-muted); }
-.spinner {
-  width: 32px; height: 32px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 12px;
-}
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.btn-remove {
-  background: var(--red); color: #fff; border: none;
-  padding: 8px 16px; border-radius: 6px; font-size: 13px;
-  font-weight: 600; cursor: pointer; transition: all .2s;
-}
+.btn-remove { background: var(--red); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
 .btn-remove:hover { background: #dc2626; }
+.yt-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.3); color: #ff4444; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 @media (max-width: 768px) {
   .container { padding: 16px; }
   .post-item { flex-direction: column; }
@@ -229,16 +92,13 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
     <h1>Painel Admin</h1>
   </div>
   <div class="user-info">
-    <a href="../" style="display:inline-block;background:rgba(255,255,255,0.1);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;margin-right:12px;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-      📊 Dashboard
-    </a>
+    <a href="../" style="display:inline-block;background:rgba(255,255,255,0.1);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;margin-right:12px;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📊 Dashboard</a>
     <span id="adminName">Admin</span>
     <button class="btn-logout" onclick="logout()">Sair</button>
   </div>
 </header>
 
 <div class="container">
-
   <div class="tabs">
     <button class="tab active" onclick="switchTab('posts')">📝 Posts</button>
     <button class="tab" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
@@ -276,13 +136,16 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         </div>
         <div class="form-group">
           <label>Arquivo/Mídia (opcional)</label>
-          <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">📎 Qualquer arquivo (imagens, vídeos, PDFs, ZIPs, indicadores, etc) - Até 500MB</p>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
+            🎥 <strong>Vídeos</strong> → enviados automaticamente para o YouTube como não listado<br>
+            📸 <strong>Imagens</strong> e 📄 <strong>PDFs/arquivos</strong> → Google Drive
+          </p>
           <div class="upload-area" id="uploadAreaUniversal">
             <input type="file" id="postArquivo" accept="*" style="display:none">
             <div id="uploadPlaceholderUniversal">
               <span style="font-size:64px">📎</span>
               <p><strong>Arraste qualquer arquivo aqui</strong><br>ou clique para selecionar</p>
-              <small style="color:var(--text-muted)">Qualquer tipo de arquivo - Até 500MB</small>
+              <small style="color:var(--text-muted)">Vídeos → YouTube não listado &nbsp;|&nbsp; Outros → Google Drive — Até 500MB</small>
             </div>
             <div id="uploadPreviewUniversal" style="display:none;">
               <div id="previewContent"></div>
@@ -290,7 +153,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
             </div>
             <div id="uploadProgressUniversal" style="display:none;">
               <div class="spinner"></div>
-              <p id="uploadProgressTextUniversal" style="margin:16px 0 12px;color:var(--text);font-weight:600;">Fazendo upload...</p>
+              <p id="uploadProgressTextUniversal" style="margin:16px 0 12px;color:var(--text);font-weight:600;">Enviando...</p>
               <div style="width:100%;max-width:400px;margin:0 auto;background:rgba(255,255,255,0.1);height:8px;border-radius:10px;overflow:hidden;">
                 <div id="uploadProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--accent),#16a34a);transition:width 0.3s ease;"></div>
               </div>
@@ -299,6 +162,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
           </div>
           <input type="hidden" id="postMidiaURL">
           <input type="hidden" id="postMidiaTipo">
+          <input type="hidden" id="postYoutubeEmbedURL">
         </div>
         <button type="submit" class="btn" id="btnPost">Publicar Post</button>
       </form>
@@ -317,15 +181,11 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
     <div class="card">
       <h2>👥 Alunos Pendentes</h2>
       <div id="alert-aprovacao" class="alert"></div>
-      <div id="usuarios-pendentes">
-        <div class="loading"><div class="spinner"></div><p>Carregando usuários...</p></div>
-      </div>
+      <div id="usuarios-pendentes"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
     </div>
     <div class="card">
       <h2>✅ Alunos Aprovados</h2>
-      <div id="usuarios-aprovados">
-        <div class="loading"><div class="spinner"></div><p>Carregando usuários...</p></div>
-      </div>
+      <div id="usuarios-aprovados"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
     </div>
   </div>
 
@@ -333,52 +193,38 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   <div id="planilha-section" class="section">
     <div class="card">
       <h2>📊 Registrar Trade do Dia</h2>
-      <p style="color:var(--text-muted);margin-bottom:16px;">Preencha os dados do trade e a planilha será atualizada automaticamente.</p>
+      <p style="color:var(--text-muted);margin-bottom:16px;">Preencha os dados e a planilha será atualizada automaticamente.</p>
       <div id="alert-trade-data" class="alert"></div>
       <form id="formTradeData">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
-          <div class="form-group">
-            <label>Dia</label>
-            <input type="number" id="diaData" min="1" max="31" required placeholder="12">
-          </div>
+          <div class="form-group"><label>Dia</label><input type="number" id="diaData" min="1" max="31" required placeholder="12"></div>
           <div class="form-group">
             <label>Mês</label>
             <select id="mesData" required>
-              <option value="1">Janeiro</option><option value="2">Fevereiro</option>
-              <option value="3">Março</option><option value="4">Abril</option>
-              <option value="5">Maio</option><option value="6">Junho</option>
-              <option value="7">Julho</option><option value="8">Agosto</option>
-              <option value="9">Setembro</option><option value="10">Outubro</option>
-              <option value="11">Novembro</option><option value="12">Dezembro</option>
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+              <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+              <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Ano</label>
-            <input type="number" id="anoData" min="2020" max="2030" required placeholder="2026">
-          </div>
+          <div class="form-group"><label>Ano</label><input type="number" id="anoData" min="2020" max="2030" required placeholder="2026"></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-          <div class="form-group">
-            <label>Semana do Mês (automático)</label>
-            <input type="text" id="semana" readonly placeholder="Calculado automaticamente" style="cursor:not-allowed;opacity:0.6;">
-          </div>
-          <div class="form-group">
-            <label>Ativo/Alvo</label>
-            <input type="text" id="alvo" required placeholder="Ex: NASDAQ, SP500, WIN...">
-          </div>
+          <div class="form-group"><label>Semana (automático)</label><input type="text" id="semana" readonly style="cursor:not-allowed;opacity:0.6;"></div>
+          <div class="form-group"><label>Ativo/Alvo</label><input type="text" id="alvo" required placeholder="Ex: NASDAQ"></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-group"><label>Pontos</label><input type="number" id="pontos" required placeholder="Ex: 15 ou -10"></div>
           <div class="form-group"><label>Total de Trades</label><input type="number" id="trades" min="0" required placeholder="Ex: 3"></div>
           <div class="form-group"><label>Gains</label><input type="number" id="gains" min="0" required placeholder="Ex: 2"></div>
           <div class="form-group"><label>Stops</label><input type="number" id="stops" min="0" required placeholder="Ex: 1"></div>
-          <div class="form-group"><label>Breakeven (0x0)</label><input type="number" id="breakeven" min="0" required placeholder="Ex: 0"></div>
+          <div class="form-group"><label>Breakeven</label><input type="number" id="breakeven" min="0" required placeholder="Ex: 0"></div>
         </div>
         <button type="submit" class="btn" id="btnTradeData" style="margin-top:16px;">Salvar na Planilha</button>
       </form>
       <div style="margin-top:20px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">💡 <strong>Dica:</strong> Quer ver/editar a planilha completa?</p>
-        <a href="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit" target="_blank" class="btn btn-secondary" style="display:inline-block;padding:8px 16px;text-decoration:none;font-size:13px;">📊 Abrir Planilha no Google Sheets</a>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">💡 Ver/editar a planilha completa:</p>
+        <a href="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit" target="_blank" class="btn btn-secondary" style="display:inline-block;padding:8px 16px;text-decoration:none;font-size:13px;">📊 Abrir no Google Sheets</a>
       </div>
     </div>
 
@@ -391,12 +237,10 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
           <div class="form-group">
             <label>Mês</label>
             <select id="mesDoTrade" required>
-              <option value="1">Janeiro</option><option value="2">Fevereiro</option>
-              <option value="3">Março</option><option value="4">Abril</option>
-              <option value="5">Maio</option><option value="6">Junho</option>
-              <option value="7">Julho</option><option value="8">Agosto</option>
-              <option value="9">Setembro</option><option value="10">Outubro</option>
-              <option value="11">Novembro</option><option value="12">Dezembro</option>
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+              <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+              <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
             </select>
           </div>
           <div class="form-group"><label>Ano</label><input type="number" id="anoDoTrade" min="2020" max="2030" required placeholder="2026"></div>
@@ -416,7 +260,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
             </div>
             <div id="uploadProgressTrade" style="display:none;text-align:center;padding:40px;">
               <div class="spinner"></div>
-              <p id="uploadProgressTextTrade" style="color:var(--text-muted);">Fazendo upload...</p>
+              <p style="color:var(--text-muted);">Fazendo upload...</p>
             </div>
           </div>
         </div>
@@ -424,7 +268,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
       </form>
     </div>
   </div>
-
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -434,47 +277,34 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 
 <script>
 // ══════════════════════════════════════════════
-// INICIALIZAÇÃO — único onAuthStateChanged ✅
+// CONFIGURAÇÃO
+// ══════════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzz9axhZDSVon2FdwCDoiFptGgq28a6Vs9C1Bolbam5RTxBfpoBkMNJGFZERrys7jum/exec';
+
+// ══════════════════════════════════════════════
+// AUTENTICAÇÃO
 // ══════════════════════════════════════════════
 auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    window.location.href = 'login.html';
-    return;
-  }
+  if (!user) { window.location.href = 'login.html'; return; }
   try {
-    // ✅ CORRIGIDO: usa 'users' (igual ao cadastro e firebase-config)
     const userDoc = await db.collection('users').doc(user.uid).get();
-
-    if (!userDoc.exists) {
-      alert('❌ Usuário não encontrado.');
+    if (!userDoc.exists || userDoc.data().role !== 'admin') {
+      alert('❌ Acesso negado.');
       await auth.signOut();
       window.location.href = 'login.html';
       return;
     }
-
-    const userData = userDoc.data();
-    const isAdmin = userData.role === 'admin';
-
-    if (!isAdmin) {
-      alert('❌ Acesso negado. Apenas administradores.');
-      await auth.signOut();
-      window.location.href = 'login.html';
-      return;
-    }
-
     document.getElementById('adminName').textContent = user.displayName || user.email;
     carregarPosts();
     carregarUsuarios();
-
   } catch (error) {
-    console.error('Erro ao verificar admin:', error);
-    alert('❌ Erro ao verificar permissões: ' + error.message);
+    console.error('Erro auth:', error);
     window.location.href = 'login.html';
   }
 });
 
 // ══════════════════════════════════════════════
-// FUNÇÕES AUXILIARES
+// AUXILIARES
 // ══════════════════════════════════════════════
 function switchTab(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -482,44 +312,37 @@ function switchTab(tabName) {
     if (tab.getAttribute('onclick').includes(tabName)) tab.classList.add('active');
   });
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  const section = document.getElementById(`${tabName}-section`);
-  if (section) section.classList.add('active');
+  document.getElementById(tabName + '-section').classList.add('active');
   if (tabName === 'posts') carregarPosts();
   else if (tabName === 'aprovacoes') carregarUsuarios();
 }
 
 function logout() {
-  if (confirm('Deseja realmente sair?')) {
-    auth.signOut();
-    window.location.href = 'login.html';
-  }
+  if (confirm('Deseja realmente sair?')) { auth.signOut(); window.location.href = 'login.html'; }
 }
 
 function mostrarAlerta(id, mensagem, tipo) {
   const el = document.getElementById(id);
   el.textContent = mensagem;
-  el.className = `alert ${tipo}`;
+  el.className = 'alert ' + tipo;
   el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 5000);
+  setTimeout(() => el.style.display = 'none', 6000);
 }
 
 // ══════════════════════════════════════════════
-// UPLOAD UNIVERSAL
+// UPLOAD UNIVERSAL (imagem/pdf → Drive | vídeo → YouTube)
 // ══════════════════════════════════════════════
 let arquivoUniversal = null;
 let tipoArquivo = null;
 
-const uploadAreaUniversal = document.getElementById('uploadAreaUniversal');
-const fileInputUniversal  = document.getElementById('postArquivo');
+const uploadAreaUniversal       = document.getElementById('uploadAreaUniversal');
+const fileInputUniversal        = document.getElementById('postArquivo');
 const uploadPlaceholderUniversal = document.getElementById('uploadPlaceholderUniversal');
-const uploadPreviewUniversal     = document.getElementById('uploadPreviewUniversal');
-const uploadProgressUniversal    = document.getElementById('uploadProgressUniversal');
+const uploadPreviewUniversal    = document.getElementById('uploadPreviewUniversal');
+const uploadProgressUniversal   = document.getElementById('uploadProgressUniversal');
 
 uploadAreaUniversal.addEventListener('click', () => fileInputUniversal.click());
-
-['dragenter','dragover','dragleave','drop'].forEach(ev => {
-  uploadAreaUniversal.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
-});
+['dragenter','dragover','dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
 ['dragenter','dragover'].forEach(ev => uploadAreaUniversal.addEventListener(ev, () => uploadAreaUniversal.classList.add('dragover')));
 ['dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, () => uploadAreaUniversal.classList.remove('dragover')));
 uploadAreaUniversal.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleArquivoUniversal(e.dataTransfer.files[0]); });
@@ -529,10 +352,12 @@ function handleArquivoUniversal(file) {
   if (file.size > 500 * 1024 * 1024) { alert('❌ Arquivo muito grande. Máximo 500MB'); return; }
   arquivoUniversal = file;
   tipoArquivo = file.type.startsWith('image/') ? 'imagem' : file.type.startsWith('video/') ? 'video' : 'pdf';
+
   uploadPlaceholderUniversal.style.display = 'none';
   uploadPreviewUniversal.style.display = 'block';
   const previewContent = document.getElementById('previewContent');
   const sizeMB = (file.size / (1024*1024)).toFixed(2);
+
   if (tipoArquivo === 'imagem') {
     const reader = new FileReader();
     reader.onload = e => {
@@ -540,44 +365,40 @@ function handleArquivoUniversal(file) {
         <p style="font-size:13px;color:var(--text-muted);">📸 ${file.name} (${sizeMB} MB)</p>`;
     };
     reader.readAsDataURL(file);
+  } else if (tipoArquivo === 'video') {
+    previewContent.innerHTML = `
+      <div style="padding:24px;background:rgba(255,0,0,0.05);border:1px solid rgba(255,0,0,0.2);border-radius:8px;margin-bottom:12px;">
+        <span style="font-size:48px;">🎥</span>
+        <p style="font-size:16px;font-weight:700;margin:12px 0;">${file.name}</p>
+        <p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p>
+        <span class="yt-badge" style="margin-top:8px;display:inline-flex;">▶ Será publicado no YouTube como não listado</span>
+      </div>`;
   } else {
-    const icon = tipoArquivo === 'video' ? '🎥' : '📄';
-    previewContent.innerHTML = `<div style="padding:24px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:12px;">
-      <span style="font-size:64px;">${icon}</span>
-      <p style="font-size:16px;font-weight:600;margin:12px 0;">${file.name}</p>
-      <p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p>
-    </div>`;
+    previewContent.innerHTML = `
+      <div style="padding:24px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:12px;">
+        <span style="font-size:64px;">📄</span>
+        <p style="font-size:16px;font-weight:600;margin:12px 0;">${file.name}</p>
+        <p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p>
+      </div>`;
   }
 }
 
 function removerArquivoUniversal() {
   arquivoUniversal = null; tipoArquivo = null;
   fileInputUniversal.value = '';
+  document.getElementById('postYoutubeEmbedURL').value = '';
   uploadPlaceholderUniversal.style.display = 'block';
   uploadPreviewUniversal.style.display = 'none';
   document.getElementById('previewContent').innerHTML = '';
 }
 
-async function uploadArquivoGoogleDrive(file) {
-  const base64 = await new Promise((resolve, reject) => {
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
+    reader.onload = e => resolve(e.target.result);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-  const params = new URLSearchParams();
-  params.append('acao', 'uploadArquivo');
-  params.append('arquivo', base64);
-  params.append('nome', file.name);
-  params.append('tipo', file.type);
-  const response = await fetch('https://script.google.com/macros/s/AKfycbxp_oeOJcpv-YqaQLVk3lb7DMsuHdbLdkKO32c0rezjEmPa7pQy06JzHOdoOga43l-R/exec', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
-  });
-  const resultado = await response.json();
-  if (resultado.success && resultado.url) return resultado.url;
-  throw new Error(resultado.error || 'Erro no upload');
 }
 
 // ══════════════════════════════════════════════
@@ -588,59 +409,124 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
   const btnPost = document.getElementById('btnPost');
   btnPost.disabled = true;
   btnPost.textContent = 'Publicando...';
+
   try {
     let finalMidiaURL = null;
     let midiaTipo = null;
+    let youtubeEmbedURL = null;
+
     if (arquivoUniversal) {
       uploadPreviewUniversal.style.display = 'none';
       uploadProgressUniversal.style.display = 'block';
+
       const sizeMB = (arquivoUniversal.size / (1024*1024)).toFixed(2);
-      document.getElementById('uploadProgressTextUniversal').textContent = `Enviando ${sizeMB}MB para Google Drive...`;
       const progressBar = document.getElementById('uploadProgressBar');
       const progressPercent = document.getElementById('uploadProgressPercent');
       let progress = 0;
       const progressInterval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 90) progress = 90;
+        progress += Math.random() * 6;
+        if (progress > 85) progress = 85;
         progressBar.style.width = progress + '%';
         progressPercent.textContent = Math.round(progress) + '%';
-      }, 200);
+      }, 400);
+
       try {
-        finalMidiaURL = await uploadArquivoGoogleDrive(arquivoUniversal);
-        midiaTipo = tipoArquivo;
+        const base64 = await fileToBase64(arquivoUniversal);
+
+        if (tipoArquivo === 'video') {
+          // ── Upload YouTube ──
+          document.getElementById('uploadProgressTextUniversal').textContent = `🎥 Enviando para YouTube... ${sizeMB}MB — pode demorar alguns minutos`;
+
+          const params = new URLSearchParams();
+          params.append('acao', 'uploadYouTube');
+          params.append('video', base64);
+          params.append('titulo', document.getElementById('postTitulo').value.trim() || arquivoUniversal.name);
+          params.append('descricao', document.getElementById('postTexto').value.trim());
+
+          const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+          });
+
+          const resultado = await response.json();
+
+          if (!resultado.success) {
+            throw new Error(resultado.error || 'Erro no upload para YouTube');
+          }
+
+          youtubeEmbedURL = resultado.embedURL;
+          finalMidiaURL   = resultado.watchURL;
+          midiaTipo       = 'youtube';
+
+          document.getElementById('uploadProgressTextUniversal').textContent = '✅ Vídeo publicado no YouTube!';
+
+        } else {
+          // ── Upload Drive (imagem/pdf) ──
+          document.getElementById('uploadProgressTextUniversal').textContent = `📤 Enviando ${sizeMB}MB para Google Drive...`;
+
+          const params = new URLSearchParams();
+          params.append('acao', 'uploadArquivo');
+          params.append('arquivo', base64);
+          params.append('nome', arquivoUniversal.name);
+          params.append('tipo', arquivoUniversal.type);
+
+          const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+          });
+
+          const resultado = await response.json();
+          if (!resultado.success) throw new Error(resultado.error || 'Erro no upload');
+
+          finalMidiaURL = tipoArquivo === 'imagem'
+            ? `https://drive.google.com/uc?export=view&id=${resultado.id}`
+            : resultado.url;
+          midiaTipo = tipoArquivo;
+        }
+
         clearInterval(progressInterval);
         progressBar.style.width = '100%';
         progressPercent.textContent = '100%';
-      } catch (error) {
+
+      } catch (uploadError) {
         clearInterval(progressInterval);
-        throw error;
+        throw uploadError;
       }
+
+      await new Promise(r => setTimeout(r, 800));
       uploadProgressUniversal.style.display = 'none';
       uploadPreviewUniversal.style.display = 'block';
     }
+
     const titulo = document.getElementById('postTitulo').value.trim();
-    const texto  = document.getElementById('postTexto').value.trim();
-    if (!titulo && !finalMidiaURL) { alert('❌ Preencha pelo menos o título ou adicione um arquivo'); throw new Error('Título obrigatório'); }
+    if (!titulo) { alert('❌ Preencha o título do post'); throw new Error('Título obrigatório'); }
+
     await db.collection('posts').add({
-      titulo: titulo || 'Post sem título',
-      texto,
-      categoria: document.getElementById('postCategoria').value,
-      link: document.getElementById('postLink').value || null,
-      midiaURL: finalMidiaURL,
+      titulo,
+      texto:           document.getElementById('postTexto').value.trim(),
+      categoria:       document.getElementById('postCategoria').value,
+      link:            document.getElementById('postLink').value || null,
+      midiaURL:        finalMidiaURL,
       midiaTipo,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-      autor: auth.currentUser.displayName || 'Admin'
+      youtubeEmbedURL, // ← YouTube embed URL
+      criadoEm:        firebase.firestore.FieldValue.serverTimestamp(),
+      autor:           auth.currentUser.displayName || 'Admin'
     });
+
     mostrarAlerta('alert-post', '✅ Post publicado com sucesso!', 'success');
     document.getElementById('formPost').reset();
     removerArquivoUniversal();
     carregarPosts();
+
   } catch (error) {
     console.error('Erro ao publicar:', error);
-    mostrarAlerta('alert-post', `❌ Erro: ${error.message}`, 'error');
+    mostrarAlerta('alert-post', '❌ Erro: ' + error.message, 'error');
     uploadProgressUniversal.style.display = 'none';
     if (arquivoUniversal) uploadPreviewUniversal.style.display = 'block';
   }
+
   btnPost.disabled = false;
   btnPost.textContent = 'Publicar Post';
 });
@@ -652,36 +538,33 @@ async function carregarPosts() {
   const container = document.getElementById('posts-list');
   try {
     const snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').limit(20).get();
-    if (snapshot.empty) {
-      container.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Nenhum post publicado ainda.</p>';
-      return;
-    }
+    if (snapshot.empty) { container.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Nenhum post ainda.</p>'; return; }
+
     let html = '';
     snapshot.forEach(doc => {
       const post = doc.data();
       const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Agora';
+
       let midiaHTML = '';
-      if (post.midiaURL && post.midiaTipo === 'video') {
-        const driveMatch = post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        const embedURL = driveMatch
-          ? `https://drive.google.com/file/d/${driveMatch[1]}/preview`
-          : (post.midiaURL.includes('streamable.com') ? post.midiaURL + '/e' : post.midiaURL);
-        midiaHTML = `<div style="position:relative;width:100%;padding-bottom:56.25%;background:#000;border-radius:8px;overflow:hidden;margin-bottom:12px;">
-          <iframe src="${embedURL}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`;
-      } else if (post.midiaURL && post.midiaTipo === 'pdf') {
-        midiaHTML = `<div style="margin-bottom:12px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px;text-align:center;">
-          <span style="font-size:48px;">📄</span><p style="margin:8px 0;font-weight:600;">Arquivo anexado</p>
-          <a href="${post.midiaURL}" target="_blank" class="btn btn-sm" style="display:inline-block;text-decoration:none;">📥 Baixar Arquivo</a></div>`;
-      } else if (post.midiaURL) {
+      if (post.youtubeEmbedURL) {
+        midiaHTML = `<div style="position:relative;width:200px;height:112px;background:#000;border-radius:8px;overflow:hidden;flex-shrink:0;">
+          <iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`;
+      } else if (post.midiaURL && post.midiaTipo === 'imagem') {
         midiaHTML = `<img src="${post.midiaURL}" class="post-image" alt="${post.titulo}" onerror="this.style.display='none'">`;
+      } else if (post.midiaURL && post.midiaTipo === 'pdf') {
+        midiaHTML = `<div style="width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;">📄</div>`;
       }
+
       html += `
         <div class="post-item">
           ${midiaHTML}
           <div class="post-content">
             <div class="post-title">${post.titulo}</div>
-            <div class="post-text">${(post.texto || '').substring(0,150)}${(post.texto||'').length > 150 ? '...' : ''}</div>
-            <div class="post-meta">📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor || 'Admin'}</div>
+            <div class="post-text">${(post.texto||'').substring(0,120)}${(post.texto||'').length>120?'...':''}</div>
+            <div class="post-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor||'Admin'}
+              ${post.youtubeEmbedURL ? '<span class="yt-badge">▶ YouTube</span>' : ''}
+            </div>
             <div class="post-actions">
               <button class="btn btn-sm" onclick="toggleComentariosAdmin('${doc.id}')" style="background:var(--blue);color:#fff;">
                 💬 Comentários (<span id="count-admin-${doc.id}">0</span>)
@@ -691,68 +574,65 @@ async function carregarPosts() {
             <div id="comentarios-admin-${doc.id}" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
               <div id="lista-admin-${doc.id}"></div>
               <div style="margin-top:16px;">
-                <textarea id="texto-admin-${doc.id}" placeholder="Escreva seu comentário como admin..."
-                  style="width:100%;min-height:80px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;"></textarea>
-                <button class="btn btn-sm" onclick="enviarComentarioAdmin('${doc.id}')" style="margin-top:8px;">Enviar Comentário</button>
+                <textarea id="texto-admin-${doc.id}" placeholder="Comentário como admin..." style="width:100%;min-height:80px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;"></textarea>
+                <button class="btn btn-sm" onclick="enviarComentarioAdmin('${doc.id}')" style="margin-top:8px;">Enviar</button>
               </div>
             </div>
           </div>
         </div>`;
     });
+
     container.innerHTML = html;
-    // Carrega contadores
+
     snapshot.forEach(async doc => {
       const snap = await db.collection('posts').doc(doc.id).collection('comentarios').get();
-      const el = document.getElementById(`count-admin-${doc.id}`);
+      const el = document.getElementById('count-admin-' + doc.id);
       if (el) el.textContent = snap.size;
     });
+
   } catch (error) {
-    console.error('Erro ao carregar posts:', error);
+    console.error('Erro posts:', error);
     container.innerHTML = '<p style="color:var(--red)">Erro ao carregar posts</p>';
   }
 }
 
 // ══════════════════════════════════════════════
-// COMENTÁRIOS (ADMIN)
+// COMENTÁRIOS ADMIN
 // ══════════════════════════════════════════════
 async function toggleComentariosAdmin(postId) {
-  const section = document.getElementById(`comentarios-admin-${postId}`);
-  if (section.style.display === 'none') {
-    section.style.display = 'block';
-    await carregarComentariosAdmin(postId);
-  } else {
-    section.style.display = 'none';
-  }
+  const section = document.getElementById('comentarios-admin-' + postId);
+  if (section.style.display === 'none') { section.style.display = 'block'; await carregarComentariosAdmin(postId); }
+  else section.style.display = 'none';
 }
 
 async function carregarComentariosAdmin(postId) {
-  const lista = document.getElementById(`lista-admin-${postId}`);
-  const countEl = document.getElementById(`count-admin-${postId}`);
+  const lista = document.getElementById('lista-admin-' + postId);
+  const countEl = document.getElementById('count-admin-' + postId);
   try {
     const snapshot = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','asc').get();
     if (countEl) countEl.textContent = snapshot.size;
-    if (snapshot.empty) { lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);">Nenhum comentário ainda.</p>'; return; }
+    if (snapshot.empty) { lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>'; return; }
     let html = '';
     snapshot.forEach(doc => {
       const c = doc.data();
-      const data = c.criadoEm ? c.criadoEm.toDate().toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+      const d = c.criadoEm ? c.criadoEm.toDate().toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
       html += `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:12px;border-radius:8px;margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <strong style="color:var(--accent);font-size:13px;">${c.autor}</strong>
           <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:11px;color:var(--text-muted);">${data}</span>
-            <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;" title="Deletar">🗑️</button>
+            <span style="font-size:11px;color:var(--text-muted);">${d}</span>
+            <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
           </div>
         </div>
         <p style="margin:0;font-size:14px;line-height:1.6;">${c.texto}</p>
       </div>`;
     });
     lista.innerHTML = html;
-  } catch (err) { console.error(err); lista.innerHTML = '<p style="color:var(--red);">Erro ao carregar</p>'; }
+  } catch (err) { lista.innerHTML = '<p style="color:var(--red);">Erro ao carregar</p>'; }
 }
 
 async function enviarComentarioAdmin(postId) {
-  const textarea = document.getElementById(`texto-admin-${postId}`);
+  const textarea = document.getElementById('texto-admin-' + postId);
   const texto = textarea.value.trim();
   if (!texto) { alert('Digite um comentário!'); return; }
   try {
@@ -763,7 +643,7 @@ async function enviarComentarioAdmin(postId) {
     });
     textarea.value = '';
     await carregarComentariosAdmin(postId);
-  } catch (err) { console.error(err); alert('Erro ao enviar comentário'); }
+  } catch (err) { alert('Erro ao enviar comentário'); }
 }
 
 async function deletarComentarioAdmin(postId, comentarioId) {
@@ -771,7 +651,7 @@ async function deletarComentarioAdmin(postId, comentarioId) {
   try {
     await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
     await carregarComentariosAdmin(postId);
-  } catch (err) { console.error(err); alert('Erro ao deletar'); }
+  } catch (err) { alert('Erro ao deletar'); }
 }
 
 async function deletarPost(postId) {
@@ -780,35 +660,28 @@ async function deletarPost(postId) {
     await db.collection('posts').doc(postId).delete();
     mostrarAlerta('alert-post', '✅ Post excluído', 'success');
     carregarPosts();
-  } catch (error) {
-    console.error('Erro ao excluir:', error);
-    mostrarAlerta('alert-post', '❌ Erro ao excluir post', 'error');
-  }
+  } catch (error) { mostrarAlerta('alert-post', '❌ Erro ao excluir post', 'error'); }
 }
 
 // ══════════════════════════════════════════════
-// USUÁRIOS — usa 'users' ✅
+// USUÁRIOS
 // ══════════════════════════════════════════════
 async function carregarUsuarios() {
   try {
-    // ✅ CORRIGIDO: 'users' em vez de 'usuarios'
     const snapshot = await db.collection('users').get();
     let pendentes = '', aprovados = '';
     snapshot.forEach(doc => {
       const user = doc.data();
       if (user.role === 'admin') return;
       const html = `<tr>
-        <td>${user.nome || ''}</td>
-        <td>${user.email || ''}</td>
-        <td><span class="badge ${user.aprovado ? 'approved' : 'pending'}">${user.aprovado ? 'Aprovado' : 'Pendente'}</span></td>
+        <td>${user.nome||''}</td><td>${user.email||''}</td>
+        <td><span class="badge ${user.aprovado?'approved':'pending'}">${user.aprovado?'Aprovado':'Pendente'}</span></td>
         <td>${!user.aprovado
           ? `<button class="btn btn-sm" onclick="aprovarUsuario('${doc.id}')">Aprovar</button>
              <button class="btn btn-sm btn-danger" onclick="rejeitarUsuario('${doc.id}')">Rejeitar</button>`
           : `<button class="btn btn-sm btn-danger" onclick="revogarAprovacao('${doc.id}')">Revogar</button>`
-        }</td>
-      </tr>`;
-      if (user.aprovado) aprovados += html;
-      else pendentes += html;
+        }</td></tr>`;
+      if (user.aprovado) aprovados += html; else pendentes += html;
     });
     document.getElementById('usuarios-pendentes').innerHTML = pendentes
       ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${pendentes}</tbody></table>`
@@ -816,33 +689,24 @@ async function carregarUsuarios() {
     document.getElementById('usuarios-aprovados').innerHTML = aprovados
       ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${aprovados}</tbody></table>`
       : '<p style="text-align:center;color:var(--text-muted)">Nenhum aluno aprovado ainda</p>';
-  } catch (error) { console.error('Erro ao carregar usuários:', error); }
+  } catch (error) { console.error('Erro usuários:', error); }
 }
 
 async function aprovarUsuario(uid) {
-  try {
-    await db.collection('users').doc(uid).update({ aprovado: true });
-    mostrarAlerta('alert-aprovacao', '✅ Usuário aprovado!', 'success');
-    carregarUsuarios();
-  } catch (err) { mostrarAlerta('alert-aprovacao', '❌ Erro ao aprovar', 'error'); }
+  try { await db.collection('users').doc(uid).update({ aprovado: true }); mostrarAlerta('alert-aprovacao','✅ Aprovado!','success'); carregarUsuarios(); }
+  catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro ao aprovar','error'); }
 }
 
 async function rejeitarUsuario(uid) {
-  if (!confirm('Deseja rejeitar este usuário? Ele será excluído.')) return;
-  try {
-    await db.collection('users').doc(uid).delete();
-    mostrarAlerta('alert-aprovacao', '✅ Usuário rejeitado', 'success');
-    carregarUsuarios();
-  } catch (err) { mostrarAlerta('alert-aprovacao', '❌ Erro ao rejeitar', 'error'); }
+  if (!confirm('Rejeitar e excluir este usuário?')) return;
+  try { await db.collection('users').doc(uid).delete(); mostrarAlerta('alert-aprovacao','✅ Rejeitado','success'); carregarUsuarios(); }
+  catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
 }
 
 async function revogarAprovacao(uid) {
-  if (!confirm('Deseja revogar a aprovação deste usuário?')) return;
-  try {
-    await db.collection('users').doc(uid).update({ aprovado: false });
-    mostrarAlerta('alert-aprovacao', '✅ Aprovação revogada', 'success');
-    carregarUsuarios();
-  } catch (err) { mostrarAlerta('alert-aprovacao', '❌ Erro ao revogar', 'error'); }
+  if (!confirm('Revogar aprovação?')) return;
+  try { await db.collection('users').doc(uid).update({ aprovado: false }); mostrarAlerta('alert-aprovacao','✅ Revogado','success'); carregarUsuarios(); }
+  catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
 }
 
 // ══════════════════════════════════════════════
@@ -853,15 +717,15 @@ const uploadAreaTrade = document.getElementById('uploadAreaTrade');
 const fileInputTrade  = document.getElementById('fileInputTrade');
 
 ['dragenter','dragover','dragleave','drop'].forEach(ev => uploadAreaTrade.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
-['dragenter','dragover'].forEach(ev => uploadAreaTrade.addEventListener(ev, () => { uploadAreaTrade.style.borderColor='var(--accent)'; uploadAreaTrade.style.background='rgba(34,197,94,0.05)'; }));
-['dragleave','drop'].forEach(ev => uploadAreaTrade.addEventListener(ev, () => { uploadAreaTrade.style.borderColor='var(--border)'; uploadAreaTrade.style.background='transparent'; }));
+['dragenter','dragover'].forEach(ev => uploadAreaTrade.addEventListener(ev, () => { uploadAreaTrade.style.borderColor='var(--accent)'; }));
+['dragleave','drop'].forEach(ev => uploadAreaTrade.addEventListener(ev, () => { uploadAreaTrade.style.borderColor='var(--border)'; }));
 uploadAreaTrade.addEventListener('drop', e => { if (e.dataTransfer.files[0]) processarArquivoTrade(e.dataTransfer.files[0]); });
 uploadAreaTrade.addEventListener('click', () => fileInputTrade.click());
 fileInputTrade.addEventListener('change', e => { if (e.target.files[0]) processarArquivoTrade(e.target.files[0]); });
 
 function processarArquivoTrade(file) {
-  if (!file.type.startsWith('image/')) { alert('❌ Por favor, selecione apenas imagens'); return; }
-  if (file.size > 10*1024*1024) { alert('❌ Imagem muito grande. Máximo 10MB'); return; }
+  if (!file.type.startsWith('image/')) { alert('❌ Apenas imagens'); return; }
+  if (file.size > 10*1024*1024) { alert('❌ Máximo 10MB'); return; }
   tradeFile = file;
   const reader = new FileReader();
   reader.onload = e => {
@@ -881,20 +745,18 @@ function removerImagemTrade() {
 document.getElementById('formFotoTrade').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!tradeFile) { mostrarAlerta('alert-foto-trade','❌ Selecione uma foto','error'); return; }
-  const dia = parseInt(document.getElementById('diaDoTrade').value);
-  const mes = parseInt(document.getElementById('mesDoTrade').value);
-  const ano = parseInt(document.getElementById('anoDoTrade').value);
   const btn = document.getElementById('btnFotoTrade');
   btn.disabled = true; btn.textContent = 'Enviando...';
   try {
     document.getElementById('uploadPreviewTrade').style.display = 'none';
     document.getElementById('uploadProgressTrade').style.display = 'block';
-    const reader = new FileReader();
-    const base64Promise = new Promise(resolve => { reader.onload = e => resolve(e.target.result); reader.readAsDataURL(tradeFile); });
-    const imagemBase64 = await base64Promise;
+    const base64 = await fileToBase64(tradeFile);
     const formData = new FormData();
-    formData.append('dia', dia); formData.append('mes', mes); formData.append('ano', ano); formData.append('imagem', imagemBase64);
-    const response = await fetch('https://script.google.com/macros/s/AKfycbxp_oeOJcpv-YqaQLVk3lb7DMsuHdbLdkKO32c0rezjEmPa7pQy06JzHOdoOga43l-R/exec', { method:'POST', body: formData });
+    formData.append('dia', document.getElementById('diaDoTrade').value);
+    formData.append('mes', document.getElementById('mesDoTrade').value);
+    formData.append('ano', document.getElementById('anoDoTrade').value);
+    formData.append('imagem', base64);
+    const response = await fetch(APPS_SCRIPT_URL, { method:'POST', body: formData });
     const resultado = await response.json();
     if (resultado.success) {
       mostrarAlerta('alert-foto-trade', `✅ Foto salva! (Linha ${resultado.linha})`, 'success');
@@ -902,8 +764,7 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
       removerImagemTrade();
     } else { throw new Error(resultado.error || 'Erro desconhecido'); }
   } catch (error) {
-    console.error('Erro ao salvar foto:', error);
-    mostrarAlerta('alert-foto-trade', `❌ Erro: ${error.message}`, 'error');
+    mostrarAlerta('alert-foto-trade', '❌ Erro: ' + error.message, 'error');
     document.getElementById('uploadPreviewTrade').style.display = 'block';
   }
   document.getElementById('uploadProgressTrade').style.display = 'none';
@@ -911,7 +772,7 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
 });
 
 // ══════════════════════════════════════════════
-// FORMULÁRIO DADOS DO TRADE
+// DADOS DO TRADE
 // ══════════════════════════════════════════════
 function calcularSemanaMes(dia) {
   if (dia <= 7) return 'SEMANA 1';
@@ -926,7 +787,6 @@ document.getElementById('diaData').addEventListener('input', e => {
   document.getElementById('semana').value = (dia >= 1 && dia <= 31) ? calcularSemanaMes(dia) : '';
 });
 
-// Define data de hoje ao carregar
 window.addEventListener('DOMContentLoaded', () => {
   const hoje = new Date();
   document.getElementById('diaData').value = hoje.getDate();
@@ -944,24 +804,20 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     const dia = parseInt(document.getElementById('diaData').value);
     const mes = parseInt(document.getElementById('mesData').value);
     const ano = parseInt(document.getElementById('anoData').value);
-    const semana = document.getElementById('semana').value.trim() || calcularSemanaMes(dia);
-    const alvo = document.getElementById('alvo').value.trim() || 'NASDAQ';
-    const pontos = parseInt(document.getElementById('pontos').value);
-    const trades = parseInt(document.getElementById('trades').value);
-    const gains = parseInt(document.getElementById('gains').value);
-    const stops = parseInt(document.getElementById('stops').value);
-    const breakeven = parseInt(document.getElementById('breakeven').value);
     const params = new URLSearchParams();
-    params.append('acao','salvarTrade'); params.append('dia',dia); params.append('mes',mes);
-    params.append('ano',ano); params.append('semana',semana); params.append('alvo',alvo);
-    params.append('pontos',pontos); params.append('trades',trades); params.append('gains',gains);
-    params.append('stops',stops); params.append('breakeven',breakeven);
-    const response = await fetch('https://script.google.com/macros/s/AKfycbxp_oeOJcpv-YqaQLVk3lb7DMsuHdbLdkKO32c0rezjEmPa7pQy06JzHOdoOga43l-R/exec', {
-      method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params.toString()
-    });
+    params.append('acao','salvarTrade');
+    params.append('dia', dia); params.append('mes', mes); params.append('ano', ano);
+    params.append('semana', document.getElementById('semana').value || calcularSemanaMes(dia));
+    params.append('alvo', document.getElementById('alvo').value || 'NASDAQ');
+    params.append('pontos', document.getElementById('pontos').value);
+    params.append('trades', document.getElementById('trades').value);
+    params.append('gains', document.getElementById('gains').value);
+    params.append('stops', document.getElementById('stops').value);
+    params.append('breakeven', document.getElementById('breakeven').value);
+    const response = await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params.toString() });
     const resultado = await response.json();
     if (resultado.success) {
-      mostrarAlerta('alert-trade-data', `✅ Dados salvos! (Linha ${resultado.linha || '?'})`, 'success');
+      mostrarAlerta('alert-trade-data', `✅ Dados salvos! (Linha ${resultado.linha||'?'})`, 'success');
       document.getElementById('formTradeData').reset();
       const hoje = new Date();
       document.getElementById('diaData').value = hoje.getDate();
@@ -970,10 +826,7 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
       document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
       document.getElementById('alvo').value = 'NASDAQ';
     } else { throw new Error(resultado.error || 'Erro desconhecido'); }
-  } catch (error) {
-    console.error('Erro ao salvar:', error);
-    mostrarAlerta('alert-trade-data', `❌ Erro: ${error.message}`, 'error');
-  }
+  } catch (error) { mostrarAlerta('alert-trade-data', '❌ Erro: ' + error.message, 'error'); }
   btn.disabled = false; btn.textContent = 'Salvar na Planilha';
 });
 </script>
