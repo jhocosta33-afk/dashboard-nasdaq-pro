@@ -687,6 +687,265 @@ h1 {
 <script src="firebase-config.js"></script>
 
 
+<script>
+// ========== CONFIGURAÇÃO ==========
+const PLANILHA_ID = "1wX_j3F9kPZQYrTB6hN2mL8vK5sO7pA4qRtU9iE3nV2c"; // SUBSTITUA!
+const SHEET_NAME = "Publicacoes";
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
 
+let postsData = [];
+let filtroAtual = 'todos';
+
+// ========== CARREGAR POSTS ==========
+async function carregarPosts() {
+  const container = document.getElementById('posts-container');
+  
+  try {
+    console.log('📚 Carregando publicações...');
+    
+    const response = await fetch(SHEET_URL);
+    const text = await response.text();
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+    
+    const rows = json.table.rows.slice(1); // Pula header
+    
+    postsData = rows.map(row => {
+      const cells = row.c;
+      return {
+        id: cells[0]?.v || '',
+        data: cells[1]?.f || cells[1]?.v || '',
+        categoria: cells[2]?.v || 'geral',
+        titulo: cells[3]?.v || '',
+        texto: cells[4]?.v || '',
+        imagemId: cells[5]?.v || '',
+        link: cells[6]?.v || '',
+        comentarios: []
+      };
+    }).filter(p => p.titulo);
+    
+    console.log(`✅ ${postsData.length} posts carregados`);
+    
+    renderizarPosts();
+    
+  } catch (error) {
+    console.error('❌ Erro ao carregar posts:', error);
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">⚠️</div>
+        <p>Erro ao carregar publicações</p>
+      </div>
+    `;
+  }
+}
+
+// ========== RENDERIZAR POSTS ==========
+function renderizarPosts() {
+  const container = document.getElementById('posts-container');
+  
+  let posts = postsData;
+  
+  // Filtra por categoria
+  if (filtroAtual !== 'todos') {
+    posts = postsData.filter(p => p.categoria === filtroAtual);
+  }
+  
+  if (posts.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <p>Nenhuma publicação nesta categoria</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = posts.map(post => {
+    const imagemUrl = post.imagemId 
+      ? `https://drive.google.com/thumbnail?id=${post.imagemId}&sz=w800`
+      : '';
+    
+    const categoriaNome = {
+      'sala-ao-vivo': '🔴 Sala ao Vivo',
+      'materiais': '📚 Materiais',
+      'analise': '📊 Análise',
+      'tutorial': '🎓 Tutorial',
+      'noticia': '📰 Notícia',
+      'link': '🔗 Link'
+    }[post.categoria] || post.categoria;
+    
+    return `
+      <div class="post-card" data-categoria="${post.categoria}">
+        <div class="post-content">
+          
+          <div class="post-header">
+            <div class="post-category">${categoriaNome}</div>
+            <div class="post-date">${post.data}</div>
+          </div>
+          
+          ${imagemUrl ? `
+            <img src="${imagemUrl}" 
+                 alt="${post.titulo}" 
+                 class="post-image"
+                 onclick="abrirImagemModal('${imagemUrl}')"
+                 loading="lazy">
+          ` : ''}
+          
+          <h3 class="post-title">${post.titulo}</h3>
+          
+          <p class="post-text">${post.texto}</p>
+          
+          <div class="post-footer">
+            ${post.link ? `
+              <a href="${post.link}" target="_blank" class="btn btn-primary">
+                🔗 Acessar Link
+              </a>
+            ` : ''}
+            <button class="btn btn-secondary" onclick="toggleComentarios('${post.id}')">
+              💬 Comentários
+            </button>
+          </div>
+          
+          <div id="comentarios-${post.id}" style="display:none; margin-top: 24px;" class="comentarios-section">
+            <div id="lista-comentarios-${post.id}"></div>
+            <div class="comentario-form" style="margin-top: 16px;">
+              <textarea id="novo-comentario-${post.id}" placeholder="Escreva seu comentário..." rows="3"></textarea>
+              <button class="btn btn-primary" onclick="adicionarComentario('${post.id}')" style="margin-top: 8px;">
+                Enviar Comentário
+              </button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ========== FILTRAR POSTS ==========
+function filtrarPosts(categoria) {
+  filtroAtual = categoria;
+  
+  // Atualiza botões
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  renderizarPosts();
+}
+
+// ========== COMENTÁRIOS ==========
+function toggleComentarios(postId) {
+  const div = document.getElementById(`comentarios-${postId}`);
+  const isVisible = div.style.display !== 'none';
+  
+  if (isVisible) {
+    div.style.display = 'none';
+  } else {
+    div.style.display = 'block';
+    carregarComentarios(postId);
+  }
+}
+
+function carregarComentarios(postId) {
+  const post = postsData.find(p => p.id === postId);
+  if (!post) return;
+  
+  const lista = document.getElementById(`lista-comentarios-${postId}`);
+  
+  if (post.comentarios.length === 0) {
+    lista.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">Nenhum comentário ainda. Seja o primeiro!</p>';
+    return;
+  }
+  
+  lista.innerHTML = post.comentarios.map(comentario => `
+    <div class="comentario-item">
+      <strong style="color: var(--accent);">${comentario.autor}</strong>
+      <span style="color: var(--text-muted); font-size: 12px; margin-left: 8px;">${comentario.data}</span>
+      <p style="margin-top: 8px; color: var(--text);">${comentario.texto}</p>
+    </div>
+  `).join('');
+}
+
+function adicionarComentario(postId) {
+  const textarea = document.getElementById(`novo-comentario-${postId}`);
+  const texto = textarea.value.trim();
+  
+  if (!texto) {
+    alert('Digite um comentário');
+    return;
+  }
+  
+  // Pega nome do usuário (do Firebase ou localStorage)
+  const userName = localStorage.getItem('userName') || 'Aluno';
+  
+  const post = postsData.find(p => p.id === postId);
+  if (!post) return;
+  
+  const novoComentario = {
+    autor: userName,
+    texto: texto,
+    data: new Date().toLocaleString('pt-BR')
+  };
+  
+  post.comentarios.push(novoComentario);
+  
+  // Limpa textarea
+  textarea.value = '';
+  
+  // Recarrega comentários
+  carregarComentarios(postId);
+  
+  alert('Comentário adicionado!');
+}
+
+// ========== MODAL DE IMAGEM ==========
+function abrirImagemModal(url) {
+  const modal = document.getElementById('imageModal');
+  const img = document.getElementById('modalImage');
+  img.src = url;
+  modal.classList.add('active');
+}
+
+function fecharModal() {
+  document.getElementById('imageModal').classList.remove('active');
+}
+
+// ========== SCROLL SUAVE ==========
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// ========== LOGOUT ==========
+function logout() {
+  if (confirm('Deseja sair da sua conta?')) {
+    // Limpa dados
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Redireciona para login
+    window.location.href = '../login.html';
+  }
+}
+
+// ========== NOME DO USUÁRIO ==========
+function carregarNomeUsuario() {
+  const userName = localStorage.getItem('userName') || 'Aluno';
+  document.getElementById('userName').textContent = userName;
+}
+
+// ========== INICIALIZAR ==========
+document.addEventListener('DOMContentLoaded', () => {
+  carregarNomeUsuario();
+  carregarPosts();
+});
+
+// Fecha modal com ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    fecharModal();
+  }
+});
+</script>
 </body>
 </html>
