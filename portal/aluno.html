@@ -13,18 +13,15 @@
   --text-muted: #94a3b8;
   --accent: #22c55e;
   --blue: #3b82f6;
+  --red: #ef4444;
 }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
 }
-
-/* HEADER */
 header {
   background: var(--card);
   border-bottom: 1px solid var(--border);
@@ -38,15 +35,8 @@ header {
   top: 0;
   z-index: 100;
 }
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
+.header-left { display: flex; align-items: center; gap: 12px; }
 .logo { font-size: 24px; }
-
 h1 {
   font-size: 20px;
   font-weight: 700;
@@ -54,14 +44,7 @@ h1 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-}
-
+.user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
 .btn-logout {
   background: var(--card);
   color: var(--text);
@@ -73,19 +56,8 @@ h1 {
   cursor: pointer;
   transition: all .2s;
 }
-
-.btn-logout:hover {
-  background: var(--border);
-}
-
-/* CONTAINER */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-/* WELCOME BANNER */
+.btn-logout:hover { background: rgba(255,255,255,0.08); }
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 .welcome-banner {
   background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1));
   border: 1px solid var(--border);
@@ -94,63 +66,31 @@ h1 {
   margin-bottom: 32px;
   text-align: center;
 }
-
-.welcome-banner h2 {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 12px;
-}
-
-.welcome-banner p {
-  font-size: 16px;
-  color: var(--text-muted);
-}
-
-/* QUICK ACCESS */
+.welcome-banner h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+.welcome-banner p { font-size: 15px; color: var(--text-muted); }
 .quick-access {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 40px;
 }
-
 .quick-card {
   background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 28px 24px;
+  padding: 24px;
   cursor: pointer;
   transition: all .3s ease;
   text-align: center;
 }
-
 .quick-card:hover {
   border-color: var(--accent);
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(34,197,94,0.15);
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%);
 }
-
-.quick-card-icon {
-  font-size: 56px;
-  margin-bottom: 16px;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-}
-
-.quick-card h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-.quick-card p {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
-/* SECTION HEADER */
+.quick-card-icon { font-size: 40px; margin-bottom: 12px; }
+.quick-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.quick-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -159,26 +99,13 @@ h1 {
   flex-wrap: wrap;
   gap: 16px;
 }
-
-.section-header h2 {
-  font-size: 24px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.filter-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
+.section-header h2 { font-size: 22px; font-weight: 700; }
+.filter-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
 .filter-btn {
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -186,172 +113,78 @@ h1 {
   transition: all .2s;
   white-space: nowrap;
 }
-
-.filter-btn:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: var(--accent);
-}
-
-.filter-btn.active {
-  background: var(--accent);
-  color: #000;
-  border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(34,197,94,0.3);
-}
-
-/* POSTS GRID */
-.posts-grid {
-  display: grid;
-  gap: 24px;
-}
-
-/* RESPONSIVO - MOBILE */
-@media (max-width: 768px) {
-  .quick-access {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .quick-card {
-    padding: 20px;
-  }
-  
-  .quick-card-icon {
-    font-size: 48px;
-  }
-  
-  .section-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  
-  .section-header h2 {
-    font-size: 20px;
-  }
-  
-  .filter-buttons {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
-  }
-  
-  .filter-btn {
-    padding: 8px 14px;
-    font-size: 12px;
-  }
-  
-  .posts-grid {
-    gap: 16px;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 16px;
-  }
-  
-  .quick-card h3 {
-    font-size: 16px;
-  }
-  
-  .quick-card p {
-    font-size: 12px;
-  }
-}
-
+.filter-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+.filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+.posts-grid { display: grid; gap: 24px; }
 .post-card {
   background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
   border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
   transition: all .3s;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
-
 .post-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 8px 32px rgba(34,197,94,0.15);
+  border-color: rgba(34,197,94,0.4);
+  box-shadow: 0 8px 32px rgba(34,197,94,0.1);
   transform: translateY(-2px);
 }
-
-.post-image {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  background: rgba(255,255,255,0.05);
-  cursor: pointer;
-  transition: all .3s ease;
-  border-radius: 12px;
-  margin: 16px 0;
-}
-
-.post-image:hover {
-  transform: scale(1.02);
-  filter: brightness(1.1);
-}
-
-.post-content {
-  padding: 20px 24px;
-}
-
+.post-content { padding: 24px; }
 .post-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
-
 .post-category {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--accent);
-  background: rgba(34,197,94,0.2);
-  padding: 8px 16px;
+  background: rgba(34,197,94,0.15);
+  padding: 6px 12px;
   border-radius: 20px;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 8px rgba(34,197,94,0.2);
 }
-
-.post-date {
-  font-size: 13px;
-  color: var(--text-muted);
+.post-date { font-size: 12px; color: var(--text-muted); }
+.post-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+.post-text { font-size: 15px; color: var(--text-muted); line-height: 1.8; margin-bottom: 20px; white-space: pre-wrap; }
+.post-media-img {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all .3s;
+  display: block;
+}
+.post-media-img:hover { transform: scale(1.01); filter: brightness(1.05); }
+.post-video-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.post-video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.post-file-box {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 500;
-}
-
-.post-date::before {
-  content: '📅';
-  font-size: 16px;
-}
-
-.post-title {
-  font-size: 28px;
-  font-weight: 800;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
   margin-bottom: 16px;
-  color: var(--text);
-  line-height: 1.3;
-  letter-spacing: -0.5px;
 }
-
-.post-text {
-  font-size: 16px;
-  color: var(--text-muted);
-  line-height: 1.9;
-  margin-bottom: 24px;
-}
-
-.post-footer {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
+.post-file-icon { font-size: 36px; }
+.post-file-info { flex: 1; }
+.post-file-info strong { display: block; font-size: 14px; margin-bottom: 4px; }
+.post-file-info span { font-size: 12px; color: var(--text-muted); }
+.post-footer { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .btn {
   padding: 10px 18px;
   border-radius: 8px;
@@ -365,241 +198,103 @@ h1 {
   gap: 6px;
   border: none;
 }
-
-.btn-primary {
-  background: var(--accent);
-  color: #000;
-}
-
-.btn-primary:hover {
-  background: #1ea855;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(34,197,94,0.3);
-}
-
-.btn-secondary {
-  background: rgba(255,255,255,0.08);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
-
-/* COMENTÁRIOS */
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: #16a34a; transform: translateY(-1px); }
+.btn-secondary { background: rgba(255,255,255,0.07); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: rgba(255,255,255,0.12); border-color: var(--accent); }
 .comentarios-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
   animation: slideDown 0.3s ease;
 }
-
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 .comentario-item {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.06);
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  transition: all .2s;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 10px;
 }
-
-.comentario-item:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(34,197,94,0.2);
-}
-
+.comentario-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.comentario-autor { font-size: 13px; font-weight: 700; color: var(--accent); }
+.comentario-data { font-size: 11px; color: var(--text-muted); }
+.comentario-texto { font-size: 14px; color: var(--text); line-height: 1.6; }
+.comentario-form { margin-top: 16px; }
 .comentario-form textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: 90px;
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 10px;
+  padding: 12px 14px;
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
-  line-height: 1.6;
   resize: vertical;
   transition: all .2s;
 }
-
 .comentario-form textarea:focus {
   outline: none;
   border-color: var(--accent);
-  background: rgba(255,255,255,0.08);
   box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
 }
-
-.comentario-form textarea::placeholder {
-  color: var(--text-muted);
-}
-
-/* RESPONSIVO - MOBILE */
-@media (max-width: 768px) {
-  .post-card {
-    border-radius: 12px;
-  }
-  
-  .post-image {
-    height: 200px;
-  }
-  
-  .post-content {
-    padding: 16px;
-  }
-  
-  .post-title {
-    font-size: 18px;
-  }
-  
-  .post-text {
-    font-size: 14px;
-  }
-  
-  .post-footer {
-    flex-direction: column;
-  }
-  
-  .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px;
-  }
-  
-  .comentario-item {
-    padding: 12px;
-  }
-  
-  .comentario-form textarea {
-    min-height: 80px;
-    font-size: 16px; /* Evita zoom no iOS */
-  }
-}
-
-.btn-primary:hover {
-  background: #16a34a;
-}
-
-.btn-secondary {
-  background: rgba(255,255,255,0.05);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-  background: rgba(255,255,255,0.08);
-}
-
-/* LOADING */
-.loading {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
-}
-
+.comentario-form textarea::placeholder { color: var(--text-muted); }
+.comentario-form-footer { display: flex; justify-content: flex-end; margin-top: 8px; }
+.loading { text-align: center; padding: 60px 20px; color: var(--text-muted); }
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 40px; height: 40px;
   border: 3px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
 }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* IMAGE MODAL */
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+.empty-state-icon { font-size: 56px; margin-bottom: 16px; }
 .image-modal {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0,0,0,0.95);
   z-index: 10000;
   cursor: pointer;
-  animation: fadeIn .3s ease;
-}
-
-.image-modal.active {
-  display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
 }
-
+.image-modal.active { display: flex; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .image-modal img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 0 50px rgba(0,0,0,0.8);
+  max-width: 100%; max-height: 90vh;
+  object-fit: contain; border-radius: 8px;
 }
-
 .image-modal-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  position: absolute; top: 16px; right: 16px;
   background: rgba(255,255,255,0.1);
-  border: 2px solid rgba(255,255,255,0.3);
-  color: #fff;
-  font-size: 32px;
-  width: 50px;
-  height: 50px;
+  border: 2px solid rgba(255,255,255,0.2);
+  color: #fff; font-size: 28px;
+  width: 44px; height: 44px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all .2s;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .2s;
 }
-
-.image-modal-close:hover {
-  background: var(--red);
-  border-color: var(--red);
-  transform: rotate(90deg);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* EMPTY STATE */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
-}
-
-.empty-state-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-}
-
-/* RESPONSIVE */
+.image-modal-close:hover { background: var(--red); transform: rotate(90deg); }
 @media (max-width: 768px) {
   .container { padding: 16px; }
-  .welcome-banner { padding: 24px; }
-  .welcome-banner h2 { font-size: 24px; }
+  .welcome-banner { padding: 20px; }
+  .quick-access { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .filter-buttons { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .post-title { font-size: 18px; }
+  .post-footer { flex-direction: column; }
+  .btn { width: 100%; justify-content: center; }
+}
+@media (max-width: 480px) {
   .quick-access { grid-template-columns: 1fr; }
-  .section-header { flex-direction: column; align-items: start; gap: 12px; }
-  .filter-buttons { width: 100%; overflow-x: auto; }
 }
 </style>
 </head>
@@ -612,56 +307,49 @@ h1 {
   </div>
   <div class="user-info">
     <span id="userName">Aluno</span>
-    <button class="btn-logout" onclick="logout()">Sair</button>
+    <button class="btn-logout" onclick="fazerLogout()">Sair</button>
   </div>
 </header>
 
 <div class="container">
-  
-  <!-- BANNER BEM-VINDO -->
   <div class="welcome-banner">
-    <h2>Bem-vindo de volta! 👋</h2>
+    <h2 id="welcomeMsg">Bem-vindo de volta! 👋</h2>
     <p>Confira as últimas análises e conteúdos exclusivos</p>
   </div>
 
-  <!-- ACESSO RÁPIDO -->
   <div class="quick-access">
     <div class="quick-card" onclick="window.location.href='../'">
       <div class="quick-card-icon">📊</div>
       <h3>Dashboard Principal</h3>
       <p>Análise de trades e mercado</p>
     </div>
-
-    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('sala-ao-vivo')">
+    <div class="quick-card" onclick="aplicarFiltro('sala-ao-vivo')">
       <div class="quick-card-icon">🔴</div>
       <h3>Sala ao Vivo</h3>
       <p>Transmissões e lives</p>
     </div>
-
-    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('materiais')">
+    <div class="quick-card" onclick="aplicarFiltro('materiais')">
       <div class="quick-card-icon">📚</div>
       <h3>Materiais</h3>
       <p>Conteúdo educativo</p>
     </div>
-
-    <div class="quick-card" onclick="scrollToSection('posts'); filtrarPosts('link')">
+    <div class="quick-card" onclick="aplicarFiltro('link')">
       <div class="quick-card-icon">🔗</div>
       <h3>Links Úteis</h3>
       <p>Recursos e ferramentas</p>
     </div>
   </div>
 
-  <!-- POSTS -->
-  <div class="section-header" id="posts">
+  <div class="section-header" id="posts-topo">
     <h2>📰 Últimas Publicações</h2>
     <div class="filter-buttons">
-      <button class="filter-btn active" onclick="filtrarPosts('todos')">Todos</button>
-      <button class="filter-btn" onclick="filtrarPosts('sala-ao-vivo')">🔴 Sala ao Vivo</button>
-      <button class="filter-btn" onclick="filtrarPosts('materiais')">📚 Materiais</button>
-      <button class="filter-btn" onclick="filtrarPosts('analise')">Análises</button>
-      <button class="filter-btn" onclick="filtrarPosts('tutorial')">Tutoriais</button>
-      <button class="filter-btn" onclick="filtrarPosts('noticia')">Notícias</button>
-      <button class="filter-btn" onclick="filtrarPosts('link')">Links</button>
+      <button class="filter-btn active" onclick="aplicarFiltro('todos', this)">Todos</button>
+      <button class="filter-btn" onclick="aplicarFiltro('sala-ao-vivo', this)">🔴 Sala ao Vivo</button>
+      <button class="filter-btn" onclick="aplicarFiltro('materiais', this)">📚 Materiais</button>
+      <button class="filter-btn" onclick="aplicarFiltro('analise', this)">📈 Análises</button>
+      <button class="filter-btn" onclick="aplicarFiltro('tutorial', this)">🎓 Tutoriais</button>
+      <button class="filter-btn" onclick="aplicarFiltro('noticia', this)">📰 Notícias</button>
+      <button class="filter-btn" onclick="aplicarFiltro('link', this)">🔗 Links</button>
     </div>
   </div>
 
@@ -671,281 +359,277 @@ h1 {
       <p>Carregando conteúdos...</p>
     </div>
   </div>
-
 </div>
 
-<!-- MODAL DE IMAGEM -->
-<div class="image-modal" id="imageModal" onclick="fecharModal()">
+<div class="image-modal" id="imageModal" onclick="fecharImagemModal()">
   <span class="image-modal-close">×</span>
-  <img id="modalImage" src="" alt="">
+  <img id="modalImage" src="" alt="" onclick="event.stopPropagation()">
 </div>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 
-
 <script>
-// ========== CONFIGURAÇÃO ==========
-const PLANILHA_ID = "1wX_j3F9kPZQYrTB6hN2mL8vK5sO7pA4qRtU9iE3nV2c"; // SUBSTITUA!
-const SHEET_NAME = "Publicacoes";
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
-
-let postsData = [];
+let todosOsPosts = [];
 let filtroAtual = 'todos';
+let usuarioAtual = null;
 
-// ========== CARREGAR POSTS ==========
+const categoriaLabels = {
+  'sala-ao-vivo': '🔴 Sala ao Vivo',
+  'materiais':    '📚 Materiais',
+  'analise':      '📈 Análise',
+  'tutorial':     '🎓 Tutorial',
+  'noticia':      '📰 Notícia',
+  'link':         '🔗 Link'
+};
+
+// ── AUTENTICAÇÃO ──────────────────────────────
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+  try {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (!userDoc.exists) {
+      await auth.signOut();
+      window.location.href = 'login.html';
+      return;
+    }
+    const userData = userDoc.data();
+
+    if (userData.role === 'admin') {
+      window.location.href = 'admin.html';
+      return;
+    }
+    if (userData.aprovado !== true) {
+      alert('⏳ Sua conta ainda aguarda aprovação do administrador.');
+      await auth.signOut();
+      window.location.href = 'login.html';
+      return;
+    }
+
+    usuarioAtual = {
+      uid: user.uid,
+      nome: userData.nome || user.displayName || user.email.split('@')[0]
+    };
+    document.getElementById('userName').textContent = usuarioAtual.nome;
+    document.getElementById('welcomeMsg').textContent =
+      `Bem-vindo de volta, ${usuarioAtual.nome.split(' ')[0]}! 👋`;
+
+    carregarPosts();
+  } catch (err) {
+    console.error('Erro ao verificar usuário:', err);
+    usuarioAtual = { uid: user.uid, nome: user.displayName || 'Aluno' };
+    carregarPosts();
+  }
+});
+
+// ── CARREGAR POSTS DO FIRESTORE ───────────────
 async function carregarPosts() {
   const container = document.getElementById('posts-container');
-  
   try {
-    console.log('📚 Carregando publicações...');
-    
-    const response = await fetch(SHEET_URL);
-    const text = await response.text();
-    const json = JSON.parse(text.substring(47).slice(0, -2));
-    
-    const rows = json.table.rows.slice(1); // Pula header
-    
-    postsData = rows.map(row => {
-      const cells = row.c;
-      return {
-        id: cells[0]?.v || '',
-        data: cells[1]?.f || cells[1]?.v || '',
-        categoria: cells[2]?.v || 'geral',
-        titulo: cells[3]?.v || '',
-        texto: cells[4]?.v || '',
-        imagemId: cells[5]?.v || '',
-        link: cells[6]?.v || '',
-        comentarios: []
-      };
-    }).filter(p => p.titulo);
-    
-    console.log(`✅ ${postsData.length} posts carregados`);
-    
+    const snapshot = await db.collection('posts')
+      .orderBy('criadoEm', 'desc')
+      .get();
+
+    todosOsPosts = [];
+    snapshot.forEach(doc => todosOsPosts.push({ id: doc.id, ...doc.data() }));
+    console.log(`✅ ${todosOsPosts.length} posts carregados`);
     renderizarPosts();
-    
-  } catch (error) {
-    console.error('❌ Erro ao carregar posts:', error);
+  } catch (err) {
+    console.error('❌ Erro ao carregar posts:', err);
     container.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">⚠️</div>
-        <p>Erro ao carregar publicações</p>
-      </div>
-    `;
+        <p>Erro ao carregar publicações. Tente recarregar a página.</p>
+      </div>`;
   }
 }
 
-// ========== RENDERIZAR POSTS ==========
+// ── RENDERIZAR ────────────────────────────────
 function renderizarPosts() {
   const container = document.getElementById('posts-container');
-  
-  let posts = postsData;
-  
-  // Filtra por categoria
-  if (filtroAtual !== 'todos') {
-    posts = postsData.filter(p => p.categoria === filtroAtual);
-  }
-  
+  const posts = filtroAtual === 'todos'
+    ? todosOsPosts
+    : todosOsPosts.filter(p => p.categoria === filtroAtual);
+
   if (posts.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">📭</div>
-        <p>Nenhuma publicação nesta categoria</p>
-      </div>
-    `;
+        <p>${todosOsPosts.length === 0
+          ? 'Nenhuma publicação ainda.'
+          : 'Nenhuma publicação nesta categoria.'}</p>
+      </div>`;
     return;
   }
-  
-  container.innerHTML = posts.map(post => {
-    const imagemUrl = post.imagemId 
-      ? `https://drive.google.com/thumbnail?id=${post.imagemId}&sz=w800`
-      : '';
-    
-    const categoriaNome = {
-      'sala-ao-vivo': '🔴 Sala ao Vivo',
-      'materiais': '📚 Materiais',
-      'analise': '📊 Análise',
-      'tutorial': '🎓 Tutorial',
-      'noticia': '📰 Notícia',
-      'link': '🔗 Link'
-    }[post.categoria] || post.categoria;
-    
-    return `
-      <div class="post-card" data-categoria="${post.categoria}">
-        <div class="post-content">
-          
-          <div class="post-header">
-            <div class="post-category">${categoriaNome}</div>
-            <div class="post-date">${post.data}</div>
-          </div>
-          
-          ${imagemUrl ? `
-            <img src="${imagemUrl}" 
-                 alt="${post.titulo}" 
-                 class="post-image"
-                 onclick="abrirImagemModal('${imagemUrl}')"
-                 loading="lazy">
-          ` : ''}
-          
-          <h3 class="post-title">${post.titulo}</h3>
-          
-          <p class="post-text">${post.texto}</p>
-          
-          <div class="post-footer">
-            ${post.link ? `
-              <a href="${post.link}" target="_blank" class="btn btn-primary">
-                🔗 Acessar Link
-              </a>
-            ` : ''}
-            <button class="btn btn-secondary" onclick="toggleComentarios('${post.id}')">
-              💬 Comentários
-            </button>
-          </div>
-          
-          <div id="comentarios-${post.id}" style="display:none; margin-top: 24px;" class="comentarios-section">
-            <div id="lista-comentarios-${post.id}"></div>
-            <div class="comentario-form" style="margin-top: 16px;">
-              <textarea id="novo-comentario-${post.id}" placeholder="Escreva seu comentário..." rows="3"></textarea>
-              <button class="btn btn-primary" onclick="adicionarComentario('${post.id}')" style="margin-top: 8px;">
-                Enviar Comentário
-              </button>
-            </div>
-          </div>
-          
-        </div>
-      </div>
-    `;
-  }).join('');
+  container.innerHTML = posts.map(montarPostHTML).join('');
 }
 
-// ========== FILTRAR POSTS ==========
-function filtrarPosts(categoria) {
+function montarPostHTML(post) {
+  const data = post.criadoEm
+    ? post.criadoEm.toDate().toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' })
+    : '';
+  const catLabel = categoriaLabels[post.categoria] || post.categoria || 'Geral';
+
+  let midiaHTML = '';
+  if (post.midiaURL) {
+    if (post.midiaTipo === 'video') {
+      let embedURL = post.midiaURL;
+      const driveMatch = post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (driveMatch) embedURL = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+      else if (post.midiaURL.includes('streamable.com') && !post.midiaURL.includes('/e')) embedURL += '/e';
+      midiaHTML = `<div class="post-video-wrap"><iframe src="${embedURL}" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe></div>`;
+    } else if (post.midiaTipo === 'pdf') {
+      midiaHTML = `
+        <div class="post-file-box">
+          <span class="post-file-icon">📄</span>
+          <div class="post-file-info"><strong>Arquivo Anexado</strong><span>Clique para baixar</span></div>
+          <a href="${post.midiaURL}" target="_blank" class="btn btn-primary">📥 Baixar</a>
+        </div>`;
+    } else {
+      midiaHTML = `<img src="${post.midiaURL}" alt="${post.titulo}" class="post-media-img"
+        onclick="abrirImagemModal('${post.midiaURL}')" loading="lazy" onerror="this.style.display='none'">`;
+    }
+  }
+
+  return `
+    <div class="post-card" id="card-${post.id}">
+      <div class="post-content">
+        <div class="post-header">
+          <span class="post-category">${catLabel}</span>
+          <span class="post-date">📅 ${data}</span>
+        </div>
+        ${midiaHTML}
+        <h3 class="post-title">${post.titulo || ''}</h3>
+        ${post.texto ? `<p class="post-text">${post.texto}</p>` : ''}
+        <div class="post-footer">
+          ${post.link ? `<a href="${post.link}" target="_blank" class="btn btn-primary">🔗 Acessar Link</a>` : ''}
+          <button class="btn btn-secondary" onclick="toggleComentarios('${post.id}')">
+            💬 Comentários <span id="count-${post.id}"></span>
+          </button>
+        </div>
+        <div id="comentarios-${post.id}" style="display:none;" class="comentarios-section">
+          <div id="lista-${post.id}">
+            <div class="loading" style="padding:20px;">
+              <div class="spinner" style="width:24px;height:24px;border-width:2px;"></div>
+            </div>
+          </div>
+          <div class="comentario-form">
+            <textarea id="textarea-${post.id}" placeholder="Escreva seu comentário..."></textarea>
+            <div class="comentario-form-footer">
+              <button class="btn btn-primary" onclick="enviarComentario('${post.id}')">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── FILTRO ────────────────────────────────────
+function aplicarFiltro(categoria, btnEl) {
   filtroAtual = categoria;
-  
-  // Atualiza botões
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
-  event.target.classList.add('active');
-  
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) {
+    btnEl.classList.add('active');
+  } else {
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      if (b.textContent.toLowerCase().replace(/\s/g,'').includes(categoria.replace('-','')))
+        b.classList.add('active');
+    });
+  }
+  document.getElementById('posts-topo').scrollIntoView({ behavior: 'smooth' });
   renderizarPosts();
 }
 
-// ========== COMENTÁRIOS ==========
-function toggleComentarios(postId) {
-  const div = document.getElementById(`comentarios-${postId}`);
-  const isVisible = div.style.display !== 'none';
-  
-  if (isVisible) {
-    div.style.display = 'none';
-  } else {
-    div.style.display = 'block';
-    carregarComentarios(postId);
+// ── COMENTÁRIOS ───────────────────────────────
+async function toggleComentarios(postId) {
+  const section = document.getElementById(`comentarios-${postId}`);
+  const aberto = section.style.display !== 'none';
+  section.style.display = aberto ? 'none' : 'block';
+  if (!aberto) await carregarComentarios(postId);
+}
+
+async function carregarComentarios(postId) {
+  const lista  = document.getElementById(`lista-${postId}`);
+  const countEl = document.getElementById(`count-${postId}`);
+  try {
+    const snap = await db.collection('posts').doc(postId)
+      .collection('comentarios').orderBy('criadoEm', 'asc').get();
+
+    if (countEl) countEl.textContent = snap.size > 0 ? `(${snap.size})` : '';
+
+    if (snap.empty) {
+      lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px;">Nenhum comentário ainda. Seja o primeiro!</p>';
+      return;
+    }
+    let html = '';
+    snap.forEach(doc => {
+      const c = doc.data();
+      const d = c.criadoEm
+        ? c.criadoEm.toDate().toLocaleString('pt-BR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
+        : '';
+      html += `
+        <div class="comentario-item">
+          <div class="comentario-header">
+            <span class="comentario-autor">${c.autor || 'Aluno'}</span>
+            <span class="comentario-data">${d}</span>
+          </div>
+          <p class="comentario-texto">${c.texto}</p>
+        </div>`;
+    });
+    lista.innerHTML = html;
+  } catch (err) {
+    console.error('Erro comentários:', err);
+    lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>';
   }
 }
 
-function carregarComentarios(postId) {
-  const post = postsData.find(p => p.id === postId);
-  if (!post) return;
-  
-  const lista = document.getElementById(`lista-comentarios-${postId}`);
-  
-  if (post.comentarios.length === 0) {
-    lista.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">Nenhum comentário ainda. Seja o primeiro!</p>';
-    return;
-  }
-  
-  lista.innerHTML = post.comentarios.map(comentario => `
-    <div class="comentario-item">
-      <strong style="color: var(--accent);">${comentario.autor}</strong>
-      <span style="color: var(--text-muted); font-size: 12px; margin-left: 8px;">${comentario.data}</span>
-      <p style="margin-top: 8px; color: var(--text);">${comentario.texto}</p>
-    </div>
-  `).join('');
-}
-
-function adicionarComentario(postId) {
-  const textarea = document.getElementById(`novo-comentario-${postId}`);
+async function enviarComentario(postId) {
+  if (!usuarioAtual) { alert('Você precisa estar logado.'); return; }
+  const textarea = document.getElementById(`textarea-${postId}`);
   const texto = textarea.value.trim();
-  
-  if (!texto) {
-    alert('Digite um comentário');
-    return;
+  if (!texto) { textarea.focus(); return; }
+  try {
+    textarea.disabled = true;
+    await db.collection('posts').doc(postId).collection('comentarios').add({
+      texto,
+      autor: usuarioAtual.nome,
+      autorId: usuarioAtual.uid,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    textarea.value = '';
+    textarea.disabled = false;
+    await carregarComentarios(postId);
+  } catch (err) {
+    console.error('Erro enviar comentário:', err);
+    alert('Erro ao enviar. Tente novamente.');
+    textarea.disabled = false;
   }
-  
-  // Pega nome do usuário (do Firebase ou localStorage)
-  const userName = localStorage.getItem('userName') || 'Aluno';
-  
-  const post = postsData.find(p => p.id === postId);
-  if (!post) return;
-  
-  const novoComentario = {
-    autor: userName,
-    texto: texto,
-    data: new Date().toLocaleString('pt-BR')
-  };
-  
-  post.comentarios.push(novoComentario);
-  
-  // Limpa textarea
-  textarea.value = '';
-  
-  // Recarrega comentários
-  carregarComentarios(postId);
-  
-  alert('Comentário adicionado!');
 }
 
-// ========== MODAL DE IMAGEM ==========
+// ── MODAL IMAGEM ──────────────────────────────
 function abrirImagemModal(url) {
-  const modal = document.getElementById('imageModal');
-  const img = document.getElementById('modalImage');
-  img.src = url;
-  modal.classList.add('active');
+  document.getElementById('modalImage').src = url;
+  document.getElementById('imageModal').classList.add('active');
 }
-
-function fecharModal() {
+function fecharImagemModal() {
   document.getElementById('imageModal').classList.remove('active');
+  document.getElementById('modalImage').src = '';
 }
 
-// ========== SCROLL SUAVE ==========
-function scrollToSection(id) {
-  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-}
-
-// ========== LOGOUT ==========
-function logout() {
+// ── LOGOUT ────────────────────────────────────
+async function fazerLogout() {
   if (confirm('Deseja sair da sua conta?')) {
-    // Limpa dados
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Redireciona para login
-    window.location.href = '../login.html';
+    await auth.signOut();
+    window.location.href = 'login.html';
   }
 }
 
-// ========== NOME DO USUÁRIO ==========
-function carregarNomeUsuario() {
-  const userName = localStorage.getItem('userName') || 'Aluno';
-  document.getElementById('userName').textContent = userName;
-}
-
-// ========== INICIALIZAR ==========
-document.addEventListener('DOMContentLoaded', () => {
-  carregarNomeUsuario();
-  carregarPosts();
-});
-
-// Fecha modal com ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    fecharModal();
-  }
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharImagemModal(); });
 </script>
 </body>
 </html>
