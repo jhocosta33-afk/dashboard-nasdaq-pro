@@ -303,6 +303,11 @@ async function carregarConfiguracoes() {
 
 // ── Carrega token do Firestore ou renova se expirado ──
 async function inicializarYouTubeAuth() {
+  // Garante configs carregadas antes de qualquer operação OAuth
+  if (!YT_CLIENT_ID || !YT_CLIENT_SECRET) {
+    await carregarConfiguracoes();
+  }
+
   // Verifica se voltou do OAuth com ?code=
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
@@ -353,6 +358,9 @@ async function renovarAccessToken(refreshToken) {
 
 // ── Inicia fluxo OAuth2 PKCE ──
 async function autenticarYouTube() {
+  // Garante configs carregadas
+  if (!YT_CLIENT_ID) await carregarConfiguracoes();
+  if (!YT_CLIENT_ID) { alert('❌ Erro ao carregar configurações. Tente recarregar a página.'); return; }
   const verifier = Array.from(crypto.getRandomValues(new Uint8Array(32)))
     .map(b => b.toString(16).padStart(2,'0')).join('');
   sessionStorage.setItem('yt_verifier', verifier);
