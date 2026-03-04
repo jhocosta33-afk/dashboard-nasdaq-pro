@@ -93,6 +93,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   </div>
   <div class="user-info">
     <a href="../" style="display:inline-block;background:rgba(255,255,255,0.1);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;margin-right:12px;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📊 Dashboard</a>
+    <button id="btnConectarYT" onclick="autenticarYouTube()" style="background:#ff0000;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">🔗 Conectar YouTube</button>
     <span id="adminName">Admin</span>
     <button class="btn-logout" onclick="logout()">Sair</button>
   </div>
@@ -277,9 +278,244 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 
 <script>
 // ══════════════════════════════════════════════
-// CONFIGURAÇÃO
+// CONFIGURAÇÃO — carregada do Firestore
 // ══════════════════════════════════════════════
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzz9axhZDSVon2FdwCDoiFptGgq28a6Vs9C1Bolbam5RTxBfpoBkMNJGFZERrys7jum/exec';
+let APPS_SCRIPT_URL = null;
+let YT_CLIENT_ID    = null;
+let YT_CLIENT_SECRET = null;
+const YT_SCOPE    = 'https://www.googleapis.com/auth/youtube.upload';
+const YT_REDIRECT = 'https://jhocosta33-afk.github.io/dashboard-nasdaq-pro/portal/admin.html';
+let   ytAccessToken = null;
+
+async function carregarConfiguracoes() {
+  try {
+    const doc = await db.collection('config').doc('oauth').get();
+    if (!doc.exists) throw new Error('Documento config/oauth não encontrado no Firestore');
+    const data = doc.data();
+    APPS_SCRIPT_URL  = data.apps_script_url;
+    YT_CLIENT_ID     = data.client_id;
+    YT_CLIENT_SECRET = data.client_secret;
+  } catch (err) {
+    console.error('Erro ao carregar configurações:', err);
+    alert('❌ Erro ao carregar configurações do sistema. Verifique o Firestore.');
+  }
+}
+
+// ── Carrega token do Firestore ou renova se expirado ──
+async function inicializarYouTubeAuth() {
+  // Verifica se voltou do OAuth com ?code=
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  if (code) {
+    window.history.replaceState({}, '', window.location.pathname);
+    await trocarCodePorToken(code);
+    atualizarBotaoYouTube();
+    return;
+  }
+
+  // Tenta carregar refresh_token do Firestore
+  try {
+    const doc = await db.collection('config').doc('youtube').get();
+    if (doc.exists && doc.data().refresh_token) {
+      const refreshToken = doc.data().refresh_token;
+      await renovarAccessToken(refreshToken);
+    }
+  } catch (err) {
+    console.log('Token YouTube não configurado ainda.');
+  }
+
+  atualizarBotaoYouTube();
+}
+
+// ── Renova access_token usando refresh_token salvo ──
+async function renovarAccessToken(refreshToken) {
+  try {
+    const resp = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id:     YT_CLIENT_ID,
+        client_secret: YT_CLIENT_SECRET,
+        refresh_token: refreshToken,
+        grant_type:    'refresh_token'
+      }).toString()
+    });
+    const data = await resp.json();
+    if (data.access_token) {
+      ytAccessToken = data.access_token;
+      return true;
+    }
+  } catch (err) {
+    console.error('Erro ao renovar token:', err);
+  }
+  return false;
+}
+
+// ── Inicia fluxo OAuth2 PKCE ──
+async function autenticarYouTube() {
+  const verifier = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+    .map(b => b.toString(16).padStart(2,'0')).join('');
+  sessionStorage.setItem('yt_verifier', verifier);
+
+  const encoder = new TextEncoder();
+  const digest  = await crypto.subtle.digest('SHA-256', encoder.encode(verifier));
+  const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+
+  const params = new URLSearchParams({
+    client_id:             YT_CLIENT_ID,
+    redirect_uri:          YT_REDIRECT,
+    response_type:         'code',
+    scope:                 YT_SCOPE,
+    code_challenge:        challenge,
+    code_challenge_method: 'S256',
+    access_type:           'offline',
+    prompt:                'consent'
+  });
+
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+// ── Troca code por tokens e salva refresh_token no Firestore ──
+async function trocarCodePorToken(code) {
+  const verifier = sessionStorage.getItem('yt_verifier');
+  if (!verifier) return;
+
+  const resp = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      client_id:     YT_CLIENT_ID,
+      client_secret: YT_CLIENT_SECRET,
+      redirect_uri:  YT_REDIRECT,
+      grant_type:    'authorization_code',
+      code_verifier: verifier
+    }).toString()
+  });
+
+  const data = await resp.json();
+  sessionStorage.removeItem('yt_verifier');
+
+  if (data.access_token) {
+    ytAccessToken = data.access_token;
+
+    // Salva refresh_token no Firestore — todos os admins usarão
+    if (data.refresh_token) {
+      await db.collection('config').doc('youtube').set({
+        refresh_token:  data.refresh_token,
+        atualizadoEm:   firebase.firestore.FieldValue.serverTimestamp(),
+        configuradoPor: auth.currentUser?.email || 'admin'
+      });
+      console.log('✅ Refresh token salvo no Firestore');
+    }
+  }
+}
+
+// ── Upload resumável para YouTube em chunks de 5MB ──
+async function uploadYouTubeDireto(file, titulo, descricao) {
+  // Se token expirou, tenta renovar automaticamente
+  if (!ytAccessToken) {
+    const doc = await db.collection('config').doc('youtube').get();
+    if (doc.exists && doc.data().refresh_token) {
+      const ok = await renovarAccessToken(doc.data().refresh_token);
+      if (!ok) throw new Error('Não foi possível renovar o token do YouTube. Reconecte clicando em "Reconectar YouTube".');
+    } else {
+      throw new Error('YouTube não conectado. Clique em "Conectar YouTube" primeiro.');
+    }
+  }
+
+  const progressBar  = document.getElementById('uploadProgressBar');
+  const progressPct  = document.getElementById('uploadProgressPercent');
+  const progressText = document.getElementById('uploadProgressTextUniversal');
+
+  progressText.textContent = '🎥 Iniciando upload no YouTube...';
+
+  // 1. Cria sessão de upload resumável
+  const metadata = {
+    snippet: { title: titulo || 'Vídeo', description: descricao || '', categoryId: '27' },
+    status:  { privacyStatus: 'unlisted', selfDeclaredMadeForKids: false }
+  };
+
+  const initResp = await fetch(
+    'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization':           'Bearer ' + ytAccessToken,
+        'Content-Type':            'application/json; charset=UTF-8',
+        'X-Upload-Content-Type':   file.type || 'video/mp4',
+        'X-Upload-Content-Length': file.size
+      },
+      body: JSON.stringify(metadata)
+    }
+  );
+
+  if (!initResp.ok) {
+    const err = await initResp.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'Erro ao iniciar upload no YouTube');
+  }
+
+  const uploadURL = initResp.headers.get('Location');
+  if (!uploadURL) throw new Error('URL de upload não recebida do YouTube');
+
+  // 2. Envia em chunks de 5MB com progresso real
+  const CHUNK = 5 * 1024 * 1024;
+  let offset = 0;
+
+  while (offset < file.size) {
+    const end   = Math.min(offset + CHUNK, file.size);
+    const chunk = file.slice(offset, end);
+
+    const pct = Math.round((end / file.size) * 95);
+    progressBar.style.width = pct + '%';
+    progressPct.textContent = pct + '%';
+    progressText.textContent = `🎥 Enviando... ${(end/(1024*1024)).toFixed(0)}MB de ${(file.size/(1024*1024)).toFixed(0)}MB`;
+
+    const chunkResp = await fetch(uploadURL, {
+      method: 'PUT',
+      headers: {
+        'Content-Range': `bytes ${offset}-${end-1}/${file.size}`,
+        'Content-Type':  file.type || 'video/mp4'
+      },
+      body: chunk
+    });
+
+    if (chunkResp.status === 200 || chunkResp.status === 201) {
+      const result = await chunkResp.json();
+      progressBar.style.width = '100%';
+      progressPct.textContent = '100%';
+      progressText.textContent = '✅ Vídeo publicado no YouTube!';
+      return {
+        videoId:  result.id,
+        embedURL: 'https://www.youtube.com/embed/' + result.id,
+        watchURL: 'https://youtu.be/' + result.id
+      };
+    } else if (chunkResp.status === 308) {
+      const range = chunkResp.headers.get('Range');
+      offset = range ? parseInt(range.split('-')[1]) + 1 : end;
+    } else {
+      const errText = await chunkResp.text();
+      throw new Error('Erro no chunk: HTTP ' + chunkResp.status + ' — ' + errText);
+    }
+  }
+
+  throw new Error('Upload não completou corretamente');
+}
+
+function atualizarBotaoYouTube() {
+  const btn = document.getElementById('btnConectarYT');
+  if (!btn) return;
+  if (ytAccessToken) {
+    btn.textContent = '✅ YouTube Conectado';
+    btn.style.background = 'var(--accent)';
+    btn.style.color = '#000';
+  } else {
+    btn.textContent = '🔗 Conectar YouTube';
+    btn.style.background = '#ff0000';
+    btn.style.color = '#fff';
+  }
+}
 
 // ══════════════════════════════════════════════
 // AUTENTICAÇÃO
@@ -295,6 +531,9 @@ auth.onAuthStateChanged(async (user) => {
       return;
     }
     document.getElementById('adminName').textContent = user.displayName || user.email;
+    // Carrega configurações do Firestore antes de qualquer coisa
+    await carregarConfiguracoes();
+    await inicializarYouTubeAuth();
     carregarPosts();
     carregarUsuarios();
   } catch (error) {
@@ -422,49 +661,33 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
       const sizeMB = (arquivoUniversal.size / (1024*1024)).toFixed(2);
       const progressBar = document.getElementById('uploadProgressBar');
       const progressPercent = document.getElementById('uploadProgressPercent');
-      let progress = 0;
-      const progressInterval = setInterval(() => {
-        progress += Math.random() * 6;
-        if (progress > 85) progress = 85;
-        progressBar.style.width = progress + '%';
-        progressPercent.textContent = Math.round(progress) + '%';
-      }, 400);
+      let progressInterval = null;
 
       try {
-        const base64 = await fileToBase64(arquivoUniversal);
-
         if (tipoArquivo === 'video') {
-          // ── Upload YouTube ──
-          document.getElementById('uploadProgressTextUniversal').textContent = `🎥 Enviando para YouTube... ${sizeMB}MB — pode demorar alguns minutos`;
-
-          const params = new URLSearchParams();
-          params.append('acao', 'uploadYouTube');
-          params.append('video', base64);
-          params.append('titulo', document.getElementById('postTitulo').value.trim() || arquivoUniversal.name);
-          params.append('descricao', document.getElementById('postTexto').value.trim());
-
-          const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString()
-          });
-
-          const resultado = await response.json();
-
-          if (!resultado.success) {
-            throw new Error(resultado.error || 'Erro no upload para YouTube');
+          // ── Upload YouTube DIRETO do navegador com chunks (sem limite de tamanho) ──
+          if (!ytAccessToken) {
+            throw new Error('Clique em "Conectar YouTube" no topo da página antes de enviar vídeos.');
           }
-
+          const titulo    = document.getElementById('postTitulo').value.trim() || arquivoUniversal.name;
+          const descricao = document.getElementById('postTexto').value.trim();
+          const resultado = await uploadYouTubeDireto(arquivoUniversal, titulo, descricao);
           youtubeEmbedURL = resultado.embedURL;
           finalMidiaURL   = resultado.watchURL;
           midiaTipo       = 'youtube';
 
-          document.getElementById('uploadProgressTextUniversal').textContent = '✅ Vídeo publicado no YouTube!';
-
         } else {
-          // ── Upload Drive (imagem/pdf) ──
+          // ── Upload Drive (imagem/pdf) — com progress animado ──
           document.getElementById('uploadProgressTextUniversal').textContent = `📤 Enviando ${sizeMB}MB para Google Drive...`;
+          let progress = 0;
+          progressInterval = setInterval(() => {
+            progress += Math.random() * 8;
+            if (progress > 85) progress = 85;
+            progressBar.style.width = progress + '%';
+            progressPercent.textContent = Math.round(progress) + '%';
+          }, 300);
 
+          const base64 = await fileToBase64(arquivoUniversal);
           const params = new URLSearchParams();
           params.append('acao', 'uploadArquivo');
           params.append('arquivo', base64);
@@ -478,6 +701,7 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
           });
 
           const resultado = await response.json();
+          clearInterval(progressInterval);
           if (!resultado.success) throw new Error(resultado.error || 'Erro no upload');
 
           finalMidiaURL = tipoArquivo === 'imagem'
@@ -486,7 +710,6 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
           midiaTipo = tipoArquivo;
         }
 
-        clearInterval(progressInterval);
         progressBar.style.width = '100%';
         progressPercent.textContent = '100%';
 
