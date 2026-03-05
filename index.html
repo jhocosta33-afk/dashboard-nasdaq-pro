@@ -390,8 +390,8 @@ let GOOGLE_DRIVE_FOLDER_ID = null;
 
 async function carregarConfiguracoes() {
   try {
-    const doc = await db.collection('config').doc('oauth').get();
-    if (!doc.exists) throw new Error('config/oauth não encontrado no Firestore');
+    const doc = await db.collection('config').doc('public').get();
+    if (!doc.exists) throw new Error('config/public não encontrado no Firestore');
     const data = doc.data();
     CSV_URL = data.csv_url;
     GOOGLE_DRIVE_FOLDER_ID = data.drive_folder_id;
