@@ -297,17 +297,26 @@ body.basic-mode .pro-only{display:none!important}
   <div class="kpis">
    <div class="kpi kpi-dias"><span>Dias Operados</span><strong id="kDias">0</strong></div>
    <div class="kpi kpi-trades"><span>Total de Trades</span><strong id="kTrades">0</strong></div>
-   <div class="kpi kpi-pontos"><span>Pontos Totais</span><strong id="kPontos">0</strong></div>
+   <div class="kpi kpi-pontos"><span>Pontos NASDAQ</span><strong id="kPontos">0</strong></div>
+   <div class="kpi" style="--kpi-color:var(--orange)"><span>Pontos DOW</span><strong id="kPontosDow" style="color:var(--orange)">0</strong></div>
    <div class="kpi kpi-acc"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
    <div class="kpi kpi-gains pro-only"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
    <div class="kpi kpi-stops pro-only"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
    <div class="kpi kpi-zero pro-only"><span>Breakeven (0x0)</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
    <div class="kpi pro-only">
-    <span>Contratos por Trade</span>
+    <span>🔵 Contratos NASDAQ</span>
     <div class="contratos-control">
-     <button id="btnMenos" class="btn-control">-</button>
-     <div id="valorContratos" class="valor-contratos">0</div>
-     <button id="btnMais" class="btn-control">+</button>
+     <button id="btnMenosNasdaq" class="btn-control">-</button>
+     <div id="valorContratosNasdaq" class="valor-contratos">0</div>
+     <button id="btnMaisNasdaq" class="btn-control">+</button>
+    </div>
+   </div>
+   <div class="kpi pro-only">
+    <span>🟠 Contratos DOW</span>
+    <div class="contratos-control">
+     <button id="btnMenosDow" class="btn-control" style="background:var(--orange)">-</button>
+     <div id="valorContratosDow" class="valor-contratos" style="border-color:var(--orange)">0</div>
+     <button id="btnMaisDow" class="btn-control" style="background:var(--orange)">+</button>
     </div>
    </div>
    <div class="kpi pro-only">
@@ -508,10 +517,36 @@ const Dashboard = {
 
   processarCSV(texto) {
     const linhas=texto.trim().split(/\r?\n/);linhas.shift();
-    this.dados=linhas.map(linha=>{
+    // Cada linha = 1 registro (pode haver 2 linhas pro mesmo dia: NASDAQ e DOW)
+    const rows=linhas.map(linha=>{
       const cols=linha.split(",");const[d,m,a]=cols[0].split("/");
-      return{dia:cols[0],data:new Date(a,m-1,d),semana:cols[1],ativo:cols[2],ano:a,mes:m,pontos:+cols[3]||0,trades:+cols[4]||0,gain:+cols[5]||0,stop:+cols[6]||0,zero:+cols[7]||0,fotoId:cols[8]||""};
+      if(!d||!m||!a)return null;
+      return{dia:cols[0],data:new Date(a,m-1,d),semana:cols[1],ativo:(cols[2]||'').trim().toUpperCase(),ano:a,mes:m,pontos:+cols[3]||0,trades:+cols[4]||0,gain:+cols[5]||0,stop:+cols[6]||0,zero:+cols[7]||0,fotoId:cols[8]||""};
     }).filter(Boolean);
+
+    // Agrupa por data: merge NASDAQ + DOW na mesma entrada de calendário
+    const mapaData={};
+    rows.forEach(r=>{
+      const key=r.dia;
+      if(!mapaData[key]){
+        mapaData[key]={
+          dia:r.dia,data:r.data,semana:r.semana,ano:r.ano,mes:r.mes,
+          pontosNasdaq:0,pontosDow:0,
+          trades:0,gain:0,stop:0,zero:0,
+          fotoId:r.fotoId,ativos:[]
+        };
+      }
+      const e=mapaData[key];
+      const isDow=r.ativo.includes('DOW');
+      if(isDow) e.pontosDow+=r.pontos;
+      else e.pontosNasdaq+=r.pontos;
+      e.trades+=r.trades;e.gain+=r.gain;e.stop+=r.stop;e.zero+=r.zero;
+      if(r.fotoId&&r.fotoId.trim())e.fotoId=r.fotoId;
+      if(!e.ativos.includes(r.ativo))e.ativos.push(r.ativo);
+      // pontos totais = soma de tudo (para gráfico acumulado)
+      e.pontos=(e.pontosNasdaq+e.pontosDow);
+    });
+    this.dados=Object.values(mapaData);
     this.inicializarFiltros();
     setTimeout(()=>{this.inicializarCalculadora();},100);
   },
@@ -546,11 +581,15 @@ const Dashboard = {
 
   inicializarCalculadora() {
     setTimeout(()=>{
-      const btnMais=document.getElementById('btnMais'),btnMenos=document.getElementById('btnMenos'),valorDiv=document.getElementById('valorContratos');
-      if(!btnMais||!btnMenos||!valorDiv)return;
-      let valor=0;
-      btnMais.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();valor++;valorDiv.textContent=valor;Dashboard.atualizar();});
-      btnMenos.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(valor>0){valor--;valorDiv.textContent=valor;Dashboard.atualizar();}});
+      const setupBtn=(plusId,minusId,divId)=>{
+        const btnP=document.getElementById(plusId),btnM=document.getElementById(minusId),div=document.getElementById(divId);
+        if(!btnP||!btnM||!div)return;
+        let val=0;
+        btnP.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();val++;div.textContent=val;Dashboard.atualizar();});
+        btnM.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(val>0){val--;div.textContent=val;Dashboard.atualizar();}});
+      };
+      setupBtn('btnMaisNasdaq','btnMenosNasdaq','valorContratosNasdaq');
+      setupBtn('btnMaisDow','btnMenosDow','valorContratosDow');
     },500);
   },
 
@@ -570,10 +609,16 @@ const Dashboard = {
   atualizar(){const d=this.obterDadosFiltrados();this.renderizarKPIs(d);this.renderizarTabela(d);this.renderizarGraficos(d);this.renderizarCalendario(d);this.atualizarSidebarStats(d);this.atualizarPerformanceIndicator(d);},
 
   renderizarKPIs(dados){
-    const t=dados.reduce((acc,d)=>({trades:acc.trades+d.trades,pontos:acc.pontos+d.pontos,gain:acc.gain+d.gain,stop:acc.stop+d.stop,zero:acc.zero+d.zero}),{trades:0,pontos:0,gain:0,stop:0,zero:0});
+    const t=dados.reduce((acc,d)=>({trades:acc.trades+d.trades,pontos:acc.pontos+d.pontos,pontosNasdaq:acc.pontosNasdaq+(d.pontosNasdaq||0),pontosDow:acc.pontosDow+(d.pontosDow||0),gain:acc.gain+d.gain,stop:acc.stop+d.stop,zero:acc.zero+d.zero}),{trades:0,pontos:0,pontosNasdaq:0,pontosDow:0,gain:0,stop:0,zero:0});
     const op=t.gain+t.stop,ass=op?Math.round((t.gain/op)*100):0,dias=dados.filter(d=>d.trades>0).length;
-    const vc=document.getElementById('valorContratos'),contratos=vc?parseInt(vc.textContent)||0:0,totalDolar=t.pontos*contratos*2;
-    document.getElementById("kDias").textContent=dias;document.getElementById("kTrades").textContent=t.trades;document.getElementById("kPontos").textContent=t.pontos;document.getElementById("kAcc").textContent=ass+"%";
+    const vcN=document.getElementById('valorContratosNasdaq'),vcD=document.getElementById('valorContratosDow');
+    const contratosN=vcN?parseInt(vcN.textContent)||0:0,contratosD=vcD?parseInt(vcD.textContent)||0:0;
+    const totalDolar=(t.pontosNasdaq*contratosN*2)+(t.pontosDow*contratosD*5);
+    document.getElementById("kDias").textContent=dias;
+    document.getElementById("kTrades").textContent=t.trades;
+    document.getElementById("kPontos").textContent=t.pontosNasdaq;
+    const kpd=document.getElementById("kPontosDow");if(kpd){kpd.textContent=t.pontosDow;kpd.style.color=t.pontosDow<0?'var(--red)':t.pontosDow>0?'var(--orange)':'var(--muted)';}
+    document.getElementById("kAcc").textContent=ass+"%";
     const kd=document.getElementById("kDolar");if(kd){kd.textContent=totalDolar.toLocaleString('en-US',{style:'currency',currency:'USD'});kd.style.color=totalDolar>=0?'var(--green)':'var(--red)';this.valorTotalUSD=totalDolar;this.atualizarValorReal();}
     const kg=document.getElementById("kGains"),ks=document.getElementById("kStops"),kz=document.getElementById("kZero");
     if(kg)kg.textContent=t.gain;if(ks)ks.textContent=t.stop;if(kz)kz.textContent=t.zero;
@@ -600,7 +645,14 @@ const Dashboard = {
 
   renderizarTabela(dados){
     let html='',tot={p:0,t:0,g:0,s:0,z:0};
-    dados.forEach(d=>{tot.p+=d.pontos;tot.t+=d.trades;tot.g+=d.gain;tot.s+=d.stop;tot.z+=d.zero;html+=`<tr><td>${d.dia}</td><td style="color:${d.pontos<0?'var(--red)':'var(--green)'};font-weight:800">${d.pontos}</td><td>${d.trades}</td><td style="color:var(--green)">${d.gain}</td><td style="color:var(--red)">${d.stop}</td><td style="color:var(--yellow)">${d.zero}</td><td>${d.ativo}</td><td>${d.semana}</td></tr>`;});
+    dados.forEach(d=>{
+      tot.p+=d.pontos;tot.t+=d.trades;tot.g+=d.gain;tot.s+=d.stop;tot.z+=d.zero;
+      const hasBoth=(d.pontosNasdaq||0)!==0&&(d.pontosDow||0)!==0;
+      const ptCell=hasBoth
+        ?`<span style="color:${(d.pontosNasdaq||0)<0?'var(--red)':'var(--green)'}">N:${d.pontosNasdaq>0?'+':''}${d.pontosNasdaq||0}</span> <span style="color:${(d.pontosDow||0)<0?'var(--red)':'var(--orange)'}">D:${d.pontosDow>0?'+':''}${d.pontosDow||0}</span>`
+        :`<span style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</span>`;
+      html+=`<tr><td>${d.dia}</td><td style="font-weight:800">${ptCell}</td><td>${d.trades}</td><td style="color:var(--green)">${d.gain}</td><td style="color:var(--red)">${d.stop}</td><td style="color:var(--yellow)">${d.zero}</td><td>${(d.ativos||[d.ativo||'']).join('/')}</td><td>${d.semana}</td></tr>`;
+    });
     html+=`<tr class="total"><td>TOTAL</td><td style="color:${tot.p<0?'var(--red)':'var(--green)'}">${tot.p}</td><td>${tot.t}</td><td style="color:var(--green)">${tot.g}</td><td style="color:var(--red)">${tot.s}</td><td style="color:var(--yellow)">${tot.z}</td><td colspan="2"></td></tr>`;
     document.getElementById('tbody').innerHTML=html;
   },
@@ -712,9 +764,19 @@ const Dashboard = {
       const md=[...new Set(this.dados.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))].sort();
       md.forEach(mesNum=>{
         const nm=nomesMeses[mesNum],dm=this.dados.filter(d=>d.ano===filtroAno.value&&d.mes===mesNum);
-        const tp=dm.reduce((acc,d)=>acc+d.pontos,0),do2=dm.filter(d=>d.trades>0).length;
+        const tp=dm.reduce((acc,d)=>acc+d.pontos,0);
+        const tpN=dm.reduce((acc,d)=>acc+(d.pontosNasdaq||0),0);
+        const tpD=dm.reduce((acc,d)=>acc+(d.pontosDow||0),0);
+        const do2=dm.filter(d=>d.trades>0).length;
+        const hasBoth=dm.some(d=>(d.pontosNasdaq||0)!==0)&&dm.some(d=>(d.pontosDow||0)!==0);
         const mc=document.createElement('div');mc.className='month-card';if(tp>0)mc.classList.add('positive');if(tp<0)mc.classList.add('negative');
-        mc.innerHTML=`<div class="month-name">${nm}</div><div class="month-points" style="color:${tp<0?'var(--red)':tp>0?'var(--green)':'var(--muted)'}">${tp>0?'+':''}${tp}</div><div class="month-info">${do2} dia${do2!==1?'s':''}</div>`;
+        const ptHtml=hasBoth
+          ?`<div style="display:flex;gap:8px;align-items:center">
+              <span style="font-size:20px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${tpN<0?'var(--red)':tpN>0?'var(--green)':'var(--muted)'}">N:${tpN>0?'+':''}${tpN}</span>
+              <span style="font-size:20px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${tpD<0?'var(--red)':tpD>0?'var(--orange)':'var(--muted)'}">D:${tpD>0?'+':''}${tpD}</span>
+            </div>`
+          :`<div class="month-points" style="color:${tp<0?'var(--red)':tp>0?'var(--green)':'var(--muted)'}">${tp>0?'+':''}${tp}</div>`;
+        mc.innerHTML=`<div class="month-name">${nm}</div>${ptHtml}<div class="month-info">${do2} dia${do2!==1?'s':''}</div>`;
         mc.onclick=()=>{filtroMes.value=mesNum;this.primeiraCarga=false;filtroSemana.disabled=false;this.inicializarSemanas();this.atualizar();};
         grid.appendChild(mc);
       });
@@ -736,11 +798,26 @@ const Dashboard = {
         let pl=`${r.trades} trade${r.trades!==1?'s':''}`,sl=[];
         if(r.gain>0)sl.push(`${r.gain} gain${r.gain!==1?'s':''}`);if(r.stop>0)sl.push(`${r.stop} stop${r.stop!==1?'s':''}`);if(r.zero>0)sl.push(`${r.zero} 0x0`);
         info=sl.length>0?`${pl}<br>${sl.join(' • ')}`:pl;
-        badge=`<div class="day-badge">${r.semana} • ${r.ativo}</div>`;
+        badge=`<div class="day-badge">${r.semana} • ${(r.ativos||[r.ativo||'NASDAQ']).join('/')}</div>`;
         if(r.trades>0&&r.fotoId&&r.fotoId.toString().trim()!==''){dayDiv.classList.add('clickable');dayDiv.style.cursor='pointer';dayDiv.addEventListener('click',()=>{Dashboard.abrirModal(r);});}
       }
-      const pd=r&&r.trades>0?(pts===0?'0':pts):(pts||""),pc=pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)';
-      dayDiv.innerHTML=`<div class="day-number">${d}</div><div class="day-points" style="color:${pc}">${pd}</div><div class="day-info">${info}</div>${badge}`;
+      // Mostra pontos NASDAQ e DOW separados se houver os dois
+      let ptDisplay='';
+      if(r&&r.trades>0){
+        const hasNasdaq=(r.pontosNasdaq||0)!==0||(r.ativos&&r.ativos.some(a=>!a.includes('DOW')));
+        const hasDow=(r.pontosDow||0)!==0||(r.ativos&&r.ativos.some(a=>a.includes('DOW')));
+        if(hasNasdaq&&hasDow){
+          const pN=r.pontosNasdaq||0,pD=r.pontosDow||0;
+          ptDisplay=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;margin:2px 0">
+            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pN<0?'var(--red)':pN>0?'var(--green)':'var(--muted)'}">N:${pN>0?'+':''}${pN}</span>
+            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pD<0?'var(--red)':pD>0?'var(--orange)':'var(--muted)'}">D:${pD>0?'+':''}${pD}</span>
+          </div>`;
+        } else {
+          const pc2=pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)';
+          ptDisplay=`<div class="day-points" style="color:${pc2}">${pts===0?'0':pts}</div>`;
+        }
+      }
+      dayDiv.innerHTML=`<div class="day-number">${d}</div>${ptDisplay}<div class="day-info">${info}</div>${badge}`;
       grid.appendChild(dayDiv);
     }
   }
