@@ -702,10 +702,10 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
           params.append('nome', arquivoUniversal.name);
           params.append('tipo', arquivoUniversal.type);
 
-          const response = await fetch(APPS_SCRIPT_URL, {
+          const response = await fetch(`${YT_WORKER}/apps-script`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString()
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: Object.fromEntries(params) })
           });
 
           const resultado = await response.json();
@@ -987,7 +987,20 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
     formData.append('mes', document.getElementById('mesDoTrade').value);
     formData.append('ano', document.getElementById('anoDoTrade').value);
     formData.append('imagem', base64);
-    const response = await fetch(APPS_SCRIPT_URL, { method:'POST', body: formData });
+    const response = await fetch(`${YT_WORKER}/apps-script`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        appsScriptUrl: APPS_SCRIPT_URL,
+        params: {
+          acao: 'uploadFotoTrade',
+          dia: document.getElementById('diaDoTrade').value,
+          mes: document.getElementById('mesDoTrade').value,
+          ano: document.getElementById('anoDoTrade').value,
+          imagem: base64
+        }
+      })
+    });
     const resultado = await response.json();
     if (resultado.success) {
       mostrarAlerta('alert-foto-trade', `✅ Foto salva! (Linha ${resultado.linha})`, 'success');
@@ -1025,6 +1038,10 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('anoData').value = hoje.getFullYear();
   document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
   document.getElementById('alvo').value = 'NASDAQ';
+  // Auto-preenche Fotos dos Trades com data de hoje
+  document.getElementById('diaDoTrade').value = hoje.getDate();
+  document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
+  document.getElementById('anoDoTrade').value = hoje.getFullYear();
 });
 
 document.getElementById('formTradeData').addEventListener('submit', async (e) => {
@@ -1045,7 +1062,11 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
     params.append('gains', document.getElementById('gains').value);
     params.append('stops', document.getElementById('stops').value);
     params.append('breakeven', document.getElementById('breakeven').value);
-    const response = await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params.toString() });
+    const response = await fetch(`${YT_WORKER}/apps-script`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: Object.fromEntries(params) })
+    });
     const resultado = await response.json();
     if (resultado.success) {
       mostrarAlerta('alert-trade-data', `✅ Dados salvos! (Linha ${resultado.linha||'?'})`, 'success');
