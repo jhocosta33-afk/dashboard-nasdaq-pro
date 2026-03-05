@@ -294,9 +294,6 @@ body.basic-mode .pro-only{display:none!important}
  </div>
 
  <div id="contentDashboard" class="tab-content active">
-  <div class="dashboard-header-report">
-   <img src="logo.png" alt="Mentoria NasdaqPro" class="report-logo" onerror="this.style.display='none'">
-  </div>
   <div class="kpis">
    <div class="kpi kpi-dias"><span>Dias Operados</span><strong id="kDias">0</strong></div>
    <div class="kpi kpi-trades"><span>Total de Trades</span><strong id="kTrades">0</strong></div>
@@ -412,6 +409,12 @@ const Dashboard = {
   async init() {
     this.carregarTema();
     this.inicializarToggleMode();
+    // Aguarda Firebase estar pronto antes de qualquer operação
+    await new Promise(resolve => {
+      if (typeof db !== 'undefined') return resolve();
+      const check = setInterval(() => { if (typeof db !== 'undefined') { clearInterval(check); resolve(); } }, 50);
+      setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+    });
     await carregarConfiguracoes();
     await this.carregarDados();
     this.atualizarPerformanceIndicator();
