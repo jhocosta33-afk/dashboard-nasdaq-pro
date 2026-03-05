@@ -212,7 +212,12 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
           <div class="form-group"><label>Semana (automático)</label><input type="text" id="semana" readonly style="cursor:not-allowed;opacity:0.6;"></div>
-          <div class="form-group"><label>Ativo/Alvo</label><input type="text" id="alvo" required placeholder="Ex: NASDAQ"></div>
+          <div class="form-group"><label>Ativo/Alvo</label>
+            <select id="alvo" required style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit;">
+              <option value="NASDAQ">🔵 NASDAQ</option>
+              <option value="DOW JONES">🟠 DOW JONES</option>
+            </select>
+          </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-group"><label>Pontos</label><input type="number" id="pontos" required placeholder="Ex: 15 ou -10"></div>
@@ -1036,7 +1041,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('mesData').value = hoje.getMonth() + 1;
   document.getElementById('anoData').value = hoje.getFullYear();
   document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
-  document.getElementById('alvo').value = 'NASDAQ';
+  document.getElementById('alvo').value = 'NASDAQ'; // default NASDAQ
   // Auto-preenche Fotos dos Trades com data de hoje
   document.getElementById('diaDoTrade').value = hoje.getDate();
   document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
@@ -1075,7 +1080,7 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
       document.getElementById('mesData').value = hoje.getMonth() + 1;
       document.getElementById('anoData').value = hoje.getFullYear();
       document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
-      document.getElementById('alvo').value = 'NASDAQ';
+      document.getElementById('alvo').value = 'NASDAQ'; // default NASDAQ
     } else { throw new Error(resultado.error || 'Erro desconhecido'); }
   } catch (error) { mostrarAlerta('alert-trade-data', '❌ Erro: ' + error.message, 'error'); }
   btn.disabled = false; btn.textContent = 'Salvar na Planilha';
