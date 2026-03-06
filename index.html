@@ -618,9 +618,10 @@ const Dashboard = {
       };
     }).filter(Boolean);
     console.log('Sheets API rows:', rows.length, 'ativos:', [...new Set(rows.map(r=>r.ativo))]);
-    // Debug: show rows where ativo is empty
-    const emptyAtivo = values.slice(1).filter(r => !(r[2]||'').trim());
-    console.log('Linhas sem ativo:', emptyAtivo.slice(0,3));
+    // Debug: show DOW rows
+    const dowRows = values.slice(1).filter(r => (r[2]||'').toUpperCase().includes('DOW'));
+    console.log('Linhas DOW raw:', dowRows);
+    console.log('Total linhas:', values.length, 'DOW:', dowRows.length);
     this._processarRows(rows);
   },
 
