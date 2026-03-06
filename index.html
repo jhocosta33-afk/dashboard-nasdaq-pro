@@ -507,15 +507,19 @@ const Dashboard = {
 
       // Cria container de exportação off-screen
       const wrap=document.createElement('div');
-      wrap.style.cssText='position:fixed;left:-9999px;top:0;width:820px;background:#020617;font-family:inherit;padding:32px;box-sizing:border-box;';
+      wrap.style.cssText='position:fixed;left:-9999px;top:0;width:900px;background:#020617;font-family:inherit;padding:36px;box-sizing:border-box;color:#e5e7eb;';
 
       // Logo
       const logoDiv=document.createElement('div');
-      logoDiv.style.cssText='text-align:center;margin-bottom:28px;';
+      logoDiv.style.cssText='text-align:center;margin-bottom:28px;padding:24px 0 20px;';
       logoDiv.innerHTML=`
-        <p style="margin:0;font-size:22px;font-weight:400;color:#fff;letter-spacing:1px;">Mentoria</p>
-        <p style="margin:0;font-size:42px;font-weight:900;background:linear-gradient(135deg,#818cf8,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;">NasdaqPro</p>`;
+        <p style="margin:0 0 4px 0;font-size:20px;font-weight:400;color:#cbd5e1;letter-spacing:2px;text-transform:uppercase;">Mentoria</p>
+        <p style="margin:0;font-size:52px;font-weight:900;color:#818cf8;letter-spacing:3px;font-family:'Archivo Black',sans-serif;">NasdaqPro</p>`;
       wrap.appendChild(logoDiv);
+      // Linha divisória
+      const divider=document.createElement('div');
+      divider.style.cssText='height:2px;background:linear-gradient(90deg,transparent,#6366f1,transparent);margin-bottom:24px;border-radius:2px;';
+      wrap.appendChild(divider);
 
       // KPIs fixos (sempre modo básico)
       const kpiData=[
@@ -538,18 +542,25 @@ const Dashboard = {
       wrap.appendChild(kpiGrid);
 
       // Calendário clonado
+      // Captura o calendário atual visível no DOM
+      const calendarSection = document.querySelector('.calendar-section') ||
+                              document.querySelector('.calendar-grid') ||
+                              document.querySelector('.calendar-month') ||
+                              document.getElementById('calendarContainer');
+
+      // Clona o calendário renderizado do dashboard (aba calendário)
       if(calClone){
-        // Remove botão voltar e navegação do clone
-        calClone.querySelectorAll('.btn-voltar,.btn-nav,.tab-nav,.month-selector').forEach(el=>el.remove());
-        calClone.style.cssText='display:block;';
-        // Garante que calendário mostra o mês atual
-        const calInner=calClone.querySelector('.calendar-view')||calClone.querySelector('.calendario-inner')||calClone;
-        calInner.style.background='transparent';
+        calClone.querySelectorAll('.btn-voltar,.btn-nav,.tab-nav,.month-selector,button,.pdf-report-btn,.mode-toggle').forEach(el=>el.remove());
+        calClone.style.cssText='display:block;background:transparent;';
+        // Força visibilidade de todos os filhos
+        calClone.querySelectorAll('*').forEach(el=>{
+          if(el.style.display==='none') el.style.display='';
+        });
         wrap.appendChild(calClone);
       }
 
       document.body.appendChild(wrap);
-      await new Promise(r=>setTimeout(r,200));
+      await new Promise(r=>setTimeout(r,400));
 
       const canvas=await html2canvas(wrap,{backgroundColor:'#020617',scale:2,logging:false,useCORS:true,allowTaint:true});
       document.body.removeChild(wrap);
