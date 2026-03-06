@@ -684,18 +684,18 @@ const Dashboard = {
   async inicializarConversorMoeda(){await this.atualizarCotacao();},
   async atualizarCotacao(){try{const r=await fetch('https://api.exchangerate-api.com/v4/latest/USD');const d=await r.json();this.cotacaoUSDtoBRL=d.rates.BRL;}catch(e){console.warn('⚠️ Erro ao buscar cotação:',this.cotacaoUSDtoBRL);}},
   atualizarValorReal(){
-    if(!this.taxaCambio)return;
+    const taxa=this.cotacaoUSDtoBRL||this.taxaCambio;
+    if(!taxa)return;
     const vc=document.getElementById('valorContratos');
     const contratos=vc?parseInt(vc.textContent)||0:0;
     const brlN=document.getElementById('valorBRLNasdaq');
     const brlD=document.getElementById('valorBRLDow');
-    // recalculate from stored pontos
     const dados=this.obterDadosFiltrados();
     const pN=dados.reduce((a,d)=>a+(d.pontosNasdaq||0),0);
     const pD=dados.reduce((a,d)=>a+(d.pontosDow||0),0);
     const usdN=pN*contratos*2, usdD=pD*contratos*0.5;
-    if(brlN)brlN.textContent=(usdN*this.taxaCambio).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-    if(brlD)brlD.textContent=(usdD*this.taxaCambio).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    if(brlN)brlN.textContent=(usdN*taxa).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    if(brlD)brlD.textContent=(usdD*taxa).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
   },
 
   atualizarCalendario(){
