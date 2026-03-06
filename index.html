@@ -495,77 +495,80 @@ const Dashboard = {
     try {
       if(!window.html2canvas){alert('Erro ao carregar biblioteca de captura. Recarregue a página.');return;}
 
-      // Pega dados atuais filtrados
+      // Dados sempre do período filtrado
       const d=this.obterDadosFiltrados();
-      const t=d.reduce((a,x)=>({trades:a.trades+x.trades,pontosNasdaq:a.pontosNasdaq+(x.pontosNasdaq||0),pontosDow:a.pontosDow+(x.pontosDow||0),gain:a.gain+x.gain,stop:a.stop+x.stop,zero:a.zero+x.zero}),{trades:0,pontosNasdaq:0,pontosDow:0,gain:0,stop:0,zero:0});
+      const t=d.reduce((a,x)=>({
+        trades:a.trades+x.trades,
+        pontosNasdaq:a.pontosNasdaq+(x.pontosNasdaq||0),
+        pontosDow:a.pontosDow+(x.pontosDow||0),
+        gain:a.gain+x.gain,stop:a.stop+x.stop,zero:a.zero+x.zero
+      }),{trades:0,pontosNasdaq:0,pontosDow:0,gain:0,stop:0,zero:0});
       const dias=d.filter(x=>x.trades>0).length;
       const op=t.gain+t.stop, ass=op?Math.round((t.gain/op)*100):0;
 
-      // Clona o calendário atual
-      const calEl=document.getElementById('contentCalendario');
-      const calClone=calEl?calEl.cloneNode(true):null;
-
-      // Cria container de exportação off-screen
+      // Container de exportação
       const wrap=document.createElement('div');
-      wrap.style.cssText='position:fixed;left:-9999px;top:0;width:900px;background:#020617;font-family:inherit;padding:36px;box-sizing:border-box;color:#e5e7eb;';
+      wrap.style.cssText='position:fixed;left:-9999px;top:0;width:960px;background:#020617;font-family:Archivo,sans-serif;padding:40px;box-sizing:border-box;color:#e5e7eb;';
 
-      // Logo
+      // Logo — usa a imagem real se disponível
       const logoDiv=document.createElement('div');
-      logoDiv.style.cssText='text-align:center;margin-bottom:28px;padding:24px 0 20px;';
-      logoDiv.innerHTML=`
-        <p style="margin:0 0 4px 0;font-size:20px;font-weight:400;color:#cbd5e1;letter-spacing:2px;text-transform:uppercase;">Mentoria</p>
-        <p style="margin:0;font-size:52px;font-weight:900;color:#818cf8;letter-spacing:3px;font-family:'Archivo Black',sans-serif;">NasdaqPro</p>`;
+      logoDiv.style.cssText='text-align:center;margin-bottom:20px;';
+      const logoImg=document.querySelector('.header-logo');
+      if(logoImg && logoImg.naturalWidth>0){
+        const imgClone=logoImg.cloneNode();
+        imgClone.style.cssText='max-height:120px;width:auto;margin:0 auto;display:block;';
+        logoDiv.appendChild(imgClone);
+      } else {
+        logoDiv.innerHTML=`
+          <p style="margin:0 0 2px;font-size:16px;font-weight:400;color:#94a3b8;letter-spacing:3px;text-transform:uppercase;">Mentoria</p>
+          <p style="margin:0;font-size:56px;font-weight:900;color:#818cf8;letter-spacing:2px;">NasdaqPro</p>`;
+      }
       wrap.appendChild(logoDiv);
-      // Linha divisória
-      const divider=document.createElement('div');
-      divider.style.cssText='height:2px;background:linear-gradient(90deg,transparent,#6366f1,transparent);margin-bottom:24px;border-radius:2px;';
-      wrap.appendChild(divider);
 
-      // KPIs fixos (sempre modo básico)
+      // Linha divisória
+      const div=document.createElement('div');
+      div.style.cssText='height:2px;background:linear-gradient(90deg,transparent,#6366f1,transparent);margin-bottom:28px;';
+      wrap.appendChild(div);
+
+      // KPIs fixos — sempre os mesmos independente do modo
       const kpiData=[
-        {label:'DIAS OPERADOS',value:dias,color:'#e5e7eb'},
-        {label:'TOTAL DE TRADES',value:t.trades,color:'#e5e7eb'},
-        {label:'PONTOS TOTAIS',value:t.pontosNasdaq+t.pontosDow,color:t.pontosNasdaq+t.pontosDow>=0?'#22c55e':'#ef4444'},
-        {label:'ASSERTIVIDADE',value:ass+'%',color:'#e5e7eb'},
-        {label:'GAINS',value:t.gain,color:'#22c55e'},
-        {label:'STOPS',value:t.stop,color:'#ef4444'},
-        {label:'BREAKEVEN (0X0)',value:t.zero,color:'#f59e0b'},
+        {label:'DIAS OPERADOS',   value:dias,             color:'#e5e7eb'},
+        {label:'TOTAL DE TRADES', value:t.trades,         color:'#e5e7eb'},
+        {label:'PONTOS NASDAQ',   value:t.pontosNasdaq,   color:t.pontosNasdaq>=0?'#22c55e':'#ef4444'},
+        {label:'PONTOS DOW JONES',value:t.pontosDow,      color:t.pontosDow>=0?'#f97316':'#ef4444'},
+        {label:'ASSERTIVIDADE',   value:ass+'%',          color:'#e5e7eb'},
       ];
       const kpiGrid=document.createElement('div');
-      kpiGrid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;';
+      kpiGrid.style.cssText='display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;';
       kpiData.forEach(k=>{
         const kd=document.createElement('div');
-        kd.style.cssText='background:#0f172a;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px 20px;';
-        kd.innerHTML=`<div style="font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:1px;margin-bottom:8px;">${k.label}</div><div style="font-size:32px;font-weight:900;color:${k.color};">${k.value}</div>`;
+        kd.style.cssText='background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px;';
+        kd.innerHTML=`<div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:1.5px;margin-bottom:10px;">${k.label}</div>`+
+                     `<div style="font-size:36px;font-weight:900;color:${k.color};">${k.value}</div>`;
         kpiGrid.appendChild(kd);
       });
       wrap.appendChild(kpiGrid);
 
-      // Calendário clonado
-      // Clona o calendário do dashboard (calendar-wrapper-outer que tem o grid)
-      const calSourceEl = document.querySelector('.calendar-wrapper-outer') ||
-                          document.querySelector('.calendar-wrapper');
-      if(calSourceEl) {
-        const calClone2 = calSourceEl.cloneNode(true);
-        // Remove botões mas preserva o grid
-        calClone2.querySelectorAll('button,.btn-voltar,.month-nav').forEach(el=>el.remove());
-        calClone2.style.cssText='display:block;margin-top:8px;';
-        // Garante que o título do mês fica visível
-        calClone2.querySelectorAll('#calendarTitle,[id*="Title"]').forEach(el=>{
-          el.style.display='flex';
-        });
-        wrap.appendChild(calClone2);
-      } else if(calClone){
-        // fallback
-        calClone.querySelectorAll('button,.btn-voltar').forEach(el=>el.remove());
-        calClone.style.cssText='display:block;';
+      // Calendário de trade — clona diretamente o .calendar-wrapper
+      const calSource=document.querySelector('.calendar-wrapper');
+      if(calSource){
+        const calClone=calSource.cloneNode(true);
+        // Remove apenas botões de navegação
+        calClone.querySelectorAll('button').forEach(el=>el.remove());
+        calClone.style.cssText='background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;';
+        // Remove animações que podem travar o html2canvas
+        calClone.querySelectorAll('*').forEach(el=>{el.style.animation='none';el.style.transition='none';});
         wrap.appendChild(calClone);
       }
 
       document.body.appendChild(wrap);
-      await new Promise(r=>setTimeout(r,100));
+      await new Promise(r=>setTimeout(r,150));
 
-      const canvas=await html2canvas(wrap,{backgroundColor:'#020617',scale:2,logging:false,useCORS:true,allowTaint:true});
+      const canvas=await html2canvas(wrap,{
+        backgroundColor:'#020617',scale:2,logging:false,
+        useCORS:true,allowTaint:true,
+        windowWidth:960,windowHeight:wrap.scrollHeight
+      });
       document.body.removeChild(wrap);
 
       btn.textContent='💾 Salvando...';
