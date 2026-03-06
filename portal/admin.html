@@ -197,7 +197,8 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
       <p style="color:var(--text-muted);margin-bottom:16px;">Preencha os dados e a planilha será atualizada automaticamente.</p>
       <div id="alert-trade-data" class="alert"></div>
       <form id="formTradeData">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+        <!-- Data e Semana -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
           <div class="form-group"><label>Dia</label><input type="number" id="diaData" min="1" max="31" required placeholder="12"></div>
           <div class="form-group">
             <label>Mês</label>
@@ -209,24 +210,46 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
             </select>
           </div>
           <div class="form-group"><label>Ano</label><input type="number" id="anoData" min="2020" max="2030" required placeholder="2026"></div>
+          <div class="form-group"><label>Semana (auto)</label><input type="text" id="semana" readonly style="cursor:not-allowed;opacity:0.6;"></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-          <div class="form-group"><label>Semana (automático)</label><input type="text" id="semana" readonly style="cursor:not-allowed;opacity:0.6;"></div>
-          <div class="form-group"><label>Ativo/Alvo</label>
-            <select id="alvo" required style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);font-family:inherit;">
-              <option value="NASDAQ">🔵 NASDAQ</option>
-              <option value="DOW JONES">🟠 DOW JONES</option>
-            </select>
+
+        <!-- NASDAQ -->
+        <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">🔵</span>
+            <strong style="font-size:15px;color:#60a5fa;">NASDAQ</strong>
+            <label style="display:flex;align-items:center;gap:6px;margin-left:auto;font-size:13px;cursor:pointer;">
+              <input type="checkbox" id="nasOp" checked onchange="toggleAtivo('nas')"> Operado hoje
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;" id="nasFields">
+            <div class="form-group"><label>Pontos</label><input type="number" id="nasPontos" placeholder="Ex: 35"></div>
+            <div class="form-group"><label>Trades</label><input type="number" id="nasTrades" min="0" placeholder="Ex: 3"></div>
+            <div class="form-group"><label>Gains</label><input type="number" id="nasGains" min="0" placeholder="Ex: 2"></div>
+            <div class="form-group"><label>Stops</label><input type="number" id="nasStops" min="0" placeholder="Ex: 1"></div>
+            <div class="form-group"><label>0x0</label><input type="number" id="nasBreak" min="0" placeholder="Ex: 0"></div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-group"><label>Pontos</label><input type="number" id="pontos" required placeholder="Ex: 15 ou -10"></div>
-          <div class="form-group"><label>Total de Trades</label><input type="number" id="trades" min="0" required placeholder="Ex: 3"></div>
-          <div class="form-group"><label>Gains</label><input type="number" id="gains" min="0" required placeholder="Ex: 2"></div>
-          <div class="form-group"><label>Stops</label><input type="number" id="stops" min="0" required placeholder="Ex: 1"></div>
-          <div class="form-group"><label>Breakeven</label><input type="number" id="breakeven" min="0" required placeholder="Ex: 0"></div>
+
+        <!-- DOW JONES -->
+        <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.25);border-radius:10px;padding:16px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">🟠</span>
+            <strong style="font-size:15px;color:#fb923c;">DOW JONES</strong>
+            <label style="display:flex;align-items:center;gap:6px;margin-left:auto;font-size:13px;cursor:pointer;">
+              <input type="checkbox" id="dowOp" onchange="toggleAtivo('dow')"> Operado hoje
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;opacity:0.4;pointer-events:none;" id="dowFields">
+            <div class="form-group"><label>Pontos</label><input type="number" id="dowPontos" placeholder="Ex: 120"></div>
+            <div class="form-group"><label>Trades</label><input type="number" id="dowTrades" min="0" placeholder="Ex: 2"></div>
+            <div class="form-group"><label>Gains</label><input type="number" id="dowGains" min="0" placeholder="Ex: 1"></div>
+            <div class="form-group"><label>Stops</label><input type="number" id="dowStops" min="0" placeholder="Ex: 1"></div>
+            <div class="form-group"><label>0x0</label><input type="number" id="dowBreak" min="0" placeholder="Ex: 0"></div>
+          </div>
         </div>
-        <button type="submit" class="btn" id="btnTradeData" style="margin-top:16px;">Salvar na Planilha</button>
+
+        <button type="submit" class="btn" id="btnTradeData" style="margin-top:4px;width:100%;padding:14px;font-size:15px;">💾 Salvar na Planilha</button>
       </form>
       <div style="margin-top:20px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">💡 Ver/editar a planilha completa:</p>
@@ -1041,49 +1064,82 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('mesData').value = hoje.getMonth() + 1;
   document.getElementById('anoData').value = hoje.getFullYear();
   document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
-  document.getElementById('alvo').value = 'NASDAQ'; // default NASDAQ
+  // NASDAQ checked by default via HTML
   // Auto-preenche Fotos dos Trades com data de hoje
   document.getElementById('diaDoTrade').value = hoje.getDate();
   document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
   document.getElementById('anoDoTrade').value = hoje.getFullYear();
 });
 
+function toggleAtivo(ativo) {
+  const checked = document.getElementById(ativo+'Op').checked;
+  const fields = document.getElementById(ativo+'Fields');
+  fields.style.opacity = checked ? '1' : '0.4';
+  fields.style.pointerEvents = checked ? 'auto' : 'none';
+}
+
+async function salvarAtivo(dia, mes, ano, semana, alvo, pontos, trades, gains, stops, breakeven) {
+  const params = {
+    acao:'salvarTrade', dia, mes, ano, semana, alvo,
+    pontos, trades, gains, stops, breakeven
+  };
+  const response = await fetch(`${YT_WORKER}/apps-script`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params })
+  });
+  return await response.json();
+}
+
 document.getElementById('formTradeData').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btnTradeData');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
-    const dia = parseInt(document.getElementById('diaData').value);
-    const mes = parseInt(document.getElementById('mesData').value);
-    const ano = parseInt(document.getElementById('anoData').value);
-    const params = new URLSearchParams();
-    params.append('acao','salvarTrade');
-    params.append('dia', dia); params.append('mes', mes); params.append('ano', ano);
-    params.append('semana', document.getElementById('semana').value || calcularSemanaMes(dia));
-    params.append('alvo', document.getElementById('alvo').value || 'NASDAQ');
-    params.append('pontos', document.getElementById('pontos').value);
-    params.append('trades', document.getElementById('trades').value);
-    params.append('gains', document.getElementById('gains').value);
-    params.append('stops', document.getElementById('stops').value);
-    params.append('breakeven', document.getElementById('breakeven').value);
-    const response = await fetch(`${YT_WORKER}/apps-script`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: Object.fromEntries(params) })
+    const dia     = parseInt(document.getElementById('diaData').value);
+    const mes     = parseInt(document.getElementById('mesData').value);
+    const ano     = parseInt(document.getElementById('anoData').value);
+    const semana  = document.getElementById('semana').value || calcularSemanaMes(dia);
+    const nasOp   = document.getElementById('nasOp').checked;
+    const dowOp   = document.getElementById('dowOp').checked;
+
+    if (!nasOp && !dowOp) { mostrarAlerta('alert-trade-data','❌ Marque pelo menos um ativo operado','error'); btn.disabled=false; btn.textContent='💾 Salvar na Planilha'; return; }
+
+    const erros = [];
+    let linhas = [];
+
+    if (nasOp) {
+      const r = await salvarAtivo(dia, mes, ano, semana, 'NASDAQ',
+        document.getElementById('nasPontos').value||0,
+        document.getElementById('nasTrades').value||0,
+        document.getElementById('nasGains').value||0,
+        document.getElementById('nasStops').value||0,
+        document.getElementById('nasBreak').value||0);
+      if (r.success) linhas.push(`NASDAQ linha ${r.linha}`);
+      else erros.push('NASDAQ: ' + r.error);
+    }
+
+    if (dowOp) {
+      const r = await salvarAtivo(dia, mes, ano, semana, 'DOW JONES',
+        document.getElementById('dowPontos').value||0,
+        document.getElementById('dowTrades').value||0,
+        document.getElementById('dowGains').value||0,
+        document.getElementById('dowStops').value||0,
+        document.getElementById('dowBreak').value||0);
+      if (r.success) linhas.push(`DOW linha ${r.linha}`);
+      else erros.push('DOW: ' + r.error);
+    }
+
+    if (erros.length) throw new Error(erros.join(' | '));
+    mostrarAlerta('alert-trade-data', `✅ Salvo! (${linhas.join(', ')})`, 'success');
+
+    // Reset campos mas mantém data
+    ['nasPontos','nasTrades','nasGains','nasStops','nasBreak',
+     'dowPontos','dowTrades','dowGains','dowStops','dowBreak'].forEach(id=>{
+      const el=document.getElementById(id); if(el)el.value='';
     });
-    const resultado = await response.json();
-    if (resultado.success) {
-      mostrarAlerta('alert-trade-data', `✅ Dados salvos! (Linha ${resultado.linha||'?'})`, 'success');
-      document.getElementById('formTradeData').reset();
-      const hoje = new Date();
-      document.getElementById('diaData').value = hoje.getDate();
-      document.getElementById('mesData').value = hoje.getMonth() + 1;
-      document.getElementById('anoData').value = hoje.getFullYear();
-      document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
-      document.getElementById('alvo').value = 'NASDAQ'; // default NASDAQ
-    } else { throw new Error(resultado.error || 'Erro desconhecido'); }
   } catch (error) { mostrarAlerta('alert-trade-data', '❌ Erro: ' + error.message, 'error'); }
-  btn.disabled = false; btn.textContent = 'Salvar na Planilha';
+  btn.disabled = false; btn.textContent = '💾 Salvar na Planilha';
 });
 </script>
 </body>
