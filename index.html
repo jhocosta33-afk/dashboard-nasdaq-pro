@@ -573,7 +573,7 @@ const Dashboard = {
     try {
       // Usa Sheets API via Worker (sem cache) se disponível, senão cai no CSV
       if(SHEETS_API_KEY && SHEETS_SPREADSHEET_ID) {
-        const url=`https://youtube-upload-proxy.nasdaqpro7.workers.dev/sheets?spreadsheetId=${SHEETS_SPREADSHEET_ID}&range=Folha1&apiKey=${SHEETS_API_KEY}`;
+        const url=`https://youtube-upload-proxy.nasdaqpro7.workers.dev/sheets?spreadsheetId=${SHEETS_SPREADSHEET_ID}&range=Folha1!A:I&apiKey=${SHEETS_API_KEY}`;
         const resp=await fetch(url);
         const json=await resp.json();
         if(json.success && json.values) {
@@ -598,6 +598,8 @@ const Dashboard = {
     if (!values || values.length < 2) { this.dados=[]; this.inicializarFiltros(); return; }
     const rows = values.slice(1).map(cols => {
       if (!cols || !cols[0]) return null;
+      // Pad row to 9 columns in case API truncates empty trailing cells
+      while(cols.length < 9) cols.push('');
       const rawData = (cols[0]||'').toString().trim();
       if (!rawData.includes('/')) return null;
       const partes = rawData.split('/');
