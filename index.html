@@ -285,7 +285,7 @@ body.basic-mode .pro-only{display:none!important}
  <div class="header-main">
   <button class="theme-toggle" id="themeToggle" onclick="Dashboard.toggleTema()" title="Alternar tema"><span id="themeIcon">🌙</span></button>
   <img src="logo.png" alt="Mentoria NasdaqPro" class="header-logo" onerror="this.style.display='none'">
-  <button class="pdf-report-btn" id="pdfReportBtn" onclick="Dashboard.gerarRelatorioPDF()">📸 Exportar Imagem</button>
+  <button class="pdf-report-btn" id="pdfReportBtn" onclick="Dashboard.gerarRelatorioPDF()" style="display:none;">📸 Exportar Imagem</button>
  </div>
  <div id="sidebarMobileAnchor"></div>
  <div class="tab-navigation">
@@ -297,8 +297,8 @@ body.basic-mode .pro-only{display:none!important}
   <div class="kpis">
    <div class="kpi kpi-dias"><span>Dias Operados</span><strong id="kDias">0</strong></div>
    <div class="kpi kpi-trades"><span>Total de Trades</span><strong id="kTrades">0</strong></div>
-   <div class="kpi kpi-pontos"><span>Pontos NASDAQ</span><strong id="kPontos">0</strong></div>
-   <div class="kpi" style="--kpi-color:var(--orange)"><span>Pontos DOW</span><strong id="kPontosDow" style="color:var(--orange)">0</strong></div>
+   <div class="kpi kpi-pontos"><span>Pontos NQ</span><strong id="kPontos">0</strong></div>
+   <div class="kpi" style="--kpi-color:var(--orange)"><span>Pontos DJ</span><strong id="kPontosDow" style="color:var(--orange)">0</strong></div>
    <div class="kpi kpi-acc"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
    <div class="kpi kpi-gains pro-only"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
    <div class="kpi kpi-stops pro-only"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
@@ -312,12 +312,12 @@ body.basic-mode .pro-only{display:none!important}
     </div>
    </div>
    <div class="kpi pro-only">
-    <span>🔵 NASDAQ em Dólar</span>
+    <span>🔵 NQ em Dólar</span>
     <strong id="kDolarNasdaq" style="color:var(--green)">$0.00</strong>
     <div class="currency-display"><span class="currency-icon">🇧🇷</span><span class="currency-value-brl" id="valorBRLNasdaq">R$ 0,00</span></div>
    </div>
    <div class="kpi pro-only">
-    <span>🟠 DOW JONES em Dólar</span>
+    <span>🟠 DJ em Dólar</span>
     <strong id="kDolarDow" style="color:var(--orange)">$0.00</strong>
     <div class="currency-display"><span class="currency-icon">🇧🇷</span><span class="currency-value-brl" id="valorBRLDow">R$ 0,00</span></div>
    </div>
@@ -427,6 +427,18 @@ const Dashboard = {
     this.inicializarConversorMoeda();
     this.inicializarSidebarMobile();
     this.inicializarGestosMobile();
+    // Mostra botão exportar só para admins
+    try {
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          const uDoc = await db.collection('users').doc(user.uid).get();
+          if (uDoc.exists && uDoc.data().role === 'admin') {
+            const btn = document.getElementById('pdfReportBtn');
+            if (btn) btn.style.display = '';
+          }
+        }
+      });
+    } catch(e) { console.log('Auth check:', e); }
   },
 
   carregarTema() {
@@ -478,14 +490,26 @@ const Dashboard = {
       if(!window.html2canvas){alert('Erro ao carregar biblioteca de captura. Recarregue a página.');return;}
       const dashboard=document.getElementById('contentDashboard');
       if(!dashboard||!dashboard.classList.contains('active')){alert('Abra a aba Dashboard para gerar o relatório');btn.classList.remove('loading');btn.textContent=textoOriginal;return;}
+      // Força modo básico temporariamente para captura consistente
+      const wasProMode = document.body.classList.contains('pro-mode');
+      document.body.classList.remove('pro-mode');
+
+      // Oculta elementos que não devem aparecer na exportação
       const elementosOcultos=[];
-      document.querySelectorAll('.kpi').forEach(kpi=>{const span=kpi.querySelector('span');if(span&&(span.textContent.includes('Contratos por Trade')||span.textContent.includes('Total em Dólar'))){kpi.style.display='none';elementosOcultos.push(kpi);}});
+      const kpisToHide = ['Contratos por Trade','NQ em Dólar','DJ em Dólar','NASDAQ em Dólar','DOW JONES em Dólar'];
+      document.querySelectorAll('.kpi').forEach(kpi=>{
+        const span=kpi.querySelector('span');
+        if(span && kpisToHide.some(t=>span.textContent.includes(t))){
+          kpi.style.display='none'; elementosOcultos.push(kpi);
+        }
+      });
       const charts=dashboard.querySelector('.charts');if(charts){charts.style.display='none';elementosOcultos.push(charts);}
       const table=dashboard.querySelector('.table-card');if(table){table.style.display='none';elementosOcultos.push(table);}
       btn.textContent='📸 Capturando...';
-      await new Promise(resolve=>setTimeout(resolve,100));
-      const canvas=await html2canvas(dashboard,{backgroundColor:getComputedStyle(document.body).getPropertyValue('--main-bg')||'#050711',scale:2,logging:false,useCORS:true,allowTaint:true,scrollY:-window.scrollY,scrollX:-window.scrollX});
+      await new Promise(resolve=>setTimeout(resolve,150));
+      const canvas=await html2canvas(dashboard,{backgroundColor:getComputedStyle(document.body).getPropertyValue('--bg')||'#020617',scale:2,logging:false,useCORS:true,allowTaint:true,scrollY:-window.scrollY,scrollX:-window.scrollX});
       elementosOcultos.forEach(el=>{if(el)el.style.display='';});
+      if(wasProMode) document.body.classList.add('pro-mode');
       btn.textContent='💾 Salvando...';
       canvas.toBlob((blob)=>{
         const url=URL.createObjectURL(blob);const link=document.createElement('a');
@@ -647,7 +671,7 @@ const Dashboard = {
       tot.p+=d.pontos;tot.t+=d.trades;tot.g+=d.gain;tot.s+=d.stop;tot.z+=d.zero;
       const hasBoth=(d.pontosNasdaq||0)!==0&&(d.pontosDow||0)!==0;
       const ptCell=hasBoth
-        ?`<span style="color:${(d.pontosNasdaq||0)<0?'var(--red)':'var(--green)'}">N:${d.pontosNasdaq>0?'+':''}${d.pontosNasdaq||0}</span> <span style="color:${(d.pontosDow||0)<0?'var(--red)':'var(--orange)'}">D:${d.pontosDow>0?'+':''}${d.pontosDow||0}</span>`
+        ?`<span style="color:${(d.pontosNasdaq||0)<0?'var(--red)':'var(--green)'}">NQ:${d.pontosNasdaq>0?'+':''}${d.pontosNasdaq||0}</span> <span style="color:${(d.pontosDow||0)<0?'var(--red)':'var(--orange)'}">DJ:${d.pontosDow>0?'+':''}${d.pontosDow||0}</span>`
         :`<span style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</span>`;
       html+=`<tr><td>${d.dia}</td><td style="font-weight:800">${ptCell}</td><td>${d.trades}</td><td style="color:var(--green)">${d.gain}</td><td style="color:var(--red)">${d.stop}</td><td style="color:var(--yellow)">${d.zero}</td><td>${(d.ativos||[d.ativo||'']).join('/')}</td><td>${d.semana}</td></tr>`;
     });
@@ -777,8 +801,8 @@ const Dashboard = {
         const mc=document.createElement('div');mc.className='month-card';if(tp>0)mc.classList.add('positive');if(tp<0)mc.classList.add('negative');
         const ptHtml=hasBoth
           ?`<div style="display:flex;gap:8px;align-items:center">
-              <span style="font-size:20px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${tpN<0?'var(--red)':tpN>0?'var(--green)':'var(--muted)'}">N:${tpN>0?'+':''}${tpN}</span>
-              <span style="font-size:20px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${tpD<0?'var(--red)':tpD>0?'var(--orange)':'var(--muted)'}">D:${tpD>0?'+':''}${tpD}</span>
+              <span style="font-size:20px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${tpN<0?'var(--red)':tpN>0?'var(--green)':'var(--muted)'}">NQ:${tpN>0?'+':''}${tpN}</span>
+              <span style="font-size:20px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${tpD<0?'var(--red)':tpD>0?'var(--orange)':'var(--muted)'}">DJ:${tpD>0?'+':''}${tpD}</span>
             </div>`
           :`<div class="month-points" style="color:${tp<0?'var(--red)':tp>0?'var(--green)':'var(--muted)'}">${tp>0?'+':''}${tp}</div>`;
         mc.innerHTML=`<div class="month-name">${nm}</div>${ptHtml}<div class="month-info">${do2} dia${do2!==1?'s':''}</div>`;
@@ -814,8 +838,8 @@ const Dashboard = {
         if(hasNasdaq&&hasDow){
           const pN=r.pontosNasdaq||0,pD=r.pontosDow||0;
           ptDisplay=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;margin:2px 0">
-            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pN<0?'var(--red)':pN>0?'var(--green)':'var(--muted)'}">N:${pN>0?'+':''}${pN}</span>
-            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pD<0?'var(--red)':pD>0?'var(--orange)':'var(--muted)'}">D:${pD>0?'+':''}${pD}</span>
+            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pN<0?'var(--red)':pN>0?'var(--green)':'var(--muted)'}">NQ:${pN>0?'+':''}${pN}</span>
+            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pD<0?'var(--red)':pD>0?'var(--orange)':'var(--muted)'}">DJ:${pD>0?'+':''}${pD}</span>
           </div>`;
         } else {
           const pc2=pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)';
