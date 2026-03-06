@@ -393,6 +393,7 @@ let CSV_URL = null;
 let GOOGLE_DRIVE_FOLDER_ID = null;
 let SHEETS_API_KEY = null;
 let SHEETS_SPREADSHEET_ID = null;
+let SHEETS_TAB_NAME = null;
 
 async function carregarConfiguracoes() {
   try {
@@ -401,8 +402,9 @@ async function carregarConfiguracoes() {
     const data = doc.data();
     CSV_URL = data.csv_url;
     GOOGLE_DRIVE_FOLDER_ID = data.drive_folder_id;
-    SHEETS_API_KEY     = data.sheets_api_key     || null;
+    SHEETS_API_KEY        = data.sheets_api_key        || null;
     SHEETS_SPREADSHEET_ID = data.sheets_spreadsheet_id || null;
+    SHEETS_TAB_NAME       = data.sheets_tab_name       || 'atual dashboard NASDAQ';
   } catch (err) {
     console.error('Erro ao carregar configurações:', err);
     alert('❌ Erro ao carregar configurações. Verifique o Firestore.');
@@ -573,7 +575,7 @@ const Dashboard = {
     try {
       // Usa Sheets API via Worker (sem cache) se disponível, senão cai no CSV
       if(SHEETS_API_KEY && SHEETS_SPREADSHEET_ID) {
-        const url=`https://youtube-upload-proxy.nasdaqpro7.workers.dev/sheets?spreadsheetId=${SHEETS_SPREADSHEET_ID}&range=Folha1!A:I&apiKey=${SHEETS_API_KEY}`;
+        const url=`https://youtube-upload-proxy.nasdaqpro7.workers.dev/sheets?spreadsheetId=${SHEETS_SPREADSHEET_ID}&range=${encodeURIComponent(SHEETS_TAB_NAME||'atual dashboard NASDAQ')}!A:I&apiKey=${SHEETS_API_KEY}`;
         const resp=await fetch(url);
         const json=await resp.json();
         if(json.success && json.values) {
