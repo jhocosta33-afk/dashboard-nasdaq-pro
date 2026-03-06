@@ -595,19 +595,27 @@ const Dashboard = {
   },
 
   processarSheetsAPI(values) {
-    // values[0] = cabeçalho, values[1..] = dados
     if (!values || values.length < 2) { this.dados=[]; this.inicializarFiltros(); return; }
     const rows = values.slice(1).map(cols => {
-      if (!cols[0]) return null;
-      // Coluna A: data como dd/mm/aaaa ou objeto Date serializado
+      if (!cols || !cols[0]) return null;
       const rawData = (cols[0]||'').toString().trim();
-      let dia,mes,ano;
-      if (rawData.includes('/')) { [dia,mes,ano]=rawData.split('/'); }
-      else { return null; }
-      const ativo=(cols[2]||'').trim().toUpperCase();
-      return {dia:rawData,data:new Date(ano,mes-1,dia),semana:cols[1]||'',ativo,ano,mes,
-              pontos:+cols[3]||0,trades:+cols[4]||0,gain:+cols[5]||0,stop:+cols[6]||0,zero:+cols[7]||0,fotoId:cols[8]||''};
+      if (!rawData.includes('/')) return null;
+      const partes = rawData.split('/');
+      const d = partes[0], m = partes[1], a = partes[2];
+      if (!d||!m||!a) return null;
+      const mesStr = m.padStart(2,'0'), anoStr = a;
+      const ativo = (cols[2]||'').trim().toUpperCase();
+      // limpa vírgulas e espaços dos números
+      const num = (v) => parseFloat((v||'0').toString().replace(/[^0-9.\-]/g,''))||0;
+      return {
+        dia: rawData, data: new Date(parseInt(a), parseInt(m)-1, parseInt(d)),
+        semana: cols[1]||'', ativo, ano: anoStr, mes: mesStr,
+        pontos: num(cols[3]), trades: num(cols[4]),
+        gain: num(cols[5]), stop: num(cols[6]),
+        zero: num(cols[7]), fotoId: (cols[8]||'').toString().trim()
+      };
     }).filter(Boolean);
+    console.log('Sheets API rows:', rows.length, rows.slice(0,3));
     this._processarRows(rows);
   },
 
