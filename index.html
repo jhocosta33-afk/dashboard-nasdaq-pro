@@ -488,37 +488,79 @@ const Dashboard = {
     const textoOriginal=btn.textContent;btn.classList.add('loading');btn.textContent='⏳ Capturando...';
     try {
       if(!window.html2canvas){alert('Erro ao carregar biblioteca de captura. Recarregue a página.');return;}
-      const dashboard=document.getElementById('contentDashboard');
-      if(!dashboard||!dashboard.classList.contains('active')){alert('Abra a aba Dashboard para gerar o relatório');btn.classList.remove('loading');btn.textContent=textoOriginal;return;}
-      // Força modo básico temporariamente para captura consistente
-      const wasProMode = document.body.classList.contains('pro-mode');
-      document.body.classList.remove('pro-mode');
 
-      // Oculta elementos que não devem aparecer na exportação
-      const elementosOcultos=[];
-      const kpisToHide = ['Contratos por Trade','NQ em Dólar','DJ em Dólar','NASDAQ em Dólar','DOW JONES em Dólar'];
-      document.querySelectorAll('.kpi').forEach(kpi=>{
-        const span=kpi.querySelector('span');
-        if(span && kpisToHide.some(t=>span.textContent.includes(t))){
-          kpi.style.display='none'; elementosOcultos.push(kpi);
-        }
+      // Pega dados atuais filtrados
+      const d=this.obterDadosFiltrados();
+      const t=d.reduce((a,x)=>({trades:a.trades+x.trades,pontosNasdaq:a.pontosNasdaq+(x.pontosNasdaq||0),pontosDow:a.pontosDow+(x.pontosDow||0),gain:a.gain+x.gain,stop:a.stop+x.stop,zero:a.zero+x.zero}),{trades:0,pontosNasdaq:0,pontosDow:0,gain:0,stop:0,zero:0});
+      const dias=d.filter(x=>x.trades>0).length;
+      const op=t.gain+t.stop, ass=op?Math.round((t.gain/op)*100):0;
+
+      // Clona o calendário atual
+      const calEl=document.getElementById('contentCalendario');
+      const calClone=calEl?calEl.cloneNode(true):null;
+
+      // Cria container de exportação off-screen
+      const wrap=document.createElement('div');
+      wrap.style.cssText='position:fixed;left:-9999px;top:0;width:820px;background:#020617;font-family:inherit;padding:32px;box-sizing:border-box;';
+
+      // Logo
+      const logoDiv=document.createElement('div');
+      logoDiv.style.cssText='text-align:center;margin-bottom:28px;';
+      logoDiv.innerHTML=`
+        <p style="margin:0;font-size:22px;font-weight:400;color:#fff;letter-spacing:1px;">Mentoria</p>
+        <p style="margin:0;font-size:42px;font-weight:900;background:linear-gradient(135deg,#818cf8,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;">NasdaqPro</p>`;
+      wrap.appendChild(logoDiv);
+
+      // KPIs fixos (sempre modo básico)
+      const kpiData=[
+        {label:'DIAS OPERADOS',value:dias,color:'#e5e7eb'},
+        {label:'TOTAL DE TRADES',value:t.trades,color:'#e5e7eb'},
+        {label:'PONTOS TOTAIS',value:t.pontosNasdaq+t.pontosDow,color:t.pontosNasdaq+t.pontosDow>=0?'#22c55e':'#ef4444'},
+        {label:'ASSERTIVIDADE',value:ass+'%',color:'#e5e7eb'},
+        {label:'GAINS',value:t.gain,color:'#22c55e'},
+        {label:'STOPS',value:t.stop,color:'#ef4444'},
+        {label:'BREAKEVEN (0X0)',value:t.zero,color:'#f59e0b'},
+      ];
+      const kpiGrid=document.createElement('div');
+      kpiGrid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;';
+      kpiData.forEach(k=>{
+        const kd=document.createElement('div');
+        kd.style.cssText='background:#0f172a;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px 20px;';
+        kd.innerHTML=`<div style="font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:1px;margin-bottom:8px;">${k.label}</div><div style="font-size:32px;font-weight:900;color:${k.color};">${k.value}</div>`;
+        kpiGrid.appendChild(kd);
       });
-      const charts=dashboard.querySelector('.charts');if(charts){charts.style.display='none';elementosOcultos.push(charts);}
-      const table=dashboard.querySelector('.table-card');if(table){table.style.display='none';elementosOcultos.push(table);}
-      btn.textContent='📸 Capturando...';
-      await new Promise(resolve=>setTimeout(resolve,150));
-      const canvas=await html2canvas(dashboard,{backgroundColor:getComputedStyle(document.body).getPropertyValue('--bg')||'#020617',scale:2,logging:false,useCORS:true,allowTaint:true,scrollY:-window.scrollY,scrollX:-window.scrollX});
-      elementosOcultos.forEach(el=>{if(el)el.style.display='';});
-      if(wasProMode) document.body.classList.add('pro-mode');
+      wrap.appendChild(kpiGrid);
+
+      // Calendário clonado
+      if(calClone){
+        // Remove botão voltar e navegação do clone
+        calClone.querySelectorAll('.btn-voltar,.btn-nav,.tab-nav,.month-selector').forEach(el=>el.remove());
+        calClone.style.cssText='display:block;';
+        // Garante que calendário mostra o mês atual
+        const calInner=calClone.querySelector('.calendar-view')||calClone.querySelector('.calendario-inner')||calClone;
+        calInner.style.background='transparent';
+        wrap.appendChild(calClone);
+      }
+
+      document.body.appendChild(wrap);
+      await new Promise(r=>setTimeout(r,200));
+
+      const canvas=await html2canvas(wrap,{backgroundColor:'#020617',scale:2,logging:false,useCORS:true,allowTaint:true});
+      document.body.removeChild(wrap);
+
       btn.textContent='💾 Salvando...';
       canvas.toBlob((blob)=>{
-        const url=URL.createObjectURL(blob);const link=document.createElement('a');
-        link.href=url;link.download=`dashboard-${new Date().toISOString().split('T')[0]}.png`;
+        const url=URL.createObjectURL(blob);
+        const link=document.createElement('a');
+        link.href=url;
+        const mes=document.getElementById('filtroMes')?.value||'';
+        const ano=document.getElementById('filtroAno')?.value||new Date().getFullYear();
+        link.download=`nasdaqpro-${ano}${mes?'-'+mes:''}.png`;
         document.body.appendChild(link);link.click();document.body.removeChild(link);URL.revokeObjectURL(url);
         btn.textContent='✅ Imagem Salva!';setTimeout(()=>{btn.textContent=textoOriginal;btn.classList.remove('loading');},2000);
       },'image/png');
     } catch(erro) {
-      console.error('Erro:',erro);document.querySelectorAll('.kpi,.charts,.table-card').forEach(el=>{el.style.display='';});
+      console.error('Erro exportar:',erro);
       btn.textContent='❌ Erro';setTimeout(()=>{btn.textContent=textoOriginal;btn.classList.remove('loading');},2000);
     }
   },
