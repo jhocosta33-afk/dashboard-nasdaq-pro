@@ -391,6 +391,8 @@ body.basic-mode .pro-only{display:none!important}
 // ══════════════════════════════════════
 let CSV_URL = null;
 let GOOGLE_DRIVE_FOLDER_ID = null;
+let SHEETS_API_KEY = null;
+let SHEETS_SPREADSHEET_ID = null;
 
 async function carregarConfiguracoes() {
   try {
@@ -399,6 +401,8 @@ async function carregarConfiguracoes() {
     const data = doc.data();
     CSV_URL = data.csv_url;
     GOOGLE_DRIVE_FOLDER_ID = data.drive_folder_id;
+    SHEETS_API_KEY     = data.sheets_api_key     || null;
+    SHEETS_SPREADSHEET_ID = data.sheets_spreadsheet_id || null;
   } catch (err) {
     console.error('Erro ao carregar configurações:', err);
     alert('❌ Erro ao carregar configurações. Verifique o Firestore.');
@@ -567,8 +571,20 @@ const Dashboard = {
 
   async carregarDados() {
     try {
+      // Usa Sheets API via Worker (sem cache) se disponível, senão cai no CSV
+      if(SHEETS_API_KEY && SHEETS_SPREADSHEET_ID) {
+        const url=`https://youtube-upload-proxy.nasdaqpro7.workers.dev/sheets?spreadsheetId=${SHEETS_SPREADSHEET_ID}&range=Folha1&apiKey=${SHEETS_API_KEY}`;
+        const resp=await fetch(url);
+        const json=await resp.json();
+        if(json.success && json.values) {
+          this.processarSheetsAPI(json.values);
+          setTimeout(()=>{document.getElementById('loading').classList.add('hidden');},500);
+          return;
+        }
+        console.warn('Sheets API falhou, usando CSV como fallback');
+      }
       if(!CSV_URL)throw new Error('CSV_URL não configurada');
-      const response=await fetch(CSV_URL);
+      const response=await fetch(CSV_URL+'&t='+Date.now()); // cache bust
       if(!response.ok)throw new Error('Erro ao carregar dados');
       this.processarCSV(await response.text());
       setTimeout(()=>{document.getElementById('loading').classList.add('hidden');},500);
@@ -576,6 +592,23 @@ const Dashboard = {
       console.error('Erro:',erro);alert('Erro ao carregar dados. Por favor, tente novamente.');
       document.getElementById('loading').classList.add('hidden');
     }
+  },
+
+  processarSheetsAPI(values) {
+    // values[0] = cabeçalho, values[1..] = dados
+    if (!values || values.length < 2) { this.dados=[]; this.inicializarFiltros(); return; }
+    const rows = values.slice(1).map(cols => {
+      if (!cols[0]) return null;
+      // Coluna A: data como dd/mm/aaaa ou objeto Date serializado
+      const rawData = (cols[0]||'').toString().trim();
+      let dia,mes,ano;
+      if (rawData.includes('/')) { [dia,mes,ano]=rawData.split('/'); }
+      else { return null; }
+      const ativo=(cols[2]||'').trim().toUpperCase();
+      return {dia:rawData,data:new Date(ano,mes-1,dia),semana:cols[1]||'',ativo,ano,mes,
+              pontos:+cols[3]||0,trades:+cols[4]||0,gain:+cols[5]||0,stop:+cols[6]||0,zero:+cols[7]||0,fotoId:cols[8]||''};
+    }).filter(Boolean);
+    this._processarRows(rows);
   },
 
   processarCSV(texto) {
@@ -586,7 +619,10 @@ const Dashboard = {
       if(!d||!m||!a)return null;
       return{dia:cols[0],data:new Date(a,m-1,d),semana:cols[1],ativo:(cols[2]||'').trim().toUpperCase(),ano:a,mes:m,pontos:+cols[3]||0,trades:+cols[4]||0,gain:+cols[5]||0,stop:+cols[6]||0,zero:+cols[7]||0,fotoId:cols[8]||""};
     }).filter(Boolean);
+    this._processarRows(rows);
+  },
 
+  _processarRows(rows) {
     // Agrupa por data: merge NASDAQ + DOW na mesma entrada de calendário
     const mapaData={};
     rows.forEach(r=>{
@@ -606,7 +642,6 @@ const Dashboard = {
       e.trades+=r.trades;e.gain+=r.gain;e.stop+=r.stop;e.zero+=r.zero;
       if(r.fotoId&&r.fotoId.trim())e.fotoId=r.fotoId;
       if(!e.ativos.includes(r.ativo))e.ativos.push(r.ativo);
-      // pontos totais = soma de tudo (para gráfico acumulado)
       e.pontos=(e.pontosNasdaq+e.pontosDow);
     });
     this.dados=Object.values(mapaData);
