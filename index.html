@@ -535,7 +535,7 @@ const Dashboard = {
         {label:'DIAS OPERADOS',   value:dias,             color:'#e5e7eb'},
         {label:'TOTAL DE TRADES', value:t.trades,         color:'#e5e7eb'},
         {label:'PONTOS NASDAQ',   value:t.pontosNasdaq,   color:t.pontosNasdaq>=0?'#22c55e':'#ef4444'},
-        {label:'PONTOS DOW JONES',value:t.pontosDow,      color:t.pontosDow>=0?'#f97316':'#ef4444'},
+        {label:'PONTOS DOW',      value:t.pontosDow,      color:t.pontosDow>=0?'#f97316':'#ef4444'},
         {label:'ASSERTIVIDADE',   value:ass+'%',          color:'#e5e7eb'},
       ];
       const kpiGrid=document.createElement('div');
@@ -543,21 +543,25 @@ const Dashboard = {
       kpiData.forEach(k=>{
         const kd=document.createElement('div');
         kd.style.cssText='background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px;';
-        kd.innerHTML=`<div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:1.5px;margin-bottom:10px;">${k.label}</div>`+
+        kd.innerHTML=`<div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:1.5px;margin-bottom:10px;white-space:nowrap;">${k.label}</div>`+
                      `<div style="font-size:36px;font-weight:900;color:${k.color};">${k.value}</div>`;
         kpiGrid.appendChild(kd);
       });
       wrap.appendChild(kpiGrid);
 
-      // Calendário de trade — clona diretamente o .calendar-wrapper
+      // Calendário de trade — clona diretamente o .calendar-wrapper (ignora pro-only)
       const calSource=document.querySelector('.calendar-wrapper');
       if(calSource){
         const calClone=calSource.cloneNode(true);
-        // Remove apenas botões de navegação
         calClone.querySelectorAll('button').forEach(el=>el.remove());
-        calClone.style.cssText='background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;';
-        // Remove animações que podem travar o html2canvas
-        calClone.querySelectorAll('*').forEach(el=>{el.style.animation='none';el.style.transition='none';});
+        // Força visibilidade independente do modo
+        calClone.style.cssText='display:block!important;background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;';
+        calClone.classList.remove('pro-only');
+        calClone.querySelectorAll('*').forEach(el=>{
+          el.style.animation='none';
+          el.style.transition='none';
+          if(el.classList.contains('pro-only')) el.classList.remove('pro-only');
+        });
         wrap.appendChild(calClone);
       }
 
