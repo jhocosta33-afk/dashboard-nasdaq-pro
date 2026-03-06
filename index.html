@@ -618,8 +618,9 @@ const Dashboard = {
       };
     }).filter(Boolean);
     console.log('Sheets API rows:', rows.length, 'ativos:', [...new Set(rows.map(r=>r.ativo))]);
-    // Debug: show raw values for last 3 rows
-    console.log('Ultimas 3 linhas raw:', values.slice(-3));
+    // Debug: show rows where ativo is empty
+    const emptyAtivo = values.slice(1).filter(r => !(r[2]||'').trim());
+    console.log('Linhas sem ativo:', emptyAtivo.slice(0,3));
     this._processarRows(rows);
   },
 
