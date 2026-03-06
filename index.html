@@ -542,25 +542,28 @@ const Dashboard = {
       wrap.appendChild(kpiGrid);
 
       // Calendário clonado
-      // Captura o calendário atual visível no DOM
-      const calendarSection = document.querySelector('.calendar-section') ||
-                              document.querySelector('.calendar-grid') ||
-                              document.querySelector('.calendar-month') ||
-                              document.getElementById('calendarContainer');
-
-      // Clona o calendário renderizado do dashboard (aba calendário)
-      if(calClone){
-        calClone.querySelectorAll('.btn-voltar,.btn-nav,.tab-nav,.month-selector,button,.pdf-report-btn,.mode-toggle').forEach(el=>el.remove());
-        calClone.style.cssText='display:block;background:transparent;';
-        // Força visibilidade de todos os filhos
-        calClone.querySelectorAll('*').forEach(el=>{
-          if(el.style.display==='none') el.style.display='';
+      // Clona o calendário do dashboard (calendar-wrapper-outer que tem o grid)
+      const calSourceEl = document.querySelector('.calendar-wrapper-outer') ||
+                          document.querySelector('.calendar-wrapper');
+      if(calSourceEl) {
+        const calClone2 = calSourceEl.cloneNode(true);
+        // Remove botões mas preserva o grid
+        calClone2.querySelectorAll('button,.btn-voltar,.month-nav').forEach(el=>el.remove());
+        calClone2.style.cssText='display:block;margin-top:8px;';
+        // Garante que o título do mês fica visível
+        calClone2.querySelectorAll('#calendarTitle,[id*="Title"]').forEach(el=>{
+          el.style.display='flex';
         });
+        wrap.appendChild(calClone2);
+      } else if(calClone){
+        // fallback
+        calClone.querySelectorAll('button,.btn-voltar').forEach(el=>el.remove());
+        calClone.style.cssText='display:block;';
         wrap.appendChild(calClone);
       }
 
       document.body.appendChild(wrap);
-      await new Promise(r=>setTimeout(r,400));
+      await new Promise(r=>setTimeout(r,100));
 
       const canvas=await html2canvas(wrap,{backgroundColor:'#020617',scale:2,logging:false,useCORS:true,allowTaint:true});
       document.body.removeChild(wrap);
