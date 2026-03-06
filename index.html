@@ -615,7 +615,7 @@ const Dashboard = {
         zero: num(cols[7]), fotoId: (cols[8]||'').toString().trim()
       };
     }).filter(Boolean);
-    console.log('Sheets API rows:', rows.length, rows.slice(0,3));
+    console.log('Sheets API rows:', rows.length, 'ativos:', [...new Set(rows.map(r=>r.ativo))]);
     this._processarRows(rows);
   },
 
