@@ -689,6 +689,8 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
     let finalMidiaURL = null;
     let midiaTipo = null;
     let youtubeEmbedURL = null;
+    let driveFileId = null;
+    let youtubeVideoId = null;
 
     if (arquivoUniversal) {
       uploadPreviewUniversal.style.display = 'none';
@@ -708,9 +710,10 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
           const titulo    = document.getElementById('postTitulo').value.trim() || arquivoUniversal.name;
           const descricao = document.getElementById('postTexto').value.trim();
           const resultado = await uploadYouTubeDireto(arquivoUniversal, titulo, descricao);
-          youtubeEmbedURL = resultado.embedURL;
-          finalMidiaURL   = resultado.watchURL;
-          midiaTipo       = 'youtube';
+          youtubeEmbedURL  = resultado.embedURL;
+          youtubeVideoId   = resultado.videoId;
+          finalMidiaURL    = resultado.watchURL;
+          midiaTipo        = 'youtube';
 
         } else {
           // ── Upload Drive (imagem/pdf) — com progress animado ──
@@ -740,9 +743,10 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
           clearInterval(progressInterval);
           if (!resultado.success) throw new Error(resultado.error || 'Erro no upload');
 
+          driveFileId   = resultado.id;
           finalMidiaURL = tipoArquivo === 'imagem'
             ? `https://drive.google.com/uc?export=view&id=${resultado.id}`
-            : resultado.url;
+            : `https://drive.google.com/uc?export=download&id=${resultado.id}`;
           midiaTipo = tipoArquivo;
         }
 
@@ -769,7 +773,9 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
       link:            document.getElementById('postLink').value || null,
       midiaURL:        finalMidiaURL,
       midiaTipo,
-      youtubeEmbedURL, // ← YouTube embed URL
+      youtubeEmbedURL,
+      youtubeVideoId:  youtubeVideoId || null,
+      driveFileId:     driveFileId    || null,
       criadoEm:        firebase.firestore.FieldValue.serverTimestamp(),
       autor:           auth.currentUser.displayName || 'Admin'
     });
@@ -914,10 +920,41 @@ async function deletarComentarioAdmin(postId, comentarioId) {
 }
 
 async function deletarPost(postId) {
-  if (!confirm('Deseja realmente excluir este post?')) return;
+  if (!confirm('Deseja realmente excluir este post?\nIsso também apagará o arquivo/vídeo de origem.')) return;
   try {
+    // Busca dados do post para pegar IDs de origem
+    const postDoc = await db.collection('posts').doc(postId).get();
+    const post = postDoc.data() || {};
+
+    // Deleta do YouTube se for vídeo
+    if (post.youtubeVideoId && ytAccessToken) {
+      try {
+        await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${post.youtubeVideoId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${ytAccessToken}` }
+        });
+        console.log('✅ Vídeo deletado do YouTube:', post.youtubeVideoId);
+      } catch(e) { console.warn('Aviso: não foi possível deletar vídeo do YouTube', e); }
+    }
+
+    // Deleta do Google Drive se tiver fileId
+    if (post.driveFileId) {
+      try {
+        const params = new URLSearchParams();
+        params.append('acao', 'deletarArquivo');
+        params.append('fileId', post.driveFileId);
+        await fetch(`${YT_WORKER}/apps-script`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: Object.fromEntries(params) })
+        });
+        console.log('✅ Arquivo deletado do Drive:', post.driveFileId);
+      } catch(e) { console.warn('Aviso: não foi possível deletar arquivo do Drive', e); }
+    }
+
+    // Deleta do Firestore
     await db.collection('posts').doc(postId).delete();
-    mostrarAlerta('alert-post', '✅ Post excluído', 'success');
+    mostrarAlerta('alert-post', '✅ Post e arquivo de origem excluídos!', 'success');
     carregarPosts();
   } catch (error) { mostrarAlerta('alert-post', '❌ Erro ao excluir post', 'error'); }
 }
