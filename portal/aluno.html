@@ -258,13 +258,17 @@ function montarPostHTML(post) {
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;text-align:center;">⚠️ Se o vídeo não carregar, pode ainda estar sendo processado.</p>`;
     }
 
-  // 3. PDF
+  // 3. PDF / arquivo
   } else if (post.midiaURL && post.midiaTipo === 'pdf') {
+    // Usa URL de download direto se tiver driveFileId, senão usa midiaURL
+    const downloadURL = post.driveFileId
+      ? `https://drive.google.com/uc?export=download&id=${post.driveFileId}`
+      : post.midiaURL;
     midiaHTML = `
       <div class="post-file-box">
         <span class="post-file-icon">📄</span>
         <div class="post-file-info"><strong>Arquivo Anexado</strong><span>Clique para baixar</span></div>
-        <a href="${post.midiaURL}" target="_blank" class="btn btn-primary">📥 Baixar</a>
+        <a href="${downloadURL}" download target="_blank" class="btn btn-primary">📥 Baixar</a>
       </div>`;
 
   // 4. Imagem
@@ -336,7 +340,27 @@ async function carregarComentarios(postId) {
     snap.forEach(doc => {
       const c = doc.data();
       const d = c.criadoEm ? c.criadoEm.toDate().toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-      html += `<div class="comentario-item"><div class="comentario-header"><span class="comentario-autor">${c.autor||'Aluno'}</span><span class="comentario-data">${d}</span></div><p class="comentario-texto">${c.texto}</p></div>`;
+      const isOwner = usuarioAtual && c.autorId === usuarioAtual.uid;
+      html += `<div class="comentario-item" id="comentario-${doc.id}">
+        <div class="comentario-header">
+          <span class="comentario-autor">${c.autor||'Aluno'}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="comentario-data">${d}</span>
+            ${isOwner ? `
+              <button onclick="editarComentario('${postId}','${doc.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--text-muted)'">✏️</button>
+              <button onclick="deletarComentario('${postId}','${doc.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">🗑️</button>
+            ` : ''}
+          </div>
+        </div>
+        <p class="comentario-texto" id="texto-display-${doc.id}">${c.texto}</p>
+        <div id="edit-form-${doc.id}" style="display:none;margin-top:8px;">
+          <textarea id="edit-textarea-${doc.id}" style="width:100%;min-height:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;">${c.texto}</textarea>
+          <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
+            <button onclick="cancelarEdicao('${doc.id}')" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;">Cancelar</button>
+            <button onclick="salvarEdicao('${postId}','${doc.id}')" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Salvar</button>
+          </div>
+        </div>
+      </div>`;
     });
     lista.innerHTML = html;
   } catch (err) { lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>'; }
@@ -356,6 +380,36 @@ async function enviarComentario(postId) {
     textarea.value = ''; textarea.disabled = false;
     await carregarComentarios(postId);
   } catch (err) { alert('Erro ao enviar. Tente novamente.'); textarea.disabled = false; }
+}
+
+function editarComentario(postId, comentarioId) {
+  document.getElementById('texto-display-' + comentarioId).style.display = 'none';
+  document.getElementById('edit-form-' + comentarioId).style.display = 'block';
+}
+
+function cancelarEdicao(comentarioId) {
+  document.getElementById('texto-display-' + comentarioId).style.display = 'block';
+  document.getElementById('edit-form-' + comentarioId).style.display = 'none';
+}
+
+async function salvarEdicao(postId, comentarioId) {
+  const textarea = document.getElementById('edit-textarea-' + comentarioId);
+  const texto = textarea.value.trim();
+  if (!texto) { textarea.focus(); return; }
+  try {
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({
+      texto, editadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await carregarComentarios(postId);
+  } catch (err) { alert('Erro ao editar. Tente novamente.'); }
+}
+
+async function deletarComentario(postId, comentarioId) {
+  if (!confirm('Apagar seu comentário?')) return;
+  try {
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
+    await carregarComentarios(postId);
+  } catch (err) { alert('Erro ao apagar. Tente novamente.'); }
 }
 
 // ── MODAL IMAGEM ──
