@@ -285,7 +285,7 @@ body.basic-mode .pro-only{display:none!important}
  <div class="header-main">
   <button class="theme-toggle" id="themeToggle" onclick="Dashboard.toggleTema()" title="Alternar tema"><span id="themeIcon">🌙</span></button>
   <img src="logo.png" alt="Mentoria NasdaqPro" class="header-logo" onerror="this.style.display='none'">
-  <button class="pdf-report-btn" id="pdfReportBtn" onclick="Dashboard.gerarRelatorioPDF()" style="display:none;">📸 Exportar Imagem</button>
+  <button class="pdf-report-btn" id="pdfReportBtn" onclick="Dashboard.gerarRelatorioPDF()" style="visibility:hidden;">📸 Exportar Imagem</button>
  </div>
  <div id="sidebarMobileAnchor"></div>
  <div class="tab-navigation">
@@ -440,7 +440,7 @@ const Dashboard = {
           const uDoc = await db.collection('users').doc(user.uid).get();
           if (uDoc.exists && uDoc.data().role === 'admin') {
             const btn = document.getElementById('pdfReportBtn');
-            if (btn) btn.style.display = '';
+            if (btn) btn.style.visibility = 'visible';
           }
         }
       });
