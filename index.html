@@ -780,16 +780,20 @@ const Dashboard = {
   },
 
   renderizarTabela(dados){
-    let html='',tot={p:0,t:0,g:0,s:0,z:0};
+    let html='',tot={p:0,pN:0,pD:0,t:0,g:0,s:0,z:0};
     dados.forEach(d=>{
-      tot.p+=d.pontos;tot.t+=d.trades;tot.g+=d.gain;tot.s+=d.stop;tot.z+=d.zero;
+      tot.p+=d.pontos;tot.pN+=(d.pontosNasdaq||0);tot.pD+=(d.pontosDow||0);tot.t+=d.trades;tot.g+=d.gain;tot.s+=d.stop;tot.z+=d.zero;
       const hasBoth=(d.pontosNasdaq||0)!==0&&(d.pontosDow||0)!==0;
       const ptCell=hasBoth
         ?`<span style="color:${(d.pontosNasdaq||0)<0?'var(--red)':'var(--green)'}">NQ:${d.pontosNasdaq>0?'+':''}${d.pontosNasdaq||0}</span> <span style="color:${(d.pontosDow||0)<0?'var(--red)':'var(--orange)'}">DJ:${d.pontosDow>0?'+':''}${d.pontosDow||0}</span>`
         :`<span style="color:${d.pontos<0?'var(--red)':'var(--green)'}">${d.pontos}</span>`;
       html+=`<tr><td>${d.dia}</td><td style="font-weight:800">${ptCell}</td><td>${d.trades}</td><td style="color:var(--green)">${d.gain}</td><td style="color:var(--red)">${d.stop}</td><td style="color:var(--yellow)">${d.zero}</td><td>${(d.ativos||[d.ativo||'']).join('/')}</td><td>${d.semana}</td></tr>`;
     });
-    html+=`<tr class="total"><td>TOTAL</td><td style="color:${tot.p<0?'var(--red)':'var(--green)'}">${tot.p}</td><td>${tot.t}</td><td style="color:var(--green)">${tot.g}</td><td style="color:var(--red)">${tot.s}</td><td style="color:var(--yellow)">${tot.z}</td><td colspan="2"></td></tr>`;
+    const hasBothTot=tot.pN!==0||tot.pD!==0;
+    const totPtCell=hasBothTot
+      ?`<span style="color:${tot.pN<0?'var(--red)':'var(--green)'}">NQ:${tot.pN>0?'+':''}${tot.pN}</span> <span style="color:${tot.pD<0?'var(--red)':'var(--orange)'}">DJ:${tot.pD>0?'+':''}${tot.pD}</span>`
+      :`<span style="color:${tot.p<0?'var(--red)':'var(--green)'}">${tot.p}</span>`;
+    html+=`<tr class="total"><td>TOTAL</td><td style="font-weight:800">${totPtCell}</td><td>${tot.t}</td><td style="color:var(--green)">${tot.g}</td><td style="color:var(--red)">${tot.s}</td><td style="color:var(--yellow)">${tot.z}</td><td colspan="2"></td></tr>`;
     document.getElementById('tbody').innerHTML=html;
   },
 
