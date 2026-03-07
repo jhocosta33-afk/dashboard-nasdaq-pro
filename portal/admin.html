@@ -937,18 +937,23 @@ async function deletarPost(postId) {
       } catch(e) { console.warn('Aviso: não foi possível deletar vídeo do YouTube', e); }
     }
 
-    // Deleta do Google Drive se tiver fileId
-    if (post.driveFileId) {
+    // Deleta do Google Drive — usa driveFileId ou extrai da URL
+    let fileIdParaDeletar = post.driveFileId || null;
+    if (!fileIdParaDeletar && post.midiaURL) {
+      // Tenta extrair ID da URL do Drive (formatos: /d/ID/, id=ID, /uc?...id=ID)
+      const m = post.midiaURL.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
+                post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (m) fileIdParaDeletar = m[1];
+    }
+    if (fileIdParaDeletar) {
       try {
-        const params = new URLSearchParams();
-        params.append('acao', 'deletarArquivo');
-        params.append('fileId', post.driveFileId);
-        await fetch(`${YT_WORKER}/apps-script`, {
+        const resp = await fetch(`${YT_WORKER}/apps-script`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: Object.fromEntries(params) })
+          body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: { acao:'deletarArquivo', fileId: fileIdParaDeletar } })
         });
-        console.log('✅ Arquivo deletado do Drive:', post.driveFileId);
+        const result = await resp.json();
+        console.log('✅ Arquivo deletado do Drive:', fileIdParaDeletar, result);
       } catch(e) { console.warn('Aviso: não foi possível deletar arquivo do Drive', e); }
     }
 
