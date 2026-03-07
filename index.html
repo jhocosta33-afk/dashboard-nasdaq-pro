@@ -470,14 +470,14 @@ const Dashboard = {
   },
 
   mudarAba(aba) {
-    // Esconde todos os conteúdos e desativa botões
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    // Ativa a aba correta
     const content = document.getElementById('content' + aba.charAt(0).toUpperCase() + aba.slice(1));
     const btn = document.getElementById('tab' + aba.charAt(0).toUpperCase() + aba.slice(1));
     if (content) content.classList.add('active');
     if (btn) btn.classList.add('active');
+    // Carrega calendário automaticamente ao abrir a aba
+    if (aba === 'mercado') setTimeout(() => this.atualizarCalendario(), 100);
   },
 
   inicializarSidebarMobile() {
