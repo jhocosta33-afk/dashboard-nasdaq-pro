@@ -64,8 +64,11 @@ h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(
 .btn-secondary { background: rgba(255,255,255,0.07); color: var(--text); border: 1px solid var(--border); }
 .btn-secondary:hover { background: rgba(255,255,255,0.12); border-color: var(--accent); }
 .comentarios-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); animation: slideDown 0.3s ease; }
+.comentario-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#6366f1,#22c55e); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.comentario-body { flex: 1; min-width: 0; }
+.comentario-item { display: flex; gap: 12px; align-items: flex-start; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 14px 16px; border-radius: 10px; margin-bottom: 10px; }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-.comentario-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 14px 16px; border-radius: 10px; margin-bottom: 10px; }
+
 .comentario-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
 .comentario-autor { font-size: 13px; font-weight: 700; color: var(--accent); }
 .comentario-data { font-size: 11px; color: var(--text-muted); }
@@ -323,6 +326,16 @@ function aplicarFiltro(categoria, btnEl) {
 }
 
 // ── COMENTÁRIOS ──
+function tempoRelativo(date) {
+  if (!date) return '';
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 60) return 'agora mesmo';
+  if (diff < 3600) return `há ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `há ${Math.floor(diff/3600)}h`;
+  if (diff < 604800) return `há ${Math.floor(diff/86400)} dia${Math.floor(diff/86400)>1?'s':''}`;
+  return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+}
+
 async function toggleComentarios(postId) {
   const section = document.getElementById('comentarios-' + postId);
   if (section.style.display === 'none') { section.style.display = 'block'; await carregarComentarios(postId); }
@@ -333,31 +346,37 @@ async function carregarComentarios(postId) {
   const lista = document.getElementById('lista-' + postId);
   const countEl = document.getElementById('count-' + postId);
   try {
-    const snap = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','asc').get();
+    const snap = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','desc').get();
     if (countEl) countEl.textContent = snap.size > 0 ? '(' + snap.size + ')' : '';
     if (snap.empty) { lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px;">Nenhum comentário ainda. Seja o primeiro!</p>'; return; }
     let html = '';
     snap.forEach(doc => {
       const c = doc.data();
-      const d = c.criadoEm ? c.criadoEm.toDate().toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+      const dateCriado = c.criadoEm ? c.criadoEm.toDate() : null;
+      const tempo = tempoRelativo(dateCriado);
       const isOwner = usuarioAtual && c.autorId === usuarioAtual.uid;
+      const nomeAutor = c.autor || 'Aluno';
+      const inicial = nomeAutor.charAt(0).toUpperCase();
       html += `<div class="comentario-item" id="comentario-${doc.id}">
-        <div class="comentario-header">
-          <span class="comentario-autor">${c.autor||'Aluno'}</span>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="comentario-data">${d}</span>
-            ${isOwner ? `
-              <button onclick="editarComentario('${postId}','${doc.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--text-muted)'">✏️</button>
-              <button onclick="deletarComentario('${postId}','${doc.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">🗑️</button>
-            ` : ''}
+        <div class="comentario-avatar">${inicial}</div>
+        <div class="comentario-body">
+          <div class="comentario-header">
+            <span class="comentario-autor">${nomeAutor}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="comentario-data" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
+              ${isOwner ? `
+                <button onclick="editarComentario('${postId}','${doc.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--text-muted)'">✏️</button>
+                <button onclick="deletarComentario('${postId}','${doc.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">🗑️</button>
+              ` : ''}
+            </div>
           </div>
-        </div>
-        <p class="comentario-texto" id="texto-display-${doc.id}">${c.texto}</p>
-        <div id="edit-form-${doc.id}" style="display:none;margin-top:8px;">
-          <textarea id="edit-textarea-${doc.id}" style="width:100%;min-height:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;">${c.texto}</textarea>
-          <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
-            <button onclick="cancelarEdicao('${doc.id}')" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;">Cancelar</button>
-            <button onclick="salvarEdicao('${postId}','${doc.id}')" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Salvar</button>
+          <p class="comentario-texto" id="texto-display-${doc.id}">${c.texto}</p>
+          <div id="edit-form-${doc.id}" style="display:none;margin-top:8px;">
+            <textarea id="edit-textarea-${doc.id}" style="width:100%;min-height:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;">${c.texto}</textarea>
+            <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
+              <button onclick="cancelarEdicao('${doc.id}')" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;">Cancelar</button>
+              <button onclick="salvarEdicao('${postId}','${doc.id}')" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Salvar</button>
+            </div>
           </div>
         </div>
       </div>`;
