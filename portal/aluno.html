@@ -496,33 +496,31 @@ function iniciarListenerComentarios(postId) {
       snap.forEach(doc => { html += renderComentario(postId, doc.id, doc.data()); });
       lista.innerHTML = html;
       // Carrega respostas de cada comentário
-      snap.forEach(doc => carregarRespostas(postId, doc.id));
+      snap.forEach(doc => carregarRespostas(postId, doc.id, doc.data().respostas || []));
     }, err => {
       lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>';
     });
   _listeners[postId] = unsub;
 }
 
-async function carregarRespostas(postId, comentarioId) {
+function renderRespostas(postId, comentarioId, respostas) {
   const container = document.getElementById('respostas-' + comentarioId);
   if (!container) return;
-  const snap = await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').orderBy('criadoEm','asc').get();
-  if (snap.empty) { container.innerHTML = ''; return; }
+  if (!respostas || respostas.length === 0) { container.innerHTML = ''; return; }
   let html = '';
-  snap.forEach(doc => {
-    const r = doc.data();
+  respostas.forEach((r, idx) => {
     const isOwner = usuarioAtual && r.autorId === usuarioAtual.uid;
     const nomeR = isOwner ? usuarioAtual.nome : (r.autor || 'Aluno');
     const fotoR = isOwner ? (usuarioAtual.fotoUrl || null) : (r.fotoUrl || null);
-    const tempo = tempoRelativo(r.criadoEm ? r.criadoEm.toDate() : null);
-    html += `<div class="resposta-item" id="resposta-${doc.id}">
+    const tempo = r.criadoEm ? tempoRelativo(new Date(r.criadoEm)) : 'agora mesmo';
+    html += `<div class="resposta-item">
       ${avatarHTML(nomeR, fotoR, 28)}
       <div style="flex:1;min-width:0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-size:12px;font-weight:700;color:#818cf8;">${nomeR}</span>
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-size:11px;color:#64748b;">${tempo}</span>
-            ${isOwner ? `<button onclick="deletarResposta('${postId}','${comentarioId}','${doc.id}')" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#64748b'">🗑️</button>` : ''}
+            ${isOwner ? `<button onclick="deletarResposta('${postId}','${comentarioId}',${idx})" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#64748b'">🗑️</button>` : ''}
           </div>
         </div>
         <p style="font-size:13px;color:var(--text);line-height:1.5;margin:0;">${r.texto}</p>
@@ -530,6 +528,10 @@ async function carregarRespostas(postId, comentarioId) {
     </div>`;
   });
   container.innerHTML = html;
+}
+
+async function carregarRespostas(postId, comentarioId, respostas) {
+  renderRespostas(postId, comentarioId, respostas || []);
 }
 
 async function enviarComentario(postId) {
@@ -567,23 +569,33 @@ async function enviarResposta(postId, comentarioId) {
   if (!texto) { textarea.focus(); return; }
   try {
     textarea.disabled = true;
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').add({
-      texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid,
+    const novaResposta = {
+      texto,
+      autor: usuarioAtual.nome,
+      autorId: usuarioAtual.uid,
       fotoUrl: usuarioAtual.fotoUrl || null,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      criadoEm: new Date().toISOString()
+    };
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({
+      respostas: firebase.firestore.FieldValue.arrayUnion(novaResposta)
     });
     textarea.value = '';
     ocultarFormResposta(comentarioId);
-    await carregarRespostas(postId, comentarioId);
-  } catch(e) { alert('Erro ao enviar resposta.'); }
+    // onSnapshot vai atualizar automaticamente
+  } catch(e) {
+    console.error('Erro resposta:', e);
+    alert('Erro ao enviar resposta: ' + e.message);
+  }
   finally { textarea.disabled = false; }
 }
 
-async function deletarResposta(postId, comentarioId, respostaId) {
+async function deletarResposta(postId, comentarioId, idx) {
   if (!confirm('Apagar esta resposta?')) return;
   try {
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').doc(respostaId).delete();
-    await carregarRespostas(postId, comentarioId);
+    const doc = await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).get();
+    const respostas = doc.data().respostas || [];
+    respostas.splice(idx, 1);
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({ respostas });
   } catch(e) { alert('Erro ao apagar resposta.'); }
 }
 

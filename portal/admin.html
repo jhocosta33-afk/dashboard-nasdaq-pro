@@ -922,19 +922,17 @@ function carregarComentariosAdmin(postId) {
         </div>`;
       });
       lista.innerHTML = html;
-      snapshot.forEach(doc => carregarRespostasAdmin(postId, doc.id));
+      snapshot.forEach(doc => carregarRespostasAdmin(postId, doc.id, doc.data().respostas || []));
     });
 }
 
-async function carregarRespostasAdmin(postId, comentarioId) {
+function carregarRespostasAdmin(postId, comentarioId, respostas) {
   const container = document.getElementById('respostas-admin-' + comentarioId);
   if (!container) return;
-  const snap = await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').orderBy('criadoEm','asc').get();
-  if (snap.empty) { container.innerHTML = ''; return; }
+  if (!respostas || respostas.length === 0) { container.innerHTML = ''; return; }
   let html = '';
-  snap.forEach(doc => {
-    const r = doc.data();
-    const tempo = tempoRelativo(r.criadoEm ? r.criadoEm.toDate() : null);
+  respostas.forEach((r, idx) => {
+    const tempo = r.criadoEm ? tempoRelativo(new Date(r.criadoEm)) : 'agora mesmo';
     const inicial = (r.autor||'A').charAt(0).toUpperCase();
     const fotoHtml = r.fotoUrl ? `<img src="${r.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${inicial}'">` : inicial;
     html += `<div style="display:flex;gap:8px;align-items:flex-start;background:rgba(255,255,255,0.03);border-left:3px solid #6366f1;padding:8px 12px;border-radius:6px;margin-bottom:6px;">
@@ -944,7 +942,7 @@ async function carregarRespostasAdmin(postId, comentarioId) {
           <span style="font-size:12px;font-weight:700;color:#818cf8;">${r.autor||'Aluno'}</span>
           <div style="display:flex;gap:6px;align-items:center;">
             <span style="font-size:11px;color:#64748b;">${tempo}</span>
-            <button onclick="deletarRespostaAdmin('${postId}','${comentarioId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
+            <button onclick="deletarRespostaAdmin('${postId}','${comentarioId}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
           </div>
         </div>
         <p style="margin:0;font-size:13px;line-height:1.5;">${r.texto}</p>
@@ -954,11 +952,13 @@ async function carregarRespostasAdmin(postId, comentarioId) {
   container.innerHTML = html;
 }
 
-async function deletarRespostaAdmin(postId, comentarioId, respostaId) {
+async function deletarRespostaAdmin(postId, comentarioId, idx) {
   if (!confirm('Deletar esta resposta?')) return;
   try {
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').doc(respostaId).delete();
-    await carregarRespostasAdmin(postId, comentarioId);
+    const docSnap = await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).get();
+    const respostas = docSnap.data().respostas || [];
+    respostas.splice(idx, 1);
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({ respostas });
   } catch(e) { alert('Erro ao deletar resposta.'); }
 }
 
