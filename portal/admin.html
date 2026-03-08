@@ -5,19 +5,86 @@
 <title>Admin | Dashboard NASDAQ PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
+/* ══ TEMA COMPARTILHADO NasdaqPro ══ */
 :root {
-  --bg: #020617;
-  --card: #0f172a;
-  --border: rgba(255,255,255,.1);
-  --text: #e5e7eb;
-  --text-muted: #94a3b8;
-  --accent: #22c55e;
+  --bg: #050711;
+  --card: #0f1420;
+  --card-hover: #161b2e;
+  --border: rgba(99,102,241,0.15);
+  --border-bright: rgba(99,102,241,0.4);
+  --text: #f8fafc;
+  --text-dim: #cbd5e1;
+  --text-muted: #64748b;
+  --accent: #10b981;
+  --blue: #6366f1;
+  --blue-bright: #818cf8;
   --red: #ef4444;
-  --blue: #3b82f6;
   --orange: #f97316;
+  --sidebar-bg: #0a0d1a;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
 }
+body.light-theme {
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --card-hover: #f8fafc;
+  --border: rgba(99,102,241,0.18);
+  --border-bright: rgba(99,102,241,0.45);
+  --text: #0f172a;
+  --text-dim: #334155;
+  --text-muted: #64748b;
+  --sidebar-bg: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+}
+body { background: var(--bg); color: var(--text); }
+body.light-theme { background: var(--bg); color: var(--text); }
+.theme-toggle-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  font-size: 17px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.theme-toggle-btn:hover { border-color: var(--blue-bright); background: var(--card-hover); transform: scale(1.08); }
+#themeIcon { display: inline-block; }
+body.light-theme input,
+body.light-theme textarea,
+body.light-theme select { background: #f8fafc; border-color: rgba(99,102,241,0.2); color: #0f172a; }
+body.light-theme input:focus,
+body.light-theme textarea:focus,
+body.light-theme select:focus { background: #fff; border-color: #6366f1; }
+body.light-theme header { background: #ffffff !important; border-color: rgba(99,102,241,0.15) !important; }
+body.light-theme .card { background: #ffffff; border-color: rgba(99,102,241,0.15); }
+body.light-theme .post-card { background: #ffffff; border-color: rgba(99,102,241,0.12); }
+body.light-theme .quick-card { background: #ffffff; border-color: rgba(99,102,241,0.15); }
+body.light-theme .comentario-item { background: #f8fafc; border-color: rgba(99,102,241,0.1); }
+body.light-theme .resposta-item { background: #f1f5f9; }
+body.light-theme .filter-btn { background: #f1f5f9; border-color: rgba(99,102,241,0.15); color: #334155; }
+body.light-theme .filter-btn.active { background: #6366f1; color: #fff; }
+body.light-theme .tab { color: #64748b; }
+body.light-theme .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+body.light-theme .btn-logout { background: #f1f5f9; color: #0f172a; border: 1px solid rgba(99,102,241,0.2); }
+body.light-theme .post-text { color: #475569; }
+body.light-theme .welcome-banner { background: linear-gradient(135deg,rgba(99,102,241,0.07),rgba(16,185,129,0.07)); }
+body.light-theme .upload-area { background: #f8fafc; border-color: rgba(99,102,241,0.2); }
+body.light-theme .upload-area:hover { background: rgba(99,102,241,0.05); border-color: #6366f1; }
+body.light-theme .tabs { border-color: rgba(99,102,241,0.15); }
+body.light-theme table th { background: #f1f5f9; color: #64748b; }
+body.light-theme table td { border-color: rgba(99,102,241,0.1); color: #0f172a; }
+body.light-theme .post-item { background: #f8fafc; border-color: rgba(99,102,241,0.12); }
+body.light-theme .section-header h2 { color: #0f172a; }
+body.light-theme .btn-secondary { background: #f1f5f9; color: #0f172a; border-color: rgba(99,102,241,0.2); }
+body.light-theme .btn-secondary:hover { background: #e2e8f0; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+body { background: var(--bg); color: var(--text); transition: background-color 0.3s, color 0.3s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
 header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 100; }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .logo { font-size: 24px; }
@@ -95,6 +162,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   <div class="user-info">
     <a href="../" style="display:inline-block;background:rgba(255,255,255,0.1);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;margin-right:12px;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📊 Dashboard</a>
     <button id="btnConectarYT" onclick="autenticarYouTube()" style="background:#ff0000;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">🔗 Conectar YouTube</button>
+    <button class="theme-toggle-btn" onclick="NasTheme.toggle()" title="Alternar tema"><span id="themeIcon">🌙</span></button>
     <div id="adminAvatarHeader" onclick="abrirPerfilAdmin()" title="Editar perfil" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;cursor:pointer;overflow:hidden;border:2px solid transparent;transition:all .2s;flex-shrink:0;">
       <span id="adminAvatarLetra">A</span>
     </div>
@@ -326,6 +394,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   </div>
 </div>
 
+<script src="theme.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>

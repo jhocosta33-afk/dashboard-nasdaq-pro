@@ -216,6 +216,7 @@ header { background:rgba(2,6,23,0.88); backdrop-filter:blur(16px); -webkit-backd
   <div class="header-right">
     <div class="avatar-header" id="avatarHeader" onclick="abrirPerfil()" title="Meu perfil"><span id="avatarLetra">A</span></div>
     <span id="userName" onclick="abrirPerfil()" style="font-size:13px;font-weight:700;cursor:pointer;color:var(--text-dim);">Aluno</span>
+    <button class="theme-toggle-btn" onclick="NasTheme.toggle()" title="Alternar tema"><span id="themeIcon">🌙</span></button>
     <button class="btn-logout" onclick="fazerLogout()">Sair</button>
   </div>
 </header>
@@ -279,6 +280,7 @@ header { background:rgba(2,6,23,0.88); backdrop-filter:blur(16px); -webkit-backd
   </div>
 </div>
 
+<script src="theme.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
