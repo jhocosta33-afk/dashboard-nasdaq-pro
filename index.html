@@ -33,9 +33,9 @@
 }
 body.light-theme{--sidebar-bg:#fff;--main-bg:#f1f5f9;--card-bg:#fff;--card-hover:#f8fafc;--border:rgba(99,102,241,0.2);--border-bright:rgba(99,102,241,0.5);--text:#0f172a;--text-dim:#475569;--muted:#94a3b8;--shadow-sm:0 1px 3px rgba(0,0,0,0.1);--shadow-md:0 4px 12px rgba(0,0,0,0.1);--shadow-lg:0 10px 30px rgba(0,0,0,0.15);--shadow-glow:0 0 20px rgba(99,102,241,0.25)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Archivo',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--main-bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;overflow-x:hidden;position:relative;transition:background-color var(--transition-normal),color var(--transition-normal)}
+body{font-family:'Archivo',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--main-bg);color:var(--text);display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;position:relative;transition:background-color var(--transition-normal),color var(--transition-normal)}
 body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(168,85,247,0.08) 0%,transparent 50%);pointer-events:none;z-index:0}
-.dashboard-container{display:flex;max-width:1800px;width:100%;min-height:100vh;position:relative;z-index:1}
+.dashboard-container{display:flex;max-width:1800px;width:100%;flex:1;position:relative;z-index:1}
 .sidebar{width:280px;background:var(--sidebar-bg);padding:32px 20px;border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;max-height:100vh;transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
 .sidebar::before{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,var(--blue),transparent);opacity:0.5}
 .header-logo{max-height:90px;width:auto;max-width:100%;display:block;filter:drop-shadow(0 4px 20px rgba(99,102,241,0.35));transition:all 0.3s}
@@ -425,11 +425,10 @@ body.basic-mode .pro-only{display:none!important}
 
     <div class="footer-divider"></div>
 
-    <p class="footer-copy">© 2025 NasdaqPro — João Dib</p>
+    <p class="footer-copy">© 2025 Mentoria Nasdaq Pro</p>
 
   </div>
 </footer>
-
 
 <div class="trade-photo-modal" id="tradePhotoModal">
  <div class="modal-content">
