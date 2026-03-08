@@ -579,10 +579,8 @@ auth.onAuthStateChanged(async (user) => {
     carregarPosts();
     carregarUsuarios();
   } catch (error) {
-    console.error('Erro auth admin:', error);
-    // Não redireciona para login se já autenticado - mostra erro
-    const postsEl = document.getElementById('posts-list');
-    if (postsEl) postsEl.innerHTML = `<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;"><p style="color:#ef4444;font-weight:700;">❌ Erro de inicialização</p><p style="color:#94a3b8;font-size:13px;margin-top:8px;">${error.message}</p></div>`;
+    console.error('Erro auth:', error);
+    window.location.href = 'login.html';
   }
 });
 
@@ -810,13 +808,7 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
 async function carregarPosts() {
   const container = document.getElementById('posts-list');
   try {
-    let snapshot;
-    try {
-      snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').limit(20).get();
-    } catch(indexErr) {
-      console.warn('orderBy falhou, tentando sem ordenação:', indexErr.message);
-      snapshot = await db.collection('posts').limit(20).get();
-    }
+    const snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').limit(20).get();
     if (snapshot.empty) { container.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Nenhum post ainda.</p>'; return; }
 
     let html = '';
@@ -871,11 +863,7 @@ async function carregarPosts() {
 
   } catch (error) {
     console.error('Erro posts:', error);
-    container.innerHTML = `<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;">
-      <p style="color:var(--red);font-weight:700;">❌ Erro ao carregar posts</p>
-      <p style="color:var(--text-muted);font-size:13px;margin-top:8px;">${error.message}</p>
-      <p style="color:var(--text-muted);font-size:12px;margin-top:4px;">Verifique as Firestore Rules e o console (F12)</p>
-    </div>`;
+    container.innerHTML = '<p style="color:var(--red)">Erro ao carregar posts</p>';
   }
 }
 
@@ -898,80 +886,36 @@ function tempoRelativo(date) {
   return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
 }
 
-function carregarComentariosAdmin(postId) {
+async function carregarComentariosAdmin(postId) {
   const lista = document.getElementById('lista-admin-' + postId);
   const countEl = document.getElementById('count-admin-' + postId);
-  lista.innerHTML = '<p style="text-align:center;padding:16px;color:#64748b;font-size:13px;">Carregando...</p>';
-
-  db.collection('posts').doc(postId).collection('comentarios')
-    .orderBy('criadoEm','desc')
-    .onSnapshot(snapshot => {
-      if (countEl) countEl.textContent = snapshot.size;
-      if (snapshot.empty) { lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>'; return; }
-      let html = '';
-      snapshot.forEach(doc => {
-        const co = doc.data();
-        const dateCriado = co.criadoEm ? co.criadoEm.toDate() : null;
-        const tempo = tempoRelativo(dateCriado);
-        const nomeAutor = co.autor || 'Aluno';
-        const inicial = nomeAutor.charAt(0).toUpperCase();
-        const fotoHtml = co.fotoUrl
-          ? '<img src="' + co.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.textContent=this.getAttribute('data-i')" data-i="' + inicial + '">'
-          : inicial;
-        html += `<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;">
-          <div onclick="verInfoUsuario('${co.autorId}','${nomeAutor}')" title="Ver info" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;cursor:pointer;overflow:hidden;">${fotoHtml}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
-                <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
-              </div>
-            </div>
-            <p style="margin:0 0 6px;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
-            <div id="respostas-admin-${doc.id}" style="margin-top:6px;"></div>
-          </div>
-        </div>`;
-      });
-      lista.innerHTML = html;
-      snapshot.forEach(doc => carregarRespostasAdmin(postId, doc.id, doc.data().respostas || []));
-    });
-}
-
-function carregarRespostasAdmin(postId, comentarioId, respostas) {
-  const container = document.getElementById('respostas-admin-' + comentarioId);
-  if (!container) return;
-  if (!respostas || respostas.length === 0) { container.innerHTML = ''; return; }
-  let html = '';
-  respostas.forEach((r, idx) => {
-    const tempo = r.criadoEm ? tempoRelativo(new Date(r.criadoEm)) : 'agora mesmo';
-    const inicial = (r.autor||'A').charAt(0).toUpperCase();
-    const fotoHtml = r.fotoUrl ? '<img src="' + r.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> ' : inicial;
-    html += `<div style="display:flex;gap:8px;align-items:flex-start;background:rgba(255,255,255,0.03);border-left:3px solid #6366f1;padding:8px 12px;border-radius:6px;margin-bottom:6px;">
-      <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;">${fotoHtml}</div>
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-          <span style="font-size:12px;font-weight:700;color:#818cf8;">${r.autor||'Aluno'}</span>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <span style="font-size:11px;color:#64748b;">${tempo}</span>
-            <button onclick="deletarRespostaAdmin('${postId}','${comentarioId}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
-          </div>
-        </div>
-        <p style="margin:0;font-size:13px;line-height:1.5;">${r.texto}</p>
-      </div>
-    </div>`;
-  });
-  container.innerHTML = html;
-}
-
-async function deletarRespostaAdmin(postId, comentarioId, idx) {
-  if (!confirm('Deletar esta resposta?')) return;
   try {
-    const docSnap = await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).get();
-    const respostas = docSnap.data().respostas || [];
-    respostas.splice(idx, 1);
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({ respostas });
-  } catch(e) { alert('Erro ao deletar resposta.'); }
+    const snapshot = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','desc').get();
+    if (countEl) countEl.textContent = snapshot.size;
+    if (snapshot.empty) { lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>'; return; }
+    let html = '';
+    snapshot.forEach(doc => {
+      const co = doc.data();
+      const dateCriado = co.criadoEm ? co.criadoEm.toDate() : null;
+      const tempo = tempoRelativo(dateCriado);
+      const nomeAutor = co.autor || 'Aluno';
+      const inicial = nomeAutor.charAt(0).toUpperCase();
+      html += `<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;">
+        <div onclick="verInfoUsuario('${co.autorId}','${nomeAutor}')" title="Ver info do usuário" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;cursor:pointer;border:2px solid transparent;transition:all .2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${co.fotoUrl ? `<img src="${co.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : inicial}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
+              <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
+            </div>
+          </div>
+          <p style="margin:0;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+        </div>
+      </div>`;
+    });
+    lista.innerHTML = html;
+  } catch (err) { lista.innerHTML = '<p style="color:var(--red);">Erro ao carregar</p>'; }
 }
 
 async function enviarComentarioAdmin(postId) {
@@ -981,13 +925,11 @@ async function enviarComentarioAdmin(postId) {
   try {
     const user = auth.currentUser;
     await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto,
-      autor: window._adminNome || user.displayName || 'Admin',
-      autorId: user.uid,
-      fotoUrl: window._adminFotoUrl || null,
+      texto, autor: window._adminNome || user.displayName || 'Admin', autorId: user.uid,
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
     textarea.value = '';
+    await carregarComentariosAdmin(postId);
   } catch (err) { alert('Erro ao enviar comentário'); }
 }
 
@@ -1070,10 +1012,7 @@ async function carregarUsuarios() {
     document.getElementById('usuarios-aprovados').innerHTML = aprovados
       ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${aprovados}</tbody></table>`
       : '<p style="text-align:center;color:var(--text-muted)">Nenhum aluno aprovado ainda</p>';
-  } catch (error) {
-    console.error('Erro usuários:', error);
-    document.getElementById('usuarios-pendentes').innerHTML = `<p style="color:var(--red);padding:16px;">❌ Erro: ${error.message}</p>`;
-  }
+  } catch (error) { console.error('Erro usuários:', error); }
 }
 
 async function aprovarUsuario(uid) {
@@ -1266,9 +1205,42 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
   } catch (error) { mostrarAlerta('alert-trade-data', '❌ Erro: ' + error.message, 'error'); }
   btn.disabled = false; btn.textContent = '💾 Salvar na Planilha';
 });
+</script>
+<!-- MODAL PERFIL ADMIN -->
+<div id="modalPerfilAdmin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:420px;position:relative;">
+    <button onclick="fecharPerfilAdmin()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:24px;">✏️ Meu Perfil</h3>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px;">
+      <div id="adminAvatarBig" onclick="document.getElementById('inputFotoAdmin').click()" title="Clique para trocar foto" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;overflow:hidden;cursor:pointer;border:3px solid rgba(255,255,255,.1);transition:all .2s;">
+        <span id="adminAvatarBigLetra">A</span>
+      </div>
+      <input type="file" id="inputFotoAdmin" accept="image/*" style="display:none" onchange="previsualizarFotoAdmin(this)">
+      <span style="font-size:12px;color:#94a3b8;">Clique no avatar para trocar foto</span>
+    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">Nome</label>
+      <input type="text" id="inputNomeAdmin" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e5e7eb;font-size:14px;font-family:inherit;">
+    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">E-mail</label>
+      <input type="text" id="inputEmailAdmin" disabled style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px;color:#64748b;font-size:14px;font-family:inherit;cursor:not-allowed;">
+    </div>
+    <button onclick="salvarPerfilAdmin()" style="width:100%;background:#6366f1;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;">💾 Salvar</button>
+    <p id="msgPerfilAdmin" style="text-align:center;margin-top:12px;font-size:13px;color:#22c55e;display:none;"></p>
+  </div>
+</div>
 
+<!-- MODAL INFO USUÁRIO -->
+<div id="modalInfoUser" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:380px;position:relative;text-align:center;">
+    <button onclick="document.getElementById('modalInfoUser').style.display='none';" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
+    <div id="infoUserAvatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;overflow:hidden;"></div>
+    <h3 id="infoUserNome" style="font-size:20px;font-weight:800;margin-bottom:6px;"></h3>
+    <p id="infoUserEmail" style="font-size:14px;color:#94a3b8;margin-bottom:16px;"></p>
+    <p id="infoUserCadastro" style="font-size:13px;color:#64748b;"></p>
+  </div>
+</div>
 
-// ══ PERFIL ADMIN ══
+<script>
 function atualizarAvatarAdmin() {
   const letra = (window._adminNome||'A').charAt(0).toUpperCase();
   ['adminAvatarLetra','adminAvatarBigLetra'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=letra; });
@@ -1338,38 +1310,5 @@ async function verInfoUsuario(autorId, nomeExibido) {
   } catch(e) { alert('Erro ao buscar dados do usuário.'); }
 }
 </script>
-<!-- MODAL PERFIL ADMIN -->
-<div id="modalPerfilAdmin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:420px;position:relative;">
-    <button onclick="fecharPerfilAdmin()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
-    <h3 style="font-size:18px;font-weight:800;margin-bottom:24px;">✏️ Meu Perfil</h3>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px;">
-      <div id="adminAvatarBig" onclick="document.getElementById('inputFotoAdmin').click()" title="Clique para trocar foto" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;overflow:hidden;cursor:pointer;border:3px solid rgba(255,255,255,.1);transition:all .2s;">
-        <span id="adminAvatarBigLetra">A</span>
-      </div>
-      <input type="file" id="inputFotoAdmin" accept="image/*" style="display:none" onchange="previsualizarFotoAdmin(this)">
-      <span style="font-size:12px;color:#94a3b8;">Clique no avatar para trocar foto</span>
-    </div>
-    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">Nome</label>
-      <input type="text" id="inputNomeAdmin" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e5e7eb;font-size:14px;font-family:inherit;">
-    </div>
-    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">E-mail</label>
-      <input type="text" id="inputEmailAdmin" disabled style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px;color:#64748b;font-size:14px;font-family:inherit;cursor:not-allowed;">
-    </div>
-    <button onclick="salvarPerfilAdmin()" style="width:100%;background:#6366f1;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;">💾 Salvar</button>
-    <p id="msgPerfilAdmin" style="text-align:center;margin-top:12px;font-size:13px;color:#22c55e;display:none;"></p>
-  </div>
-</div>
-
-<!-- MODAL INFO USUÁRIO -->
-<div id="modalInfoUser" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:380px;position:relative;text-align:center;">
-    <button onclick="document.getElementById('modalInfoUser').style.display='none';" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
-    <div id="infoUserAvatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;overflow:hidden;"></div>
-    <h3 id="infoUserNome" style="font-size:20px;font-weight:800;margin-bottom:6px;"></h3>
-    <p id="infoUserEmail" style="font-size:14px;color:#94a3b8;margin-bottom:16px;"></p>
-    <p id="infoUserCadastro" style="font-size:13px;color:#64748b;"></p>
-  </div>
-</div>
 </body>
 </html>
