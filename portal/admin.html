@@ -75,6 +75,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 .btn-remove { background: var(--red); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
 .btn-remove:hover { background: #dc2626; }
 .yt-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.3); color: #ff4444; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+@keyframes fadeNewComent { from{opacity:0;transform:translateY(-10px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
 @media (max-width: 768px) {
   .container { padding: 16px; }
   .post-item { flex-direction: column; }
@@ -826,92 +827,132 @@ async function carregarPosts() {
 // ══════════════════════════════════════════════
 // COMENTÁRIOS ADMIN — com respostas e fotos
 // ══════════════════════════════════════════════
-async function toggleComentariosAdmin(postId) {
+function toggleComentariosAdmin(postId) {
   const section = document.getElementById('comentarios-admin-' + postId);
-  if (section.style.display === 'none') { section.style.display = 'block'; await carregarComentariosAdmin(postId); }
-  else section.style.display = 'none';
+  const btn = section.previousElementSibling && section.previousElementSibling.querySelector && section.previousElementSibling.querySelector('[onclick*="toggleComentariosAdmin"]');
+  if (section.style.display === 'none') {
+    section.style.display = 'block';
+    iniciarListenerComentariosAdmin(postId);
+  } else {
+    section.style.display = 'none';
+    if (_adminListeners[postId]) { _adminListeners[postId](); delete _adminListeners[postId]; }
+  }
 }
 
-async function carregarComentariosAdmin(postId) {
+function iniciarListenerComentariosAdmin(postId) {
+  if (_adminListeners[postId]) return; // já ouvindo
   const lista = document.getElementById('lista-admin-' + postId);
   const countEl = document.getElementById('count-admin-' + postId);
   lista.innerHTML = '<p style="text-align:center;padding:12px;color:#64748b;font-size:13px;">Carregando...</p>';
-  try {
-    const snapshot = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','desc').get();
-    if (countEl) countEl.textContent = snapshot.size;
-    if (snapshot.empty) { lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>'; return; }
-    let html = '';
-    snapshot.forEach(doc => {
-      const co = doc.data();
-      const dateCriado = co.criadoEm ? co.criadoEm.toDate() : null;
-      const tempo = tempoRelativo(dateCriado);
-      const nomeAutor = co.autor || 'Aluno';
-      const av = avatarHtml(nomeAutor, co.fotoUrl || null, 34);
 
-      // Respostas
-      let respostasHtml = '';
-      if (co.respostas && co.respostas.length > 0) {
-        co.respostas.forEach((r, idx) => {
-          const rTempo = tempoRelativo(r.criadoEm);
-          const rAv = avatarHtml(r.autor||'?', r.fotoUrl||null, 28);
-          respostasHtml += `<div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;background:rgba(99,102,241,0.06);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;">
-            ${rAv}
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                <strong style="font-size:12px;color:#a5b4fc;">${r.autor||'?'}</strong>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <span style="font-size:11px;color:#475569;">${rTempo}</span>
-                  <button onclick="deletarRespostaAdmin('${postId}','${doc.id}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
-                </div>
-              </div>
-              <p style="margin:0;font-size:13px;color:var(--text);line-height:1.5;">${r.texto}</p>
-            </div>
-          </div>`;
-        });
-      }
+  const unsub = db.collection('posts').doc(postId).collection('comentarios')
+    .orderBy('criadoEm','asc')
+    .onSnapshot(async snap => {
+      if (countEl) countEl.textContent = snap.size;
+      if (snap.empty) { lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>'; return; }
 
-      html += `<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;">
-        <div onclick="verInfoUsuario('${co.autorId||''}','${nomeAutor}')" title="Ver info" style="cursor:pointer;border:2px solid transparent;border-radius:50%;transition:border .2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${av}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
-              <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
-            </div>
-          </div>
-          <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
-          ${respostasHtml}
-          <!-- Form resposta admin -->
-          <div id="form-resposta-admin-${doc.id}" style="display:none;margin-top:10px;">
-            <div style="display:flex;gap:8px;align-items:flex-start;">
-              <div id="respAdminAv-${doc.id}" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
-              <div style="flex:1;">
-                <textarea id="texto-resposta-admin-${doc.id}" placeholder="Responder como admin..." style="width:100%;min-height:60px;background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.4);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;"></textarea>
-                <div style="display:flex;gap:8px;margin-top:6px;">
-                  <button class="btn btn-sm" onclick="enviarRespostaAdmin('${postId}','${doc.id}')" style="background:#6366f1;color:#fff;">↩ Responder</button>
-                  <button class="btn btn-sm" onclick="document.getElementById('form-resposta-admin-${doc.id}').style.display='none'" style="background:rgba(255,255,255,0.1);color:var(--text);">Cancelar</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button onclick="mostrarFormRespostaAdmin('${doc.id}')" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:12px;font-weight:600;padding:4px 0;margin-top:4px;">↩ Responder</button>
+      const existingIds = new Set([...lista.querySelectorAll('[data-coment-id]')].map(el=>el.getAttribute('data-coment-id')));
+      const snapIds = new Set(snap.docs.map(d=>d.id));
+
+      // Remove deletados com animação
+      lista.querySelectorAll('[data-coment-id]').forEach(el => {
+        if (!snapIds.has(el.getAttribute('data-coment-id'))) {
+          el.style.transition='all .25s'; el.style.opacity='0'; el.style.transform='translateX(-6px)';
+          setTimeout(()=>el.remove(),250);
+        }
+      });
+
+      // Adiciona/atualiza
+      snap.forEach(doc => {
+        const co = doc.data();
+        let el = lista.querySelector('[data-coment-id="'+doc.id+'"]');
+        if (el) {
+          // Atualiza texto
+          const textEl = el.querySelector('[data-comment-text]');
+          if (textEl) textEl.innerHTML = co.texto + (co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : '');
+          // Atualiza respostas
+          const respEl = el.querySelector('[data-respostas]');
+          if (respEl) respEl.innerHTML = buildRespostasAdmin(postId, doc.id, co.respostas||[]);
+        } else {
+          const novoEl = document.createElement('div');
+          novoEl.setAttribute('data-coment-id', doc.id);
+          novoEl.style.cssText = 'display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;' + (existingIds.size>0 ? 'animation:fadeNewComent .35s cubic-bezier(.34,1.56,.64,1) both;' : '');
+          novoEl.innerHTML = buildComentarioAdmin(postId, doc.id, co);
+          lista.appendChild(novoEl);
+          lista.querySelector('p[style*="text-align:center"]')?.remove();
+        }
+      });
+
+      // Preenche avatars dos forms de resposta
+      snap.forEach(doc => {
+        const el = document.getElementById('respAdminAv-' + doc.id);
+        if (!el) return;
+        if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+        else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
+      });
+    }, err => {
+      lista.innerHTML = '<p style="color:var(--red);padding:16px;">Erro ao carregar: ' + err.message + '</p>';
+    });
+
+  _adminListeners[postId] = unsub;
+}
+
+function buildComentarioAdmin(postId, docId, co) {
+  const dateCriado = co.criadoEm ? (co.criadoEm.toDate ? co.criadoEm.toDate() : new Date(co.criadoEm)) : null;
+  const tempo = dateCriado ? tempoRelativo(dateCriado) : 'agora mesmo';
+  const nomeAutor = co.autor || 'Aluno';
+  const av = avatarHtml(nomeAutor, co.fotoUrl||null, 34);
+  return \`
+    <div onclick="verInfoUsuario('\${co.autorId||''}','\${nomeAutor}')" title="Ver info" style="cursor:pointer;border:2px solid transparent;border-radius:50%;transition:border .2s;align-self:flex-start;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">\${av}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <strong style="color:var(--accent);font-size:13px;">\${nomeAutor}</strong>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--text-muted);" title="\${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">\${tempo}</span>
+          <button onclick="deletarComentarioAdmin('\${postId}','\${docId}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
         </div>
-      </div>`;
-    });
-    lista.innerHTML = html;
+      </div>
+      <p style="margin:0 0 8px;font-size:14px;line-height:1.6;" data-comment-text="1">\${co.texto}\${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+      <div data-respostas="1">\${buildRespostasAdmin(postId, docId, co.respostas||[])}</div>
+      <div id="form-resposta-admin-\${docId}" style="display:none;margin-top:10px;">
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <div id="respAdminAv-\${docId}" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
+          <div style="flex:1;">
+            <textarea id="texto-resposta-admin-\${docId}" placeholder="Responder como admin..." style="width:100%;min-height:60px;background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.4);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <button class="btn btn-sm" onclick="enviarRespostaAdmin('\${postId}','\${docId}')" style="background:#6366f1;color:#fff;">↩ Responder</button>
+              <button class="btn btn-sm" onclick="document.getElementById('form-resposta-admin-\${docId}').style.display='none'" style="background:rgba(255,255,255,0.1);color:var(--text);">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button onclick="mostrarFormRespostaAdmin('\${docId}')" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:12px;font-weight:600;padding:4px 0;margin-top:4px;">↩ Responder</button>
+    </div>\`;
+}
 
-    // Preenche avatars dos forms de resposta
-    snapshot.forEach(doc => {
-      const el = document.getElementById('respAdminAv-' + doc.id);
-      if (!el) return;
-      if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-      else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
-    });
-  } catch (err) {
-    console.error('Erro comentários admin:', err);
-    lista.innerHTML = '<p style="color:var(--red);padding:16px;">Erro ao carregar: ' + err.message + '</p>';
-  }
+function buildRespostasAdmin(postId, comentarioId, respostas) {
+  if (!respostas||!respostas.length) return '';
+  return respostas.map((r,idx) => {
+    const rTempo = tempoRelativo(r.criadoEm ? (typeof r.criadoEm==='string' ? new Date(r.criadoEm) : r.criadoEm.toDate?r.criadoEm.toDate():new Date(r.criadoEm)) : new Date());
+    const rAv = avatarHtml(r.autor||'?', r.fotoUrl||null, 28);
+    return \`<div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;background:rgba(99,102,241,0.06);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;">
+      \${rAv}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <strong style="font-size:12px;color:#a5b4fc;">\${r.autor||'?'}</strong>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:11px;color:#475569;">\${rTempo}</span>
+            <button onclick="deletarRespostaAdmin('\${postId}','\${comentarioId}',\${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
+          </div>
+        </div>
+        <p style="margin:0;font-size:13px;color:var(--text);line-height:1.5;">\${r.texto}</p>
+      </div>
+    </div>\`;
+  }).join('');
+}
+
+async function carregarComentariosAdmin(postId) {
+  iniciarListenerComentariosAdmin(postId);
 }
 
 function mostrarFormRespostaAdmin(comentarioId) {
@@ -936,7 +977,7 @@ async function enviarRespostaAdmin(postId, comentarioId) {
     });
     textarea.value = '';
     document.getElementById('form-resposta-admin-' + comentarioId).style.display = 'none';
-    await carregarComentariosAdmin(postId);
+    // onSnapshot atualiza automaticamente
   } catch (err) { alert('Erro ao enviar resposta: ' + err.message); }
 }
 
@@ -948,7 +989,7 @@ async function deletarRespostaAdmin(postId, comentarioId, idx) {
     const respostas = snap.data().respostas || [];
     respostas.splice(idx, 1);
     await docRef.update({ respostas });
-    await carregarComentariosAdmin(postId);
+    // onSnapshot atualiza automaticamente
   } catch (err) { alert('Erro ao deletar resposta'); }
 }
 
@@ -956,6 +997,8 @@ async function enviarComentarioAdmin(postId) {
   const textarea = document.getElementById('texto-admin-' + postId);
   const texto = textarea.value.trim();
   if (!texto) { alert('Digite um comentário!'); return; }
+  const btn = textarea.parentElement?.querySelector('button');
+  if (btn) { btn.disabled=true; btn.textContent='...'; }
   try {
     await db.collection('posts').doc(postId).collection('comentarios').add({
       texto,
@@ -965,15 +1008,16 @@ async function enviarComentarioAdmin(postId) {
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
     textarea.value = '';
-    await carregarComentariosAdmin(postId);
+    // onSnapshot atualiza automaticamente
   } catch (err) { alert('Erro ao enviar comentário: ' + err.message); }
+  finally { if (btn) { btn.disabled=false; btn.textContent='Enviar'; } }
 }
 
 async function deletarComentarioAdmin(postId, comentarioId) {
   if (!confirm('Deletar este comentário?')) return;
   try {
     await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
-    await carregarComentariosAdmin(postId);
+    // onSnapshot atualiza automaticamente
   } catch (err) { alert('Erro ao deletar'); }
 }
 
