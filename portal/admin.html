@@ -886,36 +886,80 @@ function tempoRelativo(date) {
   return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
 }
 
-async function carregarComentariosAdmin(postId) {
+function carregarComentariosAdmin(postId) {
   const lista = document.getElementById('lista-admin-' + postId);
   const countEl = document.getElementById('count-admin-' + postId);
-  try {
-    const snapshot = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','desc').get();
-    if (countEl) countEl.textContent = snapshot.size;
-    if (snapshot.empty) { lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>'; return; }
-    let html = '';
-    snapshot.forEach(doc => {
-      const co = doc.data();
-      const dateCriado = co.criadoEm ? co.criadoEm.toDate() : null;
-      const tempo = tempoRelativo(dateCriado);
-      const nomeAutor = co.autor || 'Aluno';
-      const inicial = nomeAutor.charAt(0).toUpperCase();
-      html += `<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;">
-        <div onclick="verInfoUsuario('${co.autorId}','${nomeAutor}')" title="Ver info do usuário" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;cursor:pointer;border:2px solid transparent;transition:all .2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${co.fotoUrl ? `<img src="${co.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : inicial}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
-              <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
+  lista.innerHTML = '<p style="text-align:center;padding:16px;color:#64748b;font-size:13px;">Carregando...</p>';
+
+  db.collection('posts').doc(postId).collection('comentarios')
+    .orderBy('criadoEm','desc')
+    .onSnapshot(snapshot => {
+      if (countEl) countEl.textContent = snapshot.size;
+      if (snapshot.empty) { lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>'; return; }
+      let html = '';
+      snapshot.forEach(doc => {
+        const co = doc.data();
+        const dateCriado = co.criadoEm ? co.criadoEm.toDate() : null;
+        const tempo = tempoRelativo(dateCriado);
+        const nomeAutor = co.autor || 'Aluno';
+        const inicial = nomeAutor.charAt(0).toUpperCase();
+        const fotoHtml = co.fotoUrl
+          ? `<img src="${co.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${inicial}'">`
+          : inicial;
+        html += `<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;">
+          <div onclick="verInfoUsuario('${co.autorId}','${nomeAutor}')" title="Ver info" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;cursor:pointer;overflow:hidden;">${fotoHtml}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
+                <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
+              </div>
             </div>
+            <p style="margin:0 0 6px;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+            <div id="respostas-admin-${doc.id}" style="margin-top:6px;"></div>
           </div>
-          <p style="margin:0;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
-        </div>
-      </div>`;
+        </div>`;
+      });
+      lista.innerHTML = html;
+      snapshot.forEach(doc => carregarRespostasAdmin(postId, doc.id));
     });
-    lista.innerHTML = html;
-  } catch (err) { lista.innerHTML = '<p style="color:var(--red);">Erro ao carregar</p>'; }
+}
+
+async function carregarRespostasAdmin(postId, comentarioId) {
+  const container = document.getElementById('respostas-admin-' + comentarioId);
+  if (!container) return;
+  const snap = await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').orderBy('criadoEm','asc').get();
+  if (snap.empty) { container.innerHTML = ''; return; }
+  let html = '';
+  snap.forEach(doc => {
+    const r = doc.data();
+    const tempo = tempoRelativo(r.criadoEm ? r.criadoEm.toDate() : null);
+    const inicial = (r.autor||'A').charAt(0).toUpperCase();
+    const fotoHtml = r.fotoUrl ? `<img src="${r.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${inicial}'">` : inicial;
+    html += `<div style="display:flex;gap:8px;align-items:flex-start;background:rgba(255,255,255,0.03);border-left:3px solid #6366f1;padding:8px 12px;border-radius:6px;margin-bottom:6px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;">${fotoHtml}</div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:12px;font-weight:700;color:#818cf8;">${r.autor||'Aluno'}</span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:11px;color:#64748b;">${tempo}</span>
+            <button onclick="deletarRespostaAdmin('${postId}','${comentarioId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
+          </div>
+        </div>
+        <p style="margin:0;font-size:13px;line-height:1.5;">${r.texto}</p>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+async function deletarRespostaAdmin(postId, comentarioId, respostaId) {
+  if (!confirm('Deletar esta resposta?')) return;
+  try {
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').doc(respostaId).delete();
+    await carregarRespostasAdmin(postId, comentarioId);
+  } catch(e) { alert('Erro ao deletar resposta.'); }
 }
 
 async function enviarComentarioAdmin(postId) {

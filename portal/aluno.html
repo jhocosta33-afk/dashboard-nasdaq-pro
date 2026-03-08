@@ -106,6 +106,12 @@ h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(
 .image-modal img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px; }
 .image-modal-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: #fff; font-size: 28px; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; }
 .image-modal-close:hover { background: var(--red); transform: rotate(90deg); }
+.reply-btn { background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;font-weight:600;padding:2px 6px;border-radius:4px;transition:all .2s; }
+.reply-btn:hover { color:var(--blue); }
+.resposta-item { display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-left:3px solid #6366f1;padding:10px 14px;border-radius:8px;margin-top:8px; }
+.reply-form { margin-top:8px;display:flex;gap:8px;align-items:flex-start; }
+.reply-form textarea { flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;resize:none;min-height:60px;transition:all .2s; }
+.reply-form textarea:focus { outline:none;border-color:#6366f1; }
 @media (max-width: 768px) {
   .container { padding: 16px; }
   .welcome-banner { padding: 20px; }
@@ -401,6 +407,8 @@ async function salvarPerfil() {
 }
 
 // ── COMENTÁRIOS ──
+const _listeners = {}; // guarda unsubscribe de onSnapshot por postId
+
 function tempoRelativo(date) {
   if (!date) return '';
   const diff = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -411,53 +419,117 @@ function tempoRelativo(date) {
   return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
 }
 
-async function toggleComentarios(postId) {
-  const section = document.getElementById('comentarios-' + postId);
-  if (section.style.display === 'none') { section.style.display = 'block'; await carregarComentarios(postId); }
-  else section.style.display = 'none';
+function avatarHTML(nome, fotoUrl, size=34) {
+  const s = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;`;
+  if (fotoUrl) return `<div style="${s}background:linear-gradient(135deg,#6366f1,#22c55e);"><img src="${fotoUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='${(nome||'A').charAt(0).toUpperCase()}'"></div>`;
+  return `<div style="${s}background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.4)}px;font-weight:800;color:#fff;">${(nome||'A').charAt(0).toUpperCase()}</div>`;
 }
 
-async function carregarComentarios(postId) {
+function renderComentario(postId, docId, data) {
+  const dateCriado = data.criadoEm ? data.criadoEm.toDate() : null;
+  const tempo = tempoRelativo(dateCriado);
+  const isOwner = usuarioAtual && data.autorId === usuarioAtual.uid;
+  const nomeAutor = data.autor || 'Aluno';
+  // Sempre usa nome/foto atual do usuário logado para seus próprios comentários
+  const nomeDisplay = (isOwner) ? usuarioAtual.nome : nomeAutor;
+  const fotoDisplay = (isOwner) ? (usuarioAtual.fotoUrl || null) : (data.fotoUrl || null);
+
+  return `<div class="comentario-item" id="comentario-${docId}">
+    ${avatarHTML(nomeDisplay, fotoDisplay)}
+    <div class="comentario-body">
+      <div class="comentario-header">
+        <span class="comentario-autor">${nomeDisplay}</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="comentario-data" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
+          <button class="reply-btn" onclick="mostrarFormResposta('${postId}','${docId}')">↩ responder</button>
+          ${isOwner ? `
+            <button onclick="editarComentario('${postId}','${docId}')" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:13px;padding:2px 4px;transition:all .2s;" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='#64748b'">✏️</button>
+            <button onclick="deletarComentario('${postId}','${docId}')" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:13px;padding:2px 4px;transition:all .2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#64748b'">🗑️</button>
+          ` : ''}
+        </div>
+      </div>
+      <p class="comentario-texto" id="texto-display-${docId}">${data.texto}${data.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+      <div id="edit-form-${docId}" style="display:none;margin-top:8px;">
+        <textarea id="edit-textarea-${docId}" style="width:100%;min-height:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;">${data.texto}</textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
+          <button onclick="cancelarEdicao('${docId}')" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;">Cancelar</button>
+          <button onclick="salvarEdicao('${postId}','${docId}')" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Salvar</button>
+        </div>
+      </div>
+      <div id="reply-form-${docId}" style="display:none;" class="reply-form">
+        <textarea id="reply-textarea-${docId}" placeholder="Responder ${nomeDisplay}..." rows="2"></textarea>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <button onclick="enviarResposta('${postId}','${docId}')" class="btn btn-primary" style="padding:6px 12px;font-size:12px;white-space:nowrap;">Enviar</button>
+          <button onclick="ocultarFormResposta('${docId}')" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;">✕</button>
+        </div>
+      </div>
+      <div id="respostas-${docId}"></div>
+    </div>
+  </div>`;
+}
+
+function toggleComentarios(postId) {
+  const section = document.getElementById('comentarios-' + postId);
+  const isVisible = section.style.display !== 'none';
+  if (isVisible) {
+    section.style.display = 'none';
+    // Para o listener ao fechar
+    if (_listeners[postId]) { _listeners[postId](); delete _listeners[postId]; }
+  } else {
+    section.style.display = 'block';
+    iniciarListenerComentarios(postId);
+  }
+}
+
+function iniciarListenerComentarios(postId) {
+  if (_listeners[postId]) return; // já está ouvindo
   const lista = document.getElementById('lista-' + postId);
   const countEl = document.getElementById('count-' + postId);
-  try {
-    const snap = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','desc').get();
-    if (countEl) countEl.textContent = snap.size > 0 ? '(' + snap.size + ')' : '';
-    if (snap.empty) { lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px;">Nenhum comentário ainda. Seja o primeiro!</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const c = doc.data();
-      const dateCriado = c.criadoEm ? c.criadoEm.toDate() : null;
-      const tempo = tempoRelativo(dateCriado);
-      const isOwner = usuarioAtual && c.autorId === usuarioAtual.uid;
-      const nomeAutor = c.autor || 'Aluno';
-      const inicial = nomeAutor.charAt(0).toUpperCase();
-      html += `<div class="comentario-item" id="comentario-${doc.id}">
-        <div class="comentario-avatar">${inicial}</div>
-        <div class="comentario-body">
-          <div class="comentario-header">
-            <span class="comentario-autor">${nomeAutor}</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="comentario-data" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
-              ${isOwner ? `
-                <button onclick="editarComentario('${postId}','${doc.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--text-muted)'">✏️</button>
-                <button onclick="deletarComentario('${postId}','${doc.id}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">🗑️</button>
-              ` : ''}
-            </div>
-          </div>
-          <p class="comentario-texto" id="texto-display-${doc.id}">${c.texto}${c.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
-          <div id="edit-form-${doc.id}" style="display:none;margin-top:8px;">
-            <textarea id="edit-textarea-${doc.id}" style="width:100%;min-height:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;">${c.texto}</textarea>
-            <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
-              <button onclick="cancelarEdicao('${doc.id}')" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;">Cancelar</button>
-              <button onclick="salvarEdicao('${postId}','${doc.id}')" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Salvar</button>
-            </div>
+  lista.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:13px;">Carregando...</div>';
+
+  const unsub = db.collection('posts').doc(postId).collection('comentarios')
+    .orderBy('criadoEm','desc')
+    .onSnapshot(snap => {
+      if (countEl) countEl.textContent = snap.size > 0 ? `(${snap.size})` : '';
+      if (snap.empty) { lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px;">Nenhum comentário ainda. Seja o primeiro!</p>'; return; }
+      let html = '';
+      snap.forEach(doc => { html += renderComentario(postId, doc.id, doc.data()); });
+      lista.innerHTML = html;
+      // Carrega respostas de cada comentário
+      snap.forEach(doc => carregarRespostas(postId, doc.id));
+    }, err => {
+      lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>';
+    });
+  _listeners[postId] = unsub;
+}
+
+async function carregarRespostas(postId, comentarioId) {
+  const container = document.getElementById('respostas-' + comentarioId);
+  if (!container) return;
+  const snap = await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').orderBy('criadoEm','asc').get();
+  if (snap.empty) { container.innerHTML = ''; return; }
+  let html = '';
+  snap.forEach(doc => {
+    const r = doc.data();
+    const isOwner = usuarioAtual && r.autorId === usuarioAtual.uid;
+    const nomeR = isOwner ? usuarioAtual.nome : (r.autor || 'Aluno');
+    const fotoR = isOwner ? (usuarioAtual.fotoUrl || null) : (r.fotoUrl || null);
+    const tempo = tempoRelativo(r.criadoEm ? r.criadoEm.toDate() : null);
+    html += `<div class="resposta-item" id="resposta-${doc.id}">
+      ${avatarHTML(nomeR, fotoR, 28)}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-size:12px;font-weight:700;color:#818cf8;">${nomeR}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:11px;color:#64748b;">${tempo}</span>
+            ${isOwner ? `<button onclick="deletarResposta('${postId}','${comentarioId}','${doc.id}')" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#64748b'">🗑️</button>` : ''}
           </div>
         </div>
-      </div>`;
-    });
-    lista.innerHTML = html;
-  } catch (err) { lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>'; }
+        <p style="font-size:13px;color:var(--text);line-height:1.5;margin:0;">${r.texto}</p>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
 }
 
 async function enviarComentario(postId) {
@@ -465,27 +537,64 @@ async function enviarComentario(postId) {
   const textarea = document.getElementById('textarea-' + postId);
   const texto = textarea.value.trim();
   if (!texto) { textarea.focus(); return; }
+  const btn = textarea.nextElementSibling?.querySelector('button');
   try {
-    textarea.disabled = true;
+    textarea.disabled = true; if(btn) btn.disabled = true;
     await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid, fotoUrl: usuarioAtual.fotoUrl || null,
+      texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid,
+      fotoUrl: usuarioAtual.fotoUrl || null,
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
-    textarea.value = ''; textarea.disabled = false;
-    await carregarComentarios(postId);
-  } catch (err) { alert('Erro ao enviar. Tente novamente.'); textarea.disabled = false; }
+    textarea.value = '';
+  } catch (err) { alert('Erro ao enviar. Tente novamente.'); }
+  finally { textarea.disabled = false; if(btn) btn.disabled = false; }
+}
+
+function mostrarFormResposta(postId, comentarioId) {
+  document.querySelectorAll('[id^="reply-form-"]').forEach(el => el.style.display = 'none');
+  const form = document.getElementById('reply-form-' + comentarioId);
+  if (form) { form.style.display = 'flex'; document.getElementById('reply-textarea-' + comentarioId)?.focus(); }
+}
+function ocultarFormResposta(comentarioId) {
+  const form = document.getElementById('reply-form-' + comentarioId);
+  if (form) form.style.display = 'none';
+}
+
+async function enviarResposta(postId, comentarioId) {
+  if (!usuarioAtual) { alert('Você precisa estar logado.'); return; }
+  const textarea = document.getElementById('reply-textarea-' + comentarioId);
+  const texto = textarea.value.trim();
+  if (!texto) { textarea.focus(); return; }
+  try {
+    textarea.disabled = true;
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').add({
+      texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid,
+      fotoUrl: usuarioAtual.fotoUrl || null,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    textarea.value = '';
+    ocultarFormResposta(comentarioId);
+    await carregarRespostas(postId, comentarioId);
+  } catch(e) { alert('Erro ao enviar resposta.'); }
+  finally { textarea.disabled = false; }
+}
+
+async function deletarResposta(postId, comentarioId, respostaId) {
+  if (!confirm('Apagar esta resposta?')) return;
+  try {
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).collection('respostas').doc(respostaId).delete();
+    await carregarRespostas(postId, comentarioId);
+  } catch(e) { alert('Erro ao apagar resposta.'); }
 }
 
 function editarComentario(postId, comentarioId) {
   document.getElementById('texto-display-' + comentarioId).style.display = 'none';
   document.getElementById('edit-form-' + comentarioId).style.display = 'block';
 }
-
 function cancelarEdicao(comentarioId) {
   document.getElementById('texto-display-' + comentarioId).style.display = 'block';
   document.getElementById('edit-form-' + comentarioId).style.display = 'none';
 }
-
 async function salvarEdicao(postId, comentarioId) {
   const textarea = document.getElementById('edit-textarea-' + comentarioId);
   const texto = textarea.value.trim();
@@ -494,15 +603,12 @@ async function salvarEdicao(postId, comentarioId) {
     await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({
       texto, editadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
-    await carregarComentarios(postId);
   } catch (err) { alert('Erro ao editar. Tente novamente.'); }
 }
-
 async function deletarComentario(postId, comentarioId) {
   if (!confirm('Apagar seu comentário?')) return;
   try {
     await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
-    await carregarComentarios(postId);
   } catch (err) { alert('Erro ao apagar. Tente novamente.'); }
 }
 
