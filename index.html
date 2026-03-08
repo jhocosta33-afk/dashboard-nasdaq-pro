@@ -352,14 +352,7 @@ body.basic-mode .pro-only{display:none!important}
       <a href="https://br.investing.com/economic-calendar/" target="_blank" class="market-link">Ver Completo →</a>
      </div>
     </div>
-    <div class="calendar-content" id="tvCalendarContainer">
-     <!-- TradingView Economic Calendar Widget -->
-     <div class="tradingview-widget-container" style="width:100%;height:700px;">
-      <iframe scrolling="no" allowtransparency="true" frameborder="0"
-        src="https://www.tradingview.com/embed-widget/economic-calendar/?locale=pt_BR#%7B%22colorTheme%22%3A%22dark%22%2C%22isTransparent%22%3Atrue%2C%22width%22%3A%22100%25%22%2C%22height%22%3A%22700%22%2C%22importanceFilter%22%3A%22-1%2C0%2C1%22%2C%22currencyFilter%22%3A%22USD%2CBRL%22%7D"
-        style="width:100%;height:700px;border:none;" id="investingCalendar">
-      </iframe>
-     </div>
+    <div class="calendar-content" id="tvCalendarContainer" style="min-height:700px;">
     </div>
    </div>
   </div>
@@ -477,14 +470,7 @@ const Dashboard = {
     if (content) content.classList.add('active');
     if (btn) btn.classList.add('active');
     // Carrega calendário automaticamente ao abrir a aba
-    if (aba === 'mercado') {
-      setTimeout(() => {
-        const container = document.getElementById('tvCalendarContainer');
-        if (!container) return;
-        const src = 'https://www.tradingview.com/embed-widget/economic-calendar/?locale=pt_BR#%7B%22colorTheme%22%3A%22dark%22%2C%22isTransparent%22%3Atrue%2C%22width%22%3A%22100%25%22%2C%22height%22%3A%22700%22%2C%22importanceFilter%22%3A%22-1%2C0%2C1%22%2C%22currencyFilter%22%3A%22USD%2CBRL%22%7D';
-        container.innerHTML = `<iframe src="${src}" scrolling="no" allowtransparency="true" frameborder="0" style="width:100%;height:700px;border:none;" id="investingCalendar"></iframe>`;
-      }, 150);
-    }
+    if (aba === 'mercado') setTimeout(() => this.atualizarCalendario(), 150);
   },
 
   inicializarSidebarMobile() {
@@ -865,13 +851,16 @@ const Dashboard = {
   },
 
   atualizarCalendario(){
-    const iframe=document.getElementById('investingCalendar');if(!iframe)return;
-    const btn=document.querySelector('.calendar-refresh-btn');if(btn){btn.textContent='⏳ Atualizando...';btn.classList.add('loading');}
-    const src='https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone,timeselector,filters&countries=5,25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4&calType=day&timeZone=12&lang=12';
-    const container=iframe.parentElement;iframe.remove();
-    const ni=document.createElement('iframe');ni.id='investingCalendar';ni.src=src;ni.setAttribute('width','700');ni.setAttribute('height','700');ni.setAttribute('frameborder','0');ni.setAttribute('scrolling','yes');ni.style.display='block';ni.style.border='none';
-    ni.onload=()=>{if(btn){btn.textContent='🔄 Atualizar';btn.classList.remove('loading');}};
-    container.appendChild(ni);
+    const container = document.getElementById('tvCalendarContainer');
+    if (!container) return;
+    // Usa investing.com via iframe direto — mais confiável
+    container.innerHTML = `
+      <iframe
+        src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=1,2,3&features=datepicker,timezone,timeselector,filters&countries=5,25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4&calType=week&timeZone=12&lang=12"
+        frameborder="0" scrolling="yes" allowtransparency="true"
+        style="width:100%;height:720px;border:none;background:transparent;"
+        id="investingCalendar">
+      </iframe>`;
   },
 
   inicializarZoomFoto(container,img){
