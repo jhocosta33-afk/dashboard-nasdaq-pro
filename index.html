@@ -282,6 +282,7 @@ body.basic-mode .pro-only{display:none!important}
 
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="theme.js"></script>
 </head>
 <body>
 
@@ -528,19 +529,11 @@ const Dashboard = {
   },
 
   carregarTema() {
-    const tema = localStorage.getItem('dashboard-tema')||'dark';
-    if(tema==='light') document.body.classList.add('light-theme');
-    else document.body.classList.remove('light-theme');
-    const icon=document.getElementById('themeIcon');
-    if(icon) icon.textContent=tema==='dark'?'🌙':'☀️';
+    if(window.NasTheme) NasTheme.carregar();
   },
 
   toggleTema() {
-    document.body.classList.toggle('light-theme');
-    const tema=document.body.classList.contains('light-theme')?'light':'dark';
-    localStorage.setItem('dashboard-tema',tema);
-    const icon=document.getElementById('themeIcon');
-    if(icon){icon.style.transform='rotate(360deg) scale(0)';setTimeout(()=>{icon.textContent=tema==='dark'?'🌙':'☀️';icon.style.transform='rotate(0deg) scale(1)';},150);}
+    if(window.NasTheme) NasTheme.toggle();
   },
 
   mudarAba(aba) {
