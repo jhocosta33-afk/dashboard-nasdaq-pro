@@ -16,6 +16,23 @@
   --red: #ef4444;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
+.modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:420px;position:relative; }
+.modal-box h3 { font-size:18px;font-weight:800;margin-bottom:24px; }
+.modal-box .close-btn { position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer; }
+.avatar-upload { display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px; }
+.avatar-big { width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;overflow:hidden;cursor:pointer;border:3px solid rgba(255,255,255,.1);transition:all .2s; }
+.avatar-big:hover { border-color:#6366f1; }
+.avatar-big img { width:100%;height:100%;object-fit:cover; }
+.avatar-hint { font-size:12px;color:#94a3b8; }
+.profile-field { margin-bottom:16px; }
+.profile-field label { display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px; }
+.profile-field input { width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e5e7eb;font-size:14px;font-family:inherit; }
+.profile-field input:focus { outline:none;border-color:#6366f1; }
+.avatar-header { width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;cursor:pointer;overflow:hidden;border:2px solid transparent;transition:all .2s; }
+.avatar-header:hover { border-color:#6366f1; }
+.avatar-header img { width:100%;height:100%;object-fit:cover; }
 body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
 header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 100; }
 .header-left { display: flex; align-items: center; gap: 12px; }
@@ -109,7 +126,10 @@ h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(
     <h1>Área do Aluno</h1>
   </div>
   <div class="user-info">
-    <span id="userName">Aluno</span>
+    <div class="avatar-header" id="avatarHeader" onclick="abrirPerfil()" title="Editar perfil">
+      <span id="avatarLetra">A</span>
+    </div>
+    <span id="userName" style="cursor:pointer;font-weight:600;" onclick="abrirPerfil()">Aluno</span>
     <button class="btn-logout" onclick="fazerLogout()">Sair</button>
   </div>
 </header>
@@ -197,13 +217,14 @@ auth.onAuthStateChanged(async (user) => {
       alert('⏳ Sua conta ainda aguarda aprovação.');
       await auth.signOut(); window.location.href = 'login.html'; return;
     }
-    usuarioAtual = { uid: user.uid, nome: userData.nome || user.displayName || user.email.split('@')[0] };
+    usuarioAtual = { uid: user.uid, nome: userData.nome || user.displayName || user.email.split('@')[0], email: user.email, fotoUrl: userData.fotoUrl || null };
     document.getElementById('userName').textContent = usuarioAtual.nome;
     document.getElementById('welcomeMsg').textContent = `Bem-vindo de volta, ${usuarioAtual.nome.split(' ')[0]}! 👋`;
+    atualizarAvatarUI();
     carregarPosts();
   } catch (err) {
     console.error('Erro auth:', err);
-    usuarioAtual = { uid: user.uid, nome: user.displayName || 'Aluno' };
+    usuarioAtual = { uid: user.uid, nome: user.displayName || 'Aluno', email: user.email, fotoUrl: null };
     carregarPosts();
   }
 });
@@ -325,6 +346,60 @@ function aplicarFiltro(categoria, btnEl) {
   renderizarPosts();
 }
 
+// ── PERFIL ──
+function atualizarAvatarUI() {
+  const letra = usuarioAtual.nome.charAt(0).toUpperCase();
+  ['avatarLetra','avatarBigLetra'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=letra; });
+  if (usuarioAtual.fotoUrl) {
+    ['avatarHeader','avatarBig'].forEach(id => {
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = `<img src="${usuarioAtual.fotoUrl}" alt="foto">`;
+    });
+  }
+}
+
+function abrirPerfil() {
+  document.getElementById('inputNomePerfil').value = usuarioAtual.nome;
+  document.getElementById('inputEmailPerfil').value = usuarioAtual.email || '';
+  if (usuarioAtual.fotoUrl) {
+    document.getElementById('avatarBig').innerHTML = `<img src="${usuarioAtual.fotoUrl}" alt="foto">`;
+  } else {
+    document.getElementById('avatarBig').innerHTML = `<span id="avatarBigLetra">${usuarioAtual.nome.charAt(0).toUpperCase()}</span>`;
+  }
+  document.getElementById('msgPerfil').style.display = 'none';
+  document.getElementById('modalPerfil').classList.add('open');
+}
+function fecharPerfil() { document.getElementById('modalPerfil').classList.remove('open'); }
+
+function previsualizarFoto(input) {
+  const file = input.files[0]; if (!file) return;
+  if (file.size > 500*1024) { alert('Foto muito grande. Use uma imagem até 500KB.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    usuarioAtual._fotoTemp = e.target.result;
+    document.getElementById('avatarBig').innerHTML = `<img src="${e.target.result}" alt="foto">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function salvarPerfil() {
+  const nome = document.getElementById('inputNomePerfil').value.trim();
+  if (!nome) { alert('Preencha o nome'); return; }
+  const msgEl = document.getElementById('msgPerfil');
+  try {
+    const update = { nome };
+    if (usuarioAtual._fotoTemp) update.fotoUrl = usuarioAtual._fotoTemp;
+    await db.collection('users').doc(usuarioAtual.uid).update(update);
+    usuarioAtual.nome = nome;
+    if (usuarioAtual._fotoTemp) { usuarioAtual.fotoUrl = usuarioAtual._fotoTemp; delete usuarioAtual._fotoTemp; }
+    document.getElementById('userName').textContent = nome;
+    atualizarAvatarUI();
+    msgEl.textContent = '✅ Perfil salvo!'; msgEl.style.display = 'block';
+    setTimeout(() => fecharPerfil(), 1200);
+  } catch(e) { msgEl.textContent = '❌ Erro ao salvar'; msgEl.style.color='#ef4444'; msgEl.style.display='block'; }
+}
+
 // ── COMENTÁRIOS ──
 function tempoRelativo(date) {
   if (!date) return '';
@@ -370,7 +445,7 @@ async function carregarComentarios(postId) {
               ` : ''}
             </div>
           </div>
-          <p class="comentario-texto" id="texto-display-${doc.id}">${c.texto}</p>
+          <p class="comentario-texto" id="texto-display-${doc.id}">${c.texto}${c.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
           <div id="edit-form-${doc.id}" style="display:none;margin-top:8px;">
             <textarea id="edit-textarea-${doc.id}" style="width:100%;min-height:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;">${c.texto}</textarea>
             <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
@@ -393,7 +468,7 @@ async function enviarComentario(postId) {
   try {
     textarea.disabled = true;
     await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid,
+      texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid, fotoUrl: usuarioAtual.fotoUrl || null,
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
     textarea.value = ''; textarea.disabled = false;
@@ -448,5 +523,29 @@ async function fazerLogout() {
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharImagemModal(); });
 </script>
+<!-- MODAL PERFIL -->
+<div class="modal-overlay" id="modalPerfil">
+  <div class="modal-box">
+    <button class="close-btn" onclick="fecharPerfil()">×</button>
+    <h3>✏️ Meu Perfil</h3>
+    <div class="avatar-upload">
+      <div class="avatar-big" id="avatarBig" onclick="document.getElementById('inputFotoPerfil').click()" title="Clique para trocar foto">
+        <span id="avatarBigLetra">A</span>
+      </div>
+      <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
+      <span class="avatar-hint">Clique no avatar para trocar foto</span>
+    </div>
+    <div class="profile-field">
+      <label>Nome</label>
+      <input type="text" id="inputNomePerfil" placeholder="Seu nome completo">
+    </div>
+    <div class="profile-field">
+      <label>E-mail</label>
+      <input type="text" id="inputEmailPerfil" disabled style="opacity:.5;cursor:not-allowed;">
+    </div>
+    <button onclick="salvarPerfil()" style="width:100%;background:#6366f1;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;">💾 Salvar</button>
+    <p id="msgPerfil" style="text-align:center;margin-top:12px;font-size:13px;color:#22c55e;display:none;"></p>
+  </div>
+</div>
 </body>
 </html>
