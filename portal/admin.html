@@ -140,13 +140,11 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         </div>
         <div class="form-group">
           <label>Arquivo/Mídia (opcional)</label>
-
           <div class="upload-area" id="uploadAreaUniversal">
             <input type="file" id="postArquivo" accept="*" style="display:none">
             <div id="uploadPlaceholderUniversal">
               <span style="font-size:64px">📎</span>
               <p><strong>Arraste qualquer arquivo aqui</strong><br>ou clique para selecionar</p>
-
             </div>
             <div id="uploadPreviewUniversal" style="display:none;">
               <div id="previewContent"></div>
@@ -197,7 +195,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
       <p style="color:var(--text-muted);margin-bottom:16px;">Preencha os dados e a planilha será atualizada automaticamente.</p>
       <div id="alert-trade-data" class="alert"></div>
       <form id="formTradeData">
-        <!-- Data e Semana -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
           <div class="form-group"><label>Dia</label><input type="number" id="diaData" min="1" max="31" required placeholder="12"></div>
           <div class="form-group">
@@ -212,8 +209,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
           <div class="form-group"><label>Ano</label><input type="number" id="anoData" min="2020" max="2030" required placeholder="2026"></div>
           <div class="form-group"><label>Semana (auto)</label><input type="text" id="semana" readonly style="cursor:not-allowed;opacity:0.6;"></div>
         </div>
-
-        <!-- NASDAQ -->
         <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:16px;margin-bottom:12px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <span style="font-size:18px;">🔵</span>
@@ -230,8 +225,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
             <div class="form-group"><label>0x0</label><input type="number" id="nasBreak" min="0" placeholder="Ex: 0"></div>
           </div>
         </div>
-
-        <!-- DOW JONES -->
         <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.25);border-radius:10px;padding:16px;margin-bottom:16px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <span style="font-size:18px;">🟠</span>
@@ -248,7 +241,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
             <div class="form-group"><label>0x0</label><input type="number" id="dowBreak" min="0" placeholder="Ex: 0"></div>
           </div>
         </div>
-
         <button type="submit" class="btn" id="btnTradeData" style="margin-top:4px;width:100%;padding:14px;font-size:15px;">💾 Salvar na Planilha</button>
       </form>
       <div style="margin-top:20px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
@@ -299,12 +291,120 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   </div>
 </div>
 
+<!-- MODAL PERFIL ADMIN -->
+<div id="modalPerfilAdmin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:420px;position:relative;">
+    <button onclick="fecharPerfilAdmin()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:24px;">✏️ Meu Perfil</h3>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px;">
+      <div id="adminAvatarBig" onclick="document.getElementById('inputFotoAdmin').click()" title="Clique para trocar foto" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;overflow:hidden;cursor:pointer;border:3px solid rgba(255,255,255,.1);transition:all .2s;">
+        <span id="adminAvatarBigLetra">A</span>
+      </div>
+      <input type="file" id="inputFotoAdmin" accept="image/*" style="display:none" onchange="previsualizarFotoAdmin(this)">
+      <span style="font-size:12px;color:#94a3b8;">Clique no avatar para trocar foto</span>
+    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">Nome</label>
+      <input type="text" id="inputNomeAdmin" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e5e7eb;font-size:14px;font-family:inherit;">
+    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">E-mail</label>
+      <input type="text" id="inputEmailAdmin" disabled style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px;color:#64748b;font-size:14px;font-family:inherit;cursor:not-allowed;">
+    </div>
+    <button onclick="salvarPerfilAdmin()" style="width:100%;background:#6366f1;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;">💾 Salvar</button>
+    <p id="msgPerfilAdmin" style="text-align:center;margin-top:12px;font-size:13px;color:#22c55e;display:none;"></p>
+  </div>
+</div>
+
+<!-- MODAL INFO USUÁRIO -->
+<div id="modalInfoUser" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:380px;position:relative;text-align:center;">
+    <button onclick="document.getElementById('modalInfoUser').style.display='none';" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
+    <div id="infoUserAvatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;overflow:hidden;"></div>
+    <h3 id="infoUserNome" style="font-size:20px;font-weight:800;margin-bottom:6px;"></h3>
+    <p id="infoUserEmail" style="font-size:14px;color:#94a3b8;margin-bottom:16px;"></p>
+    <p id="infoUserCadastro" style="font-size:13px;color:#64748b;"></p>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 
 <script>
+// ══════════════════════════════════════════════
+// PERFIL ADMIN — definidas PRIMEIRO para hoisting seguro
+// ══════════════════════════════════════════════
+function atualizarAvatarAdmin() {
+  const letra = (window._adminNome||'A').charAt(0).toUpperCase();
+  ['adminAvatarLetra','adminAvatarBigLetra'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.textContent = letra;
+  });
+  if (window._adminFotoUrl) {
+    ['adminAvatarHeader','adminAvatarBig'].forEach(function(id) {
+      var el = document.getElementById(id); if (!el) return;
+      el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    });
+  }
+}
+
+function abrirPerfilAdmin() {
+  document.getElementById('inputNomeAdmin').value = window._adminNome || '';
+  document.getElementById('inputEmailAdmin').value = window._adminEmail || '';
+  var bigEl = document.getElementById('adminAvatarBig');
+  if (window._adminFotoUrl) bigEl.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+  else bigEl.innerHTML = '<span id="adminAvatarBigLetra">' + (window._adminNome||'A').charAt(0).toUpperCase() + '</span>';
+  document.getElementById('msgPerfilAdmin').style.display = 'none';
+  document.getElementById('modalPerfilAdmin').style.display = 'flex';
+}
+
+function fecharPerfilAdmin() { document.getElementById('modalPerfilAdmin').style.display = 'none'; }
+
+function previsualizarFotoAdmin(input) {
+  var file = input.files[0]; if (!file) return;
+  if (file.size > 500*1024) { alert('Foto muito grande. Use até 500KB.'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    window._adminFotoTemp = e.target.result;
+    document.getElementById('adminAvatarBig').innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function salvarPerfilAdmin() {
+  var nome = document.getElementById('inputNomeAdmin').value.trim();
+  if (!nome) { alert('Preencha o nome'); return; }
+  var msgEl = document.getElementById('msgPerfilAdmin');
+  try {
+    var update = { nome: nome };
+    if (window._adminFotoTemp) update.fotoUrl = window._adminFotoTemp;
+    await db.collection('users').doc(window._adminUid).update(update);
+    window._adminNome = nome;
+    if (window._adminFotoTemp) { window._adminFotoUrl = window._adminFotoTemp; delete window._adminFotoTemp; }
+    document.getElementById('adminName').textContent = nome;
+    atualizarAvatarAdmin();
+    msgEl.textContent = '✅ Perfil salvo!'; msgEl.style.display = 'block';
+    setTimeout(function() { fecharPerfilAdmin(); }, 1200);
+  } catch(e) { msgEl.textContent = '❌ Erro ao salvar'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+}
+
+async function verInfoUsuario(autorId, nomeExibido) {
+  if (!autorId) { alert('ID do usuário não disponível.'); return; }
+  try {
+    var doc = await db.collection('users').doc(autorId).get();
+    var data = doc.exists ? doc.data() : {};
+    var nome = data.nome || nomeExibido || 'Desconhecido';
+    var email = data.email || doc.id;
+    var criado = data.criadoEm ? data.criadoEm.toDate().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+    document.getElementById('infoUserNome').textContent = nome;
+    document.getElementById('infoUserEmail').textContent = '📧 ' + email;
+    document.getElementById('infoUserCadastro').textContent = 'Cadastrado em: ' + criado;
+    var avatarEl = document.getElementById('infoUserAvatar');
+    if (data.fotoUrl) avatarEl.innerHTML = '<img src="' + data.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    else avatarEl.textContent = nome.charAt(0).toUpperCase();
+    document.getElementById('modalInfoUser').style.display = 'flex';
+  } catch(e) { alert('Erro ao buscar dados do usuário.'); }
+}
+
 // ══════════════════════════════════════════════
 // CONFIGURAÇÃO — carregada do Firestore
 // ══════════════════════════════════════════════
@@ -330,14 +430,8 @@ async function carregarConfiguracoes() {
   }
 }
 
-// ── Carrega token do Firestore ou renova se expirado ──
 async function inicializarYouTubeAuth() {
-  // Garante configs carregadas antes de qualquer operação OAuth
-  if (!YT_CLIENT_ID || !YT_CLIENT_SECRET) {
-    await carregarConfiguracoes();
-  }
-
-  // Verifica se voltou do OAuth com ?code=
+  if (!YT_CLIENT_ID || !YT_CLIENT_SECRET) await carregarConfiguracoes();
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
   if (code) {
@@ -346,196 +440,110 @@ async function inicializarYouTubeAuth() {
     atualizarBotaoYouTube();
     return;
   }
-
-  // Tenta carregar refresh_token do Firestore e renovar
   try {
     const doc = await db.collection('config').doc('youtube').get();
-    if (doc.exists && doc.data().refresh_token) {
-      await renovarAccessToken(doc.data().refresh_token);
-    }
-  } catch (err) {
-    console.log('Token YouTube não configurado ainda.');
-  }
-
+    if (doc.exists && doc.data().refresh_token) await renovarAccessToken(doc.data().refresh_token);
+  } catch (err) { console.log('Token YouTube não configurado ainda.'); }
   atualizarBotaoYouTube();
 }
 
-// ── Renova access_token via Worker (sem CORS) ──
 async function renovarAccessToken(refreshToken) {
   try {
     const resp = await fetch(`${YT_WORKER}/refresh-token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id:     YT_CLIENT_ID,
-        client_secret: YT_CLIENT_SECRET,
-        refresh_token: refreshToken
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: YT_CLIENT_ID, client_secret: YT_CLIENT_SECRET, refresh_token: refreshToken })
     });
     const data = await resp.json();
-    if (data.success && data.access_token) {
-      ytAccessToken = data.access_token;
-      return true;
-    }
-  } catch (err) {
-    console.error('Erro ao renovar token:', err);
-  }
+    if (data.success && data.access_token) { ytAccessToken = data.access_token; return true; }
+  } catch (err) { console.error('Erro ao renovar token:', err); }
   return false;
 }
 
-// ── Inicia fluxo OAuth2 PKCE ──
 async function autenticarYouTube() {
-  // Garante configs carregadas
   if (!YT_CLIENT_ID) await carregarConfiguracoes();
   if (!YT_CLIENT_ID) { alert('❌ Erro ao carregar configurações. Tente recarregar a página.'); return; }
-
-  const verifier = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-    .map(b => b.toString(16).padStart(2,'0')).join('');
+  const verifier = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2,'0')).join('');
   sessionStorage.setItem('yt_verifier', verifier);
-
   const encoder = new TextEncoder();
-  const digest  = await crypto.subtle.digest('SHA-256', encoder.encode(verifier));
-  const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-
+  const digest = await crypto.subtle.digest('SHA-256', encoder.encode(verifier));
+  const challenge = btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
   const params = new URLSearchParams({
-    client_id:             YT_CLIENT_ID,
-    redirect_uri:          YT_REDIRECT,
-    response_type:         'code',
-    scope:                 YT_SCOPE,
-    code_challenge:        challenge,
-    code_challenge_method: 'S256',
-    access_type:           'offline',
-    prompt:                'consent'
+    client_id: YT_CLIENT_ID, redirect_uri: YT_REDIRECT, response_type: 'code',
+    scope: YT_SCOPE, code_challenge: challenge, code_challenge_method: 'S256',
+    access_type: 'offline', prompt: 'consent'
   });
-
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
 }
 
-// ── Troca code por tokens via Worker e salva refresh_token no Firestore ──
 async function trocarCodePorToken(code) {
   const verifier = sessionStorage.getItem('yt_verifier');
   if (!verifier) return;
   sessionStorage.removeItem('yt_verifier');
-
   try {
     const resp = await fetch(`${YT_WORKER}/exchange-token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code,
-        client_id:     YT_CLIENT_ID,
-        client_secret: YT_CLIENT_SECRET,
-        redirect_uri:  YT_REDIRECT,
-        code_verifier: verifier
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, client_id: YT_CLIENT_ID, client_secret: YT_CLIENT_SECRET, redirect_uri: YT_REDIRECT, code_verifier: verifier })
     });
-
     const data = await resp.json();
     if (data.success) {
       ytAccessToken = data.access_token;
       if (data.refresh_token) {
         await db.collection('config').doc('youtube').set({
-          refresh_token:  data.refresh_token,
-          atualizadoEm:   firebase.firestore.FieldValue.serverTimestamp(),
+          refresh_token: data.refresh_token,
+          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
           configuradoPor: auth.currentUser?.email || 'admin'
         });
-        console.log('✅ Refresh token salvo no Firestore');
       }
-    } else {
-      console.error('Erro ao trocar token:', data.error);
-    }
-  } catch (err) {
-    console.error('Erro trocarCodePorToken:', err);
-  }
+    } else { console.error('Erro ao trocar token:', data.error); }
+  } catch (err) { console.error('Erro trocarCodePorToken:', err); }
 }
 
-// ── Upload resumável via Worker (sem CORS) ──
 async function uploadYouTubeDireto(file, titulo, descricao) {
-  // Garante token válido
   if (!ytAccessToken) {
     const doc = await db.collection('config').doc('youtube').get();
     if (doc.exists && doc.data().refresh_token) {
       const ok = await renovarAccessToken(doc.data().refresh_token);
       if (!ok) throw new Error('Não foi possível renovar o token. Clique em "Reconectar YouTube".');
-    } else {
-      throw new Error('YouTube não conectado. Clique em "Conectar YouTube" primeiro.');
-    }
+    } else { throw new Error('YouTube não conectado. Clique em "Conectar YouTube" primeiro.'); }
   }
-
   const progressBar  = document.getElementById('uploadProgressBar');
   const progressPct  = document.getElementById('uploadProgressPercent');
   const progressText = document.getElementById('uploadProgressTextUniversal');
-
   progressText.textContent = '🎥 Iniciando upload no YouTube...';
-
-  // 1. Inicia sessão de upload via Worker
   const metadata = {
     snippet: { title: titulo || 'Vídeo', description: descricao || '', categoryId: '27' },
     status:  { privacyStatus: 'unlisted', selfDeclaredMadeForKids: false }
   };
-
   const initResp = await fetch(`${YT_WORKER}/init-upload`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      accessToken: ytAccessToken,
-      metadata,
-      fileSize: file.size,
-      fileType: file.type || 'video/mp4'
-    })
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accessToken: ytAccessToken, metadata, fileSize: file.size, fileType: file.type || 'video/mp4' })
   });
-
   const initData = await initResp.json();
   if (!initData.success) throw new Error(initData.error || 'Erro ao iniciar upload');
   const uploadUrl = initData.uploadUrl;
-
-  // 2. Envia em chunks de 5MB via Worker
   const CHUNK = 5 * 1024 * 1024;
   let offset = 0;
-
   while (offset < file.size) {
-    const end   = Math.min(offset + CHUNK, file.size);
+    const end = Math.min(offset + CHUNK, file.size);
     const chunk = file.slice(offset, end);
-
     const pct = Math.round((end / file.size) * 95);
     progressBar.style.width = pct + '%';
     progressPct.textContent = pct + '%';
     progressText.textContent = `🎥 Enviando... ${(end/(1024*1024)).toFixed(0)}MB de ${(file.size/(1024*1024)).toFixed(0)}MB`;
-
     const chunkResp = await fetch(`${YT_WORKER}/upload-chunk`, {
       method: 'POST',
-      headers: {
-        'Content-Type':    file.type || 'video/mp4',
-        'X-Upload-Url':    uploadUrl,
-        'X-Content-Range': `bytes ${offset}-${end-1}/${file.size}`,
-        'X-Content-Type':  file.type || 'video/mp4',
-      },
+      headers: { 'Content-Type': file.type || 'video/mp4', 'X-Upload-Url': uploadUrl, 'X-Content-Range': `bytes ${offset}-${end-1}/${file.size}`, 'X-Content-Type': file.type || 'video/mp4' },
       body: chunk
     });
-
     const chunkData = await chunkResp.json();
     if (!chunkData.success) throw new Error(chunkData.error || 'Erro no envio do chunk');
-
     if (chunkData.done) {
-      progressBar.style.width = '100%';
-      progressPct.textContent = '100%';
+      progressBar.style.width = '100%'; progressPct.textContent = '100%';
       progressText.textContent = '✅ Vídeo publicado no YouTube!';
-      return {
-        videoId:  chunkData.videoId,
-        embedURL: chunkData.embedURL,
-        watchURL: chunkData.watchURL
-      };
+      return { videoId: chunkData.videoId, embedURL: chunkData.embedURL, watchURL: chunkData.watchURL };
     }
-
-    // Atualiza offset pelo Range retornado pelo YouTube
-    if (chunkData.range) {
-      offset = parseInt(chunkData.range.split('-')[1]) + 1;
-    } else {
-      offset = end;
-    }
+    offset = chunkData.range ? parseInt(chunkData.range.split('-')[1]) + 1 : end;
   }
-
   throw new Error('Upload não completou corretamente');
 }
 
@@ -543,13 +551,9 @@ function atualizarBotaoYouTube() {
   const btn = document.getElementById('btnConectarYT');
   if (!btn) return;
   if (ytAccessToken) {
-    btn.textContent = '✅ YouTube Conectado';
-    btn.style.background = 'var(--accent)';
-    btn.style.color = '#000';
+    btn.textContent = '✅ YouTube Conectado'; btn.style.background = 'var(--accent)'; btn.style.color = '#000';
   } else {
-    btn.textContent = '🔗 Conectar YouTube';
-    btn.style.background = '#ff0000';
-    btn.style.color = '#fff';
+    btn.textContent = '🔗 Conectar YouTube'; btn.style.background = '#ff0000'; btn.style.color = '#fff';
   }
 }
 
@@ -573,14 +577,14 @@ auth.onAuthStateChanged(async (user) => {
     window._adminFotoUrl = adminData.fotoUrl || null;
     document.getElementById('adminName').textContent = window._adminNome;
     atualizarAvatarAdmin();
-    // Carrega configurações do Firestore antes de qualquer coisa
     await carregarConfiguracoes();
     await inicializarYouTubeAuth();
     carregarPosts();
     carregarUsuarios();
   } catch (error) {
-    console.error('Erro auth:', error);
-    window.location.href = 'login.html';
+    console.error('Erro auth admin:', error);
+    const postsEl = document.getElementById('posts-list');
+    if (postsEl) postsEl.innerHTML = '<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;"><p style="color:#ef4444;font-weight:700;">❌ Erro de inicialização</p><p style="color:#94a3b8;font-size:13px;margin-top:8px;">' + error.message + '</p></div>';
   }
 });
 
@@ -589,38 +593,51 @@ auth.onAuthStateChanged(async (user) => {
 // ══════════════════════════════════════════════
 function switchTab(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(tab => {
-    if (tab.getAttribute('onclick').includes(tabName)) tab.classList.add('active');
-  });
+  document.querySelectorAll('.tab').forEach(tab => { if (tab.getAttribute('onclick').includes(tabName)) tab.classList.add('active'); });
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(tabName + '-section').classList.add('active');
   if (tabName === 'posts') carregarPosts();
   else if (tabName === 'aprovacoes') carregarUsuarios();
 }
 
-function logout() {
-  if (confirm('Deseja realmente sair?')) { auth.signOut(); window.location.href = 'login.html'; }
-}
+function logout() { if (confirm('Deseja realmente sair?')) { auth.signOut(); window.location.href = 'login.html'; } }
 
 function mostrarAlerta(id, mensagem, tipo) {
   const el = document.getElementById(id);
-  el.textContent = mensagem;
-  el.className = 'alert ' + tipo;
-  el.style.display = 'block';
+  el.textContent = mensagem; el.className = 'alert ' + tipo; el.style.display = 'block';
   setTimeout(() => el.style.display = 'none', 6000);
 }
 
+function tempoRelativo(ts) {
+  if (!ts) return '';
+  const date = ts instanceof Date ? ts : (ts.toDate ? ts.toDate() : new Date(ts));
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 60) return 'agora mesmo';
+  if (diff < 3600) return `há ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `há ${Math.floor(diff/3600)}h`;
+  if (diff < 604800) return `há ${Math.floor(diff/86400)} dia${Math.floor(diff/86400)>1?'s':''}`;
+  return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+}
+
+function avatarHtml(nome, fotoUrl, size) {
+  size = size || 34;
+  const letra = (nome||'?').charAt(0).toUpperCase();
+  const style = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:' + Math.floor(size*0.38) + 'px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;';
+  const inner = fotoUrl ? '<img src="' + fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent=\'' + letra + '\'">' : letra;
+  return '<div style="' + style + '">' + inner + '</div>';
+}
+
 // ══════════════════════════════════════════════
-// UPLOAD UNIVERSAL (imagem/pdf → Drive | vídeo → YouTube)
+// UPLOAD UNIVERSAL
 // ══════════════════════════════════════════════
 let arquivoUniversal = null;
 let tipoArquivo = null;
 
-const uploadAreaUniversal       = document.getElementById('uploadAreaUniversal');
-const fileInputUniversal        = document.getElementById('postArquivo');
+const uploadAreaUniversal        = document.getElementById('uploadAreaUniversal');
+const fileInputUniversal         = document.getElementById('postArquivo');
 const uploadPlaceholderUniversal = document.getElementById('uploadPlaceholderUniversal');
-const uploadPreviewUniversal    = document.getElementById('uploadPreviewUniversal');
-const uploadProgressUniversal   = document.getElementById('uploadProgressUniversal');
+const uploadPreviewUniversal     = document.getElementById('uploadPreviewUniversal');
+const uploadProgressUniversal    = document.getElementById('uploadProgressUniversal');
 
 uploadAreaUniversal.addEventListener('click', () => fileInputUniversal.click());
 ['dragenter','dragover','dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
@@ -633,40 +650,23 @@ function handleArquivoUniversal(file) {
   if (file.size > 500 * 1024 * 1024) { alert('❌ Arquivo muito grande. Máximo 500MB'); return; }
   arquivoUniversal = file;
   tipoArquivo = file.type.startsWith('image/') ? 'imagem' : file.type.startsWith('video/') ? 'video' : 'pdf';
-
   uploadPlaceholderUniversal.style.display = 'none';
   uploadPreviewUniversal.style.display = 'block';
   const previewContent = document.getElementById('previewContent');
   const sizeMB = (file.size / (1024*1024)).toFixed(2);
-
   if (tipoArquivo === 'imagem') {
     const reader = new FileReader();
-    reader.onload = e => {
-      previewContent.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:300px;border-radius:8px;margin-bottom:12px;">
-        <p style="font-size:13px;color:var(--text-muted);">📸 ${file.name} (${sizeMB} MB)</p>`;
-    };
+    reader.onload = e => { previewContent.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:300px;border-radius:8px;margin-bottom:12px;"><p style="font-size:13px;color:var(--text-muted);">📸 ${file.name} (${sizeMB} MB)</p>`; };
     reader.readAsDataURL(file);
   } else if (tipoArquivo === 'video') {
-    previewContent.innerHTML = `
-      <div style="padding:24px;background:rgba(255,0,0,0.05);border:1px solid rgba(255,0,0,0.2);border-radius:8px;margin-bottom:12px;">
-        <span style="font-size:48px;">🎥</span>
-        <p style="font-size:16px;font-weight:700;margin:12px 0;">${file.name}</p>
-        <p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p>
-        <span class="yt-badge" style="margin-top:8px;display:inline-flex;">▶ Será publicado no YouTube como não listado</span>
-      </div>`;
+    previewContent.innerHTML = `<div style="padding:24px;background:rgba(255,0,0,0.05);border:1px solid rgba(255,0,0,0.2);border-radius:8px;margin-bottom:12px;"><span style="font-size:48px;">🎥</span><p style="font-size:16px;font-weight:700;margin:12px 0;">${file.name}</p><p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p><span class="yt-badge" style="margin-top:8px;display:inline-flex;">▶ Será publicado no YouTube como não listado</span></div>`;
   } else {
-    previewContent.innerHTML = `
-      <div style="padding:24px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:12px;">
-        <span style="font-size:64px;">📄</span>
-        <p style="font-size:16px;font-weight:600;margin:12px 0;">${file.name}</p>
-        <p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p>
-      </div>`;
+    previewContent.innerHTML = `<div style="padding:24px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:12px;"><span style="font-size:64px;">📄</span><p style="font-size:16px;font-weight:600;margin:12px 0;">${file.name}</p><p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p></div>`;
   }
 }
 
 function removerArquivoUniversal() {
-  arquivoUniversal = null; tipoArquivo = null;
-  fileInputUniversal.value = '';
+  arquivoUniversal = null; tipoArquivo = null; fileInputUniversal.value = '';
   document.getElementById('postYoutubeEmbedURL').value = '';
   uploadPlaceholderUniversal.style.display = 'block';
   uploadPreviewUniversal.style.display = 'none';
@@ -688,118 +688,69 @@ async function fileToBase64(file) {
 document.getElementById('formPost').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btnPost = document.getElementById('btnPost');
-  btnPost.disabled = true;
-  btnPost.textContent = 'Publicando...';
-
+  btnPost.disabled = true; btnPost.textContent = 'Publicando...';
   try {
-    let finalMidiaURL = null;
-    let midiaTipo = null;
-    let youtubeEmbedURL = null;
-    let driveFileId = null;
-    let youtubeVideoId = null;
-
+    let finalMidiaURL = null, midiaTipo = null, youtubeEmbedURL = null, driveFileId = null, youtubeVideoId = null;
     if (arquivoUniversal) {
-      uploadPreviewUniversal.style.display = 'none';
-      uploadProgressUniversal.style.display = 'block';
-
+      uploadPreviewUniversal.style.display = 'none'; uploadProgressUniversal.style.display = 'block';
       const sizeMB = (arquivoUniversal.size / (1024*1024)).toFixed(2);
       const progressBar = document.getElementById('uploadProgressBar');
       const progressPercent = document.getElementById('uploadProgressPercent');
       let progressInterval = null;
-
       try {
         if (tipoArquivo === 'video') {
-          // ── Upload YouTube DIRETO do navegador com chunks (sem limite de tamanho) ──
-          if (!ytAccessToken) {
-            throw new Error('Clique em "Conectar YouTube" no topo da página antes de enviar vídeos.');
-          }
-          const titulo    = document.getElementById('postTitulo').value.trim() || arquivoUniversal.name;
+          if (!ytAccessToken) throw new Error('Clique em "Conectar YouTube" no topo da página antes de enviar vídeos.');
+          const titulo = document.getElementById('postTitulo').value.trim() || arquivoUniversal.name;
           const descricao = document.getElementById('postTexto').value.trim();
           const resultado = await uploadYouTubeDireto(arquivoUniversal, titulo, descricao);
-          youtubeEmbedURL  = resultado.embedURL;
-          youtubeVideoId   = resultado.videoId;
-          finalMidiaURL    = resultado.watchURL;
-          midiaTipo        = 'youtube';
-
+          youtubeEmbedURL = resultado.embedURL; youtubeVideoId = resultado.videoId;
+          finalMidiaURL = resultado.watchURL; midiaTipo = 'youtube';
         } else {
-          // ── Upload Drive (imagem/pdf) — com progress animado ──
           document.getElementById('uploadProgressTextUniversal').textContent = `📤 Enviando ${sizeMB}MB para Google Drive...`;
           let progress = 0;
-          progressInterval = setInterval(() => {
-            progress += Math.random() * 8;
-            if (progress > 85) progress = 85;
-            progressBar.style.width = progress + '%';
-            progressPercent.textContent = Math.round(progress) + '%';
-          }, 300);
-
+          progressInterval = setInterval(() => { progress += Math.random() * 8; if (progress > 85) progress = 85; progressBar.style.width = progress + '%'; progressPercent.textContent = Math.round(progress) + '%'; }, 300);
           const base64 = await fileToBase64(arquivoUniversal);
           const params = new URLSearchParams();
-          params.append('acao', 'uploadArquivo');
-          params.append('arquivo', base64);
-          params.append('nome', arquivoUniversal.name);
-          params.append('tipo', arquivoUniversal.type);
-
+          params.append('acao', 'uploadArquivo'); params.append('arquivo', base64);
+          params.append('nome', arquivoUniversal.name); params.append('tipo', arquivoUniversal.type);
           const response = await fetch(`${YT_WORKER}/apps-script`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: Object.fromEntries(params) })
           });
-
           const resultado = await response.json();
           clearInterval(progressInterval);
           if (!resultado.success) throw new Error(resultado.error || 'Erro no upload');
-
-          driveFileId   = resultado.id;
-          finalMidiaURL = tipoArquivo === 'imagem'
-            ? `https://drive.google.com/uc?export=view&id=${resultado.id}`
-            : `https://drive.google.com/uc?export=download&id=${resultado.id}`;
+          driveFileId = resultado.id;
+          finalMidiaURL = tipoArquivo === 'imagem' ? `https://drive.google.com/uc?export=view&id=${resultado.id}` : `https://drive.google.com/uc?export=download&id=${resultado.id}`;
           midiaTipo = tipoArquivo;
         }
-
-        progressBar.style.width = '100%';
-        progressPercent.textContent = '100%';
-
-      } catch (uploadError) {
-        clearInterval(progressInterval);
-        throw uploadError;
-      }
-
+        progressBar.style.width = '100%'; progressPercent.textContent = '100%';
+      } catch (uploadError) { clearInterval(progressInterval); throw uploadError; }
       await new Promise(r => setTimeout(r, 800));
-      uploadProgressUniversal.style.display = 'none';
-      uploadPreviewUniversal.style.display = 'block';
+      uploadProgressUniversal.style.display = 'none'; uploadPreviewUniversal.style.display = 'block';
     }
-
     const titulo = document.getElementById('postTitulo').value.trim();
     if (!titulo) { alert('❌ Preencha o título do post'); throw new Error('Título obrigatório'); }
-
     await db.collection('posts').add({
-      titulo,
-      texto:           document.getElementById('postTexto').value.trim(),
-      categoria:       document.getElementById('postCategoria').value,
-      link:            document.getElementById('postLink').value || null,
-      midiaURL:        finalMidiaURL,
-      midiaTipo,
-      youtubeEmbedURL,
-      youtubeVideoId:  youtubeVideoId || null,
-      driveFileId:     driveFileId    || null,
-      criadoEm:        firebase.firestore.FieldValue.serverTimestamp(),
-      autor:           window._adminNome || auth.currentUser.displayName || 'Admin'
+      titulo, texto: document.getElementById('postTexto').value.trim(),
+      categoria: document.getElementById('postCategoria').value,
+      link: document.getElementById('postLink').value || null,
+      midiaURL: finalMidiaURL, midiaTipo, youtubeEmbedURL,
+      youtubeVideoId: youtubeVideoId || null, driveFileId: driveFileId || null,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+      autor: window._adminNome || auth.currentUser.displayName || 'Admin'
     });
-
     mostrarAlerta('alert-post', '✅ Post publicado com sucesso!', 'success');
     document.getElementById('formPost').reset();
     removerArquivoUniversal();
     carregarPosts();
-
   } catch (error) {
     console.error('Erro ao publicar:', error);
     mostrarAlerta('alert-post', '❌ Erro: ' + error.message, 'error');
     uploadProgressUniversal.style.display = 'none';
     if (arquivoUniversal) uploadPreviewUniversal.style.display = 'block';
   }
-
-  btnPost.disabled = false;
-  btnPost.textContent = 'Publicar Post';
+  btnPost.disabled = false; btnPost.textContent = 'Publicar Post';
 });
 
 // ══════════════════════════════════════════════
@@ -808,67 +759,72 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
 async function carregarPosts() {
   const container = document.getElementById('posts-list');
   try {
-    const snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').limit(20).get();
+    let snapshot;
+    try {
+      snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').limit(20).get();
+    } catch(e) {
+      snapshot = await db.collection('posts').limit(20).get();
+    }
     if (snapshot.empty) { container.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Nenhum post ainda.</p>'; return; }
-
     let html = '';
     snapshot.forEach(doc => {
       const post = doc.data();
       const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Agora';
-
       let midiaHTML = '';
       if (post.youtubeEmbedURL) {
-        midiaHTML = `<div style="position:relative;width:200px;height:112px;background:#000;border-radius:8px;overflow:hidden;flex-shrink:0;">
-          <iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`;
+        midiaHTML = `<div style="position:relative;width:200px;height:112px;background:#000;border-radius:8px;overflow:hidden;flex-shrink:0;"><iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`;
       } else if (post.midiaURL && post.midiaTipo === 'imagem') {
         midiaHTML = `<img src="${post.midiaURL}" class="post-image" alt="${post.titulo}" onerror="this.style.display='none'">`;
       } else if (post.midiaURL && post.midiaTipo === 'pdf') {
         midiaHTML = `<div style="width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;">📄</div>`;
       }
-
-      html += `
-        <div class="post-item">
-          ${midiaHTML}
-          <div class="post-content">
-            <div class="post-title">${post.titulo}</div>
-            <div class="post-text">${(post.texto||'').substring(0,120)}${(post.texto||'').length>120?'...':''}</div>
-            <div class="post-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor||'Admin'}
-              ${post.youtubeEmbedURL ? '<span class="yt-badge">▶ YouTube</span>' : ''}
-            </div>
-            <div class="post-actions">
-              <button class="btn btn-sm" onclick="toggleComentariosAdmin('${doc.id}')" style="background:var(--blue);color:#fff;">
-                💬 Comentários (<span id="count-admin-${doc.id}">0</span>)
-              </button>
-              <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">🗑️ Excluir</button>
-            </div>
-            <div id="comentarios-admin-${doc.id}" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
-              <div id="lista-admin-${doc.id}"></div>
-              <div style="margin-top:16px;">
-                <textarea id="texto-admin-${doc.id}" placeholder="Comentário como admin..." style="width:100%;min-height:80px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;"></textarea>
-                <button class="btn btn-sm" onclick="enviarComentarioAdmin('${doc.id}')" style="margin-top:8px;">Enviar</button>
-              </div>
+      html += `<div class="post-item">${midiaHTML}<div class="post-content">
+        <div class="post-title">${post.titulo}</div>
+        <div class="post-text">${(post.texto||'').substring(0,120)}${(post.texto||'').length>120?'...':''}</div>
+        <div class="post-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor||'Admin'}
+          ${post.youtubeEmbedURL ? '<span class="yt-badge">▶ YouTube</span>' : ''}
+        </div>
+        <div class="post-actions">
+          <button class="btn btn-sm" onclick="toggleComentariosAdmin('${doc.id}')" style="background:var(--blue);color:#fff;">
+            💬 Comentários (<span id="count-admin-${doc.id}">0</span>)
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">🗑️ Excluir</button>
+        </div>
+        <div id="comentarios-admin-${doc.id}" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <div id="lista-admin-${doc.id}"></div>
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:flex-start;">
+            <div id="adminAvatarComent-${doc.id}" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
+            <div style="flex:1;">
+              <textarea id="texto-admin-${doc.id}" placeholder="Comentário como admin..." style="width:100%;min-height:80px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;"></textarea>
+              <button class="btn btn-sm" onclick="enviarComentarioAdmin('${doc.id}')" style="margin-top:8px;">Enviar</button>
             </div>
           </div>
-        </div>`;
+        </div>
+      </div></div>`;
     });
-
     container.innerHTML = html;
-
+    // Preenche avatar do admin nas caixas de comentário
+    snapshot.forEach(doc => {
+      const el = document.getElementById('adminAvatarComent-' + doc.id);
+      if (!el) return;
+      if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
+    });
+    // Conta comentários
     snapshot.forEach(async doc => {
       const snap = await db.collection('posts').doc(doc.id).collection('comentarios').get();
       const el = document.getElementById('count-admin-' + doc.id);
       if (el) el.textContent = snap.size;
     });
-
   } catch (error) {
     console.error('Erro posts:', error);
-    container.innerHTML = '<p style="color:var(--red)">Erro ao carregar posts</p>';
+    container.innerHTML = `<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;"><p style="color:var(--red);font-weight:700;">❌ Erro ao carregar posts</p><p style="color:var(--text-muted);font-size:13px;margin-top:8px;">${error.message}</p></div>`;
   }
 }
 
 // ══════════════════════════════════════════════
-// COMENTÁRIOS ADMIN
+// COMENTÁRIOS ADMIN — com respostas e fotos
 // ══════════════════════════════════════════════
 async function toggleComentariosAdmin(postId) {
   const section = document.getElementById('comentarios-admin-' + postId);
@@ -876,19 +832,10 @@ async function toggleComentariosAdmin(postId) {
   else section.style.display = 'none';
 }
 
-function tempoRelativo(date) {
-  if (!date) return '';
-  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (diff < 60) return 'agora mesmo';
-  if (diff < 3600) return `há ${Math.floor(diff/60)} min`;
-  if (diff < 86400) return `há ${Math.floor(diff/3600)}h`;
-  if (diff < 604800) return `há ${Math.floor(diff/86400)} dia${Math.floor(diff/86400)>1?'s':''}`;
-  return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
-}
-
 async function carregarComentariosAdmin(postId) {
   const lista = document.getElementById('lista-admin-' + postId);
   const countEl = document.getElementById('count-admin-' + postId);
+  lista.innerHTML = '<p style="text-align:center;padding:12px;color:#64748b;font-size:13px;">Carregando...</p>';
   try {
     const snapshot = await db.collection('posts').doc(postId).collection('comentarios').orderBy('criadoEm','desc').get();
     if (countEl) countEl.textContent = snapshot.size;
@@ -899,23 +846,110 @@ async function carregarComentariosAdmin(postId) {
       const dateCriado = co.criadoEm ? co.criadoEm.toDate() : null;
       const tempo = tempoRelativo(dateCriado);
       const nomeAutor = co.autor || 'Aluno';
-      const inicial = nomeAutor.charAt(0).toUpperCase();
+      const av = avatarHtml(nomeAutor, co.fotoUrl || null, 34);
+
+      // Respostas
+      let respostasHtml = '';
+      if (co.respostas && co.respostas.length > 0) {
+        co.respostas.forEach((r, idx) => {
+          const rTempo = tempoRelativo(r.criadoEm);
+          const rAv = avatarHtml(r.autor||'?', r.fotoUrl||null, 28);
+          respostasHtml += `<div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;background:rgba(99,102,241,0.06);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;">
+            ${rAv}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <strong style="font-size:12px;color:#a5b4fc;">${r.autor||'?'}</strong>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <span style="font-size:11px;color:#475569;">${rTempo}</span>
+                  <button onclick="deletarRespostaAdmin('${postId}','${doc.id}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
+                </div>
+              </div>
+              <p style="margin:0;font-size:13px;color:var(--text);line-height:1.5;">${r.texto}</p>
+            </div>
+          </div>`;
+        });
+      }
+
       html += `<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;">
-        <div onclick="verInfoUsuario('${co.autorId}','${nomeAutor}')" title="Ver info do usuário" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;cursor:pointer;border:2px solid transparent;transition:all .2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${co.fotoUrl ? `<img src="${co.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : inicial}</div>
+        <div onclick="verInfoUsuario('${co.autorId||''}','${nomeAutor}')" title="Ver info" style="cursor:pointer;border:2px solid transparent;border-radius:50%;transition:border .2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${av}</div>
         <div style="flex:1;min-width:0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
             <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
             <div style="display:flex;align-items:center;gap:8px;">
               <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
               <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
             </div>
           </div>
-          <p style="margin:0;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+          <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+          ${respostasHtml}
+          <!-- Form resposta admin -->
+          <div id="form-resposta-admin-${doc.id}" style="display:none;margin-top:10px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div id="respAdminAv-${doc.id}" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
+              <div style="flex:1;">
+                <textarea id="texto-resposta-admin-${doc.id}" placeholder="Responder como admin..." style="width:100%;min-height:60px;background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.4);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+                <div style="display:flex;gap:8px;margin-top:6px;">
+                  <button class="btn btn-sm" onclick="enviarRespostaAdmin('${postId}','${doc.id}')" style="background:#6366f1;color:#fff;">↩ Responder</button>
+                  <button class="btn btn-sm" onclick="document.getElementById('form-resposta-admin-${doc.id}').style.display='none'" style="background:rgba(255,255,255,0.1);color:var(--text);">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button onclick="mostrarFormRespostaAdmin('${doc.id}')" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:12px;font-weight:600;padding:4px 0;margin-top:4px;">↩ Responder</button>
         </div>
       </div>`;
     });
     lista.innerHTML = html;
-  } catch (err) { lista.innerHTML = '<p style="color:var(--red);">Erro ao carregar</p>'; }
+
+    // Preenche avatars dos forms de resposta
+    snapshot.forEach(doc => {
+      const el = document.getElementById('respAdminAv-' + doc.id);
+      if (!el) return;
+      if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
+    });
+  } catch (err) {
+    console.error('Erro comentários admin:', err);
+    lista.innerHTML = '<p style="color:var(--red);padding:16px;">Erro ao carregar: ' + err.message + '</p>';
+  }
+}
+
+function mostrarFormRespostaAdmin(comentarioId) {
+  const form = document.getElementById('form-resposta-admin-' + comentarioId);
+  if (form) { form.style.display = form.style.display === 'none' ? 'block' : 'none'; }
+}
+
+async function enviarRespostaAdmin(postId, comentarioId) {
+  const textarea = document.getElementById('texto-resposta-admin-' + comentarioId);
+  const texto = textarea.value.trim();
+  if (!texto) { alert('Digite uma resposta!'); return; }
+  try {
+    const resposta = {
+      texto,
+      autor: window._adminNome || 'Admin',
+      autorId: auth.currentUser.uid,
+      fotoUrl: window._adminFotoUrl || null,
+      criadoEm: new Date().toISOString()
+    };
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({
+      respostas: firebase.firestore.FieldValue.arrayUnion(resposta)
+    });
+    textarea.value = '';
+    document.getElementById('form-resposta-admin-' + comentarioId).style.display = 'none';
+    await carregarComentariosAdmin(postId);
+  } catch (err) { alert('Erro ao enviar resposta: ' + err.message); }
+}
+
+async function deletarRespostaAdmin(postId, comentarioId, idx) {
+  if (!confirm('Deletar esta resposta?')) return;
+  try {
+    const docRef = db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId);
+    const snap = await docRef.get();
+    const respostas = snap.data().respostas || [];
+    respostas.splice(idx, 1);
+    await docRef.update({ respostas });
+    await carregarComentariosAdmin(postId);
+  } catch (err) { alert('Erro ao deletar resposta'); }
 }
 
 async function enviarComentarioAdmin(postId) {
@@ -923,14 +957,16 @@ async function enviarComentarioAdmin(postId) {
   const texto = textarea.value.trim();
   if (!texto) { alert('Digite um comentário!'); return; }
   try {
-    const user = auth.currentUser;
     await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto, autor: window._adminNome || user.displayName || 'Admin', autorId: user.uid,
+      texto,
+      autor: window._adminNome || auth.currentUser.displayName || 'Admin',
+      autorId: auth.currentUser.uid,
+      fotoUrl: window._adminFotoUrl || null,
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
     textarea.value = '';
     await carregarComentariosAdmin(postId);
-  } catch (err) { alert('Erro ao enviar comentário'); }
+  } catch (err) { alert('Erro ao enviar comentário: ' + err.message); }
 }
 
 async function deletarComentarioAdmin(postId, comentarioId) {
@@ -944,42 +980,28 @@ async function deletarComentarioAdmin(postId, comentarioId) {
 async function deletarPost(postId) {
   if (!confirm('Deseja realmente excluir este post?\nIsso também apagará o arquivo/vídeo de origem.')) return;
   try {
-    // Busca dados do post para pegar IDs de origem
     const postDoc = await db.collection('posts').doc(postId).get();
     const post = postDoc.data() || {};
-
-    // Deleta do YouTube se for vídeo
     if (post.youtubeVideoId && ytAccessToken) {
       try {
         await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${post.youtubeVideoId}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${ytAccessToken}` }
+          method: 'DELETE', headers: { Authorization: `Bearer ${ytAccessToken}` }
         });
-        console.log('✅ Vídeo deletado do YouTube:', post.youtubeVideoId);
-      } catch(e) { console.warn('Aviso: não foi possível deletar vídeo do YouTube', e); }
+      } catch(e) { console.warn('Não foi possível deletar vídeo do YouTube', e); }
     }
-
-    // Deleta do Google Drive — usa driveFileId ou extrai da URL
     let fileIdParaDeletar = post.driveFileId || null;
     if (!fileIdParaDeletar && post.midiaURL) {
-      // Tenta extrair ID da URL do Drive (formatos: /d/ID/, id=ID, /uc?...id=ID)
-      const m = post.midiaURL.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
-                post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      const m = post.midiaURL.match(/[?&]id=([a-zA-Z0-9_-]+)/) || post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
       if (m) fileIdParaDeletar = m[1];
     }
     if (fileIdParaDeletar) {
       try {
-        const resp = await fetch(`${YT_WORKER}/apps-script`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch(`${YT_WORKER}/apps-script`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: { acao:'deletarArquivo', fileId: fileIdParaDeletar } })
         });
-        const result = await resp.json();
-        console.log('✅ Arquivo deletado do Drive:', fileIdParaDeletar, result);
-      } catch(e) { console.warn('Aviso: não foi possível deletar arquivo do Drive', e); }
+      } catch(e) { console.warn('Não foi possível deletar arquivo do Drive', e); }
     }
-
-    // Deleta do Firestore
     await db.collection('posts').doc(postId).delete();
     mostrarAlerta('alert-post', '✅ Post e arquivo de origem excluídos!', 'success');
     carregarPosts();
@@ -996,12 +1018,10 @@ async function carregarUsuarios() {
     snapshot.forEach(doc => {
       const user = doc.data();
       if (user.role === 'admin') return;
-      const html = `<tr>
-        <td>${user.nome||''}</td><td>${user.email||''}</td>
+      const html = `<tr><td>${user.nome||''}</td><td>${user.email||''}</td>
         <td><span class="badge ${user.aprovado?'approved':'pending'}">${user.aprovado?'Aprovado':'Pendente'}</span></td>
         <td>${!user.aprovado
-          ? `<button class="btn btn-sm" onclick="aprovarUsuario('${doc.id}')">Aprovar</button>
-             <button class="btn btn-sm btn-danger" onclick="rejeitarUsuario('${doc.id}')">Rejeitar</button>`
+          ? `<button class="btn btn-sm" onclick="aprovarUsuario('${doc.id}')">Aprovar</button> <button class="btn btn-sm btn-danger" onclick="rejeitarUsuario('${doc.id}')">Rejeitar</button>`
           : `<button class="btn btn-sm btn-danger" onclick="revogarAprovacao('${doc.id}')">Revogar</button>`
         }</td></tr>`;
       if (user.aprovado) aprovados += html; else pendentes += html;
@@ -1012,20 +1032,21 @@ async function carregarUsuarios() {
     document.getElementById('usuarios-aprovados').innerHTML = aprovados
       ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${aprovados}</tbody></table>`
       : '<p style="text-align:center;color:var(--text-muted)">Nenhum aluno aprovado ainda</p>';
-  } catch (error) { console.error('Erro usuários:', error); }
+  } catch (error) {
+    console.error('Erro usuários:', error);
+    document.getElementById('usuarios-pendentes').innerHTML = '<p style="color:var(--red);padding:16px;">❌ Erro: ' + error.message + '</p>';
+  }
 }
 
 async function aprovarUsuario(uid) {
   try { await db.collection('users').doc(uid).update({ aprovado: true }); mostrarAlerta('alert-aprovacao','✅ Aprovado!','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro ao aprovar','error'); }
 }
-
 async function rejeitarUsuario(uid) {
   if (!confirm('Rejeitar e excluir este usuário?')) return;
   try { await db.collection('users').doc(uid).delete(); mostrarAlerta('alert-aprovacao','✅ Rejeitado','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
 }
-
 async function revogarAprovacao(uid) {
   if (!confirm('Revogar aprovação?')) return;
   try { await db.collection('users').doc(uid).update({ aprovado: false }); mostrarAlerta('alert-aprovacao','✅ Revogado','success'); carregarUsuarios(); }
@@ -1038,7 +1059,6 @@ async function revogarAprovacao(uid) {
 let tradeFile = null;
 const uploadAreaTrade = document.getElementById('uploadAreaTrade');
 const fileInputTrade  = document.getElementById('fileInputTrade');
-
 ['dragenter','dragover','dragleave','drop'].forEach(ev => uploadAreaTrade.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
 ['dragenter','dragover'].forEach(ev => uploadAreaTrade.addEventListener(ev, () => { uploadAreaTrade.style.borderColor='var(--accent)'; }));
 ['dragleave','drop'].forEach(ev => uploadAreaTrade.addEventListener(ev, () => { uploadAreaTrade.style.borderColor='var(--border)'; }));
@@ -1074,29 +1094,14 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
     document.getElementById('uploadPreviewTrade').style.display = 'none';
     document.getElementById('uploadProgressTrade').style.display = 'block';
     const base64 = await fileToBase64(tradeFile);
-    const formData = new FormData();
-    formData.append('dia', document.getElementById('diaDoTrade').value);
-    formData.append('mes', document.getElementById('mesDoTrade').value);
-    formData.append('ano', document.getElementById('anoDoTrade').value);
-    formData.append('imagem', base64);
     const response = await fetch(`${YT_WORKER}/apps-script`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        appsScriptUrl: APPS_SCRIPT_URL,
-        params: {
-          dia: document.getElementById('diaDoTrade').value,
-          mes: document.getElementById('mesDoTrade').value,
-          ano: document.getElementById('anoDoTrade').value,
-          imagem: base64
-        }
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: { dia: document.getElementById('diaDoTrade').value, mes: document.getElementById('mesDoTrade').value, ano: document.getElementById('anoDoTrade').value, imagem: base64 } })
     });
     const resultado = await response.json();
     if (resultado.success) {
       mostrarAlerta('alert-foto-trade', `✅ Foto salva! (Linha ${resultado.linha})`, 'success');
-      document.getElementById('formFotoTrade').reset();
-      removerImagemTrade();
+      document.getElementById('formFotoTrade').reset(); removerImagemTrade();
     } else { throw new Error(resultado.error || 'Erro desconhecido'); }
   } catch (error) {
     mostrarAlerta('alert-foto-trade', '❌ Erro: ' + error.message, 'error');
@@ -1110,205 +1115,64 @@ document.getElementById('formFotoTrade').addEventListener('submit', async (e) =>
 // DADOS DO TRADE
 // ══════════════════════════════════════════════
 function calcularSemanaMes(dia) {
-  if (dia <= 7) return 'SEMANA 1';
-  if (dia <= 14) return 'SEMANA 2';
-  if (dia <= 21) return 'SEMANA 3';
-  if (dia <= 28) return 'SEMANA 4';
+  if (dia <= 7) return 'SEMANA 1'; if (dia <= 14) return 'SEMANA 2';
+  if (dia <= 21) return 'SEMANA 3'; if (dia <= 28) return 'SEMANA 4';
   return 'SEMANA 5';
 }
-
 document.getElementById('diaData').addEventListener('input', e => {
   const dia = parseInt(e.target.value);
   document.getElementById('semana').value = (dia >= 1 && dia <= 31) ? calcularSemanaMes(dia) : '';
 });
-
 window.addEventListener('DOMContentLoaded', () => {
   const hoje = new Date();
   document.getElementById('diaData').value = hoje.getDate();
   document.getElementById('mesData').value = hoje.getMonth() + 1;
   document.getElementById('anoData').value = hoje.getFullYear();
   document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
-  // NASDAQ checked by default via HTML
-  // Auto-preenche Fotos dos Trades com data de hoje
   document.getElementById('diaDoTrade').value = hoje.getDate();
   document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
   document.getElementById('anoDoTrade').value = hoje.getFullYear();
 });
-
 function toggleAtivo(ativo) {
   const checked = document.getElementById(ativo+'Op').checked;
   const fields = document.getElementById(ativo+'Fields');
   fields.style.opacity = checked ? '1' : '0.4';
   fields.style.pointerEvents = checked ? 'auto' : 'none';
 }
-
 async function salvarAtivo(dia, mes, ano, semana, alvo, pontos, trades, gains, stops, breakeven) {
-  const params = {
-    acao:'salvarTrade', dia, mes, ano, semana, alvo,
-    pontos, trades, gains, stops, breakeven
-  };
   const response = await fetch(`${YT_WORKER}/apps-script`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params })
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: { acao:'salvarTrade', dia, mes, ano, semana, alvo, pontos, trades, gains, stops, breakeven } })
   });
   return await response.json();
 }
-
 document.getElementById('formTradeData').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btnTradeData');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
-    const dia     = parseInt(document.getElementById('diaData').value);
-    const mes     = parseInt(document.getElementById('mesData').value);
-    const ano     = parseInt(document.getElementById('anoData').value);
-    const semana  = document.getElementById('semana').value || calcularSemanaMes(dia);
-    const nasOp   = document.getElementById('nasOp').checked;
-    const dowOp   = document.getElementById('dowOp').checked;
-
+    const dia = parseInt(document.getElementById('diaData').value);
+    const mes = parseInt(document.getElementById('mesData').value);
+    const ano = parseInt(document.getElementById('anoData').value);
+    const semana = document.getElementById('semana').value || calcularSemanaMes(dia);
+    const nasOp = document.getElementById('nasOp').checked;
+    const dowOp = document.getElementById('dowOp').checked;
     if (!nasOp && !dowOp) { mostrarAlerta('alert-trade-data','❌ Marque pelo menos um ativo operado','error'); btn.disabled=false; btn.textContent='💾 Salvar na Planilha'; return; }
-
-    const erros = [];
-    let linhas = [];
-
+    const erros = [], linhas = [];
     if (nasOp) {
-      const r = await salvarAtivo(dia, mes, ano, semana, 'NASDAQ',
-        document.getElementById('nasPontos').value||0,
-        document.getElementById('nasTrades').value||0,
-        document.getElementById('nasGains').value||0,
-        document.getElementById('nasStops').value||0,
-        document.getElementById('nasBreak').value||0);
-      if (r.success) linhas.push(`NASDAQ linha ${r.linha}`);
-      else erros.push('NASDAQ: ' + r.error);
+      const r = await salvarAtivo(dia, mes, ano, semana, 'NASDAQ', document.getElementById('nasPontos').value||0, document.getElementById('nasTrades').value||0, document.getElementById('nasGains').value||0, document.getElementById('nasStops').value||0, document.getElementById('nasBreak').value||0);
+      if (r.success) linhas.push(`NASDAQ linha ${r.linha}`); else erros.push('NASDAQ: ' + r.error);
     }
-
     if (dowOp) {
-      const r = await salvarAtivo(dia, mes, ano, semana, 'DOW JONES',
-        document.getElementById('dowPontos').value||0,
-        document.getElementById('dowTrades').value||0,
-        document.getElementById('dowGains').value||0,
-        document.getElementById('dowStops').value||0,
-        document.getElementById('dowBreak').value||0);
-      if (r.success) linhas.push(`DOW linha ${r.linha}`);
-      else erros.push('DOW: ' + r.error);
+      const r = await salvarAtivo(dia, mes, ano, semana, 'DOW JONES', document.getElementById('dowPontos').value||0, document.getElementById('dowTrades').value||0, document.getElementById('dowGains').value||0, document.getElementById('dowStops').value||0, document.getElementById('dowBreak').value||0);
+      if (r.success) linhas.push(`DOW linha ${r.linha}`); else erros.push('DOW: ' + r.error);
     }
-
     if (erros.length) throw new Error(erros.join(' | '));
     mostrarAlerta('alert-trade-data', `✅ Salvo! (${linhas.join(', ')})`, 'success');
-
-    // Reset campos mas mantém data
-    ['nasPontos','nasTrades','nasGains','nasStops','nasBreak',
-     'dowPontos','dowTrades','dowGains','dowStops','dowBreak'].forEach(id=>{
-      const el=document.getElementById(id); if(el)el.value='';
-    });
+    ['nasPontos','nasTrades','nasGains','nasStops','nasBreak','dowPontos','dowTrades','dowGains','dowStops','dowBreak'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   } catch (error) { mostrarAlerta('alert-trade-data', '❌ Erro: ' + error.message, 'error'); }
   btn.disabled = false; btn.textContent = '💾 Salvar na Planilha';
 });
-</script>
-<!-- MODAL PERFIL ADMIN -->
-<div id="modalPerfilAdmin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:420px;position:relative;">
-    <button onclick="fecharPerfilAdmin()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
-    <h3 style="font-size:18px;font-weight:800;margin-bottom:24px;">✏️ Meu Perfil</h3>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px;">
-      <div id="adminAvatarBig" onclick="document.getElementById('inputFotoAdmin').click()" title="Clique para trocar foto" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;overflow:hidden;cursor:pointer;border:3px solid rgba(255,255,255,.1);transition:all .2s;">
-        <span id="adminAvatarBigLetra">A</span>
-      </div>
-      <input type="file" id="inputFotoAdmin" accept="image/*" style="display:none" onchange="previsualizarFotoAdmin(this)">
-      <span style="font-size:12px;color:#94a3b8;">Clique no avatar para trocar foto</span>
-    </div>
-    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">Nome</label>
-      <input type="text" id="inputNomeAdmin" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e5e7eb;font-size:14px;font-family:inherit;">
-    </div>
-    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">E-mail</label>
-      <input type="text" id="inputEmailAdmin" disabled style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px;color:#64748b;font-size:14px;font-family:inherit;cursor:not-allowed;">
-    </div>
-    <button onclick="salvarPerfilAdmin()" style="width:100%;background:#6366f1;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;">💾 Salvar</button>
-    <p id="msgPerfilAdmin" style="text-align:center;margin-top:12px;font-size:13px;color:#22c55e;display:none;"></p>
-  </div>
-</div>
-
-<!-- MODAL INFO USUÁRIO -->
-<div id="modalInfoUser" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:380px;position:relative;text-align:center;">
-    <button onclick="document.getElementById('modalInfoUser').style.display='none';" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
-    <div id="infoUserAvatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;overflow:hidden;"></div>
-    <h3 id="infoUserNome" style="font-size:20px;font-weight:800;margin-bottom:6px;"></h3>
-    <p id="infoUserEmail" style="font-size:14px;color:#94a3b8;margin-bottom:16px;"></p>
-    <p id="infoUserCadastro" style="font-size:13px;color:#64748b;"></p>
-  </div>
-</div>
-
-<script>
-function atualizarAvatarAdmin() {
-  const letra = (window._adminNome||'A').charAt(0).toUpperCase();
-  ['adminAvatarLetra','adminAvatarBigLetra'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=letra; });
-  if (window._adminFotoUrl) {
-    ['adminAvatarHeader','adminAvatarBig'].forEach(id => {
-      const el=document.getElementById(id);
-      if(!el) return;
-      el.innerHTML = `<img src="${window._adminFotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    });
-  }
-}
-
-function abrirPerfilAdmin() {
-  document.getElementById('inputNomeAdmin').value = window._adminNome || '';
-  document.getElementById('inputEmailAdmin').value = window._adminEmail || '';
-  const bigEl = document.getElementById('adminAvatarBig');
-  if (window._adminFotoUrl) bigEl.innerHTML = `<img src="${window._adminFotoUrl}" style="width:100%;height:100%;object-fit:cover;">`;
-  else bigEl.innerHTML = `<span id="adminAvatarBigLetra">${(window._adminNome||'A').charAt(0).toUpperCase()}</span>`;
-  document.getElementById('msgPerfilAdmin').style.display='none';
-  document.getElementById('modalPerfilAdmin').style.display='flex';
-}
-function fecharPerfilAdmin() { document.getElementById('modalPerfilAdmin').style.display='none'; }
-
-function previsualizarFotoAdmin(input) {
-  const file = input.files[0]; if (!file) return;
-  if (file.size > 500*1024) { alert('Foto muito grande. Use até 500KB.'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    window._adminFotoTemp = e.target.result;
-    document.getElementById('adminAvatarBig').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
-  };
-  reader.readAsDataURL(file);
-}
-
-async function salvarPerfilAdmin() {
-  const nome = document.getElementById('inputNomeAdmin').value.trim();
-  if (!nome) { alert('Preencha o nome'); return; }
-  const msgEl = document.getElementById('msgPerfilAdmin');
-  try {
-    const update = { nome };
-    if (window._adminFotoTemp) update.fotoUrl = window._adminFotoTemp;
-    await db.collection('users').doc(window._adminUid).update(update);
-    window._adminNome = nome;
-    if (window._adminFotoTemp) { window._adminFotoUrl = window._adminFotoTemp; delete window._adminFotoTemp; }
-    document.getElementById('adminName').textContent = nome;
-    atualizarAvatarAdmin();
-    msgEl.textContent = '✅ Perfil salvo!'; msgEl.style.display='block';
-    setTimeout(() => fecharPerfilAdmin(), 1200);
-  } catch(e) { msgEl.textContent='❌ Erro ao salvar'; msgEl.style.color='#ef4444'; msgEl.style.display='block'; }
-}
-
-async function verInfoUsuario(autorId, nomeExibido) {
-  if (!autorId) { alert('ID do usuário não disponível.'); return; }
-  try {
-    const doc = await db.collection('users').doc(autorId).get();
-    const data = doc.exists ? doc.data() : {};
-    const nome = data.nome || nomeExibido || 'Desconhecido';
-    const email = data.email || doc.id;
-    const criado = data.criadoEm ? data.criadoEm.toDate().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
-    document.getElementById('infoUserNome').textContent = nome;
-    document.getElementById('infoUserEmail').textContent = '📧 ' + email;
-    document.getElementById('infoUserCadastro').textContent = 'Cadastrado em: ' + criado;
-    const avatarEl = document.getElementById('infoUserAvatar');
-    if (data.fotoUrl) avatarEl.innerHTML = `<img src="${data.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    else avatarEl.textContent = nome.charAt(0).toUpperCase();
-    document.getElementById('modalInfoUser').style.display='flex';
-  } catch(e) { alert('Erro ao buscar dados do usuário.'); }
-}
 </script>
 </body>
 </html>
