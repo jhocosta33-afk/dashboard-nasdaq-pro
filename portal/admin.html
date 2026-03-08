@@ -94,7 +94,10 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   <div class="user-info">
     <a href="../" style="display:inline-block;background:rgba(255,255,255,0.1);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;margin-right:12px;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📊 Dashboard</a>
     <button id="btnConectarYT" onclick="autenticarYouTube()" style="background:#ff0000;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">🔗 Conectar YouTube</button>
-    <span id="adminName">Admin</span>
+    <div id="adminAvatarHeader" onclick="abrirPerfilAdmin()" title="Editar perfil" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;cursor:pointer;overflow:hidden;border:2px solid transparent;transition:all .2s;flex-shrink:0;">
+      <span id="adminAvatarLetra">A</span>
+    </div>
+    <span id="adminName" onclick="abrirPerfilAdmin()" style="cursor:pointer;font-weight:600;">Admin</span>
     <button class="btn-logout" onclick="logout()">Sair</button>
   </div>
 </header>
@@ -563,7 +566,13 @@ auth.onAuthStateChanged(async (user) => {
       window.location.href = 'login.html';
       return;
     }
-    document.getElementById('adminName').textContent = user.displayName || user.email;
+    const adminData = userDoc.data();
+    window._adminNome = adminData.nome || user.displayName || user.email.split('@')[0];
+    window._adminUid = user.uid;
+    window._adminEmail = user.email;
+    window._adminFotoUrl = adminData.fotoUrl || null;
+    document.getElementById('adminName').textContent = window._adminNome;
+    atualizarAvatarAdmin();
     // Carrega configurações do Firestore antes de qualquer coisa
     await carregarConfiguracoes();
     await inicializarYouTubeAuth();
@@ -774,7 +783,7 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
       youtubeVideoId:  youtubeVideoId || null,
       driveFileId:     driveFileId    || null,
       criadoEm:        firebase.firestore.FieldValue.serverTimestamp(),
-      autor:           auth.currentUser.displayName || 'Admin'
+      autor:           window._adminNome || auth.currentUser.displayName || 'Admin'
     });
 
     mostrarAlerta('alert-post', '✅ Post publicado com sucesso!', 'success');
@@ -892,7 +901,7 @@ async function carregarComentariosAdmin(postId) {
       const nomeAutor = co.autor || 'Aluno';
       const inicial = nomeAutor.charAt(0).toUpperCase();
       html += `<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;">
-        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;">${inicial}</div>
+        <div onclick="verInfoUsuario('${co.autorId}','${nomeAutor}')" title="Ver info do usuário" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;cursor:pointer;border:2px solid transparent;transition:all .2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${co.fotoUrl ? `<img src="${co.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : inicial}</div>
         <div style="flex:1;min-width:0;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
@@ -901,7 +910,7 @@ async function carregarComentariosAdmin(postId) {
               <button onclick="deletarComentarioAdmin('${postId}','${doc.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">🗑️</button>
             </div>
           </div>
-          <p style="margin:0;font-size:14px;line-height:1.6;">${co.texto}</p>
+          <p style="margin:0;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
         </div>
       </div>`;
     });
@@ -916,7 +925,7 @@ async function enviarComentarioAdmin(postId) {
   try {
     const user = auth.currentUser;
     await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto, autor: user.displayName || 'Admin', autorId: user.uid,
+      texto, autor: window._adminNome || user.displayName || 'Admin', autorId: user.uid,
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
     textarea.value = '';
@@ -1196,6 +1205,110 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
   } catch (error) { mostrarAlerta('alert-trade-data', '❌ Erro: ' + error.message, 'error'); }
   btn.disabled = false; btn.textContent = '💾 Salvar na Planilha';
 });
+</script>
+<!-- MODAL PERFIL ADMIN -->
+<div id="modalPerfilAdmin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:420px;position:relative;">
+    <button onclick="fecharPerfilAdmin()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:24px;">✏️ Meu Perfil</h3>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px;">
+      <div id="adminAvatarBig" onclick="document.getElementById('inputFotoAdmin').click()" title="Clique para trocar foto" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;overflow:hidden;cursor:pointer;border:3px solid rgba(255,255,255,.1);transition:all .2s;">
+        <span id="adminAvatarBigLetra">A</span>
+      </div>
+      <input type="file" id="inputFotoAdmin" accept="image/*" style="display:none" onchange="previsualizarFotoAdmin(this)">
+      <span style="font-size:12px;color:#94a3b8;">Clique no avatar para trocar foto</span>
+    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">Nome</label>
+      <input type="text" id="inputNomeAdmin" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e5e7eb;font-size:14px;font-family:inherit;">
+    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">E-mail</label>
+      <input type="text" id="inputEmailAdmin" disabled style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px;color:#64748b;font-size:14px;font-family:inherit;cursor:not-allowed;">
+    </div>
+    <button onclick="salvarPerfilAdmin()" style="width:100%;background:#6366f1;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;">💾 Salvar</button>
+    <p id="msgPerfilAdmin" style="text-align:center;margin-top:12px;font-size:13px;color:#22c55e;display:none;"></p>
+  </div>
+</div>
+
+<!-- MODAL INFO USUÁRIO -->
+<div id="modalInfoUser" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:380px;position:relative;text-align:center;">
+    <button onclick="document.getElementById('modalInfoUser').style.display='none';" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
+    <div id="infoUserAvatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;overflow:hidden;"></div>
+    <h3 id="infoUserNome" style="font-size:20px;font-weight:800;margin-bottom:6px;"></h3>
+    <p id="infoUserEmail" style="font-size:14px;color:#94a3b8;margin-bottom:16px;"></p>
+    <p id="infoUserCadastro" style="font-size:13px;color:#64748b;"></p>
+  </div>
+</div>
+
+<script>
+function atualizarAvatarAdmin() {
+  const letra = (window._adminNome||'A').charAt(0).toUpperCase();
+  ['adminAvatarLetra','adminAvatarBigLetra'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=letra; });
+  if (window._adminFotoUrl) {
+    ['adminAvatarHeader','adminAvatarBig'].forEach(id => {
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = `<img src="${window._adminFotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    });
+  }
+}
+
+function abrirPerfilAdmin() {
+  document.getElementById('inputNomeAdmin').value = window._adminNome || '';
+  document.getElementById('inputEmailAdmin').value = window._adminEmail || '';
+  const bigEl = document.getElementById('adminAvatarBig');
+  if (window._adminFotoUrl) bigEl.innerHTML = `<img src="${window._adminFotoUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+  else bigEl.innerHTML = `<span id="adminAvatarBigLetra">${(window._adminNome||'A').charAt(0).toUpperCase()}</span>`;
+  document.getElementById('msgPerfilAdmin').style.display='none';
+  document.getElementById('modalPerfilAdmin').style.display='flex';
+}
+function fecharPerfilAdmin() { document.getElementById('modalPerfilAdmin').style.display='none'; }
+
+function previsualizarFotoAdmin(input) {
+  const file = input.files[0]; if (!file) return;
+  if (file.size > 500*1024) { alert('Foto muito grande. Use até 500KB.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    window._adminFotoTemp = e.target.result;
+    document.getElementById('adminAvatarBig').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function salvarPerfilAdmin() {
+  const nome = document.getElementById('inputNomeAdmin').value.trim();
+  if (!nome) { alert('Preencha o nome'); return; }
+  const msgEl = document.getElementById('msgPerfilAdmin');
+  try {
+    const update = { nome };
+    if (window._adminFotoTemp) update.fotoUrl = window._adminFotoTemp;
+    await db.collection('users').doc(window._adminUid).update(update);
+    window._adminNome = nome;
+    if (window._adminFotoTemp) { window._adminFotoUrl = window._adminFotoTemp; delete window._adminFotoTemp; }
+    document.getElementById('adminName').textContent = nome;
+    atualizarAvatarAdmin();
+    msgEl.textContent = '✅ Perfil salvo!'; msgEl.style.display='block';
+    setTimeout(() => fecharPerfilAdmin(), 1200);
+  } catch(e) { msgEl.textContent='❌ Erro ao salvar'; msgEl.style.color='#ef4444'; msgEl.style.display='block'; }
+}
+
+async function verInfoUsuario(autorId, nomeExibido) {
+  if (!autorId) { alert('ID do usuário não disponível.'); return; }
+  try {
+    const doc = await db.collection('users').doc(autorId).get();
+    const data = doc.exists ? doc.data() : {};
+    const nome = data.nome || nomeExibido || 'Desconhecido';
+    const email = data.email || doc.id;
+    const criado = data.criadoEm ? data.criadoEm.toDate().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+    document.getElementById('infoUserNome').textContent = nome;
+    document.getElementById('infoUserEmail').textContent = '📧 ' + email;
+    document.getElementById('infoUserCadastro').textContent = 'Cadastrado em: ' + criado;
+    const avatarEl = document.getElementById('infoUserAvatar');
+    if (data.fotoUrl) avatarEl.innerHTML = `<img src="${data.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    else avatarEl.textContent = nome.charAt(0).toUpperCase();
+    document.getElementById('modalInfoUser').style.display='flex';
+  } catch(e) { alert('Erro ao buscar dados do usuário.'); }
+}
 </script>
 </body>
 </html>
