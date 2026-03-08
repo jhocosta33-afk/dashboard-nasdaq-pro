@@ -904,7 +904,7 @@ function carregarComentariosAdmin(postId) {
         const nomeAutor = co.autor || 'Aluno';
         const inicial = nomeAutor.charAt(0).toUpperCase();
         const fotoHtml = co.fotoUrl
-          ? '<img src="' + co.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='' + inicial + ''">'
+          ? '<img src="' + co.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.textContent=this.getAttribute('data-i')" data-i="' + inicial + '">'
           : inicial;
         html += `<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;">
           <div onclick="verInfoUsuario('${co.autorId}','${nomeAutor}')" title="Ver info" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;cursor:pointer;overflow:hidden;">${fotoHtml}</div>
@@ -934,7 +934,7 @@ function carregarRespostasAdmin(postId, comentarioId, respostas) {
   respostas.forEach((r, idx) => {
     const tempo = r.criadoEm ? tempoRelativo(new Date(r.criadoEm)) : 'agora mesmo';
     const inicial = (r.autor||'A').charAt(0).toUpperCase();
-    const fotoHtml = r.fotoUrl ? `<img src="${r.fotoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${inicial}'">` : inicial;
+    const fotoHtml = r.fotoUrl ? '<img src="' + r.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"> ' : inicial;
     html += `<div style="display:flex;gap:8px;align-items:flex-start;background:rgba(255,255,255,0.03);border-left:3px solid #6366f1;padding:8px 12px;border-radius:6px;margin-bottom:6px;">
       <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;">${fotoHtml}</div>
       <div style="flex:1;">
