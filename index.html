@@ -477,7 +477,14 @@ const Dashboard = {
     if (content) content.classList.add('active');
     if (btn) btn.classList.add('active');
     // Carrega calendário automaticamente ao abrir a aba
-    if (aba === 'mercado') setTimeout(() => this.atualizarCalendario(), 100);
+    if (aba === 'mercado') {
+      setTimeout(() => {
+        const container = document.getElementById('tvCalendarContainer');
+        if (!container) return;
+        const src = 'https://www.tradingview.com/embed-widget/economic-calendar/?locale=pt_BR#%7B%22colorTheme%22%3A%22dark%22%2C%22isTransparent%22%3Atrue%2C%22width%22%3A%22100%25%22%2C%22height%22%3A%22700%22%2C%22importanceFilter%22%3A%22-1%2C0%2C1%22%2C%22currencyFilter%22%3A%22USD%2CBRL%22%7D';
+        container.innerHTML = `<iframe src="${src}" scrolling="no" allowtransparency="true" frameborder="0" style="width:100%;height:700px;border:none;" id="investingCalendar"></iframe>`;
+      }, 150);
+    }
   },
 
   inicializarSidebarMobile() {
