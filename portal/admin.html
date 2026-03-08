@@ -579,8 +579,10 @@ auth.onAuthStateChanged(async (user) => {
     carregarPosts();
     carregarUsuarios();
   } catch (error) {
-    console.error('Erro auth:', error);
-    window.location.href = 'login.html';
+    console.error('Erro auth admin:', error);
+    // Não redireciona para login se já autenticado - mostra erro
+    const postsEl = document.getElementById('posts-list');
+    if (postsEl) postsEl.innerHTML = `<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;"><p style="color:#ef4444;font-weight:700;">❌ Erro de inicialização</p><p style="color:#94a3b8;font-size:13px;margin-top:8px;">${error.message}</p></div>`;
   }
 });
 
@@ -808,7 +810,13 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
 async function carregarPosts() {
   const container = document.getElementById('posts-list');
   try {
-    const snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').limit(20).get();
+    let snapshot;
+    try {
+      snapshot = await db.collection('posts').orderBy('criadoEm', 'desc').limit(20).get();
+    } catch(indexErr) {
+      console.warn('orderBy falhou, tentando sem ordenação:', indexErr.message);
+      snapshot = await db.collection('posts').limit(20).get();
+    }
     if (snapshot.empty) { container.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Nenhum post ainda.</p>'; return; }
 
     let html = '';
@@ -863,7 +871,11 @@ async function carregarPosts() {
 
   } catch (error) {
     console.error('Erro posts:', error);
-    container.innerHTML = '<p style="color:var(--red)">Erro ao carregar posts</p>';
+    container.innerHTML = `<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;">
+      <p style="color:var(--red);font-weight:700;">❌ Erro ao carregar posts</p>
+      <p style="color:var(--text-muted);font-size:13px;margin-top:8px;">${error.message}</p>
+      <p style="color:var(--text-muted);font-size:12px;margin-top:4px;">Verifique as Firestore Rules e o console (F12)</p>
+    </div>`;
   }
 }
 
@@ -1058,7 +1070,10 @@ async function carregarUsuarios() {
     document.getElementById('usuarios-aprovados').innerHTML = aprovados
       ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${aprovados}</tbody></table>`
       : '<p style="text-align:center;color:var(--text-muted)">Nenhum aluno aprovado ainda</p>';
-  } catch (error) { console.error('Erro usuários:', error); }
+  } catch (error) {
+    console.error('Erro usuários:', error);
+    document.getElementById('usuarios-pendentes').innerHTML = `<p style="color:var(--red);padding:16px;">❌ Erro: ${error.message}</p>`;
+  }
 }
 
 async function aprovarUsuario(uid) {
