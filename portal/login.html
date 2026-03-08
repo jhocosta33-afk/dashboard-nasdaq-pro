@@ -14,65 +14,32 @@
   --accent: #22c55e;
   --red: #ef4444;
 }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  gap: 24px;
 }
-
-.container {
-  max-width: 420px;
-  width: 100%;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.logo {
-  font-size: 48px;
-  margin-bottom: 12px;
-}
-
-h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
+.container { max-width: 420px; width: 100%; }
+.header { text-align: center; margin-bottom: 32px; }
+.logo { font-size: 48px; margin-bottom: 12px; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { font-size: 14px; color: var(--text-muted); }
 .card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 32px;
 }
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
+.form-group { margin-bottom: 20px; }
+label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
 input {
   width: 100%;
   background: rgba(255,255,255,0.05);
@@ -83,17 +50,8 @@ input {
   color: var(--text);
   transition: all .2s ease;
 }
-
-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: rgba(255,255,255,0.08);
-}
-
-input::placeholder {
-  color: var(--text-muted);
-}
-
+input:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.08); }
+input::placeholder { color: var(--text-muted); }
 .btn {
   width: 100%;
   background: var(--accent);
@@ -107,80 +65,153 @@ input::placeholder {
   transition: all .2s ease;
   margin-top: 8px;
 }
+.btn:hover { background: #16a34a; transform: scale(1.02); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: none; }
+.alert.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+.alert.warning { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; }
+.links { display: flex; justify-content: space-between; margin-top: 20px; font-size: 14px; }
+.links a { color: var(--text-muted); text-decoration: none; transition: color .2s; }
+.links a:hover { color: var(--accent); }
+.divider { text-align: center; margin: 24px 0; color: var(--text-muted); font-size: 13px; }
+.back-link { text-align: center; margin-top: 20px; }
+.back-link a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: color .2s; }
+.back-link a:hover { color: var(--accent); }
 
-.btn:hover {
-  background: #16a34a;
-  transform: scale(1.02);
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  display: none;
-}
-
-.alert.error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: var(--red);
-}
-
-.alert.warning {
-  background: rgba(251, 191, 36, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  color: #fbbf24;
-}
-
-.links {
+/* ── SOCIAL BAR ── */
+.social-bar {
+  max-width: 420px;
+  width: 100%;
   display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-  font-size: 14px;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-
-.links a {
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color .2s;
-}
-
-.links a:hover {
-  color: var(--accent);
-}
-
-.divider {
-  text-align: center;
-  margin: 24px 0;
-  color: var(--text-muted);
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
   font-size: 13px;
-}
-
-.back-link {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.back-link a {
-  color: var(--text-muted);
+  font-weight: 700;
   text-decoration: none;
-  font-size: 14px;
-  transition: color .2s;
+  transition: all .25s;
+  border: 1px solid transparent;
+}
+.social-btn.instagram {
+  background: linear-gradient(135deg, rgba(193,53,132,0.15), rgba(253,29,29,0.1));
+  border-color: rgba(193,53,132,0.4);
+  color: #f472b6;
+}
+.social-btn.instagram:hover {
+  background: linear-gradient(135deg, rgba(193,53,132,0.3), rgba(253,29,29,0.2));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(193,53,132,0.25);
+}
+.social-btn.whatsapp {
+  background: rgba(37,211,102,0.1);
+  border-color: rgba(37,211,102,0.35);
+  color: #4ade80;
+}
+.social-btn.whatsapp:hover {
+  background: rgba(37,211,102,0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37,211,102,0.2);
 }
 
-.back-link a:hover {
-  color: var(--accent);
+/* ── MESAS INDICADAS ── */
+.mesas-section {
+  max-width: 420px;
+  width: 100%;
 }
+.mesas-toggle {
+  width: 100%;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.25);
+  border-radius: 12px;
+  padding: 14px 20px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all .25s;
+  font-family: inherit;
+}
+.mesas-toggle:hover {
+  background: rgba(99,102,241,0.15);
+  border-color: rgba(99,102,241,0.5);
+}
+.mesas-toggle .arrow {
+  transition: transform .3s;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.mesas-toggle.open .arrow { transform: rotate(180deg); }
+
+.mesas-panel {
+  display: none;
+  margin-top: 10px;
+  background: var(--card);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: slideDown .25s ease;
+}
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+.mesas-panel.open { display: block; }
+
+.mesa-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background .2s;
+}
+.mesa-item:last-child { border-bottom: none; }
+.mesa-item:hover { background: rgba(99,102,241,0.06); }
+.mesa-info { display: flex; align-items: center; gap: 12px; }
+.mesa-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.mesa-logo.tp { background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #fff; font-size: 13px; letter-spacing: -0.5px; }
+.mesa-logo.apex { background: linear-gradient(135deg, #f97316, #ef4444); color: #fff; font-size: 13px; }
+.mesa-text {}
+.mesa-name { font-size: 14px; font-weight: 800; color: var(--text); }
+.mesa-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.mesa-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all .2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mesa-link:hover { transform: scale(1.05); box-shadow: 0 4px 14px rgba(99,102,241,0.4); }
 
 @media (max-width: 480px) {
   .container { max-width: 100%; }
+  .mesas-section { max-width: 100%; }
+  .social-bar { max-width: 100%; }
   .card { padding: 24px; }
   h1 { font-size: 24px; }
 }
@@ -209,16 +240,14 @@ input::placeholder {
         <input type="password" id="senha" placeholder="••••••••" required>
       </div>
 
-      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="manterConectado" checked style="width: auto; cursor: pointer;">
-        <label for="manterConectado" style="margin: 0; cursor: pointer; font-size: 13px; color: var(--text-muted);">
+      <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="manterConectado" checked style="width:auto;cursor:pointer;">
+        <label for="manterConectado" style="margin:0;cursor:pointer;font-size:13px;color:var(--text-muted);">
           Manter conectado
         </label>
       </div>
 
-      <button type="submit" class="btn" id="btnLogin">
-        Entrar
-      </button>
+      <button type="submit" class="btn" id="btnLogin">Entrar</button>
     </form>
 
     <div class="divider">ou</div>
@@ -234,6 +263,52 @@ input::placeholder {
   </div>
 </div>
 
+<!-- REDES SOCIAIS -->
+<div class="social-bar">
+  <a href="https://www.instagram.com/joaodibtrader?igsh=dzgxMmJsOWtjaWJh" target="_blank" rel="noopener" class="social-btn instagram">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    @joaodibtrader
+  </a>
+  <a href="https://chat.whatsapp.com/SEU_LINK_AQUI" target="_blank" rel="noopener" class="social-btn whatsapp">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Grupo Gratuito
+  </a>
+</div>
+
+<!-- MESAS INDICADAS -->
+<div class="mesas-section">
+  <button class="mesas-toggle" id="mesasToggle" onclick="toggleMesas()">
+    <span>🏆 Mesas Indicadas — Prop Firms</span>
+    <span class="arrow">▼</span>
+  </button>
+  <div class="mesas-panel" id="mesasPanel">
+    <div class="mesa-item">
+      <div class="mesa-info">
+        <div class="mesa-logo tp">TP</div>
+        <div class="mesa-text">
+          <div class="mesa-name">TakeProfit Trader</div>
+          <div class="mesa-desc">Mesa proprietária — indicação João Dib</div>
+        </div>
+      </div>
+      <a href="https://takeprofittrader.com/?referralCode=DIB" target="_blank" rel="noopener" class="mesa-link">
+        Acessar →
+      </a>
+    </div>
+    <div class="mesa-item">
+      <div class="mesa-info">
+        <div class="mesa-logo apex">AX</div>
+        <div class="mesa-text">
+          <div class="mesa-name">Apex Trader Funding</div>
+          <div class="mesa-desc">Mesa proprietária — indicação João Dib</div>
+        </div>
+      </div>
+      <a href="https://apextraderfunding.com/member/aff/go/joaodib?c=ZINFQCUB" target="_blank" rel="noopener" class="mesa-link">
+        Acessar →
+      </a>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -241,51 +316,32 @@ input::placeholder {
 <script src="firebase-config.js"></script>
 
 <script>
-// ══════════════════════════════════════════════
-// VERIFICAR SE JÁ ESTÁ LOGADO (AUTO-LOGIN)
-// ══════════════════════════════════════════════
+function toggleMesas() {
+  const btn = document.getElementById('mesasToggle');
+  const panel = document.getElementById('mesasPanel');
+  btn.classList.toggle('open');
+  panel.classList.toggle('open');
+}
 
-// Mostrar loading durante verificação
 document.body.style.opacity = '0.5';
 document.body.style.pointerEvents = 'none';
 
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    // Usuário já está logado, verificar se é admin ou aluno aprovado
     try {
       const userDoc = await db.collection('users').doc(user.uid).get();
-      
       if (userDoc.exists) {
         const userData = userDoc.data();
-        
-        // Se for admin, redireciona para admin
-        if (userData.role === 'admin') {
-          window.location.href = 'admin.html';
-          return;
-        }
-        
-        // Se for aluno aprovado, redireciona para área do aluno
-        if (userData.aprovado === true) {
-          window.location.href = 'aluno.html';
-          return;
-        }
-        
-        // Se não for aprovado, faz logout e mantém na página de login
+        if (userData.role === 'admin') { window.location.href = 'admin.html'; return; }
+        if (userData.aprovado === true) { window.location.href = 'aluno.html'; return; }
         await auth.signOut();
       }
-    } catch (error) {
-      console.error('Erro ao verificar usuário:', error);
-    }
+    } catch (error) { console.error('Erro ao verificar usuário:', error); }
   }
-  
-  // Remove loading - usuário não está logado ou não foi aprovado
   document.body.style.opacity = '1';
   document.body.style.pointerEvents = 'auto';
 });
 
-// ══════════════════════════════════════════════
-// FORMULÁRIO DE LOGIN
-// ══════════════════════════════════════════════
 const form = document.getElementById('loginForm');
 const alertBox = document.getElementById('alert');
 const btnLogin = document.getElementById('btnLogin');
@@ -298,95 +354,47 @@ function mostrarAlerta(mensagem, tipo) {
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  
   const email = document.getElementById('email').value.trim();
   const senha = document.getElementById('senha').value;
-
   btnLogin.disabled = true;
   btnLogin.textContent = 'Entrando...';
-
   try {
-    // Faz login
     const userCredential = await auth.signInWithEmailAndPassword(email, senha);
     const user = userCredential.user;
-
-    // Busca dados do usuário no Firestore
     const userDoc = await db.collection('users').doc(user.uid).get();
-
     if (!userDoc.exists) {
-      // Se não existe no Firestore, cria agora
       await db.collection('users').doc(user.uid).set({
         nome: user.displayName || user.email.split('@')[0],
-        email: user.email,
-        role: 'aluno',
-        aprovado: false,
+        email: user.email, role: 'aluno', aprovado: false,
         criadoEm: firebase.firestore.FieldValue.serverTimestamp()
       });
       mostrarAlerta('⏳ Conta criada. Aguarde aprovação do administrador.', 'warning');
-      await auth.signOut();
-      btnLogin.disabled = false;
-      btnLogin.textContent = 'Entrar';
-      return;
+      await auth.signOut(); btnLogin.disabled = false; btnLogin.textContent = 'Entrar'; return;
     }
-
     const userData = userDoc.data();
-
-    // Verifica se é admin
-    if (userData.role === 'admin') {
-      // Admin sempre tem acesso
-      window.location.href = 'admin.html';
-      return;
-    }
-
-    // Verifica se o aluno foi aprovado
+    if (userData.role === 'admin') { window.location.href = 'admin.html'; return; }
     if (userData.aprovado !== true) {
       mostrarAlerta('⏳ Sua conta ainda está aguardando aprovação do administrador.', 'warning');
-      await auth.signOut();
-      btnLogin.disabled = false;
-      btnLogin.textContent = 'Entrar';
-      return;
+      await auth.signOut(); btnLogin.disabled = false; btnLogin.textContent = 'Entrar'; return;
     }
-
-    // Aluno aprovado - redireciona para área do aluno
     window.location.href = 'aluno.html';
-
   } catch (error) {
-    console.error('Erro no login:', error);
-    
     let mensagem = '❌ ';
-    
     switch (error.code) {
-      case 'auth/user-not-found':
-      case 'auth/wrong-password':
-        mensagem += 'E-mail ou senha incorretos.';
-        break;
-      case 'auth/invalid-email':
-        mensagem += 'E-mail inválido.';
-        break;
-      case 'auth/too-many-requests':
-        mensagem += 'Muitas tentativas. Tente novamente mais tarde.';
-        break;
-      default:
-        mensagem += error.message;
+      case 'auth/user-not-found': case 'auth/wrong-password': mensagem += 'E-mail ou senha incorretos.'; break;
+      case 'auth/invalid-email': mensagem += 'E-mail inválido.'; break;
+      case 'auth/too-many-requests': mensagem += 'Muitas tentativas. Tente novamente mais tarde.'; break;
+      default: mensagem += error.message;
     }
-    
     mostrarAlerta(mensagem, 'error');
-    btnLogin.disabled = false;
-    btnLogin.textContent = 'Entrar';
+    btnLogin.disabled = false; btnLogin.textContent = 'Entrar';
   }
 });
 
-// Esqueceu a senha
 document.getElementById('esqueceuSenha').addEventListener('click', async (e) => {
   e.preventDefault();
-  
   const email = document.getElementById('email').value.trim();
-  
-  if (!email) {
-    mostrarAlerta('❌ Digite seu e-mail primeiro', 'error');
-    return;
-  }
-
+  if (!email) { mostrarAlerta('❌ Digite seu e-mail primeiro', 'error'); return; }
   try {
     await auth.sendPasswordResetEmail(email);
     mostrarAlerta('✅ E-mail de recuperação enviado! Verifique sua caixa de entrada.', 'warning');
@@ -395,6 +403,5 @@ document.getElementById('esqueceuSenha').addEventListener('click', async (e) => 
   }
 });
 </script>
-
 </body>
 </html>
