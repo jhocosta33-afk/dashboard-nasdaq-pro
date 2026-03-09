@@ -373,8 +373,8 @@ function montarPostHTML(post) {
           <span class="post-category">${catLabel}</span>
           <span class="post-date">📅 ${data}</span>
         </div>
-        ${midiaHTML}
         <h3 class="post-title">${post.titulo || ''}</h3>
+        ${midiaHTML}
         ${post.texto ? `<p class="post-text">${post.texto}</p>` : ''}
         <div class="post-footer">
           ${post.link ? `<a href="${post.link}" target="_blank" class="btn btn-primary">🔗 Acessar Link</a>` : ''}

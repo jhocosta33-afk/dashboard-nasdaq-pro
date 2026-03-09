@@ -892,7 +892,9 @@ function carregarPosts() {
 
           let midiaHTML = '';
           if (post.youtubeEmbedURL) {
-            midiaHTML = `<div style="position:relative;width:200px;height:112px;background:#000;border-radius:8px;overflow:hidden;flex-shrink:0;"><iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`;
+            midiaHTML = `<div style="position:relative;width:280px;height:158px;background:#000;border-radius:10px;overflow:hidden;flex-shrink:0;">
+            <iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+          </div>`;
           } else if (post.midiaURL && post.midiaTipo === 'imagem') {
             midiaHTML = `<img src="${post.midiaURL}" class="post-image" alt="${post.titulo}" onerror="this.style.display='none'">`;
           } else if (post.midiaURL && post.midiaTipo === 'pdf') {
