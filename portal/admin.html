@@ -912,31 +912,41 @@ function temPermissao(perm) {
 
 // Aplica visibilidade das abas e elementos baseado nas permissões
 function aplicarPermissoesUI() {
-  // Aba Administradores: só superadmin
-  const tabAdmins = document.getElementById('tabAdmins');
-  if (tabAdmins) tabAdmins.style.display = window._isSuperAdmin ? '' : 'none';
+  // Mapa aba → id do elemento → permissão necessária
+  const abas = [
+    { id: 'tabPosts',       secao: 'posts',       perm: () => temPermissao('posts')    },
+    { id: 'tabAprovacoes',  secao: 'aprovacoes',  perm: () => temPermissao('alunos')   },
+    { id: 'tabPlanilha',    secao: 'planilha',    perm: () => temPermissao('planilha') },
+    { id: 'tabAdmins',      secao: 'admins',      perm: () => window._isSuperAdmin     },
+  ];
 
-  // Aba Posts
-  document.querySelectorAll('[onclick="switchTab(\'posts\')"]').forEach(el => {
-    el.style.display = temPermissao('posts') ? '' : 'none';
+  abas.forEach(a => {
+    const el = document.getElementById(a.id);
+    if (el) el.style.display = a.perm() ? '' : 'none';
   });
 
-  // Aba Aprovações
-  document.querySelectorAll('[onclick="switchTab(\'aprovacoes\')"]').forEach(el => {
-    el.style.display = temPermissao('alunos') ? '' : 'none';
+  // Ativa a primeira aba que o usuário pode ver
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+  const primeira = abas.find(a => {
+    const el = document.getElementById(a.id);
+    return el && el.style.display !== 'none';
   });
 
-  // Aba Planilha
-  document.querySelectorAll('[onclick="switchTab(\'planilha\')"]').forEach(el => {
-    el.style.display = temPermissao('planilha') ? '' : 'none';
-  });
-
-  // Se a aba ativa ficou oculta, vai para a primeira visível
-  const activeTab = document.querySelector('.tab.active');
-  const firstVisible = document.querySelector('.tab:not([style*="display: none"]):not([style*="display:none"])');
-  if (activeTab && activeTab.style.display === 'none' && firstVisible) {
-    firstVisible.click();
+  if (primeira) {
+    const tabEl = document.getElementById(primeira.id);
+    const secEl = document.getElementById(primeira.secao + '-section');
+    if (tabEl) tabEl.classList.add('active');
+    if (secEl) secEl.classList.add('active');
+    if (primeira.secao === 'posts')      carregarPosts();
+    else if (primeira.secao === 'aprovacoes') carregarUsuarios();
+    else if (primeira.secao === 'admins')     carregarAdmins();
   }
+
+  // Revela a barra de abas sem flash
+  const tabsBar = document.getElementById('tabsBar');
+  if (tabsBar) tabsBar.style.visibility = '';
 }
 
 // Carrega dados do superadmin e lista de admins
@@ -1992,15 +2002,13 @@ function inicializarVisualizacao() {
 }
 
 function alternarVisualizacao() {
-  // Salva preferência e abre o portal do aluno em nova aba
+  // Navega na mesma aba para o portal do aluno
   localStorage.setItem(VISTA_KEY, 'aluno');
-  window.open('aluno.html?from=admin', '_blank');
-  // Reverte a preferência para admin (só abriu para visualizar)
-  setTimeout(() => localStorage.setItem(VISTA_KEY, 'admin'), 500);
+  window.location.href = 'aluno.html?from=admin';
 }
 
 function inicializarVisualizacao() {
-  // Apenas garante que o localStorage está em 'admin' ao abrir o painel
+  // Garante que ao abrir o painel admin a preferência volta para admin
   localStorage.setItem(VISTA_KEY, 'admin');
 }
 
