@@ -204,8 +204,8 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
           <input type="text" id="postTitulo" placeholder="Ex: Análise semanal do NASDAQ" required>
         </div>
         <div class="form-group">
-          <label>Texto (opcional)</label>
-          <textarea id="postTexto" placeholder="Escreva o conteúdo do post..."></textarea>
+          <label>Descrição (opcional)</label>
+          <textarea id="postTexto" placeholder="Escreva uma descrição para o post..."></textarea>
         </div>
         <div class="form-group">
           <label>Categoria</label>
@@ -261,15 +261,52 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 
   <!-- APROVAÇÕES -->
   <div id="aprovacoes-section" class="section">
-    <div class="card">
-      <h2>👥 Alunos Pendentes</h2>
+
+    <!-- Stats bar -->
+    <div id="alunos-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+      <div class="card" style="padding:16px 20px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:var(--blue);" id="stat-total">–</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Total de Alunos</div>
+      </div>
+      <div class="card" style="padding:16px 20px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:var(--green);" id="stat-aprovados">–</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Aprovados</div>
+      </div>
+      <div class="card" style="padding:16px 20px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:var(--orange,#f97316);" id="stat-pendentes">–</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Pendentes</div>
+      </div>
+    </div>
+
+    <!-- Pendentes -->
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <h2 style="margin:0;">👥 Alunos Pendentes</h2>
+        <span id="badge-pendentes" style="background:rgba(249,115,22,0.15);color:#f97316;border:1px solid rgba(249,115,22,0.3);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">0 aguardando</span>
+      </div>
       <div id="alert-aprovacao" class="alert"></div>
       <div id="usuarios-pendentes"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
     </div>
+
+    <!-- Aprovados com busca -->
     <div class="card">
-      <h2>✅ Alunos Aprovados</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <h2 style="margin:0;">✅ Alunos Aprovados</h2>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span id="badge-aprovados" style="background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.2);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">0 alunos</span>
+          <button onclick="exportarAlunos()" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.2);color:var(--blue);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.12)'">📥 Exportar CSV</button>
+        </div>
+      </div>
+      <!-- Busca -->
+      <div style="position:relative;margin-bottom:16px;">
+        <input type="text" id="buscaAlunos" placeholder="🔍  Buscar por nome ou e-mail..." oninput="filtrarAlunos(this.value)"
+          style="width:100%;padding:10px 14px 10px 16px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:14px;transition:all .2s;"
+          onfocus="this.style.borderColor='var(--blue)';this.style.background='rgba(99,102,241,0.1)'"
+          onblur="this.style.borderColor='var(--border)';this.style.background='rgba(99,102,241,0.06)'">
+      </div>
       <div id="usuarios-aprovados"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
     </div>
+
   </div>
 
   <!-- PLANILHA & FOTOS -->
@@ -904,7 +941,7 @@ function carregarPosts() {
           html += `<div class="post-item${isNovo ? ' post-item--novo' : ''}" id="post-item-${doc.id}" style="${isNovo ? 'animation:slideInPost .4s cubic-bezier(0.34,1.56,0.64,1);' : ''}">${midiaHTML}<div class="post-content">
             ${isNovo ? '<span style="display:inline-block;background:#10b981;color:#000;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">✨ Novo</span>' : ''}
             <div class="post-title">${post.titulo}</div>
-            <div class="post-text">${(post.texto||''). substring(0,120)}${(post.texto||'').length>120?'...':''}</div>
+            ${(post.texto||'').trim() ? `<div class="post-desc" style="font-size:12px;color:var(--text-muted);line-height:1.5;margin:4px 0 6px;font-style:italic;"><span style="color:var(--blue);font-style:normal;font-weight:700;font-size:11px;">DESCRIÇÃO</span> ${(post.texto||'').substring(0,140)}${(post.texto||'').length>140?'…':''}</div>` : ''}
             <div class="post-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor||'Admin'}
               ${post.youtubeEmbedURL ? '<span class="yt-badge">▶ YouTube</span>' : ''}
@@ -1166,33 +1203,119 @@ async function deletarComentarioAdmin(postId, comentarioId) {
 // ══════════════════════════════════════════════
 // USUÁRIOS
 // ══════════════════════════════════════════════
+// Armazena todos os alunos para filtragem local
+let _todosAlunos = [];
+
 async function carregarUsuarios() {
   try {
     const snapshot = await db.collection('users').get();
-    let pendentes = '', aprovados = '';
+    _todosAlunos = [];
+    let pendentes = [];
+
     snapshot.forEach(doc => {
       const user = doc.data();
       if (user.role === 'admin') return;
-      const html = `<tr><td>${user.nome||''}</td><td>${user.email||''}</td>
-        <td><span class="badge ${user.aprovado?'approved':'pending'}">${user.aprovado?'Aprovado':'Pendente'}</span></td>
-        <td>${!user.aprovado
-          ? `<button class="btn btn-sm" onclick="aprovarUsuario('${doc.id}')">Aprovar</button> <button class="btn btn-sm btn-danger" onclick="rejeitarUsuario('${doc.id}')">Rejeitar</button>`
-          : `<button class="btn btn-sm btn-danger" onclick="revogarAprovacao('${doc.id}')">Revogar</button>`
-        }</td></tr>`;
-      if (user.aprovado) aprovados += html; else pendentes += html;
+      const entry = { id: doc.id, ...user };
+      if (user.aprovado) _todosAlunos.push(entry);
+      else pendentes.push(entry);
     });
-    document.getElementById('usuarios-pendentes').innerHTML = pendentes
-      ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${pendentes}</tbody></table>`
-      : '<p style="text-align:center;color:var(--text-muted)">Nenhum usuário pendente</p>';
-    document.getElementById('usuarios-aprovados').innerHTML = aprovados
-      ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${aprovados}</tbody></table>`
-      : '<p style="text-align:center;color:var(--text-muted)">Nenhum aluno aprovado ainda</p>';
+
+    // ── Stats ──
+    const total = pendentes.length + _todosAlunos.length;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-aprovados').textContent = _todosAlunos.length;
+    document.getElementById('stat-pendentes').textContent = pendentes.length;
+    document.getElementById('badge-aprovados').textContent = _todosAlunos.length + ' aluno' + (_todosAlunos.length !== 1 ? 's' : '');
+    document.getElementById('badge-pendentes').textContent = pendentes.length + ' aguardando';
+
+    // ── Pendentes ──
+    if (pendentes.length === 0) {
+      document.getElementById('usuarios-pendentes').innerHTML =
+        '<div style="text-align:center;padding:24px;color:var(--text-muted);"><span style="font-size:40px;display:block;margin-bottom:8px;">🎉</span>Nenhum aluno pendente</div>';
+    } else {
+      document.getElementById('usuarios-pendentes').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${pendentes.map(u => renderAlunoCard(u, false)).join('')}
+        </div>`;
+    }
+
+    // ── Aprovados (respeita busca atual) ──
+    const busca = document.getElementById('buscaAlunos')?.value || '';
+    renderAprovados(busca);
+
   } catch (error) {
     console.error('Erro usuários:', error);
     document.getElementById('usuarios-pendentes').innerHTML = '<p style="color:var(--red);padding:16px;">❌ Erro: ' + error.message + '</p>';
   }
 }
 
+function renderAlunoCard(u, aprovado) {
+  const av = avatarHtml(u.nome || u.email || '?', u.fotoUrl || null, 40);
+  const nome = u.nome || '—';
+  const email = u.email || '—';
+  const dataStr = u.criadoEm ? tempoRelativo(u.criadoEm) : '';
+  return `
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(99,102,241,0.04);border:1px solid var(--border);border-radius:12px;transition:all .2s;"
+         onmouseover="this.style.borderColor='rgba(99,102,241,0.3)';this.style.background='rgba(99,102,241,0.07)'"
+         onmouseout="this.style.borderColor='var(--border)';this.style.background='rgba(99,102,241,0.04)'">
+      ${av}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <strong style="font-size:14px;color:var(--text);">${nome}</strong>
+          ${aprovado
+            ? '<span style="background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.2);border-radius:20px;padding:1px 8px;font-size:10px;font-weight:800;text-transform:uppercase;">✓ Aprovado</span>'
+            : '<span style="background:rgba(249,115,22,0.12);color:#f97316;border:1px solid rgba(249,115,22,0.2);border-radius:20px;padding:1px 8px;font-size:10px;font-weight:800;text-transform:uppercase;">⏳ Pendente</span>'
+          }
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${email}</div>
+        ${dataStr ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;opacity:.7;">Cadastrou ${dataStr}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+        ${!aprovado
+          ? `<button onclick="aprovarUsuario('${u.id}')" style="background:#10b981;color:#000;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">✅ Aprovar</button>
+             <button onclick="rejeitarUsuario('${u.id}')" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.2);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.12)'">❌ Rejeitar</button>`
+          : `<button onclick="revogarAprovacao('${u.id}')" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">🚫 Revogar</button>`
+        }
+      </div>
+    </div>`;
+}
+
+function renderAprovados(busca) {
+  busca = (busca || '').toLowerCase().trim();
+  const filtrados = busca
+    ? _todosAlunos.filter(u => (u.nome||'').toLowerCase().includes(busca) || (u.email||'').toLowerCase().includes(busca))
+    : _todosAlunos;
+
+  const container = document.getElementById('usuarios-aprovados');
+  if (filtrados.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-muted);">${
+      busca ? '🔍 Nenhum aluno encontrado para <strong>"' + busca + '"</strong>' : '📭 Nenhum aluno aprovado ainda'
+    }</div>`;
+    return;
+  }
+
+  // Sort: by name
+  const sorted = [...filtrados].sort((a,b) => (a.nome||'').localeCompare(b.nome||''));
+  container.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;">${
+    sorted.map(u => renderAlunoCard(u, true)).join('')
+  }</div>`;
+}
+
+function filtrarAlunos(valor) {
+  renderAprovados(valor);
+}
+
+function exportarAlunos() {
+  if (_todosAlunos.length === 0) { alert('Nenhum aluno para exportar.'); return; }
+  const linhas = [['Nome','Email','Status']];
+  _todosAlunos.forEach(function(u) { linhas.push([u.nome||'', u.email||'', 'Aprovado']); });
+  const csv = linhas.map(function(r){ return r.map(function(c){ return '"' + String(c).replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'alunos_aprovados_' + new Date().toISOString().slice(0,10) + '.csv';
+  link.click();
+}
 async function aprovarUsuario(uid) {
   try { await db.collection('users').doc(uid).update({ aprovado: true }); mostrarAlerta('alert-aprovacao','✅ Aprovado!','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro ao aprovar','error'); }
