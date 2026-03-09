@@ -263,7 +263,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   <div id="aprovacoes-section" class="section">
 
     <!-- Stats bar -->
-    <div id="alunos-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
       <div class="card" style="padding:16px 20px;text-align:center;">
         <div style="font-size:28px;font-weight:900;color:var(--blue);" id="stat-total">–</div>
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Total de Alunos</div>
@@ -273,19 +273,16 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Aprovados</div>
       </div>
       <div class="card" style="padding:16px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:900;color:var(--orange,#f97316);" id="stat-pendentes">–</div>
+        <div style="font-size:28px;font-weight:900;color:#f97316;" id="stat-pendentes">–</div>
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Pendentes</div>
       </div>
     </div>
 
-    <!-- Pendentes + Aprovados lado a lado -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+    <!-- Cards lado a lado -->
+    <div style="display:grid;grid-template-columns:minmax(260px,38%) 1fr;gap:16px;align-items:start;">
 
-      <!-- Pendentes + Aprovados lado a lado -->
-    <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-
-      <!-- Pendentes (coluna esquerda ~38%) -->
-      <div class="card" style="flex:0 0 calc(38% - 8px);min-width:280px;">
+      <!-- Pendentes (coluna esquerda) -->
+      <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
           <h2 style="margin:0;">👥 Pendentes</h2>
           <span id="badge-pendentes" style="background:rgba(249,115,22,0.15);color:#f97316;border:1px solid rgba(249,115,22,0.3);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">0 aguardando</span>
@@ -294,8 +291,8 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         <div id="usuarios-pendentes"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
       </div>
 
-      <!-- Aprovados com busca (coluna direita ~62%) -->
-      <div class="card" style="flex:1;min-width:300px;">
+      <!-- Aprovados com busca (coluna direita) -->
+      <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
           <h2 style="margin:0;">✅ Aprovados</h2>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -303,10 +300,9 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
             <button onclick="exportarAlunos()" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.2);color:var(--blue);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.12)'">📥 CSV</button>
           </div>
         </div>
-        <!-- Busca -->
-        <div style="position:relative;margin-bottom:16px;">
+        <div style="margin-bottom:16px;">
           <input type="text" id="buscaAlunos" placeholder="🔍  Buscar por nome ou e-mail..." oninput="filtrarAlunos(this.value)"
-            style="width:100%;padding:10px 14px 10px 16px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:14px;transition:all .2s;"
+            style="width:100%;padding:10px 16px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:14px;transition:all .2s;outline:none;"
             onfocus="this.style.borderColor='var(--blue)';this.style.background='rgba(99,102,241,0.1)'"
             onblur="this.style.borderColor='var(--border)';this.style.background='rgba(99,102,241,0.06)'">
         </div>
