@@ -1815,6 +1815,14 @@ async function salvarAtivo(dia, mes, ano, semana, alvo, pontos, trades, gains, s
   });
   return await response.json();
 }
+async function deletarPost(postId) {
+  if (!temPermissao('posts')) { alert('❌ Sem permissão para excluir posts.'); return; }
+  if (!confirm('Excluir este post permanentemente? Esta ação não pode ser desfeita.')) return;
+  try {
+    await db.collection('posts').doc(postId).delete();
+  } catch (err) { alert('❌ Erro ao excluir: ' + err.message); }
+}
+
 document.getElementById('formTradeData').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!temPermissao('planilha')) { alert('❌ Sem permissão para registrar trades.'); return; }
@@ -1845,12 +1853,4 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
 });
 </script>
 </body>
-</html>async function deletarPost(postId) {
-  if (!temPermissao('posts')) { alert('❌ Sem permissão para excluir posts.'); return; }
-  if (!confirm('Excluir este post permanentemente? Esta ação não pode ser desfeita.')) return;
-  try {
-    await db.collection('posts').doc(postId).delete();
-  } catch (err) { alert('❌ Erro ao excluir: ' + err.message); }
-}
-
-
+</html>
