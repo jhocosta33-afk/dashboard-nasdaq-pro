@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Admin | Dashboard NASDAQ PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* ══ TEMA COMPARTILHADO NasdaqPro ══ */
+:root {
+  --bg: #050711;
+  --card: #0f1420;
+  --card-hover: #161b2e;
+  --border: rgba(99,102,241,0.15);
+  --border-bright: rgba(99,102,241,0.4);
+  --text: #f8fafc;
+  --text-dim: #cbd5e1;
+  --text-muted: #64748b;
+  --accent: #10b981;
+  --blue: #6366f1;
+  --blue-bright: #818cf8;
+  --red: #ef4444;
+  --orange: #f97316;
+  --sidebar-bg: #0a0d1a;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+body.light-theme {
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --card-hover: #f8fafc;
+  --border: rgba(99,102,241,0.18);
+  --border-bright: rgba(99,102,241,0.45);
+  --text: #0f172a;
+  --text-dim: #334155;
+  --text-muted: #64748b;
+  --sidebar-bg: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+}
+body { background: var(--bg); color: var(--text); }
+body.light-theme { background: var(--bg); color: var(--text); }
+.theme-toggle-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  font-size: 17px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.theme-toggle-btn:hover { border-color: var(--blue-bright); background: var(--card-hover); transform: scale(1.08); }
+#themeIcon { display: inline-block; }
+body.light-theme input,
+body.light-theme textarea,
+body.light-theme select { background: #f8fafc; border-color: rgba(99,102,241,0.2); color: #0f172a; }
+body.light-theme input:focus,
+body.light-theme textarea:focus,
+body.light-theme select:focus { background: #fff; border-color: #6366f1; }
+body.light-theme header { background: #ffffff !important; border-color: rgba(99,102,241,0.15) !important; }
+body.light-theme .card { background: #ffffff; border-color: rgba(99,102,241,0.15); }
+body.light-theme .post-card { background: #ffffff; border-color: rgba(99,102,241,0.12); }
+body.light-theme .quick-card { background: #ffffff; border-color: rgba(99,102,241,0.15); }
+body.light-theme .comentario-item { background: #f8fafc; border-color: rgba(99,102,241,0.1); }
+body.light-theme .resposta-item { background: #f1f5f9; }
+body.light-theme .filter-btn { background: #f1f5f9; border-color: rgba(99,102,241,0.15); color: #334155; }
+body.light-theme .filter-btn.active { background: #6366f1; color: #fff; }
+body.light-theme .tab { color: #64748b; }
+body.light-theme .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+body.light-theme .btn-logout { background: #f1f5f9; color: #0f172a; border: 1px solid rgba(99,102,241,0.2); }
+body.light-theme .post-text { color: #475569; }
+body.light-theme .welcome-banner { background: linear-gradient(135deg,rgba(99,102,241,0.07),rgba(16,185,129,0.07)); }
+body.light-theme .upload-area { background: #f8fafc; border-color: rgba(99,102,241,0.2); }
+body.light-theme .upload-area:hover { background: rgba(99,102,241,0.05); border-color: #6366f1; }
+body.light-theme .tabs { border-color: rgba(99,102,241,0.15); }
+body.light-theme table th { background: #f1f5f9; color: #64748b; }
+body.light-theme table td { border-color: rgba(99,102,241,0.1); color: #0f172a; }
+body.light-theme .post-item { background: #f8fafc; border-color: rgba(99,102,241,0.12); }
+body.light-theme .section-header h2 { color: #0f172a; }
+body.light-theme .btn-secondary { background: #f1f5f9; color: #0f172a; border-color: rgba(99,102,241,0.2); }
+body.light-theme .btn-secondary:hover { background: #e2e8f0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); transition: background-color 0.3s, color 0.3s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 100; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo { font-size: 24px; }
+h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.btn-logout { background: var(--red); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-logout:hover { opacity: 0.8; }
+.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tab { padding: 12px 20px; border: none; background: none; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab:hover { color: var(--text); }
+.section { display: none; }
+.section.active { display: block; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.card h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.form-group { margin-bottom: 16px; }
+label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text); font-family: inherit; transition: all .2s; } select option { background: #1e293b; color: #e5e7eb; }
+textarea { resize: vertical; min-height: 100px; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.08); }
+.btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn:hover { background: #16a34a; transform: scale(1.02); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-secondary { background: var(--blue); color: #fff; }
+.btn-secondary:hover { background: #2563eb; }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #dc2626; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; padding: 12px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-muted); }
+td { padding: 12px; border-bottom: 1px solid var(--border); }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.badge.pending { background: rgba(251,191,36,0.1); color: #fbbf24; }
+.badge.approved { background: rgba(34,197,94,0.1); color: var(--accent); }
+.posts-list { display: grid; gap: 16px; }
+.post-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; gap: 16px; }
+.post-image { width: 120px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.post-content { flex: 1; }
+.post-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.post-text { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.5; }
+.post-meta { font-size: 12px; color: var(--text-muted); }
+.post-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all .3s ease; background: rgba(255,255,255,0.02); }
+.upload-area:hover { border-color: var(--accent); background: rgba(34,197,94,0.05); }
+.upload-area.dragover { border-color: var(--accent); background: rgba(34,197,94,0.1); transform: scale(1.02); }
+.btn-remove-image { background: var(--red); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-remove-image:hover { opacity: 0.8; }
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; }
+.alert.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--accent); }
+.alert.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+.loading { text-align: center; padding: 40px; color: var(--text-muted); }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-remove { background: var(--red); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-remove:hover { background: #dc2626; }
+.yt-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.3); color: #ff4444; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+@keyframes fadeNewComent { from{opacity:0;transform:translateY(-10px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+@media (max-width: 768px) {
+  .container { padding: 16px; }
+  .post-item { flex-direction: column; }
+  .post-image { width: 100%; height: 160px; }
+  table { font-size: 12px; }
+  th, td { padding: 8px; }
+}
+
+@keyframes slideInComment {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInPost {
+  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.post-item--novo {
+  border-color: rgba(16,185,129,0.4) !important;
+  box-shadow: 0 0 0 1px rgba(16,185,129,0.2), 0 4px 16px rgba(16,185,129,0.1);
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="logo">👑</span>
+    <h1>Painel Admin</h1>
+  </div>
+  <div class="user-info">
+    <a href="../" style="display:inline-block;background:rgba(255,255,255,0.1);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;margin-right:12px;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📊 Dashboard</a>
+    <button id="btnConectarYT" onclick="autenticarYouTube()" style="background:#ff0000;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">🔗 Conectar YouTube</button>
+    <button class="theme-toggle-btn" onclick="NasTheme.toggle()" title="Alternar tema"><span id="themeIcon">🌙</span></button>
+    <div id="adminAvatarHeader" onclick="abrirPerfilAdmin()" title="Editar perfil" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;cursor:pointer;overflow:hidden;border:2px solid transparent;transition:all .2s;flex-shrink:0;">
+      <span id="adminAvatarLetra">A</span>
+    </div>
+    <span id="adminName" onclick="abrirPerfilAdmin()" style="cursor:pointer;font-weight:600;">Admin</span>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('posts')">📝 Posts</button>
+    <button class="tab" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
+    <button class="tab" onclick="switchTab('planilha')">📊 Planilha & Fotos</button>
+  </div>
+
+  <!-- POSTS -->
+  <div id="posts-section" class="section active">
+    <div class="card">
+      <h2>✨ Criar Novo Post</h2>
+      <div id="alert-post" class="alert"></div>
+      <form id="formPost">
+        <div class="form-group">
+          <label>Título</label>
+          <input type="text" id="postTitulo" placeholder="Ex: Análise semanal do NASDAQ" required>
+        </div>
+        <div class="form-group">
+          <label>Texto (opcional)</label>
+          <textarea id="postTexto" placeholder="Escreva o conteúdo do post..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="postCategoria">
+            <option value="sala-ao-vivo">🔴 Sala ao Vivo</option>
+            <option value="materiais">📚 Materiais</option>
+            <option value="analise">📈 Análise</option>
+            <option value="tutorial">🎓 Tutorial</option>
+            <option value="noticia">📰 Notícia</option>
+            <option value="link">🔗 Link Útil</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Link (opcional)</label>
+          <input type="url" id="postLink" placeholder="https://exemplo.com">
+        </div>
+        <div class="form-group">
+          <label>Arquivo/Mídia (opcional)</label>
+          <div class="upload-area" id="uploadAreaUniversal">
+            <input type="file" id="postArquivo" accept="*" style="display:none">
+            <div id="uploadPlaceholderUniversal">
+              <span style="font-size:64px">📎</span>
+              <p><strong>Arraste qualquer arquivo aqui</strong><br>ou clique para selecionar</p>
+            </div>
+            <div id="uploadPreviewUniversal" style="display:none;">
+              <div id="previewContent"></div>
+              <button type="button" class="btn-remove-image" onclick="removerArquivoUniversal()">❌ Remover</button>
+            </div>
+            <div id="uploadProgressUniversal" style="display:none;">
+              <div class="spinner"></div>
+              <p id="uploadProgressTextUniversal" style="margin:16px 0 12px;color:var(--text);font-weight:600;">Enviando...</p>
+              <div style="width:100%;max-width:400px;margin:0 auto;background:rgba(255,255,255,0.1);height:8px;border-radius:10px;overflow:hidden;">
+                <div id="uploadProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--accent),#16a34a);transition:width 0.3s ease;"></div>
+              </div>
+              <p id="uploadProgressPercent" style="margin-top:8px;font-size:13px;color:var(--text-muted);font-weight:600;">0%</p>
+            </div>
+          </div>
+          <input type="hidden" id="postMidiaURL">
+          <input type="hidden" id="postMidiaTipo">
+          <input type="hidden" id="postYoutubeEmbedURL">
+        </div>
+        <button type="submit" class="btn" id="btnPost">Publicar Post</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>📚 Posts Publicados</h2>
+      <div id="posts-list" class="posts-list">
+        <div class="loading"><div class="spinner"></div><p>Carregando posts...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APROVAÇÕES -->
+  <div id="aprovacoes-section" class="section">
+    <div class="card">
+      <h2>👥 Alunos Pendentes</h2>
+      <div id="alert-aprovacao" class="alert"></div>
+      <div id="usuarios-pendentes"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
+    </div>
+    <div class="card">
+      <h2>✅ Alunos Aprovados</h2>
+      <div id="usuarios-aprovados"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
+    </div>
+  </div>
+
+  <!-- PLANILHA & FOTOS -->
+  <div id="planilha-section" class="section">
+    <div class="card">
+      <h2>📊 Registrar Trade do Dia</h2>
+      <p style="color:var(--text-muted);margin-bottom:16px;">Preencha os dados e a planilha será atualizada automaticamente.</p>
+      <div id="alert-trade-data" class="alert"></div>
+      <form id="formTradeData">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div class="form-group"><label>Dia</label><input type="number" id="diaData" min="1" max="31" required placeholder="12"></div>
+          <div class="form-group">
+            <label>Mês</label>
+            <select id="mesData" required>
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+              <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+              <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Ano</label><input type="number" id="anoData" min="2020" max="2030" required placeholder="2026"></div>
+          <div class="form-group"><label>Semana (auto)</label><input type="text" id="semana" readonly style="cursor:not-allowed;opacity:0.6;"></div>
+        </div>
+        <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">🔵</span>
+            <strong style="font-size:15px;color:#60a5fa;">NASDAQ</strong>
+            <label style="display:flex;align-items:center;gap:6px;margin-left:auto;font-size:13px;cursor:pointer;">
+              <input type="checkbox" id="nasOp" checked onchange="toggleAtivo('nas')"> Operado hoje
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;" id="nasFields">
+            <div class="form-group"><label>Pontos</label><input type="number" id="nasPontos" placeholder="Ex: 35"></div>
+            <div class="form-group"><label>Trades</label><input type="number" id="nasTrades" min="0" placeholder="Ex: 3"></div>
+            <div class="form-group"><label>Gains</label><input type="number" id="nasGains" min="0" placeholder="Ex: 2"></div>
+            <div class="form-group"><label>Stops</label><input type="number" id="nasStops" min="0" placeholder="Ex: 1"></div>
+            <div class="form-group"><label>0x0</label><input type="number" id="nasBreak" min="0" placeholder="Ex: 0"></div>
+          </div>
+        </div>
+        <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.25);border-radius:10px;padding:16px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">🟠</span>
+            <strong style="font-size:15px;color:#fb923c;">DOW JONES</strong>
+            <label style="display:flex;align-items:center;gap:6px;margin-left:auto;font-size:13px;cursor:pointer;">
+              <input type="checkbox" id="dowOp" onchange="toggleAtivo('dow')"> Operado hoje
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;opacity:0.4;pointer-events:none;" id="dowFields">
+            <div class="form-group"><label>Pontos</label><input type="number" id="dowPontos" placeholder="Ex: 120"></div>
+            <div class="form-group"><label>Trades</label><input type="number" id="dowTrades" min="0" placeholder="Ex: 2"></div>
+            <div class="form-group"><label>Gains</label><input type="number" id="dowGains" min="0" placeholder="Ex: 1"></div>
+            <div class="form-group"><label>Stops</label><input type="number" id="dowStops" min="0" placeholder="Ex: 1"></div>
+            <div class="form-group"><label>0x0</label><input type="number" id="dowBreak" min="0" placeholder="Ex: 0"></div>
+          </div>
+        </div>
+        <button type="submit" class="btn" id="btnTradeData" style="margin-top:4px;width:100%;padding:14px;font-size:15px;">💾 Salvar na Planilha</button>
+      </form>
+      <div style="margin-top:20px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">💡 Ver/editar a planilha completa:</p>
+        <a href="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit" target="_blank" class="btn btn-secondary" style="display:inline-block;padding:8px 16px;text-decoration:none;font-size:13px;">📊 Abrir no Google Sheets</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📸 Fotos dos Trades</h2>
+      <div id="alert-foto-trade" class="alert"></div>
+      <form id="formFotoTrade">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="form-group"><label>Dia</label><input type="number" id="diaDoTrade" min="1" max="31" required placeholder="12"></div>
+          <div class="form-group">
+            <label>Mês</label>
+            <select id="mesDoTrade" required>
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+              <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+              <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Ano</label><input type="number" id="anoDoTrade" min="2020" max="2030" required placeholder="2026"></div>
+        </div>
+        <div class="form-group">
+          <label>Foto do Trade</label>
+          <div class="upload-area" id="uploadAreaTrade" style="cursor:pointer;">
+            <input type="file" id="fileInputTrade" accept="image/*" style="display:none">
+            <div id="uploadPlaceholderTrade">
+              <span style="font-size:48px">📸</span>
+              <p><strong>Arraste a foto do trade aqui</strong><br>ou clique para selecionar</p>
+              <small style="color:var(--text-muted)">JPG, PNG até 10MB</small>
+            </div>
+            <div id="uploadPreviewTrade" style="display:none">
+              <img id="previewImgTrade" src="" alt="Preview" style="max-width:100%;max-height:300px;border-radius:8px;margin-bottom:12px;">
+              <button type="button" class="btn-remove" onclick="event.stopPropagation();removerImagemTrade()">✕ Remover</button>
+            </div>
+            <div id="uploadProgressTrade" style="display:none;text-align:center;padding:40px;">
+              <div class="spinner"></div>
+              <p style="color:var(--text-muted);">Fazendo upload...</p>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn" id="btnFotoTrade">Salvar Foto do Trade</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERFIL ADMIN -->
+<div id="modalPerfilAdmin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:420px;position:relative;">
+    <button onclick="fecharPerfilAdmin()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:24px;">✏️ Meu Perfil</h3>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px;">
+      <div id="adminAvatarBig" onclick="document.getElementById('inputFotoAdmin').click()" title="Clique para trocar foto" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;overflow:hidden;cursor:pointer;border:3px solid rgba(255,255,255,.1);transition:all .2s;">
+        <span id="adminAvatarBigLetra">A</span>
+      </div>
+      <input type="file" id="inputFotoAdmin" accept="image/*" style="display:none" onchange="previsualizarFotoAdmin(this)">
+      <span style="font-size:12px;color:#94a3b8;">Clique no avatar para trocar foto</span>
+    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">Nome</label>
+      <input type="text" id="inputNomeAdmin" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e5e7eb;font-size:14px;font-family:inherit;">
+    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;">E-mail</label>
+      <input type="text" id="inputEmailAdmin" disabled style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px;color:#64748b;font-size:14px;font-family:inherit;cursor:not-allowed;">
+    </div>
+    <button onclick="salvarPerfilAdmin()" style="width:100%;background:#6366f1;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;">💾 Salvar</button>
+    <p id="msgPerfilAdmin" style="text-align:center;margin-top:12px;font-size:13px;color:#22c55e;display:none;"></p>
+  </div>
+</div>
+
+<!-- MODAL INFO USUÁRIO -->
+<div id="modalInfoUser" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:100%;max-width:380px;position:relative;text-align:center;">
+    <button onclick="document.getElementById('modalInfoUser').style.display='none';" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">×</button>
+    <div id="infoUserAvatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;overflow:hidden;"></div>
+    <h3 id="infoUserNome" style="font-size:20px;font-weight:800;margin-bottom:6px;"></h3>
+    <p id="infoUserEmail" style="font-size:14px;color:#94a3b8;margin-bottom:16px;"></p>
+    <p id="infoUserCadastro" style="font-size:13px;color:#64748b;"></p>
+  </div>
+</div>
+
+<script>
+/* ── NasTheme inline ── */
+(function(){
+  var KEY='dashboard-tema';
+  function aplicar(t){
+    if(t==='light'){document.documentElement.classList.add('light-theme');if(document.body)document.body.classList.add('light-theme');}
+    else{document.documentElement.classList.remove('light-theme');if(document.body)document.body.classList.remove('light-theme');}
+    var ic=document.getElementById('themeIcon');if(ic)ic.textContent=t==='dark'?'🌙':'☀️';
+  }
+  function get(){return localStorage.getItem(KEY)||'dark';}
+  aplicar(get());
+  window.NasTheme={
+    toggle:function(){
+      var n=get()==='dark'?'light':'dark';
+      localStorage.setItem(KEY,n);aplicar(n);
+      var ic=document.getElementById('themeIcon');
+      if(ic){ic.style.transform='rotate(360deg) scale(0)';setTimeout(function(){ic.textContent=n==='dark'?'🌙':'☀️';ic.style.transform='none';},150);}
+    },
+    getTema:get
+  };
+  document.addEventListener('DOMContentLoaded',function(){aplicar(get());});
+})();
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+// ══════════════════════════════════════════════
+// PERFIL ADMIN — definidas PRIMEIRO para hoisting seguro
+// ══════════════════════════════════════════════
+function atualizarAvatarAdmin() {
+  const letra = (window._adminNome||'A').charAt(0).toUpperCase();
+  ['adminAvatarLetra','adminAvatarBigLetra'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.textContent = letra;
+  });
+  if (window._adminFotoUrl) {
+    ['adminAvatarHeader','adminAvatarBig'].forEach(function(id) {
+      var el = document.getElementById(id); if (!el) return;
+      el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    });
+  }
+}
+
+function abrirPerfilAdmin() {
+  document.getElementById('inputNomeAdmin').value = window._adminNome || '';
+  document.getElementById('inputEmailAdmin').value = window._adminEmail || '';
+  var bigEl = document.getElementById('adminAvatarBig');
+  if (window._adminFotoUrl) bigEl.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+  else bigEl.innerHTML = '<span id="adminAvatarBigLetra">' + (window._adminNome||'A').charAt(0).toUpperCase() + '</span>';
+  document.getElementById('msgPerfilAdmin').style.display = 'none';
+  document.getElementById('modalPerfilAdmin').style.display = 'flex';
+}
+
+function fecharPerfilAdmin() { document.getElementById('modalPerfilAdmin').style.display = 'none'; }
+
+function previsualizarFotoAdmin(input) {
+  var file = input.files[0]; if (!file) return;
+  if (file.size > 500*1024) { alert('Foto muito grande. Use até 500KB.'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    window._adminFotoTemp = e.target.result;
+    document.getElementById('adminAvatarBig').innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function salvarPerfilAdmin() {
+  var nome = document.getElementById('inputNomeAdmin').value.trim();
+  if (!nome) { alert('Preencha o nome'); return; }
+  var msgEl = document.getElementById('msgPerfilAdmin');
+  try {
+    var update = { nome: nome };
+    if (window._adminFotoTemp) update.fotoUrl = window._adminFotoTemp;
+    await db.collection('users').doc(window._adminUid).update(update);
+    window._adminNome = nome;
+    if (window._adminFotoTemp) { window._adminFotoUrl = window._adminFotoTemp; delete window._adminFotoTemp; }
+    document.getElementById('adminName').textContent = nome;
+    atualizarAvatarAdmin();
+    msgEl.textContent = '✅ Perfil salvo!'; msgEl.style.display = 'block';
+    setTimeout(function() { fecharPerfilAdmin(); }, 1200);
+  } catch(e) { msgEl.textContent = '❌ Erro ao salvar'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+}
+
+async function verInfoUsuario(autorId, nomeExibido) {
+  if (!autorId) { alert('ID do usuário não disponível.'); return; }
+  try {
+    var doc = await db.collection('users').doc(autorId).get();
+    var data = doc.exists ? doc.data() : {};
+    var nome = data.nome || nomeExibido || 'Desconhecido';
+    var email = data.email || doc.id;
+    var criado = data.criadoEm ? data.criadoEm.toDate().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+    document.getElementById('infoUserNome').textContent = nome;
+    document.getElementById('infoUserEmail').textContent = '📧 ' + email;
+    document.getElementById('infoUserCadastro').textContent = 'Cadastrado em: ' + criado;
+    var avatarEl = document.getElementById('infoUserAvatar');
+    if (data.fotoUrl) avatarEl.innerHTML = '<img src="' + data.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    else avatarEl.textContent = nome.charAt(0).toUpperCase();
+    document.getElementById('modalInfoUser').style.display = 'flex';
+  } catch(e) { alert('Erro ao buscar dados do usuário.'); }
+}
+
+// ══════════════════════════════════════════════
+// CONFIGURAÇÃO — carregada do Firestore
+// ══════════════════════════════════════════════
+let APPS_SCRIPT_URL  = null;
+let YT_CLIENT_ID     = null;
+let YT_CLIENT_SECRET = null;
+const YT_SCOPE    = 'https://www.googleapis.com/auth/youtube.upload';
+const YT_REDIRECT = 'https://jhocosta33-afk.github.io/dashboard-nasdaq-pro/portal/admin.html';
+const YT_WORKER   = 'https://youtube-upload-proxy.nasdaqpro7.workers.dev';
+let   ytAccessToken = null;
+
+async function carregarConfiguracoes() {
+  try {
+    const doc = await db.collection('config').doc('oauth').get();
+    if (!doc.exists) throw new Error('Documento config/oauth não encontrado no Firestore');
+    const data = doc.data();
+    APPS_SCRIPT_URL  = data.apps_script_url;
+    YT_CLIENT_ID     = data.client_id;
+    YT_CLIENT_SECRET = data.client_secret;
+  } catch (err) {
+    console.error('Erro ao carregar configurações:', err);
+    alert('❌ Erro ao carregar configurações do sistema. Verifique o Firestore.');
+  }
+}
+
+async function inicializarYouTubeAuth() {
+  if (!YT_CLIENT_ID || !YT_CLIENT_SECRET) await carregarConfiguracoes();
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  if (code) {
+    window.history.replaceState({}, '', window.location.pathname);
+    await trocarCodePorToken(code);
+    atualizarBotaoYouTube();
+    return;
+  }
+  try {
+    const doc = await db.collection('config').doc('youtube').get();
+    if (doc.exists && doc.data().refresh_token) await renovarAccessToken(doc.data().refresh_token);
+  } catch (err) { console.log('Token YouTube não configurado ainda.'); }
+  atualizarBotaoYouTube();
+}
+
+async function renovarAccessToken(refreshToken) {
+  try {
+    const resp = await fetch(`${YT_WORKER}/refresh-token`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: YT_CLIENT_ID, client_secret: YT_CLIENT_SECRET, refresh_token: refreshToken })
+    });
+    const data = await resp.json();
+    if (data.success && data.access_token) { ytAccessToken = data.access_token; return true; }
+  } catch (err) { console.error('Erro ao renovar token:', err); }
+  return false;
+}
+
+async function autenticarYouTube() {
+  if (!YT_CLIENT_ID) await carregarConfiguracoes();
+  if (!YT_CLIENT_ID) { alert('❌ Erro ao carregar configurações. Tente recarregar a página.'); return; }
+  const verifier = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2,'0')).join('');
+  sessionStorage.setItem('yt_verifier', verifier);
+  const encoder = new TextEncoder();
+  const digest = await crypto.subtle.digest('SHA-256', encoder.encode(verifier));
+  const challenge = btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  const params = new URLSearchParams({
+    client_id: YT_CLIENT_ID, redirect_uri: YT_REDIRECT, response_type: 'code',
+    scope: YT_SCOPE, code_challenge: challenge, code_challenge_method: 'S256',
+    access_type: 'offline', prompt: 'consent'
+  });
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+async function trocarCodePorToken(code) {
+  const verifier = sessionStorage.getItem('yt_verifier');
+  if (!verifier) return;
+  sessionStorage.removeItem('yt_verifier');
+  try {
+    const resp = await fetch(`${YT_WORKER}/exchange-token`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, client_id: YT_CLIENT_ID, client_secret: YT_CLIENT_SECRET, redirect_uri: YT_REDIRECT, code_verifier: verifier })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      ytAccessToken = data.access_token;
+      if (data.refresh_token) {
+        await db.collection('config').doc('youtube').set({
+          refresh_token: data.refresh_token,
+          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+          configuradoPor: auth.currentUser?.email || 'admin'
+        });
+      }
+    } else { console.error('Erro ao trocar token:', data.error); }
+  } catch (err) { console.error('Erro trocarCodePorToken:', err); }
+}
+
+async function uploadYouTubeDireto(file, titulo, descricao) {
+  if (!ytAccessToken) {
+    const doc = await db.collection('config').doc('youtube').get();
+    if (doc.exists && doc.data().refresh_token) {
+      const ok = await renovarAccessToken(doc.data().refresh_token);
+      if (!ok) throw new Error('Não foi possível renovar o token. Clique em "Reconectar YouTube".');
+    } else { throw new Error('YouTube não conectado. Clique em "Conectar YouTube" primeiro.'); }
+  }
+  const progressBar  = document.getElementById('uploadProgressBar');
+  const progressPct  = document.getElementById('uploadProgressPercent');
+  const progressText = document.getElementById('uploadProgressTextUniversal');
+  progressText.textContent = '🎥 Iniciando upload no YouTube...';
+  const metadata = {
+    snippet: { title: titulo || 'Vídeo', description: descricao || '', categoryId: '27' },
+    status:  { privacyStatus: 'unlisted', selfDeclaredMadeForKids: false }
+  };
+  const initResp = await fetch(`${YT_WORKER}/init-upload`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accessToken: ytAccessToken, metadata, fileSize: file.size, fileType: file.type || 'video/mp4' })
+  });
+  const initData = await initResp.json();
+  if (!initData.success) throw new Error(initData.error || 'Erro ao iniciar upload');
+  const uploadUrl = initData.uploadUrl;
+  const CHUNK = 5 * 1024 * 1024;
+  let offset = 0;
+  while (offset < file.size) {
+    const end = Math.min(offset + CHUNK, file.size);
+    const chunk = file.slice(offset, end);
+    const pct = Math.round((end / file.size) * 95);
+    progressBar.style.width = pct + '%';
+    progressPct.textContent = pct + '%';
+    progressText.textContent = `🎥 Enviando... ${(end/(1024*1024)).toFixed(0)}MB de ${(file.size/(1024*1024)).toFixed(0)}MB`;
+    const chunkResp = await fetch(`${YT_WORKER}/upload-chunk`, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'video/mp4', 'X-Upload-Url': uploadUrl, 'X-Content-Range': `bytes ${offset}-${end-1}/${file.size}`, 'X-Content-Type': file.type || 'video/mp4' },
+      body: chunk
+    });
+    const chunkData = await chunkResp.json();
+    if (!chunkData.success) throw new Error(chunkData.error || 'Erro no envio do chunk');
+    if (chunkData.done) {
+      progressBar.style.width = '100%'; progressPct.textContent = '100%';
+      progressText.textContent = '✅ Vídeo publicado no YouTube!';
+      return { videoId: chunkData.videoId, embedURL: chunkData.embedURL, watchURL: chunkData.watchURL };
+    }
+    offset = chunkData.range ? parseInt(chunkData.range.split('-')[1]) + 1 : end;
+  }
+  throw new Error('Upload não completou corretamente');
+}
+
+function atualizarBotaoYouTube() {
+  const btn = document.getElementById('btnConectarYT');
+  if (!btn) return;
+  if (ytAccessToken) {
+    btn.textContent = '✅ YouTube Conectado'; btn.style.background = 'var(--accent)'; btn.style.color = '#000';
+  } else {
+    btn.textContent = '🔗 Conectar YouTube'; btn.style.background = '#ff0000'; btn.style.color = '#fff';
+  }
+}
+
+// ══════════════════════════════════════════════
+// AUTENTICAÇÃO
+// ══════════════════════════════════════════════
+auth.onAuthStateChanged(async (user) => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  try {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (!userDoc.exists || userDoc.data().role !== 'admin') {
+      alert('❌ Acesso negado.');
+      await auth.signOut();
+      window.location.href = 'login.html';
+      return;
+    }
+    const adminData = userDoc.data();
+    window._adminNome = adminData.nome || user.displayName || user.email.split('@')[0];
+    window._adminUid = user.uid;
+    window._adminEmail = user.email;
+    window._adminFotoUrl = adminData.fotoUrl || null;
+    document.getElementById('adminName').textContent = window._adminNome;
+    atualizarAvatarAdmin();
+    await carregarConfiguracoes();
+    await inicializarYouTubeAuth();
+    carregarPosts();
+    carregarUsuarios();
+  } catch (error) {
+    console.error('Erro auth admin:', error);
+    const postsEl = document.getElementById('posts-list');
+    if (postsEl) postsEl.innerHTML = '<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;"><p style="color:#ef4444;font-weight:700;">❌ Erro de inicialização</p><p style="color:#94a3b8;font-size:13px;margin-top:8px;">' + error.message + '</p></div>';
+  }
+});
+
+// ══════════════════════════════════════════════
+// AUXILIARES
+// ══════════════════════════════════════════════
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(tab => { if (tab.getAttribute('onclick').includes(tabName)) tab.classList.add('active'); });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(tabName + '-section').classList.add('active');
+  if (tabName === 'posts') carregarPosts();
+  else if (tabName === 'aprovacoes') carregarUsuarios();
+}
+
+function logout() { if (confirm('Deseja realmente sair?')) { auth.signOut(); window.location.href = 'login.html'; } }
+
+function mostrarAlerta(id, mensagem, tipo) {
+  const el = document.getElementById(id);
+  el.textContent = mensagem; el.className = 'alert ' + tipo; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 6000);
+}
+
+function tempoRelativo(ts) {
+  if (!ts) return '';
+  const date = ts instanceof Date ? ts : (ts.toDate ? ts.toDate() : new Date(ts));
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 60) return 'agora mesmo';
+  if (diff < 3600) return `há ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `há ${Math.floor(diff/3600)}h`;
+  if (diff < 604800) return `há ${Math.floor(diff/86400)} dia${Math.floor(diff/86400)>1?'s':''}`;
+  return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+}
+
+function avatarHtml(nome, fotoUrl, size) {
+  size = size || 34;
+  const letra = (nome||'?').charAt(0).toUpperCase();
+  const style = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:' + Math.floor(size*0.38) + 'px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;';
+  const inner = fotoUrl ? '<img src="' + fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent=\'' + letra + '\'">' : letra;
+  return '<div style="' + style + '">' + inner + '</div>';
+}
+
+// ══════════════════════════════════════════════
+// UPLOAD UNIVERSAL
+// ══════════════════════════════════════════════
+let arquivoUniversal = null;
+let tipoArquivo = null;
+
+const uploadAreaUniversal        = document.getElementById('uploadAreaUniversal');
+const fileInputUniversal         = document.getElementById('postArquivo');
+const uploadPlaceholderUniversal = document.getElementById('uploadPlaceholderUniversal');
+const uploadPreviewUniversal     = document.getElementById('uploadPreviewUniversal');
+const uploadProgressUniversal    = document.getElementById('uploadProgressUniversal');
+
+uploadAreaUniversal.addEventListener('click', () => fileInputUniversal.click());
+['dragenter','dragover','dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+['dragenter','dragover'].forEach(ev => uploadAreaUniversal.addEventListener(ev, () => uploadAreaUniversal.classList.add('dragover')));
+['dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, () => uploadAreaUniversal.classList.remove('dragover')));
+uploadAreaUniversal.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleArquivoUniversal(e.dataTransfer.files[0]); });
+fileInputUniversal.addEventListener('change', e => { if (e.target.files[0]) handleArquivoUniversal(e.target.files[0]); });
+
+function handleArquivoUniversal(file) {
+  if (file.size > 500 * 1024 * 1024) { alert('❌ Arquivo muito grande. Máximo 500MB'); return; }
+  arquivoUniversal = file;
+  tipoArquivo = file.type.startsWith('image/') ? 'imagem' : file.type.startsWith('video/') ? 'video' : 'pdf';
+  uploadPlaceholderUniversal.style.display = 'none';
+  uploadPreviewUniversal.style.display = 'block';
+  const previewContent = document.getElementById('previewContent');
+  const sizeMB = (file.size / (1024*1024)).toFixed(2);
+  if (tipoArquivo === 'imagem') {
+    const reader = new FileReader();
+    reader.onload = e => { previewContent.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:300px;border-radius:8px;margin-bottom:12px;"><p style="font-size:13px;color:var(--text-muted);">📸 ${file.name} (${sizeMB} MB)</p>`; };
+    reader.readAsDataURL(file);
+  } else if (tipoArquivo === 'video') {
+    previewContent.innerHTML = `<div style="padding:24px;background:rgba(255,0,0,0.05);border:1px solid rgba(255,0,0,0.2);border-radius:8px;margin-bottom:12px;"><span style="font-size:48px;">🎥</span><p style="font-size:16px;font-weight:700;margin:12px 0;">${file.name}</p><p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p><span class="yt-badge" style="margin-top:8px;display:inline-flex;">▶ Será publicado no YouTube como não listado</span></div>`;
+  } else {
+    previewContent.innerHTML = `<div style="padding:24px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:12px;"><span style="font-size:64px;">📄</span><p style="font-size:16px;font-weight:600;margin:12px 0;">${file.name}</p><p style="font-size:13px;color:var(--text-muted);">${sizeMB} MB</p></div>`;
+  }
+}
+
+function removerArquivoUniversal() {
+  arquivoUniversal = null; tipoArquivo = null; fileInputUniversal.value = '';
+  document.getElementById('postYoutubeEmbedURL').value = '';
+  uploadPlaceholderUniversal.style.display = 'block';
+  uploadPreviewUniversal.style.display = 'none';
+  document.getElementById('previewContent').innerHTML = '';
+}
+
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ══════════════════════════════════════════════
+// PUBLICAR POST
+// ══════════════════════════════════════════════
+document.getElementById('formPost').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btnPost = document.getElementById('btnPost');
+  btnPost.disabled = true; btnPost.textContent = 'Publicando...';
+  try {
+    let finalMidiaURL = null, midiaTipo = null, youtubeEmbedURL = null, driveFileId = null, youtubeVideoId = null;
+    if (arquivoUniversal) {
+      uploadPreviewUniversal.style.display = 'none'; uploadProgressUniversal.style.display = 'block';
+      const sizeMB = (arquivoUniversal.size / (1024*1024)).toFixed(2);
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressPercent = document.getElementById('uploadProgressPercent');
+      let progressInterval = null;
+      try {
+        if (tipoArquivo === 'video') {
+          if (!ytAccessToken) throw new Error('Clique em "Conectar YouTube" no topo da página antes de enviar vídeos.');
+          const titulo = document.getElementById('postTitulo').value.trim() || arquivoUniversal.name;
+          const descricao = document.getElementById('postTexto').value.trim();
+          const resultado = await uploadYouTubeDireto(arquivoUniversal, titulo, descricao);
+          youtubeEmbedURL = resultado.embedURL; youtubeVideoId = resultado.videoId;
+          finalMidiaURL = resultado.watchURL; midiaTipo = 'youtube';
+        } else {
+          document.getElementById('uploadProgressTextUniversal').textContent = `📤 Enviando ${sizeMB}MB para Google Drive...`;
+          let progress = 0;
+          progressInterval = setInterval(() => { progress += Math.random() * 8; if (progress > 85) progress = 85; progressBar.style.width = progress + '%'; progressPercent.textContent = Math.round(progress) + '%'; }, 300);
+          const base64 = await fileToBase64(arquivoUniversal);
+          const params = new URLSearchParams();
+          params.append('acao', 'uploadArquivo'); params.append('arquivo', base64);
+          params.append('nome', arquivoUniversal.name); params.append('tipo', arquivoUniversal.type);
+          const response = await fetch(`${YT_WORKER}/apps-script`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: Object.fromEntries(params) })
+          });
+          const resultado = await response.json();
+          clearInterval(progressInterval);
+          if (!resultado.success) throw new Error(resultado.error || 'Erro no upload');
+          driveFileId = resultado.id;
+          finalMidiaURL = tipoArquivo === 'imagem' ? `https://drive.google.com/uc?export=view&id=${resultado.id}` : `https://drive.google.com/uc?export=download&id=${resultado.id}`;
+          midiaTipo = tipoArquivo;
+        }
+        progressBar.style.width = '100%'; progressPercent.textContent = '100%';
+      } catch (uploadError) { clearInterval(progressInterval); throw uploadError; }
+      await new Promise(r => setTimeout(r, 800));
+      uploadProgressUniversal.style.display = 'none'; uploadPreviewUniversal.style.display = 'block';
+    }
+    const titulo = document.getElementById('postTitulo').value.trim();
+    if (!titulo) { alert('❌ Preencha o título do post'); throw new Error('Título obrigatório'); }
+    await db.collection('posts').add({
+      titulo, texto: document.getElementById('postTexto').value.trim(),
+      categoria: document.getElementById('postCategoria').value,
+      link: document.getElementById('postLink').value || null,
+      midiaURL: finalMidiaURL, midiaTipo, youtubeEmbedURL,
+      youtubeVideoId: youtubeVideoId || null, driveFileId: driveFileId || null,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+      autor: window._adminNome || auth.currentUser.displayName || 'Admin'
+    });
+    mostrarAlerta('alert-post', '✅ Post publicado com sucesso!', 'success');
+    document.getElementById('formPost').reset();
+    removerArquivoUniversal();
+    carregarPosts();
+  } catch (error) {
+    console.error('Erro ao publicar:', error);
+    mostrarAlerta('alert-post', '❌ Erro: ' + error.message, 'error');
+    uploadProgressUniversal.style.display = 'none';
+    if (arquivoUniversal) uploadPreviewUniversal.style.display = 'block';
+  }
+  btnPost.disabled = false; btnPost.textContent = 'Publicar Post';
+});
+
+// ══════════════════════════════════════════════
+// CARREGAR POSTS
+// ══════════════════════════════════════════════
+function carregarPosts() {
+  const container = document.getElementById('posts-list');
+
+  // Cancel previous listener
+  if (window._postsListener) { window._postsListener(); window._postsListener = null; }
+
+  container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando posts...</p></div>';
+
+  try {
+    window._postsListener = db.collection('posts')
+      .orderBy('criadoEm', 'desc')
+      .limit(30)
+      .onSnapshot(snapshot => {
+        if (snapshot.empty) {
+          container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px;">Nenhum post ainda.</p>';
+          return;
+        }
+
+        // Track which posts are new (added since page load)
+        const isFirstLoad = container.querySelector('.loading') !== null || container.innerHTML.includes('Carregando');
+
+        let html = '';
+        snapshot.forEach(doc => {
+          const post = doc.data();
+          const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Agora';
+          const isNovo = !isFirstLoad && snapshot.docChanges().some(c => c.type === 'added' && c.doc.id === doc.id);
+
+          let midiaHTML = '';
+          if (post.youtubeEmbedURL) {
+            midiaHTML = `<div style="position:relative;width:280px;height:158px;background:#000;border-radius:10px;overflow:hidden;flex-shrink:0;">
+            <iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+          </div>`;
+          } else if (post.midiaURL && post.midiaTipo === 'imagem') {
+            midiaHTML = `<img src="${post.midiaURL}" class="post-image" alt="${post.titulo}" onerror="this.style.display='none'">`;
+          } else if (post.midiaURL && post.midiaTipo === 'pdf') {
+            midiaHTML = `<div style="width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;">📄</div>`;
+          }
+
+          html += `<div class="post-item${isNovo ? ' post-item--novo' : ''}" id="post-item-${doc.id}" style="${isNovo ? 'animation:slideInPost .4s cubic-bezier(0.34,1.56,0.64,1);' : ''}">${midiaHTML}<div class="post-content">
+            ${isNovo ? '<span style="display:inline-block;background:#10b981;color:#000;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">✨ Novo</span>' : ''}
+            <div class="post-title">${post.titulo}</div>
+            <div class="post-text">${(post.texto||''). substring(0,120)}${(post.texto||'').length>120?'...':''}</div>
+            <div class="post-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor||'Admin'}
+              ${post.youtubeEmbedURL ? '<span class="yt-badge">▶ YouTube</span>' : ''}
+            </div>
+            <div class="post-actions">
+              <button class="btn btn-sm" onclick="toggleComentariosAdmin('${doc.id}')" style="background:var(--blue);color:#fff;">
+                💬 Comentários (<span id="count-admin-${doc.id}">…</span>)
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">🗑️ Excluir</button>
+            </div>
+            <div id="comentarios-admin-${doc.id}" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+              <div id="lista-admin-${doc.id}"></div>
+              <div style="margin-top:16px;display:flex;gap:10px;align-items:flex-start;">
+                <div id="adminAvatarComent-${doc.id}" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
+                <div style="flex:1;">
+                  <textarea id="texto-admin-${doc.id}" placeholder="Comentário como admin..." style="width:100%;min-height:80px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;"></textarea>
+                  <button class="btn btn-sm" onclick="enviarComentarioAdmin('${doc.id}')" style="margin-top:8px;">Enviar</button>
+                </div>
+              </div>
+            </div>
+          </div></div>`;
+        });
+
+        container.innerHTML = html;
+
+        // Avatar + live comment counts
+        snapshot.forEach(doc => {
+          const el = document.getElementById('adminAvatarComent-' + doc.id);
+          if (!el) return;
+          if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+          else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
+        });
+
+        // Live comment counts via onSnapshot per post
+        snapshot.forEach(doc => {
+          if (window._countListeners && window._countListeners[doc.id]) return; // already watching
+          if (!window._countListeners) window._countListeners = {};
+          window._countListeners[doc.id] = db.collection('posts').doc(doc.id).collection('comentarios')
+            .onSnapshot(cSnap => {
+              const el = document.getElementById('count-admin-' + doc.id);
+              if (el) el.textContent = cSnap.size;
+            });
+        });
+
+        // Animate new posts badge removal after 4s
+        setTimeout(() => {
+          document.querySelectorAll('.post-item--novo span').forEach(el => {
+            el.style.transition = 'opacity .5s'; el.style.opacity = '0';
+            setTimeout(() => el.remove(), 500);
+          });
+        }, 4000);
+
+      }, err => {
+        console.error('Erro posts:', err);
+        container.innerHTML = `<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;"><p style="color:var(--red);font-weight:700;">❌ Erro ao carregar posts</p><p style="color:var(--text-muted);font-size:13px;margin-top:8px;">${err.message}</p></div>`;
+      });
+  } catch(error) {
+    console.error('Erro posts:', error);
+  }
+}
+
+// ══════════════════════════════════════════════
+// COMENTÁRIOS ADMIN — TEMPO REAL (onSnapshot)
+// ══════════════════════════════════════════════
+const _adminListeners = {}; // postId → unsubscribe
+
+function toggleComentariosAdmin(postId) {
+  const section = document.getElementById('comentarios-admin-' + postId);
+  const isOpen = section.style.display !== 'none';
+  if (isOpen) {
+    section.style.display = 'none';
+    // Para o listener ao fechar
+    if (_adminListeners[postId]) { _adminListeners[postId](); delete _adminListeners[postId]; }
+  } else {
+    section.style.display = 'block';
+    iniciarListenerAdmin(postId);
+  }
+}
+
+function iniciarListenerAdmin(postId) {
+  if (_adminListeners[postId]) return; // já ouvindo
+  const lista   = document.getElementById('lista-admin-' + postId);
+  const countEl = document.getElementById('count-admin-' + postId);
+  lista.innerHTML = '<p style="text-align:center;padding:16px;color:#64748b;font-size:13px;">Carregando...</p>';
+
+  const unsub = db.collection('posts').doc(postId).collection('comentarios')
+    .orderBy('criadoEm', 'asc')
+    .onSnapshot(snapshot => {
+      if (countEl) countEl.textContent = snapshot.size;
+      if (snapshot.empty) {
+        lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>';
+        return;
+      }
+
+      // Detecta novos docs para animar
+      const novos = new Set();
+      snapshot.docChanges().forEach(change => {
+        if (change.type === 'added') novos.add(change.doc.id);
+      });
+
+      let html = '';
+      snapshot.forEach(doc => {
+        html += renderComentarioAdmin(postId, doc.id, doc.data(), novos.has(doc.id));
+      });
+      lista.innerHTML = html;
+
+      // Avatars nos forms de resposta
+      snapshot.forEach(doc => {
+        const el = document.getElementById('respAdminAv-' + doc.id);
+        if (!el) return;
+        if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+        else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
+      });
+
+      // Scroll suave para novo comentário
+      if (novos.size > 0 && lista.children.length > 0) {
+        const lastNew = lista.querySelector('.novo-comentario');
+        if (lastNew) lastNew.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, err => {
+      lista.innerHTML = '<p style="color:var(--red);padding:16px;">Erro: ' + err.message + '</p>';
+    });
+
+  _adminListeners[postId] = unsub;
+}
+
+function renderComentarioAdmin(postId, docId, co, isNovo) {
+  const dateCriado = co.criadoEm ? co.criadoEm.toDate() : null;
+  const tempo = tempoRelativo(dateCriado);
+  const nomeAutor = co.autor || 'Aluno';
+  const av = avatarHtml(nomeAutor, co.fotoUrl || null, 34);
+
+  // Respostas
+  let respostasHtml = '';
+  if (co.respostas && co.respostas.length > 0) {
+    co.respostas.forEach((r, idx) => {
+      const rTempo = tempoRelativo(r.criadoEm);
+      const rAv = avatarHtml(r.autor||'?', r.fotoUrl||null, 28);
+      respostasHtml += `<div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;background:rgba(99,102,241,0.06);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;">
+        ${rAv}
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <strong style="font-size:12px;color:#a5b4fc;">${r.autor||'?'}</strong>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span style="font-size:11px;color:#475569;">${rTempo}</span>
+              <button onclick="deletarRespostaAdmin('${postId}','${docId}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
+            </div>
+          </div>
+          <p style="margin:0;font-size:13px;color:var(--text);line-height:1.5;">${r.texto}</p>
+        </div>
+      </div>`;
+    });
+  }
+
+  const animClass = isNovo ? 'novo-comentario' : '';
+  const animStyle = isNovo ? 'animation:slideInComment 0.35s cubic-bezier(0.4,0,0.2,1);' : '';
+
+  return `<div class="${animClass}" style="${animStyle}display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;transition:all 0.2s;">
+    <div onclick="verInfoUsuario('${co.autorId||''}','${nomeAutor}')" title="Ver info" style="cursor:pointer;border:2px solid transparent;border-radius:50%;transition:border .2s;flex-shrink:0;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${av}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
+          <button onclick="deletarComentarioAdmin('${postId}','${docId}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;" title="Deletar">🗑️</button>
+        </div>
+      </div>
+      <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+      ${respostasHtml}
+      <div id="form-resposta-admin-${docId}" style="display:none;margin-top:10px;">
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <div id="respAdminAv-${docId}" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
+          <div style="flex:1;">
+            <textarea id="texto-resposta-admin-${docId}" placeholder="Responder como admin..." style="width:100%;min-height:60px;background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.4);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <button class="btn btn-sm" onclick="enviarRespostaAdmin('${postId}','${docId}')" style="background:#6366f1;color:#fff;">↩ Responder</button>
+              <button class="btn btn-sm" onclick="document.getElementById('form-resposta-admin-${docId}').style.display='none'" style="background:rgba(255,255,255,0.1);color:var(--text);">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button onclick="mostrarFormRespostaAdmin('${docId}')" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:12px;font-weight:600;padding:4px 0;margin-top:4px;">↩ Responder</button>
+    </div>
+  </div>`;
+}
+
+function mostrarFormRespostaAdmin(comentarioId) {
+  const form = document.getElementById('form-resposta-admin-' + comentarioId);
+  if (form) { form.style.display = form.style.display === 'none' ? 'block' : 'none'; }
+}
+
+async function enviarRespostaAdmin(postId, comentarioId) {
+  const textarea = document.getElementById('texto-resposta-admin-' + comentarioId);
+  const texto = textarea.value.trim();
+  if (!texto) { alert('Digite uma resposta!'); return; }
+  const btn = textarea.nextElementSibling?.querySelector('button');
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+    textarea.disabled = true;
+    const resposta = {
+      texto,
+      autor: window._adminNome || 'Admin',
+      autorId: auth.currentUser.uid,
+      fotoUrl: window._adminFotoUrl || null,
+      criadoEm: new Date().toISOString()
+    };
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({
+      respostas: firebase.firestore.FieldValue.arrayUnion(resposta)
+    });
+    textarea.value = '';
+    document.getElementById('form-resposta-admin-' + comentarioId).style.display = 'none';
+    // onSnapshot atualiza automaticamente
+  } catch (err) { alert('Erro ao enviar resposta: ' + err.message); }
+  finally { textarea.disabled = false; if (btn) { btn.disabled = false; btn.textContent = '↩ Responder'; } }
+}
+
+async function deletarRespostaAdmin(postId, comentarioId, idx) {
+  if (!confirm('Deletar esta resposta?')) return;
+  try {
+    const docRef = db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId);
+    const snap = await docRef.get();
+    const respostas = snap.data().respostas || [];
+    respostas.splice(idx, 1);
+    await docRef.update({ respostas });
+    // onSnapshot atualiza automaticamente
+  } catch (err) { alert('Erro ao deletar resposta'); }
+}
+
+async function enviarComentarioAdmin(postId) {
+  const textarea = document.getElementById('texto-admin-' + postId);
+  const texto = textarea.value.trim();
+  if (!texto) { textarea.focus(); return; }
+  const btn = textarea.parentElement?.querySelector('.btn');
+  try {
+    textarea.disabled = true;
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+    await db.collection('posts').doc(postId).collection('comentarios').add({
+      texto,
+      autor: window._adminNome || auth.currentUser.displayName || 'Admin',
+      autorId: auth.currentUser.uid,
+      fotoUrl: window._adminFotoUrl || null,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    textarea.value = '';
+    // onSnapshot atualiza automaticamente — sem recarregar
+  } catch (err) { alert('Erro ao enviar comentário: ' + err.message); }
+  finally { textarea.disabled = false; if (btn) { btn.disabled = false; btn.textContent = 'Enviar'; } }
+}
+
+async function deletarComentarioAdmin(postId, comentarioId) {
+  if (!confirm('Deletar este comentário?')) return;
+  try {
+    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
+    // onSnapshot atualiza automaticamente
+  } catch (err) { alert('Erro ao deletar'); }
+}
+
+
+// ══════════════════════════════════════════════
+// USUÁRIOS
+// ══════════════════════════════════════════════
+async function carregarUsuarios() {
+  try {
+    const snapshot = await db.collection('users').get();
+    let pendentes = '', aprovados = '';
+    snapshot.forEach(doc => {
+      const user = doc.data();
+      if (user.role === 'admin') return;
+      const html = `<tr><td>${user.nome||''}</td><td>${user.email||''}</td>
+        <td><span class="badge ${user.aprovado?'approved':'pending'}">${user.aprovado?'Aprovado':'Pendente'}</span></td>
+        <td>${!user.aprovado
+          ? `<button class="btn btn-sm" onclick="aprovarUsuario('${doc.id}')">Aprovar</button> <button class="btn btn-sm btn-danger" onclick="rejeitarUsuario('${doc.id}')">Rejeitar</button>`
+          : `<button class="btn btn-sm btn-danger" onclick="revogarAprovacao('${doc.id}')">Revogar</button>`
+        }</td></tr>`;
+      if (user.aprovado) aprovados += html; else pendentes += html;
+    });
+    document.getElementById('usuarios-pendentes').innerHTML = pendentes
+      ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${pendentes}</tbody></table>`
+      : '<p style="text-align:center;color:var(--text-muted)">Nenhum usuário pendente</p>';
+    document.getElementById('usuarios-aprovados').innerHTML = aprovados
+      ? `<table><thead><tr><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead><tbody>${aprovados}</tbody></table>`
+      : '<p style="text-align:center;color:var(--text-muted)">Nenhum aluno aprovado ainda</p>';
+  } catch (error) {
+    console.error('Erro usuários:', error);
+    document.getElementById('usuarios-pendentes').innerHTML = '<p style="color:var(--red);padding:16px;">❌ Erro: ' + error.message + '</p>';
+  }
+}
+
+async function aprovarUsuario(uid) {
+  try { await db.collection('users').doc(uid).update({ aprovado: true }); mostrarAlerta('alert-aprovacao','✅ Aprovado!','success'); carregarUsuarios(); }
+  catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro ao aprovar','error'); }
+}
+async function rejeitarUsuario(uid) {
+  if (!confirm('Rejeitar e excluir este usuário?')) return;
+  try { await db.collection('users').doc(uid).delete(); mostrarAlerta('alert-aprovacao','✅ Rejeitado','success'); carregarUsuarios(); }
+  catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
+}
+async function revogarAprovacao(uid) {
+  if (!confirm('Revogar aprovação?')) return;
+  try { await db.collection('users').doc(uid).update({ aprovado: false }); mostrarAlerta('alert-aprovacao','✅ Revogado','success'); carregarUsuarios(); }
+  catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
+}
+
+// ══════════════════════════════════════════════
+// FOTOS DE TRADES
+// ══════════════════════════════════════════════
+let tradeFile = null;
+const uploadAreaTrade = document.getElementById('uploadAreaTrade');
+const fileInputTrade  = document.getElementById('fileInputTrade');
+['dragenter','dragover','dragleave','drop'].forEach(ev => uploadAreaTrade.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+['dragenter','dragover'].forEach(ev => uploadAreaTrade.addEventListener(ev, () => { uploadAreaTrade.style.borderColor='var(--accent)'; }));
+['dragleave','drop'].forEach(ev => uploadAreaTrade.addEventListener(ev, () => { uploadAreaTrade.style.borderColor='var(--border)'; }));
+uploadAreaTrade.addEventListener('drop', e => { if (e.dataTransfer.files[0]) processarArquivoTrade(e.dataTransfer.files[0]); });
+uploadAreaTrade.addEventListener('click', () => fileInputTrade.click());
+fileInputTrade.addEventListener('change', e => { if (e.target.files[0]) processarArquivoTrade(e.target.files[0]); });
+
+function processarArquivoTrade(file) {
+  if (!file.type.startsWith('image/')) { alert('❌ Apenas imagens'); return; }
+  if (file.size > 10*1024*1024) { alert('❌ Máximo 10MB'); return; }
+  tradeFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('previewImgTrade').src = e.target.result;
+    document.getElementById('uploadPlaceholderTrade').style.display = 'none';
+    document.getElementById('uploadPreviewTrade').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerImagemTrade() {
+  tradeFile = null; fileInputTrade.value = '';
+  document.getElementById('uploadPlaceholderTrade').style.display = 'block';
+  document.getElementById('uploadPreviewTrade').style.display = 'none';
+}
+
+document.getElementById('formFotoTrade').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!tradeFile) { mostrarAlerta('alert-foto-trade','❌ Selecione uma foto','error'); return; }
+  const btn = document.getElementById('btnFotoTrade');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    document.getElementById('uploadPreviewTrade').style.display = 'none';
+    document.getElementById('uploadProgressTrade').style.display = 'block';
+    const base64 = await fileToBase64(tradeFile);
+    const response = await fetch(`${YT_WORKER}/apps-script`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: { dia: document.getElementById('diaDoTrade').value, mes: document.getElementById('mesDoTrade').value, ano: document.getElementById('anoDoTrade').value, imagem: base64 } })
+    });
+    const resultado = await response.json();
+    if (resultado.success) {
+      mostrarAlerta('alert-foto-trade', `✅ Foto salva! (Linha ${resultado.linha})`, 'success');
+      document.getElementById('formFotoTrade').reset(); removerImagemTrade();
+    } else { throw new Error(resultado.error || 'Erro desconhecido'); }
+  } catch (error) {
+    mostrarAlerta('alert-foto-trade', '❌ Erro: ' + error.message, 'error');
+    document.getElementById('uploadPreviewTrade').style.display = 'block';
+  }
+  document.getElementById('uploadProgressTrade').style.display = 'none';
+  btn.disabled = false; btn.textContent = 'Salvar Foto do Trade';
+});
+
+// ══════════════════════════════════════════════
+// DADOS DO TRADE
+// ══════════════════════════════════════════════
+function calcularSemanaMes(dia) {
+  if (dia <= 7) return 'SEMANA 1'; if (dia <= 14) return 'SEMANA 2';
+  if (dia <= 21) return 'SEMANA 3'; if (dia <= 28) return 'SEMANA 4';
+  return 'SEMANA 5';
+}
+document.getElementById('diaData').addEventListener('input', e => {
+  const dia = parseInt(e.target.value);
+  document.getElementById('semana').value = (dia >= 1 && dia <= 31) ? calcularSemanaMes(dia) : '';
+});
+window.addEventListener('DOMContentLoaded', () => {
+  const hoje = new Date();
+  document.getElementById('diaData').value = hoje.getDate();
+  document.getElementById('mesData').value = hoje.getMonth() + 1;
+  document.getElementById('anoData').value = hoje.getFullYear();
+  document.getElementById('semana').value = calcularSemanaMes(hoje.getDate());
+  document.getElementById('diaDoTrade').value = hoje.getDate();
+  document.getElementById('mesDoTrade').value = hoje.getMonth() + 1;
+  document.getElementById('anoDoTrade').value = hoje.getFullYear();
+});
+function toggleAtivo(ativo) {
+  const checked = document.getElementById(ativo+'Op').checked;
+  const fields = document.getElementById(ativo+'Fields');
+  fields.style.opacity = checked ? '1' : '0.4';
+  fields.style.pointerEvents = checked ? 'auto' : 'none';
+}
+async function salvarAtivo(dia, mes, ano, semana, alvo, pontos, trades, gains, stops, breakeven) {
+  const response = await fetch(`${YT_WORKER}/apps-script`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appsScriptUrl: APPS_SCRIPT_URL, params: { acao:'salvarTrade', dia, mes, ano, semana, alvo, pontos, trades, gains, stops, breakeven } })
+  });
+  return await response.json();
+}
+document.getElementById('formTradeData').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btnTradeData');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const dia = parseInt(document.getElementById('diaData').value);
+    const mes = parseInt(document.getElementById('mesData').value);
+    const ano = parseInt(document.getElementById('anoData').value);
+    const semana = document.getElementById('semana').value || calcularSemanaMes(dia);
+    const nasOp = document.getElementById('nasOp').checked;
+    const dowOp = document.getElementById('dowOp').checked;
+    if (!nasOp && !dowOp) { mostrarAlerta('alert-trade-data','❌ Marque pelo menos um ativo operado','error'); btn.disabled=false; btn.textContent='💾 Salvar na Planilha'; return; }
+    const erros = [], linhas = [];
+    if (nasOp) {
+      const r = await salvarAtivo(dia, mes, ano, semana, 'NASDAQ', document.getElementById('nasPontos').value||0, document.getElementById('nasTrades').value||0, document.getElementById('nasGains').value||0, document.getElementById('nasStops').value||0, document.getElementById('nasBreak').value||0);
+      if (r.success) linhas.push(`NASDAQ linha ${r.linha}`); else erros.push('NASDAQ: ' + r.error);
+    }
+    if (dowOp) {
+      const r = await salvarAtivo(dia, mes, ano, semana, 'DOW JONES', document.getElementById('dowPontos').value||0, document.getElementById('dowTrades').value||0, document.getElementById('dowGains').value||0, document.getElementById('dowStops').value||0, document.getElementById('dowBreak').value||0);
+      if (r.success) linhas.push(`DOW linha ${r.linha}`); else erros.push('DOW: ' + r.error);
+    }
+    if (erros.length) throw new Error(erros.join(' | '));
+    mostrarAlerta('alert-trade-data', `✅ Salvo! (${linhas.join(', ')})`, 'success');
+    ['nasPontos','nasTrades','nasGains','nasStops','nasBreak','dowPontos','dowTrades','dowGains','dowStops','dowBreak'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  } catch (error) { mostrarAlerta('alert-trade-data', '❌ Erro: ' + error.message, 'error'); }
+  btn.disabled = false; btn.textContent = '💾 Salvar na Planilha';
+});
+</script>
+</body>
+</html>
