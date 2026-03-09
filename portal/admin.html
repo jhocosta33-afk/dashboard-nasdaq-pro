@@ -165,6 +165,15 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   box-shadow: 0 0 0 1px rgba(16,185,129,0.2), 0 4px 16px rgba(16,185,129,0.1);
 }
 
+
+.tab-superadmin { border: 1px solid rgba(251,191,36,0.4) !important; color: #fbbf24 !important; }
+.tab-superadmin.active { background: linear-gradient(135deg,rgba(251,191,36,0.15),rgba(251,191,36,0.05)) !important; border-color: #fbbf24 !important; }
+.perm-tag { display:inline-flex;align-items:center;gap:4px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:var(--blue);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;white-space:nowrap; }
+.perm-tag.perm-off { background:rgba(100,116,139,0.08);border-color:rgba(100,116,139,0.15);color:var(--text-muted); }
+.admin-card { display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(251,191,36,0.03);border:1px solid rgba(251,191,36,0.15);border-radius:12px;transition:all .2s;margin-bottom:10px; }
+.admin-card:hover { border-color:rgba(251,191,36,0.4);background:rgba(251,191,36,0.06); }
+.admin-card:last-child { margin-bottom:0; }
+.superadmin-badge { background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.5px; }
 </style>
 </head>
 <body>
@@ -191,6 +200,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
     <button class="tab active" onclick="switchTab('posts')">📝 Posts</button>
     <button class="tab" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
     <button class="tab" onclick="switchTab('planilha')">📊 Planilha & Fotos</button>
+    <button class="tab tab-superadmin" id="tabAdmins" onclick="switchTab('admins')" style="display:none;">👑 Administradores</button>
   </div>
 
   <!-- POSTS -->
@@ -415,6 +425,119 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
     </div>
   </div>
 </div>
+
+  <!-- ADMINISTRADORES (só superadmin vê) -->
+  <div id="admins-section" class="section">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+      <div class="card" style="padding:16px 20px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:var(--blue);" id="stat-total-admins">–</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Total de Admins</div>
+      </div>
+      <div class="card" style="padding:16px 20px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:var(--green);" id="stat-admins-ativos">–</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Ativos</div>
+      </div>
+      <div class="card" style="padding:16px 20px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#f97316;" id="stat-admins-pendentes">–</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Alunos aprovados (elegíveis)</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(300px,42%) 1fr;gap:16px;align-items:start;">
+
+      <!-- Col esquerda: Promover aluno a admin -->
+      <div class="card">
+        <h2 style="margin-bottom:4px;">➕ Promover Aluno a Admin</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Selecione um aluno aprovado e defina suas permissões.</p>
+        <div id="alert-admins" class="alert"></div>
+
+        <div class="form-group">
+          <label>Selecionar Aluno</label>
+          <select id="selectAlunoAdmin" style="width:100%;padding:10px 12px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:14px;">
+            <option value="">— Escolha um aluno aprovado —</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;font-weight:700;color:var(--text);display:block;margin-bottom:10px;">🔐 Permissões</label>
+          <div style="display:flex;flex-direction:column;gap:8px;" id="permissoesCheckboxes">
+
+            <label class="perm-row" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(99,102,241,0.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='rgba(99,102,241,0.04)'">
+              <input type="checkbox" id="perm_posts" value="posts" style="width:16px;height:16px;accent-color:var(--blue);">
+              <div>
+                <div style="font-size:13px;font-weight:700;">📝 Publicações</div>
+                <div style="font-size:11px;color:var(--text-muted);">Criar e excluir posts</div>
+              </div>
+            </label>
+
+            <label class="perm-row" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(99,102,241,0.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='rgba(99,102,241,0.04)'">
+              <input type="checkbox" id="perm_comentarios" value="comentarios" style="width:16px;height:16px;accent-color:var(--blue);">
+              <div>
+                <div style="font-size:13px;font-weight:700;">💬 Comentários</div>
+                <div style="font-size:11px;color:var(--text-muted);">Ver, responder e excluir comentários</div>
+              </div>
+            </label>
+
+            <label class="perm-row" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(99,102,241,0.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='rgba(99,102,241,0.04)'">
+              <input type="checkbox" id="perm_alunos" value="alunos" style="width:16px;height:16px;accent-color:var(--blue);">
+              <div>
+                <div style="font-size:13px;font-weight:700;">👥 Aprovar Alunos</div>
+                <div style="font-size:11px;color:var(--text-muted);">Aprovar, rejeitar e revogar alunos</div>
+              </div>
+            </label>
+
+            <label class="perm-row" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(99,102,241,0.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='rgba(99,102,241,0.04)'">
+              <input type="checkbox" id="perm_planilha" value="planilha" style="width:16px;height:16px;accent-color:var(--blue);">
+              <div>
+                <div style="font-size:13px;font-weight:700;">📊 Planilha & Fotos</div>
+                <div style="font-size:11px;color:var(--text-muted);">Registrar trades e enviar fotos</div>
+              </div>
+            </label>
+
+            <label class="perm-row" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(99,102,241,0.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='rgba(99,102,241,0.04)'">
+              <input type="checkbox" id="perm_youtube" value="youtube" style="width:16px;height:16px;accent-color:var(--blue);">
+              <div>
+                <div style="font-size:13px;font-weight:700;">▶ YouTube</div>
+                <div style="font-size:11px;color:var(--text-muted);">Conectar e usar integração YouTube</div>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+        <button onclick="promoverAdmin()" style="width:100%;padding:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
+          👑 Promover a Administrador
+        </button>
+      </div>
+
+      <!-- Col direita: Lista de admins -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <h2 style="margin:0;">👑 Administradores Ativos</h2>
+          <span id="badge-admins" style="background:rgba(99,102,241,0.12);color:var(--blue);border:1px solid rgba(99,102,241,0.2);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">0 admins</span>
+        </div>
+        <div id="lista-admins"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
+      </div>
+
+    </div>
+
+    <!-- Modal editar permissões -->
+    <div id="modalEditarPermissoes" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:var(--card-bg,#0f172a);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:440px;position:relative;margin:16px;">
+        <button onclick="fecharModalPermissoes()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;">×</button>
+        <h3 style="font-size:17px;font-weight:800;margin-bottom:6px;">✏️ Editar Permissões</h3>
+        <p id="editPermNome" style="font-size:13px;color:var(--text-muted);margin-bottom:18px;"></p>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="editPermCheckboxes"></div>
+        <div style="display:flex;gap:10px;margin-top:20px;">
+          <button onclick="salvarPermissoes()" style="flex:1;padding:11px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">💾 Salvar</button>
+          <button onclick="rebaixarAdmin()" style="padding:11px 16px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">🚫 Remover Admin</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
 
 <!-- MODAL PERFIL ADMIN -->
 <div id="modalPerfilAdmin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
@@ -723,6 +846,233 @@ function atualizarBotaoYouTube() {
 }
 
 // ══════════════════════════════════════════════
+// SISTEMA DE PERMISSÕES — SUPERADMIN
+// ══════════════════════════════════════════════
+
+// Permissões disponíveis com labels
+const TODAS_PERMISSOES = [
+  { id: 'posts',       icon: '📝', label: 'Publicações',      desc: 'Criar e excluir posts' },
+  { id: 'comentarios', icon: '💬', label: 'Comentários',      desc: 'Ver, responder e excluir comentários' },
+  { id: 'alunos',      icon: '👥', label: 'Aprovar Alunos',   desc: 'Aprovar, rejeitar e revogar alunos' },
+  { id: 'planilha',    icon: '📊', label: 'Planilha & Fotos', desc: 'Registrar trades e enviar fotos' },
+  { id: 'youtube',     icon: '▶',  label: 'YouTube',          desc: 'Conectar e usar integração YouTube' },
+];
+
+// UID do superadmin (preenchido no login)
+window._isSuperAdmin = false;
+// Permissões do admin logado
+window._adminPerms = null; // null = superadmin (acesso total), [] ou array = admin com restrições
+
+// Verifica se o admin logado tem uma permissão específica
+function temPermissao(perm) {
+  if (window._isSuperAdmin) return true;
+  if (!window._adminPerms) return true;
+  return Array.isArray(window._adminPerms) && window._adminPerms.includes(perm);
+}
+
+// Aplica visibilidade das abas e elementos baseado nas permissões
+function aplicarPermissoesUI() {
+  // Aba Administradores: só superadmin
+  const tabAdmins = document.getElementById('tabAdmins');
+  if (tabAdmins) tabAdmins.style.display = window._isSuperAdmin ? '' : 'none';
+
+  // Aba Posts
+  document.querySelectorAll('[onclick="switchTab(\'posts\')"]').forEach(el => {
+    el.style.display = temPermissao('posts') ? '' : 'none';
+  });
+
+  // Aba Aprovações
+  document.querySelectorAll('[onclick="switchTab(\'aprovacoes\')"]').forEach(el => {
+    el.style.display = temPermissao('alunos') ? '' : 'none';
+  });
+
+  // Aba Planilha
+  document.querySelectorAll('[onclick="switchTab(\'planilha\')"]').forEach(el => {
+    el.style.display = temPermissao('planilha') ? '' : 'none';
+  });
+
+  // Se a aba ativa ficou oculta, vai para a primeira visível
+  const activeTab = document.querySelector('.tab.active');
+  const firstVisible = document.querySelector('.tab:not([style*="display: none"]):not([style*="display:none"])');
+  if (activeTab && activeTab.style.display === 'none' && firstVisible) {
+    firstVisible.click();
+  }
+}
+
+// Carrega dados do superadmin e lista de admins
+async function carregarAdmins() {
+  try {
+    const snapshot = await db.collection('users').where('role', '==', 'admin').get();
+    const admins = [];
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      admins.push({ id: doc.id, ...d });
+    });
+
+    // Stats
+    document.getElementById('stat-total-admins').textContent = admins.length;
+    document.getElementById('stat-admins-ativos').textContent = admins.length;
+    document.getElementById('badge-admins').textContent = admins.length + ' admin' + (admins.length !== 1 ? 's' : '');
+
+    // Conta alunos aprovados elegíveis (não são admins)
+    const alunosSnap = await db.collection('users').where('aprovado', '==', true).get();
+    let elegíveis = 0;
+    const selectEl = document.getElementById('selectAlunoAdmin');
+    selectEl.innerHTML = '<option value="">— Escolha um aluno aprovado —</option>';
+
+    alunosSnap.forEach(doc => {
+      const d = doc.data();
+      if (d.role === 'admin') return;
+      elegíveis++;
+      const opt = document.createElement('option');
+      opt.value = doc.id;
+      opt.textContent = (d.nome || d.email || doc.id) + ' — ' + (d.email || '');
+      opt.dataset.nome = d.nome || d.email || '';
+      selectEl.appendChild(opt);
+    });
+    document.getElementById('stat-admins-pendentes').textContent = elegíveis;
+
+    // Renderiza lista de admins
+    const lista = document.getElementById('lista-admins');
+    if (admins.length === 0) {
+      lista.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);">Nenhum administrador cadastrado ainda.</div>';
+      return;
+    }
+
+    lista.innerHTML = admins.map(a => renderAdminCard(a)).join('');
+
+  } catch (err) {
+    console.error('Erro carregarAdmins:', err);
+    document.getElementById('lista-admins').innerHTML = '<p style="color:var(--red);padding:16px;">❌ Erro: ' + err.message + '</p>';
+  }
+}
+
+function renderAdminCard(a) {
+  const av = avatarHtml(a.nome || a.email || '?', a.fotoUrl || null, 42);
+  const nome = a.nome || '—';
+  const email = a.email || '—';
+  const isSuperA = !a.permissoes; // null/undefined = superadmin (acesso total)
+  const perms = a.permissoes || [];
+
+  // Tags de permissões
+  const permTags = isSuperA
+    ? '<span class="superadmin-badge">⭐ Super Admin</span>'
+    : TODAS_PERMISSOES.map(p => {
+        const has = perms.includes(p.id);
+        return `<span class="perm-tag${has ? '' : ' perm-off'}" title="${p.desc}">${p.icon} ${p.label}</span>`;
+      }).join('');
+
+  const editBtn = (window._isSuperAdmin && a.id !== window._adminUid)
+    ? `<button onclick="abrirModalPermissoes('${a.id}','${(a.nome||a.email||'').replace(/'/g,"\\'")}',${JSON.stringify(a.permissoes||null).replace(/"/g,"'")})"
+         style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:var(--blue);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;"
+         onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">✏️ Editar</button>`
+    : (a.id === window._adminUid ? '<span style="font-size:11px;color:var(--text-muted);flex-shrink:0;">👤 Você</span>' : '');
+
+  return `
+    <div class="admin-card">
+      ${av}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;">${nome}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${email}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">${permTags}</div>
+      </div>
+      ${editBtn}
+    </div>`;
+}
+
+// Promover aluno selecionado a admin
+async function promoverAdmin() {
+  const select = document.getElementById('selectAlunoAdmin');
+  const uid = select.value;
+  if (!uid) { mostrarAlerta('alert-admins', '❌ Selecione um aluno primeiro.', 'error'); return; }
+
+  const perms = TODAS_PERMISSOES
+    .filter(p => document.getElementById('perm_' + p.id)?.checked)
+    .map(p => p.id);
+
+  if (perms.length === 0) {
+    mostrarAlerta('alert-admins', '❌ Selecione ao menos uma permissão.', 'error'); return;
+  }
+
+  const nomeAluno = select.options[select.selectedIndex]?.dataset.nome || uid;
+  if (!confirm('Promover ' + nomeAluno + ' a administrador com ' + perms.length + ' permissão(ões)?')) return;
+
+  try {
+    await db.collection('users').doc(uid).update({
+      role: 'admin',
+      permissoes: perms,
+      promotedBy: window._adminUid,
+      promotedAt: new Date()
+    });
+    mostrarAlerta('alert-admins', '✅ ' + nomeAluno + ' é agora administrador!', 'success');
+    // Reset form
+    select.value = '';
+    TODAS_PERMISSOES.forEach(p => { const el = document.getElementById('perm_' + p.id); if (el) el.checked = false; });
+    carregarAdmins();
+  } catch (err) {
+    mostrarAlerta('alert-admins', '❌ Erro: ' + err.message, 'error');
+  }
+}
+
+// ── Modal editar permissões ──
+let _editingAdminId = null;
+
+function abrirModalPermissoes(uid, nome, permsAtual) {
+  _editingAdminId = uid;
+  document.getElementById('editPermNome').textContent = '👤 ' + nome;
+
+  const container = document.getElementById('editPermCheckboxes');
+  container.innerHTML = TODAS_PERMISSOES.map(p => {
+    const has = permsAtual === null ? true : (Array.isArray(permsAtual) && permsAtual.includes(p.id));
+    return `
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(99,102,241,0.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;"
+             onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='rgba(99,102,241,0.04)'">
+        <input type="checkbox" id="edit_perm_${p.id}" value="${p.id}" ${has ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--blue);">
+        <div>
+          <div style="font-size:13px;font-weight:700;">${p.icon} ${p.label}</div>
+          <div style="font-size:11px;color:var(--text-muted);">${p.desc}</div>
+        </div>
+      </label>`;
+  }).join('');
+
+  const modal = document.getElementById('modalEditarPermissoes');
+  modal.style.display = 'flex';
+}
+
+function fecharModalPermissoes() {
+  document.getElementById('modalEditarPermissoes').style.display = 'none';
+  _editingAdminId = null;
+}
+
+async function salvarPermissoes() {
+  if (!_editingAdminId) return;
+  const novasPerms = TODAS_PERMISSOES
+    .filter(p => document.getElementById('edit_perm_' + p.id)?.checked)
+    .map(p => p.id);
+  if (novasPerms.length === 0) { alert('❌ Selecione ao menos uma permissão.'); return; }
+  try {
+    await db.collection('users').doc(_editingAdminId).update({ permissoes: novasPerms, updatedBy: window._adminUid, updatedAt: new Date() });
+    fecharModalPermissoes();
+    mostrarAlerta('alert-admins', '✅ Permissões atualizadas!', 'success');
+    carregarAdmins();
+  } catch (err) { alert('❌ Erro: ' + err.message); }
+}
+
+async function rebaixarAdmin() {
+  if (!_editingAdminId) return;
+  if (!confirm('Remover este administrador? Ele voltará a ser aluno.')) return;
+  try {
+    await db.collection('users').doc(_editingAdminId).update({
+      role: 'aluno', permissoes: null, promotedBy: null, promotedAt: null
+    });
+    fecharModalPermissoes();
+    mostrarAlerta('alert-admins', '✅ Admin removido, voltou a ser aluno.', 'success');
+    carregarAdmins();
+  } catch (err) { alert('❌ Erro: ' + err.message); }
+}
+
+
+// ══════════════════════════════════════════════
 // AUTENTICAÇÃO
 // ══════════════════════════════════════════════
 auth.onAuthStateChanged(async (user) => {
@@ -740,12 +1090,20 @@ auth.onAuthStateChanged(async (user) => {
     window._adminUid = user.uid;
     window._adminEmail = user.email;
     window._adminFotoUrl = adminData.fotoUrl || null;
+
+    // Permissões: null/undefined = superadmin (acesso total); array = admin com restrições
+    const perms = adminData.permissoes;
+    window._isSuperAdmin = !perms || !Array.isArray(perms);
+    window._adminPerms = window._isSuperAdmin ? null : perms;
+
     document.getElementById('adminName').textContent = window._adminNome;
     atualizarAvatarAdmin();
+    aplicarPermissoesUI();
+
     await carregarConfiguracoes();
-    await inicializarYouTubeAuth();
-    carregarPosts();
-    carregarUsuarios();
+    if (temPermissao('youtube')) await inicializarYouTubeAuth();
+    if (temPermissao('posts')) carregarPosts();
+    if (temPermissao('alunos')) carregarUsuarios();
   } catch (error) {
     console.error('Erro auth admin:', error);
     const postsEl = document.getElementById('posts-list');
@@ -758,11 +1116,16 @@ auth.onAuthStateChanged(async (user) => {
 // ══════════════════════════════════════════════
 function switchTab(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(tab => { if (tab.getAttribute('onclick').includes(tabName)) tab.classList.add('active'); });
+  document.querySelectorAll('.tab').forEach(tab => {
+    const oc = tab.getAttribute('onclick') || '';
+    if (oc.includes("'" + tabName + "'")) tab.classList.add('active');
+  });
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(tabName + '-section').classList.add('active');
+  const sec = document.getElementById(tabName + '-section');
+  if (sec) sec.classList.add('active');
   if (tabName === 'posts') carregarPosts();
   else if (tabName === 'aprovacoes') carregarUsuarios();
+  else if (tabName === 'admins') carregarAdmins();
 }
 
 function logout() { if (confirm('Deseja realmente sair?')) { auth.signOut(); window.location.href = 'login.html'; } }
@@ -852,6 +1215,7 @@ async function fileToBase64(file) {
 // ══════════════════════════════════════════════
 document.getElementById('formPost').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (!temPermissao('posts')) { alert('❌ Sem permissão para criar posts.'); return; }
   const btnPost = document.getElementById('btnPost');
   btnPost.disabled = true; btnPost.textContent = 'Publicando...';
   try {
@@ -1180,6 +1544,7 @@ async function enviarRespostaAdmin(postId, comentarioId) {
 }
 
 async function deletarRespostaAdmin(postId, comentarioId, idx) {
+  if (!temPermissao('comentarios')) { alert('❌ Sem permissão para excluir respostas.'); return; }
   if (!confirm('Deletar esta resposta?')) return;
   try {
     const docRef = db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId);
@@ -1213,6 +1578,7 @@ async function enviarComentarioAdmin(postId) {
 }
 
 async function deletarComentarioAdmin(postId, comentarioId) {
+  if (!temPermissao('comentarios')) { alert('❌ Sem permissão para excluir comentários.'); return; }
   if (!confirm('Deletar este comentário?')) return;
   try {
     await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
@@ -1338,15 +1704,18 @@ function exportarAlunos() {
   link.click();
 }
 async function aprovarUsuario(uid) {
+  if (!temPermissao('alunos')) { alert('❌ Sem permissão.'); return; }
   try { await db.collection('users').doc(uid).update({ aprovado: true }); mostrarAlerta('alert-aprovacao','✅ Aprovado!','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro ao aprovar','error'); }
 }
 async function rejeitarUsuario(uid) {
+  if (!temPermissao('alunos')) { alert('❌ Sem permissão.'); return; }
   if (!confirm('Rejeitar e excluir este usuário?')) return;
   try { await db.collection('users').doc(uid).delete(); mostrarAlerta('alert-aprovacao','✅ Rejeitado','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
 }
 async function revogarAprovacao(uid) {
+  if (!temPermissao('alunos')) { alert('❌ Sem permissão.'); return; }
   if (!confirm('Revogar aprovação?')) return;
   try { await db.collection('users').doc(uid).update({ aprovado: false }); mostrarAlerta('alert-aprovacao','✅ Revogado','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
@@ -1386,6 +1755,7 @@ function removerImagemTrade() {
 
 document.getElementById('formFotoTrade').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (!temPermissao('planilha')) { alert('❌ Sem permissão para enviar fotos.'); return; }
   if (!tradeFile) { mostrarAlerta('alert-foto-trade','❌ Selecione uma foto','error'); return; }
   const btn = document.getElementById('btnFotoTrade');
   btn.disabled = true; btn.textContent = 'Enviando...';
@@ -1447,6 +1817,7 @@ async function salvarAtivo(dia, mes, ano, semana, alvo, pontos, trades, gains, s
 }
 document.getElementById('formTradeData').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (!temPermissao('planilha')) { alert('❌ Sem permissão para registrar trades.'); return; }
   const btn = document.getElementById('btnTradeData');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
@@ -1474,4 +1845,12 @@ document.getElementById('formTradeData').addEventListener('submit', async (e) =>
 });
 </script>
 </body>
-</html>
+</html>async function deletarPost(postId) {
+  if (!temPermissao('posts')) { alert('❌ Sem permissão para excluir posts.'); return; }
+  if (!confirm('Excluir este post permanentemente? Esta ação não pode ser desfeita.')) return;
+  try {
+    await db.collection('posts').doc(postId).delete();
+  } catch (err) { alert('❌ Erro ao excluir: ' + err.message); }
+}
+
+
