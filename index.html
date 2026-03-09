@@ -1058,17 +1058,17 @@ const Dashboard = {
         badge=`<div class="day-badge">${r.semana} • ${(r.ativos||[r.ativo||'NASDAQ']).join('/')}</div>`;
         if(r.trades>0&&r.fotoId&&r.fotoId.toString().trim()!==''){dayDiv.classList.add('clickable');dayDiv.style.cursor='pointer';dayDiv.addEventListener('click',()=>{Dashboard.abrirModal(r);});}
       }
-      // Mostra pontos NASDAQ e DOW separados se houver os dois
+      // Sempre mostra pontos com label NQ/DJ quando há ativo identificado
       let ptDisplay='';
       if(r&&r.trades>0){
-        const hasNasdaq=(r.pontosNasdaq||0)!==0||(r.ativos&&r.ativos.some(a=>!a.includes('DOW')));
-        const hasDow=(r.pontosDow||0)!==0||(r.ativos&&r.ativos.some(a=>a.includes('DOW')));
-        if(hasNasdaq&&hasDow){
-          const pN=r.pontosNasdaq||0,pD=r.pontosDow||0;
-          ptDisplay=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;margin:2px 0">
-            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pN<0?'var(--red)':pN>0?'var(--green)':'var(--muted)'}">NQ:${pN>0?'+':''}${pN}</span>
-            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pD<0?'var(--red)':pD>0?'var(--orange)':'var(--muted)'}">DJ:${pD>0?'+':''}${pD}</span>
-          </div>`;
+        const tradedNasdaq=(r.ativos&&r.ativos.some(a=>!a.includes('DOW')))||(r.pontosNasdaq||0)!==0;
+        const tradedDow=(r.ativos&&r.ativos.some(a=>a.includes('DOW')))||(r.pontosDow||0)!==0;
+        const pN=r.pontosNasdaq||0,pD=r.pontosDow||0;
+        if(tradedNasdaq||tradedDow){
+          let parts='';
+          if(tradedNasdaq) parts+=`<span style="font-size:12px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pN<0?'var(--red)':pN>0?'var(--green)':'var(--muted)'}">NQ:${pN>0?'+':''}${pN}</span>`;
+          if(tradedDow) parts+=`<span style="font-size:12px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pD<0?'var(--red)':pD>0?'var(--orange,#f97316)':'var(--muted)'}">DJ:${pD>0?'+':''}${pD}</span>`;
+          ptDisplay=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;margin:2px 0">${parts}</div>`;
         } else {
           const pc2=pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)';
           ptDisplay=`<div class="day-points" style="color:${pc2}">${pts===0?'0':pts}</div>`;
