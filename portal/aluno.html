@@ -333,64 +333,67 @@ auth.onAuthStateChanged(async (user) => {
 
 // ── CARREGAR POSTS DO FIRESTORE (real-time) ──
 let _postsListener = null;
+let _primeiraCarrga = true;
 
 function carregarPosts() {
   const container = document.getElementById('posts-container');
   if (!container) return;
 
-  // Cancela listener anterior se houver
   if (_postsListener) { _postsListener(); _postsListener = null; }
+  _primeiraCarrga = true;
+  todosOsPosts = [];
 
   container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><p>Carregando publicações...</p></div>';
 
   _postsListener = db.collection('posts')
     .orderBy('criadoEm', 'desc')
     .onSnapshot(snapshot => {
-      const primeiraVez = todosOsPosts.length === 0 && snapshot.docs.length > 0;
 
+      if (_primeiraCarrga) {
+        // Primeira carga: usa snapshot.docs que já vem na ordem certa (desc)
+        todosOsPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        _primeiraCarrga = false;
+        renderizarPosts();
+        return;
+      }
+
+      // Atualizações em tempo real após a primeira carga
       snapshot.docChanges().forEach(change => {
         const id = change.doc.id;
         const data = { id, ...change.doc.data() };
 
         if (change.type === 'added') {
-          // Insere no array na posição correta (mais recente primeiro)
+          // Novo post — insere no início (mais recente)
           const existe = todosOsPosts.findIndex(p => p.id === id);
-          if (existe === -1) {
-            todosOsPosts.unshift(data);
-          }
-          // Se não é a primeira carga, anima a entrada do card
-          if (!primeiraVez) {
-            renderizarPosts();
-            setTimeout(() => {
-              const card = document.getElementById('card-' + id);
-              if (card) {
-                card.style.animation = 'slideInPost .4s cubic-bezier(0.34,1.56,0.64,1)';
-                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }, 50);
-            return; // renderizarPosts já foi chamado
-          }
+          if (existe === -1) todosOsPosts.unshift(data);
+          // Anima entrada
+          renderizarPosts();
+          setTimeout(() => {
+            const card = document.getElementById('card-' + id);
+            if (card) {
+              card.style.animation = 'slideInPost .4s cubic-bezier(0.34,1.56,0.64,1)';
+              card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 50);
+
         } else if (change.type === 'modified') {
           const idx = todosOsPosts.findIndex(p => p.id === id);
           if (idx !== -1) todosOsPosts[idx] = data;
-          // Atualiza só o card afetado se estiver visível
           const card = document.getElementById('card-' + id);
           if (card) {
-            const novo = document.createElement('div');
-            novo.innerHTML = montarPostHTML(data);
-            const novoCard = novo.firstElementChild;
+            const tmp = document.createElement('div');
+            tmp.innerHTML = montarPostHTML(data);
+            const novoCard = tmp.firstElementChild;
             if (novoCard) {
               novoCard.style.animation = 'fadeIn .3s ease';
               card.replaceWith(novoCard);
-              // inline onclicks are auto-active after replaceWith
             }
           }
-          return;
+
         } else if (change.type === 'removed') {
           todosOsPosts = todosOsPosts.filter(p => p.id !== id);
           const card = document.getElementById('card-' + id);
           if (card) {
-            // Anima saída antes de remover
             card.style.transition = 'all .35s ease';
             card.style.opacity = '0';
             card.style.transform = 'translateY(-12px) scale(0.97)';
@@ -402,20 +405,13 @@ function carregarPosts() {
               card.style.overflow = 'hidden';
               setTimeout(() => {
                 card.remove();
-                // Mostra empty state se necessário
                 const posts = filtroAtual === 'todos' ? todosOsPosts : todosOsPosts.filter(p => p.categoria === filtroAtual);
                 if (posts.length === 0) renderizarPosts();
               }, 350);
             }, 10);
-          } else {
-            // Card não está visível (filtrado), só remove do array
           }
-          return;
         }
       });
-
-      // Primeira carga ou atualização completa
-      renderizarPosts();
 
     }, err => {
       console.error('Erro posts listener:', err);

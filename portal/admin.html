@@ -237,7 +237,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         <div class="form-group">
           <label>Arquivo/Mídia (opcional)</label>
           <div class="upload-area" id="uploadAreaUniversal">
-            <input type="file" id="postArquivo" accept="*" multiple style="display:none">
+            <input type="file" id="postArquivo" accept="*" style="display:none">
             <div id="uploadPlaceholderUniversal">
               <span style="font-size:64px">📎</span>
               <p><strong>Arraste arquivos aqui</strong> (múltiplos permitidos)<br>ou clique para selecionar</p>
@@ -1223,8 +1223,8 @@ uploadAreaUniversal.addEventListener('click', () => fileInputUniversal.click());
 ['dragenter','dragover','dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
 ['dragenter','dragover'].forEach(ev => uploadAreaUniversal.addEventListener(ev, () => uploadAreaUniversal.classList.add('dragover')));
 ['dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, () => uploadAreaUniversal.classList.remove('dragover')));
-uploadAreaUniversal.addEventListener('drop', e => { if (e.dataTransfer.files.length > 0) handleArquivoUniversal(e.dataTransfer.files); });
-fileInputUniversal.addEventListener('change', e => { if (e.target.files.length > 0) handleArquivoUniversal(e.target.files); });
+uploadAreaUniversal.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleArquivoUniversal(e.dataTransfer.files[0]); });
+fileInputUniversal.addEventListener('change', e => { if (e.target.files[0]) handleArquivoUniversal(e.target.files[0]); });
 
 function handleArquivoUniversal(file) {
   if (file.size > 500 * 1024 * 1024) { alert('❌ Arquivo muito grande. Máximo 500MB'); return; }
@@ -1964,60 +1964,6 @@ document.getElementById('modalEditarPost')?.addEventListener('click', (e) => {
 // MÚLTIPLOS ARQUIVOS — preview list
 // ══════════════════════════════════════════════
 let arquivosMultiplos = [];
-
-function handleArquivoUniversal(files) {
-  arquivosMultiplos = Array.from(files);
-  const placeholder = document.getElementById('uploadPlaceholderUniversal');
-  const preview = document.getElementById('uploadPlaceholderUniversal').parentElement;
-
-  // Build preview list
-  let previewHTML = '<div style="display:flex;flex-direction:column;gap:8px;padding:8px;">';
-  arquivosMultiplos.forEach((f, i) => {
-    const isImg = f.type.startsWith('image/');
-    const isVid = f.type.startsWith('video/');
-    const icon = isImg ? '🖼' : isVid ? '🎬' : '📄';
-    const size = f.size > 1048576 ? (f.size/1048576).toFixed(1) + ' MB' : (f.size/1024).toFixed(0) + ' KB';
-    previewHTML += `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:8px;">
-      <span style="font-size:20px;">${icon}</span>
-      <div style="flex:1;min-width:0;overflow:hidden;">
-        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div>
-        <div style="font-size:11px;color:var(--text-muted);">${size}</div>
-      </div>
-      <button type="button" onclick="removerArquivoIndex(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
-    </div>`;
-    if (isImg) {
-      const url = URL.createObjectURL(f);
-      previewHTML = previewHTML.replace(`>${f.name}</div>`, `>${f.name}</div>`);
-    }
-  });
-  previewHTML += '</div>';
-  previewHTML += `<button type="button" onclick="removerArquivoUniversal()" style="margin:0 8px 8px;background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;width:calc(100% - 16px);">✕ Remover todos</button>`;
-
-  const uploadArea = document.getElementById('uploadAreaUniversal');
-  let previewDiv = document.getElementById('multiPreviewDiv');
-  if (!previewDiv) {
-    previewDiv = document.createElement('div');
-    previewDiv.id = 'multiPreviewDiv';
-    uploadArea.appendChild(previewDiv);
-  }
-  previewDiv.innerHTML = previewHTML;
-  placeholder.style.display = 'none';
-  previewDiv.style.display = 'block';
-}
-
-function removerArquivoIndex(i) {
-  arquivosMultiplos.splice(i, 1);
-  if (arquivosMultiplos.length === 0) {
-    removerArquivoUniversal();
-  } else {
-    handleArquivoUniversal(arquivosMultiplos);
-  }
-}
-
-// ══════════════════════════════════════════════
-// VISUALIZAR COMO ALUNO / ADMIN
-// ══════════════════════════════════════════════
-const VISTA_KEY = 'nasdaqpro_vista_preferencia';
 
 function inicializarVisualizacao() {
   const vista = localStorage.getItem(VISTA_KEY) || 'admin';
