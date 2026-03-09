@@ -278,33 +278,41 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
       </div>
     </div>
 
-    <!-- Pendentes -->
-    <div class="card" style="margin-bottom:20px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-        <h2 style="margin:0;">👥 Alunos Pendentes</h2>
-        <span id="badge-pendentes" style="background:rgba(249,115,22,0.15);color:#f97316;border:1px solid rgba(249,115,22,0.3);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">0 aguardando</span>
-      </div>
-      <div id="alert-aprovacao" class="alert"></div>
-      <div id="usuarios-pendentes"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
-    </div>
+    <!-- Pendentes + Aprovados lado a lado -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
 
-    <!-- Aprovados com busca -->
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-        <h2 style="margin:0;">✅ Alunos Aprovados</h2>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <span id="badge-aprovados" style="background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.2);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">0 alunos</span>
-          <button onclick="exportarAlunos()" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.2);color:var(--blue);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.12)'">📥 Exportar CSV</button>
+      <!-- Pendentes + Aprovados lado a lado -->
+    <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+
+      <!-- Pendentes (coluna esquerda ~38%) -->
+      <div class="card" style="flex:0 0 calc(38% - 8px);min-width:280px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <h2 style="margin:0;">👥 Pendentes</h2>
+          <span id="badge-pendentes" style="background:rgba(249,115,22,0.15);color:#f97316;border:1px solid rgba(249,115,22,0.3);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">0 aguardando</span>
         </div>
+        <div id="alert-aprovacao" class="alert"></div>
+        <div id="usuarios-pendentes"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
       </div>
-      <!-- Busca -->
-      <div style="position:relative;margin-bottom:16px;">
-        <input type="text" id="buscaAlunos" placeholder="🔍  Buscar por nome ou e-mail..." oninput="filtrarAlunos(this.value)"
-          style="width:100%;padding:10px 14px 10px 16px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:14px;transition:all .2s;"
-          onfocus="this.style.borderColor='var(--blue)';this.style.background='rgba(99,102,241,0.1)'"
-          onblur="this.style.borderColor='var(--border)';this.style.background='rgba(99,102,241,0.06)'">
+
+      <!-- Aprovados com busca (coluna direita ~62%) -->
+      <div class="card" style="flex:1;min-width:300px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <h2 style="margin:0;">✅ Aprovados</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <span id="badge-aprovados" style="background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.2);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">0 alunos</span>
+            <button onclick="exportarAlunos()" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.2);color:var(--blue);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.12)'">📥 CSV</button>
+          </div>
+        </div>
+        <!-- Busca -->
+        <div style="position:relative;margin-bottom:16px;">
+          <input type="text" id="buscaAlunos" placeholder="🔍  Buscar por nome ou e-mail..." oninput="filtrarAlunos(this.value)"
+            style="width:100%;padding:10px 14px 10px 16px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:14px;transition:all .2s;"
+            onfocus="this.style.borderColor='var(--blue)';this.style.background='rgba(99,102,241,0.1)'"
+            onblur="this.style.borderColor='var(--border)';this.style.background='rgba(99,102,241,0.06)'">
+        </div>
+        <div id="usuarios-aprovados"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
       </div>
-      <div id="usuarios-aprovados"><div class="loading"><div class="spinner"></div><p>Carregando...</p></div></div>
+
     </div>
 
   </div>
@@ -366,7 +374,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
       </form>
       <div style="margin-top:20px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">💡 Ver/editar a planilha completa:</p>
-        <a href="https://docs.google.com/spreadsheets/d/1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10/edit" target="_blank" class="btn btn-secondary" style="display:inline-block;padding:8px 16px;text-decoration:none;font-size:13px;">📊 Abrir no Google Sheets</a>
+        <a href="#" id="btnAbrirPlanilha" onclick="abrirPlanilhaDinamica(event)" target="_blank" class="btn btn-secondary" style="display:inline-block;padding:8px 16px;text-decoration:none;font-size:13px;">📊 Abrir no Google Sheets</a>
       </div>
     </div>
 
@@ -557,21 +565,38 @@ let YT_CLIENT_ID     = null;
 let YT_CLIENT_SECRET = null;
 const YT_SCOPE    = 'https://www.googleapis.com/auth/youtube.upload';
 const YT_REDIRECT = 'https://jhocosta33-afk.github.io/dashboard-nasdaq-pro/portal/admin.html';
+let SHEETS_SPREADSHEET_ID = null;
 const YT_WORKER   = 'https://youtube-upload-proxy.nasdaqpro7.workers.dev';
 let   ytAccessToken = null;
 
 async function carregarConfiguracoes() {
   try {
-    const doc = await db.collection('config').doc('oauth').get();
-    if (!doc.exists) throw new Error('Documento config/oauth não encontrado no Firestore');
-    const data = doc.data();
+    const [docOauth, docPublic] = await Promise.all([
+      db.collection('config').doc('oauth').get(),
+      db.collection('config').doc('public').get()
+    ]);
+    if (!docOauth.exists) throw new Error('Documento config/oauth não encontrado no Firestore');
+    const data = docOauth.data();
     APPS_SCRIPT_URL  = data.apps_script_url;
     YT_CLIENT_ID     = data.client_id;
     YT_CLIENT_SECRET = data.client_secret;
+    // config/public — spreadsheet ID para o botão abrir planilha
+    if (docPublic.exists) {
+      const pub = docPublic.data();
+      SHEETS_SPREADSHEET_ID = pub.sheets_spreadsheet_id || null;
+    }
   } catch (err) {
     console.error('Erro ao carregar configurações:', err);
     alert('❌ Erro ao carregar configurações do sistema. Verifique o Firestore.');
   }
+}
+
+function abrirPlanilhaDinamica(e) {
+  e.preventDefault();
+  // ID correto da planilha NasdaqPro (hardcoded como fonte de verdade)
+  const id = '1iawimQW3a9bWC4-pTJxvnu3ED62AcN-TjthXwpaIQ10';
+  const url = 'https://docs.google.com/spreadsheets/d/' + id + '/edit';
+  window.open(url, '_blank');
 }
 
 async function inicializarYouTubeAuth() {
