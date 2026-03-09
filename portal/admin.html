@@ -156,6 +156,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @keyframes slideInPost {
   from { opacity: 0; transform: translateY(-12px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -1337,116 +1338,131 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
 // ══════════════════════════════════════════════
 // CARREGAR POSTS
 // ══════════════════════════════════════════════
+function buildPostItemHTML(doc, isNovo) {
+  const post = doc.data ? doc.data() : doc;
+  const postId = doc.id || post.id;
+  const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Agora';
+  let midiaHTML = '';
+if (post.youtubeEmbedURL) {
+  midiaHTML = `<div style="position:relative;width:280px;height:158px;background:#000;border-radius:10px;overflow:hidden;flex-shrink:0;">
+  <iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+</div>`;
+} else if (post.midiaURL && post.midiaTipo === 'imagem') {
+  midiaHTML = `<img src="${post.midiaURL}" class="post-image" alt="${post.titulo}" onerror="this.style.display='none'">`;
+} else if (post.midiaURL && post.midiaTipo === 'pdf') {
+  midiaHTML = `<div style="width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;">📄</div>`;
+}
+
+html += `<div class="post-item${isNovo ? ' post-item--novo' : ''}" id="post-item-${postId}" style="${isNovo ? 'animation:slideInPost .4s cubic-bezier(0.34,1.56,0.64,1);' : ''}">${midiaHTML}<div class="post-content">
+  ${isNovo ? '<span style="display:inline-block;background:#10b981;color:#000;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">✨ Novo</span>' : ''}
+  <div class="post-title">${post.titulo}</div>
+  ${(post.texto||'').trim() ? `<div class="post-desc" style="font-size:12px;color:var(--text-muted);line-height:1.5;margin:4px 0 6px;font-style:italic;"><span style="color:var(--blue);font-style:normal;font-weight:700;font-size:11px;">DESCRIÇÃO</span> ${(post.texto||'').substring(0,140)}${(post.texto||'').length>140?'…':''}</div>` : ''}
+  <div class="post-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor||'Admin'}
+    ${post.youtubeEmbedURL ? '<span class="yt-badge">▶ YouTube</span>' : ''}
+  </div>
+  <div class="post-actions">
+    <button class="btn btn-sm" onclick="toggleComentariosAdmin('${postId}')" style="background:var(--blue);color:#fff;">
+      💬 Comentários (<span id="count-admin-${postId}">…</span>)
+    </button>
+    ${(window._isSuperAdmin || (temPermissao('posts') && post.autorUid === window._adminUid)) ? `
+      <button class="btn btn-sm" onclick="abrirEditarPost('${postId}')" style="background:rgba(99,102,241,0.15);color:var(--blue);border:1px solid rgba(99,102,241,0.3);">✏️ Editar</button>
+      <button class="btn btn-sm btn-danger" onclick="deletarPost('${postId}')">🗑️ Excluir</button>
+    ` : '<span style="font-size:11px;color:var(--text-muted);padding:4px 8px;">🔒 Post de outro admin</span>'}
+  </div>
+  <div id="comentarios-admin-${postId}" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+    <div id="lista-admin-${postId}"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;align-items:flex-start;">
+      <div id="adminAvatarComent-${postId}" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
+      <div style="flex:1;">
+        <textarea id="texto-admin-${postId}" placeholder="Comentário como admin..." style="width:100%;min-height:80px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;"></textarea>
+        <button class="btn btn-sm" onclick="enviarComentarioAdmin('${postId}')" style="margin-top:8px;">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div></div>`;
+}
+
 function carregarPosts() {
   const container = document.getElementById('posts-list');
+  if (!container) return;
 
-  // Cancel previous listener
   if (window._postsListener) { window._postsListener(); window._postsListener = null; }
-
   container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando posts...</p></div>';
 
   try {
     window._postsListener = db.collection('posts')
       .orderBy('criadoEm', 'desc')
-      .limit(30)
+      .limit(50)
       .onSnapshot(snapshot => {
         if (snapshot.empty) {
           container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px;">Nenhum post ainda.</p>';
           return;
         }
 
-        // Track which posts are new (added since page load)
-        const isFirstLoad = container.querySelector('.loading') !== null || container.innerHTML.includes('Carregando');
+        const isFirstLoad = !container.querySelector('.post-item');
 
-        let html = '';
-        snapshot.forEach(doc => {
-          const post = doc.data();
-          const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Agora';
-          const isNovo = !isFirstLoad && snapshot.docChanges().some(c => c.type === 'added' && c.doc.id === doc.id);
+        snapshot.docChanges().forEach(change => {
+          const doc = change.doc;
+          const id = doc.id;
 
-          let midiaHTML = '';
-          if (post.youtubeEmbedURL) {
-            midiaHTML = `<div style="position:relative;width:280px;height:158px;background:#000;border-radius:10px;overflow:hidden;flex-shrink:0;">
-            <iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
-          </div>`;
-          } else if (post.midiaURL && post.midiaTipo === 'imagem') {
-            midiaHTML = `<img src="${post.midiaURL}" class="post-image" alt="${post.titulo}" onerror="this.style.display='none'">`;
-          } else if (post.midiaURL && post.midiaTipo === 'pdf') {
-            midiaHTML = `<div style="width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;">📄</div>`;
+          if (change.type === 'added') {
+            if (isFirstLoad) return; // handled by full render below
+            const html = buildPostItemHTML(doc, true);
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            const el = tmp.firstElementChild;
+            if (el) {
+              container.prepend(el);
+              // Remove empty-state if present
+              container.querySelectorAll('p').forEach(p => { if (p.textContent.includes('Nenhum post')) p.remove(); });
+            }
+
+          } else if (change.type === 'modified') {
+            const existing = document.getElementById('post-item-' + id);
+            if (existing) {
+              const html = buildPostItemHTML(doc, false);
+              const tmp = document.createElement('div');
+              tmp.innerHTML = html;
+              const el = tmp.firstElementChild;
+              if (el) {
+                el.style.animation = 'fadeIn .3s ease';
+                existing.replaceWith(el);
+              }
+            }
+
+          } else if (change.type === 'removed') {
+            const existing = document.getElementById('post-item-' + id);
+            if (existing) {
+              existing.style.transition = 'all .35s ease';
+              existing.style.opacity = '0';
+              existing.style.transform = 'translateY(-10px) scale(0.97)';
+              existing.style.maxHeight = existing.offsetHeight + 'px';
+              setTimeout(() => {
+                existing.style.maxHeight = '0';
+                existing.style.margin = '0';
+                existing.style.padding = '0';
+                existing.style.overflow = 'hidden';
+                setTimeout(() => existing.remove(), 350);
+              }, 10);
+            }
           }
-
-          html += `<div class="post-item${isNovo ? ' post-item--novo' : ''}" id="post-item-${doc.id}" style="${isNovo ? 'animation:slideInPost .4s cubic-bezier(0.34,1.56,0.64,1);' : ''}">${midiaHTML}<div class="post-content">
-            ${isNovo ? '<span style="display:inline-block;background:#10b981;color:#000;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">✨ Novo</span>' : ''}
-            <div class="post-title">${post.titulo}</div>
-            ${(post.texto||'').trim() ? `<div class="post-desc" style="font-size:12px;color:var(--text-muted);line-height:1.5;margin:4px 0 6px;font-style:italic;"><span style="color:var(--blue);font-style:normal;font-weight:700;font-size:11px;">DESCRIÇÃO</span> ${(post.texto||'').substring(0,140)}${(post.texto||'').length>140?'…':''}</div>` : ''}
-            <div class="post-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor||'Admin'}
-              ${post.youtubeEmbedURL ? '<span class="yt-badge">▶ YouTube</span>' : ''}
-            </div>
-            <div class="post-actions">
-              <button class="btn btn-sm" onclick="toggleComentariosAdmin('${doc.id}')" style="background:var(--blue);color:#fff;">
-                💬 Comentários (<span id="count-admin-${doc.id}">…</span>)
-              </button>
-              ${(window._isSuperAdmin || (temPermissao('posts') && post.autorUid === window._adminUid)) ? `
-                <button class="btn btn-sm" onclick="abrirEditarPost('${doc.id}')" style="background:rgba(99,102,241,0.15);color:var(--blue);border:1px solid rgba(99,102,241,0.3);">✏️ Editar</button>
-                <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">🗑️ Excluir</button>
-              ` : '<span style="font-size:11px;color:var(--text-muted);padding:4px 8px;">🔒 Post de outro admin</span>'}
-            </div>
-            <div id="comentarios-admin-${doc.id}" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
-              <div id="lista-admin-${doc.id}"></div>
-              <div style="margin-top:16px;display:flex;gap:10px;align-items:flex-start;">
-                <div id="adminAvatarComent-${doc.id}" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
-                <div style="flex:1;">
-                  <textarea id="texto-admin-${doc.id}" placeholder="Comentário como admin..." style="width:100%;min-height:80px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;"></textarea>
-                  <button class="btn btn-sm" onclick="enviarComentarioAdmin('${doc.id}')" style="margin-top:8px;">Enviar</button>
-                </div>
-              </div>
-            </div>
-          </div></div>`;
         });
 
-        container.innerHTML = html;
-
-        // Avatar + live comment counts
-        snapshot.forEach(doc => {
-          const el = document.getElementById('adminAvatarComent-' + doc.id);
-          if (!el) return;
-          if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-          else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
-        });
-
-        // Live comment counts via onSnapshot per post
-        snapshot.forEach(doc => {
-          if (window._countListeners && window._countListeners[doc.id]) return; // already watching
-          if (!window._countListeners) window._countListeners = {};
-          window._countListeners[doc.id] = db.collection('posts').doc(doc.id).collection('comentarios')
-            .onSnapshot(cSnap => {
-              const el = document.getElementById('count-admin-' + doc.id);
-              if (el) el.textContent = cSnap.size;
-            });
-        });
-
-        // Animate new posts badge removal after 4s
-        setTimeout(() => {
-          document.querySelectorAll('.post-item--novo span').forEach(el => {
-            el.style.transition = 'opacity .5s'; el.style.opacity = '0';
-            setTimeout(() => el.remove(), 500);
-          });
-        }, 4000);
+        if (isFirstLoad) {
+          let html = '';
+          snapshot.forEach(doc => { html += buildPostItemHTML(doc, false); });
+          container.innerHTML = html || '<p style="text-align:center;color:var(--text-muted);padding:40px;">Nenhum post ainda.</p>';
+        }
 
       }, err => {
         console.error('Erro posts:', err);
-        container.innerHTML = `<div style="padding:20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;"><p style="color:var(--red);font-weight:700;">❌ Erro ao carregar posts</p><p style="color:var(--text-muted);font-size:13px;margin-top:8px;">${err.message}</p></div>`;
+        container.innerHTML = '<p style="color:var(--red);padding:20px;">❌ Erro ao carregar posts.</p>';
       });
   } catch(error) {
     console.error('Erro posts:', error);
   }
 }
-
-// ══════════════════════════════════════════════
-// COMENTÁRIOS ADMIN — TEMPO REAL (onSnapshot)
-// ══════════════════════════════════════════════
-const _adminListeners = {}; // postId → unsubscribe
 
 function toggleComentariosAdmin(postId) {
   const section = document.getElementById('comentarios-admin-' + postId);
