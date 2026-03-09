@@ -409,7 +409,29 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   </div>
 </div>
 
-<script src="theme.js"></script>
+<script>
+/* ── NasTheme inline ── */
+(function(){
+  var KEY='dashboard-tema';
+  function aplicar(t){
+    if(t==='light'){document.documentElement.classList.add('light-theme');if(document.body)document.body.classList.add('light-theme');}
+    else{document.documentElement.classList.remove('light-theme');if(document.body)document.body.classList.remove('light-theme');}
+    var ic=document.getElementById('themeIcon');if(ic)ic.textContent=t==='dark'?'🌙':'☀️';
+  }
+  function get(){return localStorage.getItem(KEY)||'dark';}
+  aplicar(get());
+  window.NasTheme={
+    toggle:function(){
+      var n=get()==='dark'?'light':'dark';
+      localStorage.setItem(KEY,n);aplicar(n);
+      var ic=document.getElementById('themeIcon');
+      if(ic){ic.style.transform='rotate(360deg) scale(0)';setTimeout(function(){ic.textContent=n==='dark'?'🌙':'☀️';ic.style.transform='none';},150);}
+    },
+    getTema:get
+  };
+  document.addEventListener('DOMContentLoaded',function(){aplicar(get());});
+})();
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -1020,16 +1042,16 @@ function renderComentarioAdmin(postId, docId, co, isNovo) {
       const rTempo = tempoRelativo(r.criadoEm);
       const rAv = avatarHtml(r.autor||'?', r.fotoUrl||null, 28);
       respostasHtml += `<div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;background:rgba(99,102,241,0.06);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;">
-        \${rAv}
+        ${rAv}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <strong style="font-size:12px;color:#a5b4fc;">\${r.autor||'?'}</strong>
+            <strong style="font-size:12px;color:#a5b4fc;">${r.autor||'?'}</strong>
             <div style="display:flex;gap:6px;align-items:center;">
-              <span style="font-size:11px;color:#475569;">\${rTempo}</span>
-              <button onclick="deletarRespostaAdmin('\${postId}','\${docId}',\${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
+              <span style="font-size:11px;color:#475569;">${rTempo}</span>
+              <button onclick="deletarRespostaAdmin('${postId}','${docId}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
             </div>
           </div>
-          <p style="margin:0;font-size:13px;color:var(--text);line-height:1.5;">\${r.texto}</p>
+          <p style="margin:0;font-size:13px;color:var(--text);line-height:1.5;">${r.texto}</p>
         </div>
       </div>`;
     });
@@ -1038,31 +1060,31 @@ function renderComentarioAdmin(postId, docId, co, isNovo) {
   const animClass = isNovo ? 'novo-comentario' : '';
   const animStyle = isNovo ? 'animation:slideInComment 0.35s cubic-bezier(0.4,0,0.2,1);' : '';
 
-  return `<div class="\${animClass}" style="\${animStyle}display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;transition:all 0.2s;">
-    <div onclick="verInfoUsuario('\${co.autorId||''}','\${nomeAutor}')" title="Ver info" style="cursor:pointer;border:2px solid transparent;border-radius:50%;transition:border .2s;flex-shrink:0;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">\${av}</div>
+  return `<div class="${animClass}" style="${animStyle}display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;transition:all 0.2s;">
+    <div onclick="verInfoUsuario('${co.autorId||''}','${nomeAutor}')" title="Ver info" style="cursor:pointer;border:2px solid transparent;border-radius:50%;transition:border .2s;flex-shrink:0;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${av}</div>
     <div style="flex:1;min-width:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <strong style="color:var(--accent);font-size:13px;">\${nomeAutor}</strong>
+        <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:11px;color:var(--text-muted);" title="\${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">\${tempo}</span>
-          <button onclick="deletarComentarioAdmin('\${postId}','\${docId}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;" title="Deletar">🗑️</button>
+          <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
+          <button onclick="deletarComentarioAdmin('${postId}','${docId}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;" title="Deletar">🗑️</button>
         </div>
       </div>
-      <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">\${co.texto}\${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
-      \${respostasHtml}
-      <div id="form-resposta-admin-\${docId}" style="display:none;margin-top:10px;">
+      <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+      ${respostasHtml}
+      <div id="form-resposta-admin-${docId}" style="display:none;margin-top:10px;">
         <div style="display:flex;gap:8px;align-items:flex-start;">
-          <div id="respAdminAv-\${docId}" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
+          <div id="respAdminAv-${docId}" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;margin-top:2px;"></div>
           <div style="flex:1;">
-            <textarea id="texto-resposta-admin-\${docId}" placeholder="Responder como admin..." style="width:100%;min-height:60px;background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.4);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+            <textarea id="texto-resposta-admin-${docId}" placeholder="Responder como admin..." style="width:100%;min-height:60px;background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.4);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;"></textarea>
             <div style="display:flex;gap:8px;margin-top:6px;">
-              <button class="btn btn-sm" onclick="enviarRespostaAdmin('\${postId}','\${docId}')" style="background:#6366f1;color:#fff;">↩ Responder</button>
-              <button class="btn btn-sm" onclick="document.getElementById('form-resposta-admin-\${docId}').style.display='none'" style="background:rgba(255,255,255,0.1);color:var(--text);">Cancelar</button>
+              <button class="btn btn-sm" onclick="enviarRespostaAdmin('${postId}','${docId}')" style="background:#6366f1;color:#fff;">↩ Responder</button>
+              <button class="btn btn-sm" onclick="document.getElementById('form-resposta-admin-${docId}').style.display='none'" style="background:rgba(255,255,255,0.1);color:var(--text);">Cancelar</button>
             </div>
           </div>
         </div>
       </div>
-      <button onclick="mostrarFormRespostaAdmin('\${docId}')" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:12px;font-weight:600;padding:4px 0;margin-top:4px;">↩ Responder</button>
+      <button onclick="mostrarFormRespostaAdmin('${docId}')" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:12px;font-weight:600;padding:4px 0;margin-top:4px;">↩ Responder</button>
     </div>
   </div>`;
 }

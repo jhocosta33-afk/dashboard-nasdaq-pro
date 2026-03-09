@@ -5,41 +5,57 @@
 <title>Login | Dashboard NASDAQ PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-/* ══ TEMA COMPARTILHADO NasdaqPro ══ */
+/* ══ TEMA COMPARTILHADO ══ */
 :root {
-  --bg: #050711;
-  --card: #0f1420;
-  --card-hover: #161b2e;
-  --border: rgba(99,102,241,0.15);
-  --border-bright: rgba(99,102,241,0.4);
-  --text: #f8fafc;
-  --text-dim: #cbd5e1;
-  --text-muted: #64748b;
-  --accent: #10b981;
-  --blue: #6366f1;
-  --blue-bright: #818cf8;
-  --red: #ef4444;
-  --orange: #f97316;
-  --sidebar-bg: #0a0d1a;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
-  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+  --bg: #020617; --card: #0f172a; --card-hover: #161b2e;
+  --border: rgba(255,255,255,.1); --border-bright: rgba(99,102,241,0.4);
+  --text: #e5e7eb; --text-dim: #cbd5e1; --text-muted: #94a3b8;
+  --accent: #22c55e; --blue: #3b82f6; --blue-bright: #818cf8; --red: #ef4444;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3); --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
 }
 body.light-theme {
-  --bg: #f1f5f9;
-  --card: #ffffff;
-  --card-hover: #f8fafc;
-  --border: rgba(99,102,241,0.18);
-  --border-bright: rgba(99,102,241,0.45);
-  --text: #0f172a;
-  --text-dim: #334155;
-  --text-muted: #64748b;
-  --sidebar-bg: #ffffff;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+  --bg: #f1f5f9; --card: #ffffff; --card-hover: #f8fafc;
+  --border: rgba(99,102,241,0.18); --border-bright: rgba(99,102,241,0.45);
+  --text: #0f172a; --text-dim: #334155; --text-muted: #64748b;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08); --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
 }
+body { background: var(--bg); color: var(--text); transition: background-color .3s, color .3s; }
+.theme-toggle-btn {
+  background: var(--card); border: 1px solid var(--border); color: var(--text);
+  width: 34px; height: 34px; border-radius: 9px; font-size: 16px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s;
+}
+.theme-toggle-btn:hover { border-color: var(--blue-bright); transform: scale(1.08); }
+#themeIcon { display: inline-block; transition: transform .3s; }
+/* Light theme overrides */
+body.light-theme header { background: #ffffff !important; border-color: rgba(99,102,241,0.15) !important; }
+body.light-theme .card, body.light-theme .modal-box { background: #ffffff !important; border-color: rgba(99,102,241,0.15) !important; }
+body.light-theme .post-card { background: #ffffff; border-color: rgba(99,102,241,0.12); }
+body.light-theme .quick-card { background: #ffffff; border-color: rgba(99,102,241,0.12); }
+body.light-theme .comentario-item { background: #f8fafc; border-color: rgba(99,102,241,0.1); }
+body.light-theme .resposta-item { background: #f1f5f9; }
+body.light-theme .filter-btn { background: #f1f5f9; border-color: rgba(99,102,241,0.15); color: #334155; }
+body.light-theme .filter-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+body.light-theme .filter-btn:hover { border-color: #3b82f6; }
+body.light-theme .btn-logout { background: #f1f5f9; color: #0f172a; border-color: rgba(99,102,241,0.2); }
+body.light-theme .btn-secondary { background: #f1f5f9; color: #334155; border-color: rgba(99,102,241,0.2); }
+body.light-theme .btn-secondary:hover { background: #e2e8f0; border-color: #3b82f6; }
+body.light-theme .welcome-banner { background: linear-gradient(135deg,rgba(59,130,246,0.07),rgba(34,197,94,0.05)); }
+body.light-theme .post-text, body.light-theme .post-meta { color: #475569; }
+body.light-theme .post-file-box { background: rgba(99,102,241,0.04); border-color: rgba(99,102,241,0.15); }
+body.light-theme textarea, body.light-theme .comentario-form textarea, body.light-theme .reply-form textarea {
+  background: #f8fafc !important; border-color: rgba(99,102,241,0.2) !important; color: #0f172a !important;
+}
+body.light-theme input { background: #f8fafc !important; color: #0f172a !important; border-color: rgba(99,102,241,0.2) !important; }
+body.light-theme .section-header h2, body.light-theme h1, body.light-theme h2, body.light-theme h3 { color: #0f172a; }
+body.light-theme .tab { color: #64748b; }
+body.light-theme .tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+body.light-theme table th { background: #f1f5f9; color: #64748b; }
+body.light-theme table td { border-color: rgba(99,102,241,0.1); color: #0f172a; }
+body.light-theme .post-item { background: #f8fafc; border-color: rgba(99,102,241,0.12); }
+body.light-theme .upload-area { background: #f8fafc; border-color: rgba(99,102,241,0.2); }
+body.light-theme select { background: #f8fafc; color: #0f172a; border-color: rgba(99,102,241,0.2); }
+body.light-theme select option { background: #ffffff; color: #0f172a; }
 body { background: var(--bg); color: var(--text); transition: background-color 0.3s, color 0.3s; }
 body.light-theme { background: var(--bg); color: var(--text); }
 .theme-toggle-btn {
@@ -55,7 +71,7 @@ body.light-theme { background: var(--bg); color: var(--text); }
 }
 .theme-toggle-btn:hover { border-color: var(--blue-bright); background: var(--card-hover); transform: scale(1.08); }
 #themeIcon { display: inline-block; }
-body.light-theme .login-card { background: #ffffff !important; border-color: rgba(99,102,241,0.15) !important; }
+body.light-theme 
 body.light-theme input,
 body.light-theme textarea { background: #f8fafc !important; border-color: rgba(99,102,241,0.2) !important; color: #0f172a !important; }
 body.light-theme input:focus,
@@ -281,12 +297,33 @@ input::placeholder { color: var(--text-muted); }
   h1 { font-size: 24px; }
 }
 </style>
-<script src="theme.js"></script>
+<script>
+/* ── NasTheme inline ── */
+(function(){
+  const KEY='dashboard-tema';
+  function aplicar(t){
+    if(t==='light'){document.documentElement.classList.add('light-theme');if(document.body)document.body.classList.add('light-theme');}
+    else{document.documentElement.classList.remove('light-theme');if(document.body)document.body.classList.remove('light-theme');}
+    var ic=document.getElementById('themeIcon');if(ic)ic.textContent=t==='dark'?'🌙':'☀️';
+  }
+  function get(){return localStorage.getItem(KEY)||'dark';}
+  aplicar(get());
+  window.NasTheme={
+    carregar:function(){aplicar(get());},
+    toggle:function(){
+      var n=get()==='dark'?'light':'dark';
+      localStorage.setItem(KEY,n);aplicar(n);
+      var ic=document.getElementById('themeIcon');
+      if(ic){ic.style.transform='rotate(360deg) scale(0)';setTimeout(function(){ic.textContent=n==='dark'?'🌙':'☀️';ic.style.transform='rotate(0deg) scale(1)';},150);}
+    },
+    getTema:get
+  };
+  document.addEventListener('DOMContentLoaded',function(){aplicar(get());});
+})();
+</script>
 </head>
 <body>
-<button onclick="NasTheme.toggle()" title="Alternar tema" style="position:fixed;top:16px;right:16px;z-index:9999;background:var(--card);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md);transition:all 0.2s;">
-  <span id="themeIcon">🌙</span>
-</button>
+<button onclick="NasTheme.toggle()" title="Alternar tema" style="position:fixed;top:16px;right:16px;z-index:9999;background:var(--card);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:all .2s;"><span id="themeIcon">🌙</span></button>
 
 <div class="container">
   <div class="header">
