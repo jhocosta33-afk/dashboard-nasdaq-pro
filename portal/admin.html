@@ -186,6 +186,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   <div class="user-info">
     <a href="../" style="display:inline-block;background:rgba(255,255,255,0.1);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;margin-right:12px;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📊 Dashboard</a>
     <button id="btnConectarYT" onclick="autenticarYouTube()" style="background:#ff0000;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">🔗 Conectar YouTube</button>
+    <button id="btnVisualizacao" onclick="alternarVisualizacao()" title="Alternar visualização" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);color:var(--blue);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;margin-right:8px;" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.12)'">👁 Ver como Aluno</button>
     <button class="theme-toggle-btn" onclick="NasTheme.toggle()" title="Alternar tema"><span id="themeIcon">🌙</span></button>
     <div id="adminAvatarHeader" onclick="abrirPerfilAdmin()" title="Editar perfil" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22c55e);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;cursor:pointer;overflow:hidden;border:2px solid transparent;transition:all .2s;flex-shrink:0;">
       <span id="adminAvatarLetra">A</span>
@@ -196,10 +197,10 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 </header>
 
 <div class="container">
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('posts')">📝 Posts</button>
-    <button class="tab" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
-    <button class="tab" onclick="switchTab('planilha')">📊 Planilha & Fotos</button>
+  <div class="tabs" id="tabsBar" style="visibility:hidden;">
+    <button class="tab active" id="tabPosts" onclick="switchTab('posts')">📝 Posts</button>
+    <button class="tab" id="tabAprovacoes" onclick="switchTab('aprovacoes')">✅ Aprovar Alunos</button>
+    <button class="tab" id="tabPlanilha" onclick="switchTab('planilha')">📊 Planilha & Fotos</button>
     <button class="tab tab-superadmin" id="tabAdmins" onclick="switchTab('admins')" style="display:none;">👑 Administradores</button>
   </div>
 
@@ -235,10 +236,10 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         <div class="form-group">
           <label>Arquivo/Mídia (opcional)</label>
           <div class="upload-area" id="uploadAreaUniversal">
-            <input type="file" id="postArquivo" accept="*" style="display:none">
+            <input type="file" id="postArquivo" accept="*" multiple style="display:none">
             <div id="uploadPlaceholderUniversal">
               <span style="font-size:64px">📎</span>
-              <p><strong>Arraste qualquer arquivo aqui</strong><br>ou clique para selecionar</p>
+              <p><strong>Arraste arquivos aqui</strong> (múltiplos permitidos)<br>ou clique para selecionar</p>
             </div>
             <div id="uploadPreviewUniversal" style="display:none;">
               <div id="previewContent"></div>
@@ -537,6 +538,45 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
       </div>
     </div>
 
+  </div>
+
+  <!-- MODAL EDITAR POST -->
+  <div id="modalEditarPost" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1500;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--card-bg,#0f172a);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;position:relative;">
+      <button onclick="fecharEditarPost()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text-muted);font-size:24px;cursor:pointer;line-height:1;">×</button>
+      <h3 style="font-size:18px;font-weight:800;margin-bottom:20px;">✏️ Editar Publicação</h3>
+      <div id="alert-edit-post" class="alert"></div>
+      <input type="hidden" id="editPostId">
+      <div class="form-group">
+        <label>Título</label>
+        <input type="text" id="editPostTitulo" placeholder="Título do post" required style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label>Descrição (opcional)</label>
+        <textarea id="editPostTexto" placeholder="Descrição do post..." style="width:100%;min-height:80px;"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="editPostCategoria" style="width:100%;">
+            <option value="sala-ao-vivo">🔴 Sala ao Vivo</option>
+            <option value="materiais">📚 Materiais</option>
+            <option value="analise">📈 Análise</option>
+            <option value="tutorial">🎓 Tutorial</option>
+            <option value="noticia">📰 Notícia</option>
+            <option value="link">🔗 Link Útil</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Link (opcional)</label>
+          <input type="url" id="editPostLink" placeholder="https://exemplo.com" style="width:100%;">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button onclick="salvarEdicaoPost()" style="flex:1;padding:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">💾 Salvar Alterações</button>
+        <button onclick="fecharEditarPost()" style="padding:12px 20px;background:rgba(100,116,139,0.12);color:var(--text-muted);border:1px solid var(--border);border-radius:10px;font-size:14px;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
   </div>
 
 <!-- MODAL PERFIL ADMIN -->
@@ -1099,6 +1139,7 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('adminName').textContent = window._adminNome;
     atualizarAvatarAdmin();
     aplicarPermissoesUI();
+    inicializarVisualizacao();
 
     await carregarConfiguracoes();
     if (temPermissao('youtube')) await inicializarYouTubeAuth();
@@ -1171,8 +1212,8 @@ uploadAreaUniversal.addEventListener('click', () => fileInputUniversal.click());
 ['dragenter','dragover','dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
 ['dragenter','dragover'].forEach(ev => uploadAreaUniversal.addEventListener(ev, () => uploadAreaUniversal.classList.add('dragover')));
 ['dragleave','drop'].forEach(ev => uploadAreaUniversal.addEventListener(ev, () => uploadAreaUniversal.classList.remove('dragover')));
-uploadAreaUniversal.addEventListener('drop', e => { if (e.dataTransfer.files[0]) handleArquivoUniversal(e.dataTransfer.files[0]); });
-fileInputUniversal.addEventListener('change', e => { if (e.target.files[0]) handleArquivoUniversal(e.target.files[0]); });
+uploadAreaUniversal.addEventListener('drop', e => { if (e.dataTransfer.files.length > 0) handleArquivoUniversal(e.dataTransfer.files); });
+fileInputUniversal.addEventListener('change', e => { if (e.target.files.length > 0) handleArquivoUniversal(e.target.files); });
 
 function handleArquivoUniversal(file) {
   if (file.size > 500 * 1024 * 1024) { alert('❌ Arquivo muito grande. Máximo 500MB'); return; }
@@ -1267,7 +1308,8 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
       midiaURL: finalMidiaURL, midiaTipo, youtubeEmbedURL,
       youtubeVideoId: youtubeVideoId || null, driveFileId: driveFileId || null,
       criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-      autor: window._adminNome || auth.currentUser.displayName || 'Admin'
+      autor: window._adminNome || auth.currentUser.displayName || 'Admin',
+      autorUid: window._adminUid || auth.currentUser.uid
     });
     mostrarAlerta('alert-post', '✅ Post publicado com sucesso!', 'success');
     document.getElementById('formPost').reset();
@@ -1335,7 +1377,10 @@ function carregarPosts() {
               <button class="btn btn-sm" onclick="toggleComentariosAdmin('${doc.id}')" style="background:var(--blue);color:#fff;">
                 💬 Comentários (<span id="count-admin-${doc.id}">…</span>)
               </button>
-              <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">🗑️ Excluir</button>
+              ${(window._isSuperAdmin || (temPermissao('posts') && post.autorUid === window._adminUid)) ? `
+                <button class="btn btn-sm" onclick="abrirEditarPost('${doc.id}')" style="background:rgba(99,102,241,0.15);color:var(--blue);border:1px solid rgba(99,102,241,0.3);">✏️ Editar</button>
+                <button class="btn btn-sm btn-danger" onclick="deletarPost('${doc.id}')">🗑️ Excluir</button>
+              ` : '<span style="font-size:11px;color:var(--text-muted);padding:4px 8px;">🔒 Post de outro admin</span>'}
             </div>
             <div id="comentarios-admin-${doc.id}" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
               <div id="lista-admin-${doc.id}"></div>
@@ -1472,7 +1517,7 @@ function renderComentarioAdmin(postId, docId, co, isNovo) {
             <strong style="font-size:12px;color:#a5b4fc;">${r.autor||'?'}</strong>
             <div style="display:flex;gap:6px;align-items:center;">
               <span style="font-size:11px;color:#475569;">${rTempo}</span>
-              <button onclick="deletarRespostaAdmin('${postId}','${docId}',${idx})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>
+              ${(window._isSuperAdmin || temPermissao('comentarios') || r.autorId === window._adminUid) ? `<button onclick="deletarRespostaAdmin('${postId}','${docId}',${idx},'${r.autorId||''}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;">🗑️</button>` : ''}
             </div>
           </div>
           <p style="margin:0;font-size:13px;color:var(--text);line-height:1.5;">${r.texto}</p>
@@ -1491,7 +1536,7 @@ function renderComentarioAdmin(postId, docId, co, isNovo) {
         <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
-          <button onclick="deletarComentarioAdmin('${postId}','${docId}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;" title="Deletar">🗑️</button>
+          ${(window._isSuperAdmin || temPermissao('comentarios') || co.autorId === window._adminUid) ? `<button onclick="deletarComentarioAdmin('${postId}','${docId}','${co.autorId||''}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;" title="Deletar comentário">🗑️</button>` : ''}
         </div>
       </div>
       <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
@@ -1543,8 +1588,11 @@ async function enviarRespostaAdmin(postId, comentarioId) {
   finally { textarea.disabled = false; if (btn) { btn.disabled = false; btn.textContent = '↩ Responder'; } }
 }
 
-async function deletarRespostaAdmin(postId, comentarioId, idx) {
-  if (!temPermissao('comentarios')) { alert('❌ Sem permissão para excluir respostas.'); return; }
+async function deletarRespostaAdmin(postId, comentarioId, idx, autorId) {
+  const ehPropria = autorId && autorId === window._adminUid;
+  if (!window._isSuperAdmin && !temPermissao('comentarios') && !ehPropria) {
+    alert('❌ Sem permissão para excluir respostas de outros.'); return;
+  }
   if (!confirm('Deletar esta resposta?')) return;
   try {
     const docRef = db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId);
@@ -1577,8 +1625,12 @@ async function enviarComentarioAdmin(postId) {
   finally { textarea.disabled = false; if (btn) { btn.disabled = false; btn.textContent = 'Enviar'; } }
 }
 
-async function deletarComentarioAdmin(postId, comentarioId) {
-  if (!temPermissao('comentarios')) { alert('❌ Sem permissão para excluir comentários.'); return; }
+async function deletarComentarioAdmin(postId, comentarioId, autorId) {
+  // Pode deletar se: superadmin OU tem permissão 'comentarios' OU é o próprio autor
+  const ehProprioComentario = autorId && autorId === window._adminUid;
+  if (!window._isSuperAdmin && !temPermissao('comentarios') && !ehProprioComentario) {
+    alert('❌ Sem permissão para excluir comentários de outros.'); return;
+  }
   if (!confirm('Deletar este comentário?')) return;
   try {
     await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
@@ -1822,6 +1874,136 @@ async function deletarPost(postId) {
     await db.collection('posts').doc(postId).delete();
   } catch (err) { alert('❌ Erro ao excluir: ' + err.message); }
 }
+
+// ══════════════════════════════════════════════
+// EDITAR POST
+// ══════════════════════════════════════════════
+let _editPostCache = {};
+
+function abrirEditarPost(postId) {
+  db.collection('posts').doc(postId).get().then(doc => {
+    if (!doc.exists) { alert('Post não encontrado.'); return; }
+    const p = doc.data();
+    _editPostCache = { id: postId, ...p };
+    document.getElementById('editPostId').value = postId;
+    document.getElementById('editPostTitulo').value = p.titulo || '';
+    document.getElementById('editPostTexto').value = p.texto || '';
+    document.getElementById('editPostCategoria').value = p.categoria || 'analise';
+    document.getElementById('editPostLink').value = p.link || '';
+    const modal = document.getElementById('modalEditarPost');
+    modal.style.display = 'flex';
+  }).catch(err => alert('❌ Erro: ' + err.message));
+}
+
+function fecharEditarPost() {
+  document.getElementById('modalEditarPost').style.display = 'none';
+  _editPostCache = {};
+}
+
+async function salvarEdicaoPost() {
+  const postId = document.getElementById('editPostId').value;
+  if (!postId) return;
+  const titulo = document.getElementById('editPostTitulo').value.trim();
+  if (!titulo) { mostrarAlerta('alert-edit-post', '❌ Título obrigatório.', 'error'); return; }
+
+  try {
+    await db.collection('posts').doc(postId).update({
+      titulo,
+      texto: document.getElementById('editPostTexto').value.trim(),
+      categoria: document.getElementById('editPostCategoria').value,
+      link: document.getElementById('editPostLink').value.trim() || null,
+      editadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+      editadoPor: window._adminNome || 'Admin'
+    });
+    mostrarAlerta('alert-edit-post', '✅ Post atualizado!', 'success');
+    setTimeout(() => fecharEditarPost(), 1200);
+  } catch (err) {
+    mostrarAlerta('alert-edit-post', '❌ Erro: ' + err.message, 'error');
+  }
+}
+
+// Close modal clicking backdrop
+document.getElementById('modalEditarPost')?.addEventListener('click', (e) => {
+  if (e.target.id === 'modalEditarPost') fecharEditarPost();
+});
+
+// ══════════════════════════════════════════════
+// MÚLTIPLOS ARQUIVOS — preview list
+// ══════════════════════════════════════════════
+let arquivosMultiplos = [];
+
+function handleArquivoUniversal(files) {
+  arquivosMultiplos = Array.from(files);
+  const placeholder = document.getElementById('uploadPlaceholderUniversal');
+  const preview = document.getElementById('uploadPlaceholderUniversal').parentElement;
+
+  // Build preview list
+  let previewHTML = '<div style="display:flex;flex-direction:column;gap:8px;padding:8px;">';
+  arquivosMultiplos.forEach((f, i) => {
+    const isImg = f.type.startsWith('image/');
+    const isVid = f.type.startsWith('video/');
+    const icon = isImg ? '🖼' : isVid ? '🎬' : '📄';
+    const size = f.size > 1048576 ? (f.size/1048576).toFixed(1) + ' MB' : (f.size/1024).toFixed(0) + ' KB';
+    previewHTML += `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(99,102,241,0.06);border:1px solid var(--border);border-radius:8px;">
+      <span style="font-size:20px;">${icon}</span>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div>
+        <div style="font-size:11px;color:var(--text-muted);">${size}</div>
+      </div>
+      <button type="button" onclick="removerArquivoIndex(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
+    </div>`;
+    if (isImg) {
+      const url = URL.createObjectURL(f);
+      previewHTML = previewHTML.replace(`>${f.name}</div>`, `>${f.name}</div>`);
+    }
+  });
+  previewHTML += '</div>';
+  previewHTML += `<button type="button" onclick="removerArquivoUniversal()" style="margin:0 8px 8px;background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;width:calc(100% - 16px);">✕ Remover todos</button>`;
+
+  const uploadArea = document.getElementById('uploadAreaUniversal');
+  let previewDiv = document.getElementById('multiPreviewDiv');
+  if (!previewDiv) {
+    previewDiv = document.createElement('div');
+    previewDiv.id = 'multiPreviewDiv';
+    uploadArea.appendChild(previewDiv);
+  }
+  previewDiv.innerHTML = previewHTML;
+  placeholder.style.display = 'none';
+  previewDiv.style.display = 'block';
+}
+
+function removerArquivoIndex(i) {
+  arquivosMultiplos.splice(i, 1);
+  if (arquivosMultiplos.length === 0) {
+    removerArquivoUniversal();
+  } else {
+    handleArquivoUniversal(arquivosMultiplos);
+  }
+}
+
+// ══════════════════════════════════════════════
+// VISUALIZAR COMO ALUNO / ADMIN
+// ══════════════════════════════════════════════
+const VISTA_KEY = 'nasdaqpro_vista_preferencia';
+
+function inicializarVisualizacao() {
+  const vista = localStorage.getItem(VISTA_KEY) || 'admin';
+  aplicarVista(vista, false);
+}
+
+function alternarVisualizacao() {
+  // Salva preferência e abre o portal do aluno em nova aba
+  localStorage.setItem(VISTA_KEY, 'aluno');
+  window.open('aluno.html?from=admin', '_blank');
+  // Reverte a preferência para admin (só abriu para visualizar)
+  setTimeout(() => localStorage.setItem(VISTA_KEY, 'admin'), 500);
+}
+
+function inicializarVisualizacao() {
+  // Apenas garante que o localStorage está em 'admin' ao abrir o painel
+  localStorage.setItem(VISTA_KEY, 'admin');
+}
+
 
 document.getElementById('formTradeData').addEventListener('submit', async (e) => {
   e.preventDefault();

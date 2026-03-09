@@ -305,7 +305,15 @@ auth.onAuthStateChanged(async (user) => {
     const userDoc = await db.collection('users').doc(user.uid).get();
     if (!userDoc.exists) { await auth.signOut(); window.location.href = 'login.html'; return; }
     const userData = userDoc.data();
-    if (userData.role === 'admin') { window.location.href = 'admin.html'; return; }
+    if (userData.role === 'admin') {
+      // Se veio do admin ou está visualizando como aluno, permite ficar
+      const fromAdmin = new URLSearchParams(window.location.search).get('from') === 'admin';
+      const vistaAluno = localStorage.getItem('nasdaqpro_vista_preferencia') === 'aluno';
+      if (!fromAdmin && !vistaAluno) { window.location.href = 'admin.html'; return; }
+      // Mostra botão de voltar ao admin
+      const btnVoltar = document.getElementById('btnVoltarAdmin');
+      if (btnVoltar) btnVoltar.style.display = '';
+    }
     if (userData.aprovado !== true) {
       alert('⏳ Sua conta ainda aguarda aprovação.');
       await auth.signOut(); window.location.href = 'login.html'; return;
