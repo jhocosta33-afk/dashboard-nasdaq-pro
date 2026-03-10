@@ -806,15 +806,31 @@ async function autenticarYouTube() {
 
 async function trocarCodePorToken(code) {
   const verifier = sessionStorage.getItem('yt_verifier');
-  if (!verifier) return;
-  sessionStorage.removeItem('yt_verifier');
+
+  // Mostra que está processando
+  const btn = document.getElementById('btnConectarYT');
+  if (btn) { btn.textContent = '⏳ Conectando YouTube...'; btn.disabled = true; }
+
+  if (!verifier) {
+    // Verifier perdido — tenta sem PKCE (fallback)
+    console.warn('PKCE verifier não encontrado, tentando sem code_verifier');
+  }
+  if (verifier) sessionStorage.removeItem('yt_verifier');
+
   try {
+    // Garante que as configs estão carregadas
+    if (!YT_CLIENT_ID || !YT_CLIENT_SECRET) await carregarConfiguracoes();
+
+    const payload = { code, client_id: YT_CLIENT_ID, client_secret: YT_CLIENT_SECRET, redirect_uri: YT_REDIRECT };
+    if (verifier) payload.code_verifier = verifier;
+
     const resp = await fetch(`${YT_WORKER}/exchange-token`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, client_id: YT_CLIENT_ID, client_secret: YT_CLIENT_SECRET, redirect_uri: YT_REDIRECT, code_verifier: verifier })
+      body: JSON.stringify(payload)
     });
     const data = await resp.json();
-    if (data.success) {
+
+    if (data.success && data.access_token) {
       ytAccessToken = data.access_token;
       if (data.refresh_token) {
         await db.collection('config').doc('youtube').set({
@@ -822,9 +838,24 @@ async function trocarCodePorToken(code) {
           atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
           configuradoPor: auth.currentUser?.email || 'admin'
         });
+        console.log('✅ refresh_token salvo no Firestore');
+      } else {
+        console.warn('⚠️ Sem refresh_token na resposta — YouTube já estava conectado antes. Token de acesso salvo na sessão.');
       }
-    } else { console.error('Erro ao trocar token:', data.error); }
-  } catch (err) { console.error('Erro trocarCodePorToken:', err); }
+      // Limpa o ?code= da URL sem recarregar
+      window.history.replaceState({}, '', window.location.pathname);
+      alert('✅ YouTube conectado com sucesso!');
+    } else {
+      const errMsg = data.error || 'Resposta inválida do servidor';
+      console.error('Erro ao trocar token:', errMsg, data);
+      alert('❌ Falha ao conectar YouTube: ' + errMsg + '\n\nVerifique:\n• URI de redirecionamento no Google Console\n• client_id e client_secret no Firestore /config/oauth');
+    }
+  } catch (err) {
+    console.error('Erro trocarCodePorToken:', err);
+    alert('❌ Erro de rede ao conectar YouTube: ' + err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function uploadYouTubeDireto(file, titulo, descricao) {
@@ -880,10 +911,28 @@ function atualizarBotaoYouTube() {
   const btn = document.getElementById('btnConectarYT');
   if (!btn) return;
   if (ytAccessToken) {
-    btn.textContent = '✅ YouTube Conectado'; btn.style.background = 'var(--accent)'; btn.style.color = '#000';
+    btn.textContent = '✅ YouTube Conectado';
+    btn.style.background = '#10b981';
+    btn.style.color = '#fff';
+    btn.onclick = desconectarYouTube;
+    btn.title = 'Clique para desconectar';
   } else {
-    btn.textContent = '🔗 Conectar YouTube'; btn.style.background = '#ff0000'; btn.style.color = '#fff';
+    btn.textContent = '🔗 Conectar YouTube';
+    btn.style.background = '#ff0000';
+    btn.style.color = '#fff';
+    btn.onclick = autenticarYouTube;
+    btn.title = 'Clique para conectar';
   }
+}
+
+async function desconectarYouTube() {
+  if (!confirm('Desconectar o YouTube? Você precisará reconectar para enviar vídeos.')) return;
+  ytAccessToken = null;
+  try {
+    await db.collection('config').doc('youtube').delete();
+  } catch(e) {}
+  atualizarBotaoYouTube();
+  alert('YouTube desconectado. Clique em "Conectar YouTube" para reconectar.');
 }
 
 // ══════════════════════════════════════════════
