@@ -1966,7 +1966,42 @@ async function deletarPost(postId) {
   if (!temPermissao('posts')) { alert('❌ Sem permissão para excluir posts.'); return; }
   if (!confirm('Excluir este post permanentemente? Esta ação não pode ser desfeita.')) return;
   try {
+    // Busca o post para verificar se tem vídeo no YouTube
+    const postDoc = await db.collection('posts').doc(postId).get();
+    const postData = postDoc.exists ? postDoc.data() : null;
+    const videoId = postData?.youtubeVideoId || null;
+
+    // Apaga do Firestore
     await db.collection('posts').doc(postId).delete();
+
+    // Se tinha vídeo no YouTube, apaga também
+    if (videoId) {
+      try {
+        // Garante token válido
+        if (!ytAccessToken) {
+          const cfgDoc = await db.collection('config').doc('youtube').get();
+          if (cfgDoc.exists && cfgDoc.data().refresh_token) {
+            await renovarAccessToken(cfgDoc.data().refresh_token);
+          }
+        }
+        if (ytAccessToken) {
+          const resp = await fetch(`${YT_WORKER}/delete-video`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ accessToken: ytAccessToken, videoId })
+          });
+          const data = await resp.json();
+          if (data.success) {
+            console.log('[YT] Vídeo deletado:', videoId);
+          } else {
+            console.warn('[YT] Falha ao deletar vídeo:', data.error);
+          }
+        }
+      } catch (ytErr) {
+        console.warn('[YT] Erro ao deletar vídeo do YouTube:', ytErr.message);
+        // Não bloqueia — post já foi apagado do Firestore
+      }
+    }
   } catch (err) { alert('❌ Erro ao excluir: ' + err.message); }
 }
 
