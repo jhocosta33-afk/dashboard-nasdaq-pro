@@ -332,6 +332,7 @@ body.basic-mode .pro-only{display:none!important}
  <a href="portal/login.html" class="mode-toggle" style="text-decoration:none;margin-top:12px;background:linear-gradient(135deg,#22c55e,#3b82f6);color:#000;font-weight:700;">
   <span>🎓</span><span>Portal do Aluno</span>
  </a>
+
  <div class="stats-sidebar">
   <div class="sidebar-stat"><span>Assertividade</span><span id="sidebarWinRate">0%</span></div>
   <div class="sidebar-stat"><span>Melhor Dia</span><span id="sidebarBestDay">0</span></div>
@@ -921,7 +922,15 @@ const Dashboard = {
     if(!modal||!mt||!mig||!mpc)return;
     const data=new Date(dadosDia.data),dia=data.getDate(),mes=nomesMeses[dadosDia.mes],ano=dadosDia.ano;
     mt.textContent=`📅 ${dia} de ${mes} de ${ano}`;
-    let infoHTML=`<div class="modal-info-item ${dadosDia.pontos>0?'positive':dadosDia.pontos<0?'negative':''}"><label>Pontos</label><div class="value">${dadosDia.pontos>0?'+':''}${dadosDia.pontos}</div></div><div class="modal-info-item"><label>Trades</label><div class="value">${dadosDia.trades}</div></div><div class="modal-info-item positive"><label>Gains</label><div class="value">${dadosDia.gain}</div></div><div class="modal-info-item negative"><label>Stops</label><div class="value">${dadosDia.stop}</div></div>`;
+    const pN=dadosDia.pontosNasdaq||0, pD=dadosDia.pontosDow||0;
+    const hasBoth=pN!==0&&pD!==0;
+    let pontosHTML='';
+    if(hasBoth){
+      pontosHTML=`<div class="modal-info-item ${pN>0?'positive':pN<0?'negative':''}"><label>NASDAQ</label><div class="value">${pN>0?'+':''}${pN}</div></div><div class="modal-info-item ${pD>0?'positive':pD<0?'negative':''}"><label>DOW JONES</label><div class="value">${pD>0?'+':''}${pD}</div></div>`;
+    } else {
+      pontosHTML=`<div class="modal-info-item ${dadosDia.pontos>0?'positive':dadosDia.pontos<0?'negative':''}"><label>Pontos</label><div class="value">${dadosDia.pontos>0?'+':''}${dadosDia.pontos}</div></div>`;
+    }
+    let infoHTML=pontosHTML+`<div class="modal-info-item"><label>Trades</label><div class="value">${dadosDia.trades}</div></div><div class="modal-info-item positive"><label>Gains</label><div class="value">${dadosDia.gain}</div></div><div class="modal-info-item negative"><label>Stops</label><div class="value">${dadosDia.stop}</div></div>`;
     if(dadosDia.zero>0)infoHTML+=`<div class="modal-info-item"><label>Breakeven</label><div class="value" style="color:var(--yellow)">${dadosDia.zero}</div></div>`;
     mig.innerHTML=infoHTML;
     this.carregarFotoTrade(dadosDia.dia,mpc,dadosDia.fotoId);
@@ -985,7 +994,18 @@ const Dashboard = {
     try{
       const data=new Date(this.tradeAtual.data),dia=data.getDate(),mes=nomesMeses[this.tradeAtual.mes],ano=this.tradeAtual.ano;
       document.getElementById('captureIcon').textContent='📅';document.getElementById('captureTitle').textContent=`${dia} de ${mes} de ${ano}`;
-      document.getElementById('captureStats').innerHTML=`<div class="capture-stat"><div class="capture-stat-label">PONTOS</div><div class="capture-stat-value" style="color:${this.tradeAtual.pontos<0?'#ef4444':this.tradeAtual.pontos>0?'#10b981':'#94a3b8'}">${this.tradeAtual.pontos>0?'+':''}${this.tradeAtual.pontos}</div></div><div class="capture-stat"><div class="capture-stat-label">TRADES</div><div class="capture-stat-value">${this.tradeAtual.trades}</div></div><div class="capture-stat"><div class="capture-stat-label">GAINS</div><div class="capture-stat-value" style="color:#10b981">${this.tradeAtual.gain}</div></div><div class="capture-stat"><div class="capture-stat-label">STOPS</div><div class="capture-stat-value" style="color:#ef4444">${this.tradeAtual.stop}</div></div><div class="capture-stat"><div class="capture-stat-label">BREAKEVEN</div><div class="capture-stat-value" style="color:#f59e0b">${this.tradeAtual.zero}</div></div>`;
+      const _pN=this.tradeAtual.pontosNasdaq||0, _pD=this.tradeAtual.pontosDow||0;
+      const _hasNQ=(this.tradeAtual.ativos||[]).some(a=>!a.includes('DOW'))||_pN!==0;
+      const _hasDJ=(this.tradeAtual.ativos||[]).some(a=>a.includes('DOW'))||_pD!==0;
+      let _pontosStats='';
+      if(_hasNQ&&_hasDJ){
+        _pontosStats=`<div class="capture-stat"><div class="capture-stat-label">NASDAQ</div><div class="capture-stat-value" style="color:${_pN<0?'#ef4444':_pN>0?'#10b981':'#94a3b8'}">${_pN>0?'+':''}${_pN}</div></div>`+
+                     `<div class="capture-stat"><div class="capture-stat-label">DOW JONES</div><div class="capture-stat-value" style="color:${_pD<0?'#ef4444':_pD>0?'#f97316':'#94a3b8'}">${_pD>0?'+':''}${_pD}</div></div>`;
+      } else {
+        const _pt=this.tradeAtual.pontos;
+        _pontosStats=`<div class="capture-stat"><div class="capture-stat-label">PONTOS</div><div class="capture-stat-value" style="color:${_pt<0?'#ef4444':_pt>0?'#10b981':'#94a3b8'}">${_pt>0?'+':''}${_pt}</div></div>`;
+      }
+      document.getElementById('captureStats').innerHTML=_pontosStats+`<div class="capture-stat"><div class="capture-stat-label">TRADES</div><div class="capture-stat-value">${this.tradeAtual.trades}</div></div><div class="capture-stat"><div class="capture-stat-label">GAINS</div><div class="capture-stat-value" style="color:#10b981">${this.tradeAtual.gain}</div></div><div class="capture-stat"><div class="capture-stat-label">STOPS</div><div class="capture-stat-value" style="color:#ef4444">${this.tradeAtual.stop}</div></div><div class="capture-stat"><div class="capture-stat-label">BREAKEVEN</div><div class="capture-stat-value" style="color:#f59e0b">${this.tradeAtual.zero}</div></div>`;
       const mi=document.querySelector('#modalPhotoContainer img');if(mi)document.getElementById('capturePhoto').innerHTML=`<img src="${mi.src}" crossorigin="anonymous">`;else throw new Error('Imagem não encontrada');
       await new Promise(resolve=>setTimeout(resolve,500));
       const canvas=await html2canvas(document.getElementById('captureCard'),{backgroundColor:null,scale:2,logging:false,useCORS:true,allowTaint:true});
@@ -1003,7 +1023,26 @@ const Dashboard = {
       const tentarProximaURL=()=>{
         if(t>=urls.length){container.innerHTML=`<div class="modal-photo-error">❌ Não foi possível carregar a foto<br><small style="font-size:11px;opacity:0.7;margin-top:10px;display:block">ID: ${idLimpo}<br>Verifique se a foto está compartilhada como "Qualquer pessoa com o link"</small></div>`;return;}
         const img=new Image();img.crossOrigin='anonymous';
-        img.onload=()=>{container.innerHTML=`<img src="${urls[t]}" alt="Trade do dia ${dataStr}" crossorigin="anonymous" id="zoomableImage">`;setTimeout(()=>{const ie=document.getElementById('zoomableImage');if(ie){Dashboard.resetZoom(ie,container);Dashboard.inicializarZoomFoto(container,ie);}},100);};
+        img.onload=()=>{
+          // Monta overlay de pontos por ativo
+          const dadosDia=Dashboard.tradeAtual||{};
+          const pN=dadosDia.pontosNasdaq||0, pD=dadosDia.pontosDow||0;
+          const tradedNQ=(dadosDia.ativos||[]).some(a=>!a.includes('DOW'))||pN!==0;
+          const tradedDJ=(dadosDia.ativos||[]).some(a=>a.includes('DOW'))||pD!==0;
+          let overlayItems='';
+          if(tradedNQ){
+            const cor=pN>0?'#22c55e':pN<0?'#ef4444':'#94a3b8';
+            overlayItems+=`<div style="display:flex;flex-direction:column;align-items:center;line-height:1.1"><span style="font-size:10px;font-weight:700;opacity:0.8;letter-spacing:1px">NQ</span><span style="font-size:20px;font-weight:900;color:${cor};font-family:'JetBrains Mono',monospace;text-shadow:0 2px 8px rgba(0,0,0,0.8)">${pN>0?'+':''}${pN}</span></div>`;
+          }
+          if(tradedDJ){
+            const cor=pD>0?'#f97316':pD<0?'#ef4444':'#94a3b8';
+            overlayItems+=`<div style="display:flex;flex-direction:column;align-items:center;line-height:1.1"><span style="font-size:10px;font-weight:700;opacity:0.8;letter-spacing:1px">DJ</span><span style="font-size:20px;font-weight:900;color:${cor};font-family:'JetBrains Mono',monospace;text-shadow:0 2px 8px rgba(0,0,0,0.8)">${pD>0?'+':''}${pD}</span></div>`;
+          }
+          const overlay=overlayItems?`<div style="position:absolute;top:10px;right:12px;display:flex;gap:14px;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);z-index:10;pointer-events:none">${overlayItems}</div>`:'';
+          container.style.position='relative';
+          container.innerHTML=`${overlay}<img src="${urls[t]}" alt="Trade do dia ${dataStr}" crossorigin="anonymous" id="zoomableImage" style="width:100%;height:100%;object-fit:contain">`;
+          setTimeout(()=>{const ie=document.getElementById('zoomableImage');if(ie){Dashboard.resetZoom(ie,container);Dashboard.inicializarZoomFoto(container,ie);}},100);
+        };
         img.onerror=()=>{t++;tentarProximaURL();};
         img.src=urls[t];
       };
