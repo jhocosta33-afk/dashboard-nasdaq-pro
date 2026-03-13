@@ -31,9 +31,9 @@
  --shadow-lg:0 8px 32px rgba(0,0,0,0.5);--shadow-glow:0 0 20px rgba(99,102,241,0.4);
  --transition-fast:0.15s;--transition-normal:0.3s;--transition-slow:0.5s;
 }
-bodyhtml.light-theme,body.light-theme{--sidebar-bg:#fff;--main-bg:#f1f5f9;--card-bg:#fff;--card-hover:#f8fafc;--border:rgba(99,102,241,0.2);--border-bright:rgba(99,102,241,0.5);--text:#0f172a;--text-dim:#475569;--muted:#94a3b8;--shadow-sm:0 1px 3px rgba(0,0,0,0.1);--shadow-md:0 4px 12px rgba(0,0,0,0.1);--shadow-lg:0 10px 30px rgba(0,0,0,0.15);--shadow-glow:0 0 20px rgba(99,102,241,0.25);background:#f1f5f9;color:#0f172a}
+body.light-theme{--sidebar-bg:#fff;--main-bg:#f1f5f9;--card-bg:#fff;--card-hover:#f8fafc;--border:rgba(99,102,241,0.2);--border-bright:rgba(99,102,241,0.5);--text:#0f172a;--text-dim:#475569;--muted:#94a3b8;--shadow-sm:0 1px 3px rgba(0,0,0,0.1);--shadow-md:0 4px 12px rgba(0,0,0,0.1);--shadow-lg:0 10px 30px rgba(0,0,0,0.15);--shadow-glow:0 0 20px rgba(99,102,241,0.25)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{transition:background-color .3s,color .3s;font-family:'Archivo',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--main-bg);color:var(--text);display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;position:relative;transition:background-color var(--transition-normal),color var(--transition-normal)}
+body{font-family:'Archivo',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--main-bg);color:var(--text);display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;position:relative;transition:background-color var(--transition-normal),color var(--transition-normal)}
 body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(168,85,247,0.08) 0%,transparent 50%);pointer-events:none;z-index:0}
 .dashboard-container{display:flex;max-width:1800px;width:100%;flex:1;position:relative;z-index:1}
 .sidebar{width:280px;background:var(--sidebar-bg);padding:32px 20px;border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;max-height:100vh;transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
@@ -282,30 +282,7 @@ body.basic-mode .pro-only{display:none!important}
  
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-/* ── NasTheme inline (index.html) ── */
-(function(){
-  const KEY='dashboard-tema';
-  function aplicar(t){
-    if(t==='light'){document.documentElement.classList.add('light-theme');if(document.body)document.body.classList.add('light-theme');}
-    else{document.documentElement.classList.remove('light-theme');if(document.body)document.body.classList.remove('light-theme');}
-    var ic=document.getElementById('themeIcon');if(ic)ic.textContent=t==='dark'?'🌙':'☀️';
-  }
-  function get(){return localStorage.getItem(KEY)||'dark';}
-  aplicar(get());
-  window.NasTheme={
-    carregar:function(){aplicar(get());},
-    toggle:function(){
-      var n=get()==='dark'?'light':'dark';
-      localStorage.setItem(KEY,n);aplicar(n);
-      var ic=document.getElementById('themeIcon');
-      if(ic){ic.style.transform='rotate(360deg) scale(0)';setTimeout(function(){ic.textContent=n==='dark'?'🌙':'☀️';ic.style.transform='rotate(0deg) scale(1)';},150);}
-    },
-    getTema:get
-  };
-  document.addEventListener('DOMContentLoaded',function(){aplicar(get());});
-})();
-</script>
+<script src="theme.js"></script>
 </head>
 <body>
  
@@ -332,7 +309,6 @@ body.basic-mode .pro-only{display:none!important}
  <a href="portal/login.html" class="mode-toggle" style="text-decoration:none;margin-top:12px;background:linear-gradient(135deg,#22c55e,#3b82f6);color:#000;font-weight:700;">
   <span>🎓</span><span>Portal do Aluno</span>
  </a>
- 
  <div class="stats-sidebar">
   <div class="sidebar-stat"><span>Assertividade</span><span id="sidebarWinRate">0%</span></div>
   <div class="sidebar-stat"><span>Melhor Dia</span><span id="sidebarBestDay">0</span></div>
@@ -598,105 +574,192 @@ const Dashboard = {
   },
  
   async gerarRelatorioPDF() {
-    const btn=document.getElementById('pdfReportBtn');if(!btn)return;
-    const textoOriginal=btn.textContent;btn.classList.add('loading');btn.textContent='⏳ Capturando...';
+    const btn = document.getElementById('pdfReportBtn');
+    if (!btn) return;
+    const textoOriginal = btn.textContent;
+    btn.classList.add('loading');
+    btn.textContent = '⏳ Gerando...';
+ 
     try {
-      if(!window.html2canvas){alert('Erro ao carregar biblioteca de captura. Recarregue a página.');return;}
+      if (!window.html2canvas) {
+        alert('Erro ao carregar biblioteca de captura. Recarregue a página.');
+        return;
+      }
  
-      // Dados sempre do período filtrado
-      const d=this.obterDadosFiltrados();
-      const t=d.reduce((a,x)=>({
-        trades:a.trades+x.trades,
-        pontosNasdaq:a.pontosNasdaq+(x.pontosNasdaq||0),
-        pontosDow:a.pontosDow+(x.pontosDow||0),
-        gain:a.gain+x.gain,stop:a.stop+x.stop,zero:a.zero+x.zero
-      }),{trades:0,pontosNasdaq:0,pontosDow:0,gain:0,stop:0,zero:0});
-      const dias=d.filter(x=>x.trades>0).length;
-      const op=t.gain+t.stop, ass=op?Math.round((t.gain/op)*100):0;
+      // ── Coleta dados ──
+      const d = this.obterDadosFiltrados();
+      const todosDados = this.dados || [];
+      const anoAtual = document.getElementById('filtroAno')?.value || new Date().getFullYear().toString();
+      const mesAtual = document.getElementById('filtroMes')?.value || 'ALL';
  
-      // Container de exportação
-      const wrap=document.createElement('div');
-      wrap.style.cssText='position:fixed;left:-9999px;top:0;width:960px;background:#020617;font-family:Archivo,sans-serif;padding:40px;box-sizing:border-box;color:#e5e7eb;';
+      const t = d.reduce((a, x) => ({
+        trades:       a.trades       + x.trades,
+        pontosNasdaq: a.pontosNasdaq + (x.pontosNasdaq || 0),
+        pontosDow:    a.pontosDow    + (x.pontosDow    || 0),
+        gain: a.gain + x.gain,
+        stop: a.stop + x.stop,
+      }), { trades: 0, pontosNasdaq: 0, pontosDow: 0, gain: 0, stop: 0 });
  
-      // Logo — usa a imagem real se disponível
-      const logoDiv=document.createElement('div');
-      logoDiv.style.cssText='text-align:center;margin-bottom:20px;';
-      const logoImg=document.querySelector('.header-logo');
-      if(logoImg && logoImg.naturalWidth>0){
-        const imgClone=logoImg.cloneNode();
-        imgClone.style.cssText='max-height:120px;width:auto;margin:0 auto;display:block;';
-        logoDiv.appendChild(imgClone);
+      const dias = d.filter(x => x.trades > 0).length;
+      const op   = t.gain + t.stop;
+      const ass  = op ? Math.round((t.gain / op) * 100) : 0;
+ 
+      // ── Determina qual mês mostrar no calendário ──
+      // Se filtro em mês específico → usa ele; se ALL → usa o mês atual do sistema
+      const mesCalendario = mesAtual !== 'ALL'
+        ? mesAtual
+        : (new Date().getMonth() + 1).toString().padStart(2, '0');
+ 
+      const dadosMes = todosDados.filter(x =>
+        x.ano === anoAtual && x.mes === mesCalendario
+      );
+ 
+      // ── Monta o HTML da imagem como string e injeta num div oculto ──
+      // (string HTML é mais confiável com html2canvas que manipulação de DOM)
+ 
+      // Calendário — gera as células
+      let calCells = '';
+      if (dadosMes.length > 0) {
+        const base    = dadosMes[0];
+        const baseDate = base.data instanceof Date ? base.data : new Date(base.data);
+        const ano2  = baseDate.getFullYear();
+        const mes2  = baseDate.getMonth();
+        const primeiro = new Date(ano2, mes2, 1);
+        const ultimo   = new Date(ano2, mes2 + 1, 0);
+        const nomeMesCal = nomesMeses[mesCalendario] || mesCalendario;
+ 
+        // Cabeçalho dos dias
+        const diasSem = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+        const headerCells = diasSem.map(ds =>
+          `<div style="text-align:center;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:1px;padding:4px 0;">${ds}</div>`
+        ).join('');
+ 
+        // Células vazias no início
+        let emptyCells = '';
+        for (let i = 0; i < primeiro.getDay(); i++) {
+          emptyCells += `<div style="min-height:68px;"></div>`;
+        }
+ 
+        // Células dos dias
+        let dayCells = '';
+        for (let dd = 1; dd <= ultimo.getDate(); dd++) {
+          const data2 = new Date(ano2, mes2, dd);
+          const r = dadosMes.find(x => {
+            const dx = x.data instanceof Date ? x.data : new Date(x.data);
+            return dx.toDateString() === data2.toDateString();
+          });
+ 
+          const pN  = r ? (r.pontosNasdaq || 0) : 0;
+          const pD  = r ? (r.pontosDow    || 0) : 0;
+          const pts = r ? (r.pontos       || 0) : 0;
+          const hasBoth = pN !== 0 && pD !== 0;
+ 
+          const bg = r && pts > 0 ? 'rgba(16,185,129,0.12)'
+                   : r && pts < 0 ? 'rgba(239,68,68,0.12)'
+                   : 'rgba(15,20,32,0.6)';
+          const bc = r && pts > 0 ? 'rgba(16,185,129,0.4)'
+                   : r && pts < 0 ? 'rgba(239,68,68,0.4)'
+                   : 'rgba(255,255,255,0.06)';
+ 
+          let ptHtml = '';
+          if (r && r.trades > 0) {
+            if (hasBoth) {
+              ptHtml =
+                `<div style="font-size:11px;font-weight:900;color:${pN>0?'#22c55e':pN<0?'#ef4444':'#94a3b8'};font-family:'JetBrains Mono',monospace;line-height:1.3">NQ:${pN>0?'+':''}${pN}</div>`+
+                `<div style="font-size:11px;font-weight:900;color:${pD>0?'#f97316':pD<0?'#ef4444':'#94a3b8'};font-family:'JetBrains Mono',monospace;line-height:1.3">DJ:${pD>0?'+':''}${pD}</div>`;
+            } else {
+              const cor = pts > 0 ? '#22c55e' : pts < 0 ? '#ef4444' : '#94a3b8';
+              ptHtml = `<div style="font-size:19px;font-weight:900;color:${cor};font-family:'JetBrains Mono',monospace;">${pts>0?'+':''}${pts}</div>`;
+            }
+            ptHtml += `<div style="font-size:9px;color:#64748b;font-weight:600;">${r.trades}T ${r.gain}G ${r.stop}S</div>`;
+          }
+ 
+          dayCells += `<div style="background:${bg};border:1px solid ${bc};border-radius:8px;min-height:68px;padding:5px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;">
+            <div style="font-size:10px;color:#475569;font-weight:700;align-self:flex-start;">${dd}</div>
+            ${ptHtml}
+          </div>`;
+        }
+ 
+        calCells = `
+          <div style="font-size:15px;font-weight:700;color:#94a3b8;margin-bottom:14px;">📅 ${nomeMesCal} ${ano2}</div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px;">${headerCells}</div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;">${emptyCells}${dayCells}</div>`;
       } else {
-        logoDiv.innerHTML=`
-          <p style="margin:0 0 2px;font-size:16px;font-weight:400;color:#94a3b8;letter-spacing:3px;text-transform:uppercase;">Mentoria</p>
-          <p style="margin:0;font-size:56px;font-weight:900;color:#818cf8;letter-spacing:2px;">NasdaqPro</p>`;
+        calCells = `<div style="color:#64748b;text-align:center;padding:20px;font-size:14px;">Sem dados para o período selecionado</div>`;
       }
-      wrap.appendChild(logoDiv);
  
-      // Linha divisória
-      const div=document.createElement('div');
-      div.style.cssText='height:2px;background:linear-gradient(90deg,transparent,#6366f1,transparent);margin-bottom:28px;';
-      wrap.appendChild(div);
+      // ── HTML completo da imagem ──
+      const logoSrc = document.querySelector('.header-logo');
+      const logoHTML = logoSrc && logoSrc.naturalWidth > 0
+        ? `<img src="${logoSrc.src}" style="max-height:100px;width:auto;display:block;margin:0 auto;">`
+        : `<div style="font-size:42px;font-weight:900;color:#818cf8;text-align:center;">NasdaqPro</div>`;
  
-      // KPIs fixos — sempre os mesmos independente do modo
-      const kpiData=[
-        {label:'DIAS OPERADOS',   value:dias,             color:'#e5e7eb'},
-        {label:'TOTAL DE TRADES', value:t.trades,         color:'#e5e7eb'},
-        {label:'PONTOS NASDAQ',   value:t.pontosNasdaq,   color:t.pontosNasdaq>=0?'#22c55e':'#ef4444'},
-        {label:'PONTOS DOW',      value:t.pontosDow,      color:t.pontosDow>=0?'#f97316':'#ef4444'},
-        {label:'ASSERTIVIDADE',   value:ass+'%',          color:'#e5e7eb'},
+      const kpis = [
+        { label: 'DIAS OPERADOS',    value: String(dias),                                       color: '#e5e7eb' },
+        { label: 'TOTAL DE TRADES',  value: String(t.trades),                                   color: '#e5e7eb' },
+        { label: 'PONTOS NASDAQ',    value: (t.pontosNasdaq > 0 ? '+' : '') + t.pontosNasdaq,   color: t.pontosNasdaq > 0 ? '#22c55e' : t.pontosNasdaq < 0 ? '#ef4444' : '#94a3b8' },
+        { label: 'PONTOS DOW JONES', value: (t.pontosDow    > 0 ? '+' : '') + t.pontosDow,      color: t.pontosDow    > 0 ? '#f97316' : t.pontosDow    < 0 ? '#ef4444' : '#94a3b8' },
+        { label: 'ASSERTIVIDADE',    value: ass + '%',                                           color: '#e5e7eb' },
       ];
-      const kpiGrid=document.createElement('div');
-      kpiGrid.style.cssText='display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;';
-      kpiData.forEach(k=>{
-        const kd=document.createElement('div');
-        kd.style.cssText='background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px;';
-        kd.innerHTML=`<div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:1.5px;margin-bottom:10px;white-space:nowrap;">${k.label}</div>`+
-                     `<div style="font-size:36px;font-weight:900;color:${k.color};">${k.value}</div>`;
-        kpiGrid.appendChild(kd);
-      });
-      wrap.appendChild(kpiGrid);
  
-      // Calendário de trade — clona diretamente o .calendar-wrapper (ignora pro-only)
-      const calSource=document.querySelector('.calendar-wrapper');
-      if(calSource){
-        const calClone=calSource.cloneNode(true);
-        calClone.querySelectorAll('button').forEach(el=>el.remove());
-        // Força visibilidade independente do modo
-        calClone.style.cssText='display:block!important;background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;';
-        calClone.classList.remove('pro-only');
-        calClone.querySelectorAll('*').forEach(el=>{
-          el.style.animation='none';
-          el.style.transition='none';
-          if(el.classList.contains('pro-only')) el.classList.remove('pro-only');
-        });
-        wrap.appendChild(calClone);
+      const kpisHTML = kpis.map(k => `
+        <div style="background:#0f172a;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 10px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:#64748b;letter-spacing:1.2px;margin-bottom:8px;text-transform:uppercase;">${k.label}</div>
+          <div style="font-size:30px;font-weight:900;color:${k.color};font-family:'JetBrains Mono',monospace;">${k.value}</div>
+        </div>`).join('');
+ 
+      const fullHTML = `
+        <div style="text-align:center;margin-bottom:20px;">${logoHTML}</div>
+        <div style="height:2px;background:linear-gradient(90deg,transparent,#6366f1,transparent);margin-bottom:24px;"></div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;">${kpisHTML}</div>
+        <div style="background:#0f172a;border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:20px;">${calCells}</div>`;
+ 
+      // ── Injeta num div fora da tela e captura ──
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:absolute;left:-9999px;top:0;width:960px;background:#020617;padding:36px;box-sizing:border-box;font-family:Archivo,sans-serif;color:#e5e7eb;border-radius:20px;';
+      wrap.innerHTML = fullHTML;
+      document.body.appendChild(wrap);
+ 
+      // Aguarda imagens carregarem
+      await new Promise(r => setTimeout(r, 300));
+      // Carrega a logo se for img
+      const logoEl = wrap.querySelector('img');
+      if (logoEl && !logoEl.complete) {
+        await new Promise(r => { logoEl.onload = r; logoEl.onerror = r; setTimeout(r, 2000); });
       }
  
-      document.body.appendChild(wrap);
-      await new Promise(r=>setTimeout(r,150));
- 
-      const canvas=await html2canvas(wrap,{
-        backgroundColor:'#020617',scale:2,logging:false,
-        useCORS:true,allowTaint:true,
-        windowWidth:960,windowHeight:wrap.scrollHeight
+      const canvas = await html2canvas(wrap, {
+        backgroundColor: '#020617',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        width: 960,
+        height: wrap.scrollHeight,
       });
+ 
       document.body.removeChild(wrap);
  
-      btn.textContent='💾 Salvando...';
-      canvas.toBlob((blob)=>{
-        const url=URL.createObjectURL(blob);
-        const link=document.createElement('a');
-        link.href=url;
-        const mes=document.getElementById('filtroMes')?.value||'';
-        const ano=document.getElementById('filtroAno')?.value||new Date().getFullYear();
-        link.download=`nasdaqpro-${ano}${mes?'-'+mes:''}.png`;
-        document.body.appendChild(link);link.click();document.body.removeChild(link);URL.revokeObjectURL(url);
-        btn.textContent='✅ Imagem Salva!';setTimeout(()=>{btn.textContent=textoOriginal;btn.classList.remove('loading');},2000);
-      },'image/png');
-    } catch(erro) {
-      console.error('Erro exportar:',erro);
-      btn.textContent='❌ Erro';setTimeout(()=>{btn.textContent=textoOriginal;btn.classList.remove('loading');},2000);
+      btn.textContent = '💾 Salvando...';
+      canvas.toBlob(blob => {
+        const url  = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href  = url;
+        const ms   = mesAtual !== 'ALL' ? `-${mesAtual}` : '';
+        link.download = `nasdaqpro-${anoAtual}${ms}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        btn.textContent = '✅ Imagem Salva!';
+        setTimeout(() => { btn.textContent = textoOriginal; btn.classList.remove('loading'); }, 2000);
+      }, 'image/png');
+ 
+    } catch (erro) {
+      console.error('❌ Erro ao exportar:', erro);
+      alert('❌ Erro ao gerar imagem. Tente novamente.');
+      btn.textContent = '❌ Erro';
+      setTimeout(() => { btn.textContent = textoOriginal; btn.classList.remove('loading'); }, 2000);
     }
   },
  
@@ -922,15 +985,7 @@ const Dashboard = {
     if(!modal||!mt||!mig||!mpc)return;
     const data=new Date(dadosDia.data),dia=data.getDate(),mes=nomesMeses[dadosDia.mes],ano=dadosDia.ano;
     mt.textContent=`📅 ${dia} de ${mes} de ${ano}`;
-    const pN=dadosDia.pontosNasdaq||0, pD=dadosDia.pontosDow||0;
-    const hasBoth=pN!==0&&pD!==0;
-    let pontosHTML='';
-    if(hasBoth){
-      pontosHTML=`<div class="modal-info-item ${pN>0?'positive':pN<0?'negative':''}"><label>NASDAQ</label><div class="value">${pN>0?'+':''}${pN}</div></div><div class="modal-info-item ${pD>0?'positive':pD<0?'negative':''}"><label>DOW JONES</label><div class="value">${pD>0?'+':''}${pD}</div></div>`;
-    } else {
-      pontosHTML=`<div class="modal-info-item ${dadosDia.pontos>0?'positive':dadosDia.pontos<0?'negative':''}"><label>Pontos</label><div class="value">${dadosDia.pontos>0?'+':''}${dadosDia.pontos}</div></div>`;
-    }
-    let infoHTML=pontosHTML+`<div class="modal-info-item"><label>Trades</label><div class="value">${dadosDia.trades}</div></div><div class="modal-info-item positive"><label>Gains</label><div class="value">${dadosDia.gain}</div></div><div class="modal-info-item negative"><label>Stops</label><div class="value">${dadosDia.stop}</div></div>`;
+    let infoHTML=`<div class="modal-info-item ${dadosDia.pontos>0?'positive':dadosDia.pontos<0?'negative':''}"><label>Pontos</label><div class="value">${dadosDia.pontos>0?'+':''}${dadosDia.pontos}</div></div><div class="modal-info-item"><label>Trades</label><div class="value">${dadosDia.trades}</div></div><div class="modal-info-item positive"><label>Gains</label><div class="value">${dadosDia.gain}</div></div><div class="modal-info-item negative"><label>Stops</label><div class="value">${dadosDia.stop}</div></div>`;
     if(dadosDia.zero>0)infoHTML+=`<div class="modal-info-item"><label>Breakeven</label><div class="value" style="color:var(--yellow)">${dadosDia.zero}</div></div>`;
     mig.innerHTML=infoHTML;
     this.carregarFotoTrade(dadosDia.dia,mpc,dadosDia.fotoId);
@@ -990,85 +1045,17 @@ const Dashboard = {
  
   async baixarFoto(){
     if(!this.tradeAtual){alert('❌ Nenhum trade selecionado');return;}
-    const btn=document.querySelector('.download-btn');
-    if(btn){btn.classList.add('downloading');btn.innerHTML='<span>⏳</span><span>Gerando...</span>';}
+    const btn=document.querySelector('.download-btn');if(btn){btn.classList.add('downloading');btn.innerHTML='<span>⏳</span><span>Gerando...</span>';}
     try{
-      const data=new Date(this.tradeAtual.data);
-      const dia=data.getDate(),mes=nomesMeses[this.tradeAtual.mes],ano=this.tradeAtual.ano;
-      document.getElementById('captureIcon').textContent='📅';
-      document.getElementById('captureTitle').textContent=`${dia} de ${mes} de ${ano}`;
- 
-      // Detecta se operou os dois ativos pelo campo ativo da planilha
-      const ativoStr=(this.tradeAtual.ativo||'').toUpperCase();
-      const hasDOW=ativoStr.includes('DOW')||ativoStr.includes('DJ');
-      const hasNQ=ativoStr.includes('NQ')||ativoStr.includes('NASDAQ')||(!hasDOW);
-      const ambos=hasDOW&&hasNQ;
- 
-      const pontos=this.tradeAtual.pontos||0;
-      // Se operou os dois, tenta dividir: pontosNasdaq e pontosDow são calculados na planilha
-      // Caso contrário usa o total
-      const pN=this.tradeAtual.pontosNasdaq!=null?this.tradeAtual.pontosNasdaq:(hasNQ&&!hasDOW?pontos:0);
-      const pD=this.tradeAtual.pontosDow!=null?this.tradeAtual.pontosDow:(hasDOW&&!hasNQ?pontos:0);
- 
-      let pontosHTML='';
-      if(ambos){
-        pontosHTML=
-          `<div class="capture-stat"><div class="capture-stat-label">NASDAQ</div><div class="capture-stat-value" style="color:${pN<0?'#ef4444':pN>0?'#10b981':'#94a3b8'}">${pN>0?'+':''}${pN}</div></div>`+
-          `<div class="capture-stat"><div class="capture-stat-label">DOW JONES</div><div class="capture-stat-value" style="color:${pD<0?'#ef4444':pD>0?'#f97316':'#94a3b8'}">${pD>0?'+':''}${pD}</div></div>`;
-      } else {
-        pontosHTML=`<div class="capture-stat"><div class="capture-stat-label">${hasDOW?'DOW JONES':'NASDAQ'}</div><div class="capture-stat-value" style="color:${pontos<0?'#ef4444':pontos>0?'#10b981':'#94a3b8'}">${pontos>0?'+':''}${pontos}</div></div>`;
-      }
- 
-      document.getElementById('captureStats').innerHTML=pontosHTML+
-        `<div class="capture-stat"><div class="capture-stat-label">TRADES</div><div class="capture-stat-value">${this.tradeAtual.trades}</div></div>`+
-        `<div class="capture-stat"><div class="capture-stat-label">GAINS</div><div class="capture-stat-value" style="color:#10b981">${this.tradeAtual.gain}</div></div>`+
-        `<div class="capture-stat"><div class="capture-stat-label">STOPS</div><div class="capture-stat-value" style="color:#ef4444">${this.tradeAtual.stop}</div></div>`+
-        `<div class="capture-stat"><div class="capture-stat-label">BREAKEVEN</div><div class="capture-stat-value" style="color:#f59e0b">${this.tradeAtual.zero}</div></div>`;
- 
-      // Pega a imagem do modal
-      const modalImg=document.querySelector('#modalPhotoContainer img');
-      const capturePhoto=document.getElementById('capturePhoto');
-      if(modalImg){
-        capturePhoto.innerHTML=`<img src="${modalImg.src}" crossorigin="anonymous">`;
-      } else {
-        throw new Error('Imagem não encontrada no modal');
-      }
- 
-      // Garante que a logo está carregada
-      const logoImg=document.querySelector('#captureFooter img');
-      if(logoImg&&!logoImg.complete){
-        await new Promise(resolve=>{
-          logoImg.onload=resolve;
-          logoImg.onerror=resolve;
-          setTimeout(resolve,2000);
-        });
-      }
- 
-      // Aguarda imagem do trade carregar
+      const data=new Date(this.tradeAtual.data),dia=data.getDate(),mes=nomesMeses[this.tradeAtual.mes],ano=this.tradeAtual.ano;
+      document.getElementById('captureIcon').textContent='📅';document.getElementById('captureTitle').textContent=`${dia} de ${mes} de ${ano}`;
+      document.getElementById('captureStats').innerHTML=`<div class="capture-stat"><div class="capture-stat-label">PONTOS</div><div class="capture-stat-value" style="color:${this.tradeAtual.pontos<0?'#ef4444':this.tradeAtual.pontos>0?'#10b981':'#94a3b8'}">${this.tradeAtual.pontos>0?'+':''}${this.tradeAtual.pontos}</div></div><div class="capture-stat"><div class="capture-stat-label">TRADES</div><div class="capture-stat-value">${this.tradeAtual.trades}</div></div><div class="capture-stat"><div class="capture-stat-label">GAINS</div><div class="capture-stat-value" style="color:#10b981">${this.tradeAtual.gain}</div></div><div class="capture-stat"><div class="capture-stat-label">STOPS</div><div class="capture-stat-value" style="color:#ef4444">${this.tradeAtual.stop}</div></div><div class="capture-stat"><div class="capture-stat-label">BREAKEVEN</div><div class="capture-stat-value" style="color:#f59e0b">${this.tradeAtual.zero}</div></div>`;
+      const mi=document.querySelector('#modalPhotoContainer img');if(mi)document.getElementById('capturePhoto').innerHTML=`<img src="${mi.src}" crossorigin="anonymous">`;else throw new Error('Imagem não encontrada');
       await new Promise(resolve=>setTimeout(resolve,500));
- 
-      // Captura
-      const canvas=await html2canvas(document.getElementById('captureCard'),{
-        backgroundColor:null,
-        scale:2,
-        logging:false,
-        useCORS:true,
-        allowTaint:true
-      });
- 
-      // Download
-      const link=document.createElement('a');
-      link.download=`trade-${this.tradeAtual.dia.replace(/\//g,'-')}.png`;
-      link.href=canvas.toDataURL('image/png');
-      link.click();
-      console.log('✅ Foto baixada com sucesso!');
- 
-    }catch(error){
-      console.error('❌ Erro ao baixar foto:',error);
-      alert('❌ Erro ao gerar imagem. Tente novamente.');
-    }finally{
-      if(btn){btn.classList.remove('downloading');btn.innerHTML='<span>📥</span><span>Baixar Foto</span>';}
-    }
+      const canvas=await html2canvas(document.getElementById('captureCard'),{backgroundColor:null,scale:2,logging:false,useCORS:true,allowTaint:true});
+      const link=document.createElement('a');link.download=`trade-${this.tradeAtual.dia.replace(/\//g,'-')}.png`;link.href=canvas.toDataURL('image/png');link.click();
+    }catch(error){console.error('❌ Erro:',error);alert('❌ Erro ao gerar imagem.');}
+    finally{if(btn){btn.classList.remove('downloading');btn.innerHTML='<span>📥</span><span>Baixar Foto</span>';}}
   },
  
   carregarFotoTrade(dataStr,container,fotoId){
@@ -1080,26 +1067,7 @@ const Dashboard = {
       const tentarProximaURL=()=>{
         if(t>=urls.length){container.innerHTML=`<div class="modal-photo-error">❌ Não foi possível carregar a foto<br><small style="font-size:11px;opacity:0.7;margin-top:10px;display:block">ID: ${idLimpo}<br>Verifique se a foto está compartilhada como "Qualquer pessoa com o link"</small></div>`;return;}
         const img=new Image();img.crossOrigin='anonymous';
-        img.onload=()=>{
-          // Monta overlay de pontos por ativo
-          const dadosDia=Dashboard.tradeAtual||{};
-          const pN=dadosDia.pontosNasdaq||0, pD=dadosDia.pontosDow||0;
-          const tradedNQ=(dadosDia.ativos||[]).some(a=>!a.includes('DOW'))||pN!==0;
-          const tradedDJ=(dadosDia.ativos||[]).some(a=>a.includes('DOW'))||pD!==0;
-          let overlayItems='';
-          if(tradedNQ){
-            const cor=pN>0?'#22c55e':pN<0?'#ef4444':'#94a3b8';
-            overlayItems+=`<div style="display:flex;flex-direction:column;align-items:center;line-height:1.1"><span style="font-size:10px;font-weight:700;opacity:0.8;letter-spacing:1px">NQ</span><span style="font-size:20px;font-weight:900;color:${cor};font-family:'JetBrains Mono',monospace;text-shadow:0 2px 8px rgba(0,0,0,0.8)">${pN>0?'+':''}${pN}</span></div>`;
-          }
-          if(tradedDJ){
-            const cor=pD>0?'#f97316':pD<0?'#ef4444':'#94a3b8';
-            overlayItems+=`<div style="display:flex;flex-direction:column;align-items:center;line-height:1.1"><span style="font-size:10px;font-weight:700;opacity:0.8;letter-spacing:1px">DJ</span><span style="font-size:20px;font-weight:900;color:${cor};font-family:'JetBrains Mono',monospace;text-shadow:0 2px 8px rgba(0,0,0,0.8)">${pD>0?'+':''}${pD}</span></div>`;
-          }
-          const overlay=overlayItems?`<div style="position:absolute;top:10px;right:12px;display:flex;gap:14px;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);z-index:10;pointer-events:none">${overlayItems}</div>`:'';
-          container.style.position='relative';
-          container.innerHTML=`${overlay}<img src="${urls[t]}" alt="Trade do dia ${dataStr}" crossorigin="anonymous" id="zoomableImage" style="width:100%;height:100%;object-fit:contain">`;
-          setTimeout(()=>{const ie=document.getElementById('zoomableImage');if(ie){Dashboard.resetZoom(ie,container);Dashboard.inicializarZoomFoto(container,ie);}},100);
-        };
+        img.onload=()=>{container.innerHTML=`<img src="${urls[t]}" alt="Trade do dia ${dataStr}" crossorigin="anonymous" id="zoomableImage">`;setTimeout(()=>{const ie=document.getElementById('zoomableImage');if(ie){Dashboard.resetZoom(ie,container);Dashboard.inicializarZoomFoto(container,ie);}},100);};
         img.onerror=()=>{t++;tentarProximaURL();};
         img.src=urls[t];
       };
@@ -1154,17 +1122,17 @@ const Dashboard = {
         badge=`<div class="day-badge">${r.semana} • ${(r.ativos||[r.ativo||'NASDAQ']).join('/')}</div>`;
         if(r.trades>0&&r.fotoId&&r.fotoId.toString().trim()!==''){dayDiv.classList.add('clickable');dayDiv.style.cursor='pointer';dayDiv.addEventListener('click',()=>{Dashboard.abrirModal(r);});}
       }
-      // Sempre mostra pontos com label NQ/DJ quando há ativo identificado
+      // Mostra pontos NASDAQ e DOW separados se houver os dois
       let ptDisplay='';
       if(r&&r.trades>0){
-        const tradedNasdaq=(r.ativos&&r.ativos.some(a=>!a.includes('DOW')))||(r.pontosNasdaq||0)!==0;
-        const tradedDow=(r.ativos&&r.ativos.some(a=>a.includes('DOW')))||(r.pontosDow||0)!==0;
-        const pN=r.pontosNasdaq||0,pD=r.pontosDow||0;
-        if(tradedNasdaq||tradedDow){
-          let parts='';
-          if(tradedNasdaq) parts+=`<span style="font-size:12px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pN<0?'var(--red)':pN>0?'var(--green)':'var(--muted)'}">NQ:${pN>0?'+':''}${pN}</span>`;
-          if(tradedDow) parts+=`<span style="font-size:12px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pD<0?'var(--red)':pD>0?'var(--orange,#f97316)':'var(--muted)'}">DJ:${pD>0?'+':''}${pD}</span>`;
-          ptDisplay=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;margin:2px 0">${parts}</div>`;
+        const hasNasdaq=(r.pontosNasdaq||0)!==0||(r.ativos&&r.ativos.some(a=>!a.includes('DOW')));
+        const hasDow=(r.pontosDow||0)!==0||(r.ativos&&r.ativos.some(a=>a.includes('DOW')));
+        if(hasNasdaq&&hasDow){
+          const pN=r.pontosNasdaq||0,pD=r.pontosDow||0;
+          ptDisplay=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;margin:2px 0">
+            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pN<0?'var(--red)':pN>0?'var(--green)':'var(--muted)'}">NQ:${pN>0?'+':''}${pN}</span>
+            <span style="font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace;color:${pD<0?'var(--red)':pD>0?'var(--orange)':'var(--muted)'}">DJ:${pD>0?'+':''}${pD}</span>
+          </div>`;
         } else {
           const pc2=pts<0?'var(--red)':pts>0?'var(--green)':'var(--muted)';
           ptDisplay=`<div class="day-points" style="color:${pc2}">${pts===0?'0':pts}</div>`;
@@ -1184,3 +1152,4 @@ document.addEventListener('keydown',(e)=>{if(e.key==='Escape')Dashboard.fecharMo
  
 </body>
 </html>
+ 
