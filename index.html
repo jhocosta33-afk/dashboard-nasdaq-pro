@@ -11,13 +11,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
- 
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="portal/firebase-config.js"></script>
- 
+<script>
+// Firebase config inline
+const firebaseConfig = {
+  apiKey: "AIzaSyCABn9XHvjrFCbbeHT_0gHFaF5uGlKLUWM",
+  authDomain: "dashboard-nasdaq-pro.firebaseapp.com",
+  projectId: "dashboard-nasdaq-pro",
+  storageBucket: "dashboard-nasdaq-pro.firebasestorage.app",
+  messagingSenderId: "325405049429",
+  appId: "1:325405049429:web:a0289dc4f604fee1d20adc"
+};
+const app = firebase.initializeApp(firebaseConfig);
+const db  = firebase.firestore(app);
+const auth = firebase.auth(app);
+console.log('✅ Firebase configurado e pronto para uso');
+</script>
+
 <style>
 :root {
  --sidebar-bg:#0a0d1a;--main-bg:#050711;--card-bg:#0f1420;--card-hover:#161b2e;
@@ -31,7 +45,7 @@
  --shadow-lg:0 8px 32px rgba(0,0,0,0.5);--shadow-glow:0 0 20px rgba(99,102,241,0.4);
  --transition-fast:0.15s;--transition-normal:0.3s;--transition-slow:0.5s;
 }
-body.light-theme{--sidebar-bg:#fff;--main-bg:#f1f5f9;--card-bg:#fff;--card-hover:#f8fafc;--border:rgba(99,102,241,0.2);--border-bright:rgba(99,102,241,0.5);--text:#0f172a;--text-dim:#475569;--muted:#94a3b8;--shadow-sm:0 1px 3px rgba(0,0,0,0.1);--shadow-md:0 4px 12px rgba(0,0,0,0.1);--shadow-lg:0 10px 30px rgba(0,0,0,0.15);--shadow-glow:0 0 20px rgba(99,102,241,0.25)}
+html.light-theme,body.light-theme{--sidebar-bg:#fff;--main-bg:#f1f5f9;--card-bg:#fff;--card-hover:#f8fafc;--border:rgba(99,102,241,0.2);--border-bright:rgba(99,102,241,0.5);--text:#0f172a;--text-dim:#475569;--muted:#94a3b8;--shadow-sm:0 1px 3px rgba(0,0,0,0.1);--shadow-md:0 4px 12px rgba(0,0,0,0.1);--shadow-lg:0 10px 30px rgba(0,0,0,0.15);--shadow-glow:0 0 20px rgba(99,102,241,0.25)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Archivo',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--main-bg);color:var(--text);display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;position:relative;transition:background-color var(--transition-normal),color var(--transition-normal)}
 body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(168,85,247,0.08) 0%,transparent 50%);pointer-events:none;z-index:0}
@@ -56,9 +70,6 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .sidebar-stat span:first-child{color:var(--text-dim);font-weight:600}
 .sidebar-stat span:last-child{color:var(--text);font-weight:800;font-family:'JetBrains Mono',monospace;font-size:15px}
 .mode-toggle{width:100%;background:linear-gradient(135deg,var(--blue) 0%,var(--purple) 100%);color:white;border:none;padding:18px 20px;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);display:grid;grid-template-columns:20px 1fr;align-items:center;justify-items:center;gap:0;letter-spacing:1px;position:relative;overflow:hidden;box-shadow:0 4px 12px rgba(99,102,241,0.3)}
-.mode-toggle span{display:inline-block}
-.mode-toggle #modeIcon{font-size:18px;line-height:1;justify-self:end}
-.mode-toggle #modeText{font-size:15px;font-weight:800;letter-spacing:1px;justify-self:start;margin-left:8px}
 .mode-toggle::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.5s}
 .mode-toggle:hover::before{left:100%}
 .mode-toggle:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(99,102,241,0.5)}
@@ -160,7 +171,6 @@ tr.total{background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(99,102,241
 tr.total td{border-bottom:none;padding:20px 14px;font-size:15px}
 tbody tr{transition:all 0.2s}
 tbody tr:hover{background:rgba(99,102,241,0.08);transform:scale(1.01)}
-body.basic-mode .pro-only{display:none!important}
 .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--main-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;opacity:1;transition:opacity 0.5s}
 .loading-overlay.hidden{opacity:0;pointer-events:none}
 .spinner{width:70px;height:70px;border:4px solid var(--border);border-top-color:var(--blue);border-bottom-color:var(--purple);border-radius:50%;animation:spin 1s cubic-bezier(0.68,-0.55,0.265,1.55) infinite;margin-bottom:24px}
@@ -246,11 +256,11 @@ body.basic-mode .pro-only{display:none!important}
 }
 .tooltip{position:absolute;background:rgba(0,0,0,0.95);color:var(--text);padding:12px 16px;border-radius:8px;font-size:12px;font-weight:600;pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:1000;border:1px solid var(--border-bright);backdrop-filter:blur(10px);white-space:nowrap}
 .tooltip.show{opacity:1}
- 
- 
- 
- 
- 
+
+
+
+
+
 /* ── FOOTER ── */
 .site-footer{width:100%;background:var(--sidebar-bg);border-top:1px solid var(--border);padding:28px 48px 20px}
 .footer-inner{max-width:1800px;margin:0 auto;display:flex;flex-direction:column;gap:0}
@@ -279,23 +289,23 @@ body.basic-mode .pro-only{display:none!important}
 .footer-bottom p{font-size:11px;color:var(--muted)}
 @media(max-width:1024px){.site-footer{padding:20px 16px}}
 @media(max-width:640px){.footer-row{flex-direction:column;align-items:flex-start;gap:10px}.footer-row-label{min-width:unset}.footer-bottom{flex-direction:column;align-items:flex-start}}
- 
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="theme.js"></script>
 </head>
 <body>
- 
+
 <div class="loading-overlay" id="loading">
  <div class="spinner"></div>
  <div class="loading-text">Carregando Dashboard...</div>
 </div>
- 
+
 <div class="performance-indicator" id="perfIndicator" style="display:none;">
  <div class="performance-dot neutral"></div>
  <span id="perfText">Carregando...</span>
 </div>
- 
+
 <div class="dashboard-container">
 <div class="sidebar" id="sidebarDesktop">
  <div class="filters">
@@ -303,19 +313,15 @@ body.basic-mode .pro-only{display:none!important}
   <div class="filter-group"><label>📆 Mês</label><select id="filtroMes"></select></div>
   <div class="filter-group"><label>📊 Semana</label><select id="filtroSemana"></select></div>
  </div>
- <button class="mode-toggle basic" id="toggleMode">
-  <span id="modeIcon">📊</span><span id="modeText">Modo Básico</span>
- </button>
- <a href="portal/login.html" class="mode-toggle" style="text-decoration:none;margin-top:12px;background:linear-gradient(135deg,#22c55e,#3b82f6);color:#000;font-weight:700;">
-  <span>🎓</span><span>Portal do Aluno</span>
- </a>
+ 
+
  <div class="stats-sidebar">
   <div class="sidebar-stat"><span>Assertividade</span><span id="sidebarWinRate">0%</span></div>
   <div class="sidebar-stat"><span>Melhor Dia</span><span id="sidebarBestDay">0</span></div>
   <div class="sidebar-stat"><span>Pior Dia</span><span id="sidebarWorstDay">0</span></div>
  </div>
 </div>
- 
+
 <div class="main-content">
  <div class="header-main">
   <button class="theme-toggle" id="themeToggle" onclick="Dashboard.toggleTema()" title="Alternar tema"><span id="themeIcon">🌙</span></button>
@@ -327,7 +333,7 @@ body.basic-mode .pro-only{display:none!important}
   <button class="tab-btn active" id="tabDashboard" onclick="Dashboard.mudarAba('dashboard')"><span class="tab-icon">📊</span><span class="tab-label">Dashboard</span></button>
   <button class="tab-btn" id="tabMercado" onclick="Dashboard.mudarAba('mercado')"><span class="tab-icon">📅</span><span class="tab-label">Calendário Econômico</span></button>
  </div>
- 
+
  <div id="contentDashboard" class="tab-content active">
   <div class="kpis">
    <div class="kpi kpi-dias"><span>Dias Operados</span><strong id="kDias">0</strong></div>
@@ -335,10 +341,10 @@ body.basic-mode .pro-only{display:none!important}
    <div class="kpi kpi-pontos"><span>Pontos NASDAQ</span><strong id="kPontos">0</strong></div>
    <div class="kpi" style="--kpi-color:var(--orange)"><span>Pontos DOW JONES</span><strong id="kPontosDow" style="color:var(--orange)">0</strong></div>
    <div class="kpi kpi-acc"><span>Assertividade</span><strong id="kAcc">0%</strong></div>
-   <div class="kpi kpi-gains pro-only"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
-   <div class="kpi kpi-stops pro-only"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
-   <div class="kpi kpi-zero pro-only"><span>Breakeven (0x0)</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
-   <div class="kpi pro-only">
+   <div class="kpi kpi-gains"><span>Gains</span><strong id="kGains" style="color:var(--green)">0</strong></div>
+   <div class="kpi kpi-stops"><span>Stops</span><strong id="kStops" style="color:var(--red)">0</strong></div>
+   <div class="kpi kpi-zero"><span>Breakeven (0x0)</span><strong id="kZero" style="color:var(--yellow)">0</strong></div>
+   <div class="kpi">
     <span>Contratos por Trade</span>
     <div class="contratos-control">
      <button id="btnMenos" class="btn-control">-</button>
@@ -346,22 +352,22 @@ body.basic-mode .pro-only{display:none!important}
      <button id="btnMais" class="btn-control">+</button>
     </div>
    </div>
-   <div class="kpi pro-only">
+   <div class="kpi">
     <span>🔵 NASDAQ em Dólar</span>
     <strong id="kDolarNasdaq" style="color:var(--green)">$0.00</strong>
     <div class="currency-display"><span class="currency-icon">🇧🇷</span><span class="currency-value-brl" id="valorBRLNasdaq">R$ 0,00</span></div>
    </div>
-   <div class="kpi pro-only">
+   <div class="kpi">
     <span>🟠 DOW JONES em Dólar</span>
     <strong id="kDolarDow" style="color:var(--orange)">$0.00</strong>
     <div class="currency-display"><span class="currency-icon">🇧🇷</span><span class="currency-value-brl" id="valorBRLDow">R$ 0,00</span></div>
    </div>
   </div>
-  <div class="charts pro-only">
+  <div class="charts">
    <div class="chart-card"><h3>📈 Evolução de Performance</h3><div class="chart-wrap"><canvas id="chartAcumulado"></canvas></div></div>
    <div class="chart-card"><h3>📊 Distribuição de Resultados</h3><div class="chart-wrap"><canvas id="chartBar"></canvas></div></div>
   </div>
-  <div class="calendar-wrapper pro-only">
+  <div class="calendar-wrapper">
    <strong id="calendarTitle">📅 Calendário de Trading</strong>
    <div class="calendar-header"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
    <div class="calendar-grid" id="calendar"></div>
@@ -376,7 +382,7 @@ body.basic-mode .pro-only{display:none!important}
    </div>
   </div>
  </div>
- 
+
  <div id="contentMercado" class="tab-content">
   <div class="calendar-wrapper-outer">
    <div class="market-card calendar-solo-card">
@@ -394,13 +400,13 @@ body.basic-mode .pro-only{display:none!important}
  </div>
 </div>
 </div>
- 
- 
- 
+
+
+
 <!-- ══ FOOTER ══ -->
 <footer class="site-footer">
   <div class="footer-inner">
- 
+
     <!-- Redes Sociais -->
     <div class="footer-row">
       <span class="footer-row-label">🌐 Redes Sociais</span>
@@ -416,7 +422,7 @@ body.basic-mode .pro-only{display:none!important}
         </a>
       </div>
     </div>
- 
+
     <!-- Mesas Indicadas -->
     <div class="footer-row">
       <span class="footer-row-label">🏆 Mesas Indicadas</span>
@@ -431,9 +437,9 @@ body.basic-mode .pro-only{display:none!important}
         </a>
       </div>
     </div>
- 
+
   </div>
- 
+
   <div class="footer-inner">
     <div class="footer-bottom">
       <p>© 2025 Mentoria Nasdaq Pro. Todos os direitos reservados.</p>
@@ -441,7 +447,7 @@ body.basic-mode .pro-only{display:none!important}
     </div>
   </div>
 </footer>
- 
+
 <div class="trade-photo-modal" id="tradePhotoModal">
  <div class="modal-content">
   <div class="modal-header">
@@ -456,7 +462,7 @@ body.basic-mode .pro-only{display:none!important}
   </div>
  </div>
 </div>
- 
+
 <div class="capture-card" id="captureCard">
  <div class="capture-header"><span class="capture-header-icon" id="captureIcon">📅</span><span class="capture-header-title" id="captureTitle">Carregando...</span></div>
  <div class="capture-stats" id="captureStats"></div>
@@ -465,7 +471,7 @@ body.basic-mode .pro-only{display:none!important}
   <img src="logo.png" alt="Mentoria NasdaqPro" onerror="this.parentElement.innerHTML='<span style=\'color:#64748b;font-size:12px;font-weight:600\'>NASDAQ PRO Trading Dashboard</span>'">
  </div>
 </div>
- 
+
 <script>
 // ══════════════════════════════════════
 // CONFIGURAÇÕES — carregadas do Firestore
@@ -475,7 +481,7 @@ let GOOGLE_DRIVE_FOLDER_ID = null;
 let SHEETS_API_KEY = null;
 let SHEETS_SPREADSHEET_ID = null;
 let SHEETS_TAB_NAME = null;
- 
+
 async function carregarConfiguracoes() {
   try {
     const doc = await db.collection('config').doc('public').get();
@@ -491,17 +497,16 @@ async function carregarConfiguracoes() {
     alert('❌ Erro ao carregar configurações. Verifique o Firestore.');
   }
 }
- 
+
 const nomesMeses = {"01":"Janeiro","02":"Fevereiro","03":"Março","04":"Abril","05":"Maio","06":"Junho","07":"Julho","08":"Agosto","09":"Setembro","10":"Outubro","11":"Novembro","12":"Dezembro"};
- 
+
 const Dashboard = {
   dados:[],primeiraCarga:true,chartAcumulado:null,chartBar:null,
   cotacaoUSDtoBRL:5.50,valorTotalUSD:0,zoomLevel:1,zoomPosX:0,zoomPosY:0,
   isDragging:false,startX:0,startY:0,tradeAtual:null,intervaloAtualizacaoMercado:null,
- 
+
   async init() {
     this.carregarTema();
-    this.inicializarToggleMode();
     // Aguarda Firebase estar pronto antes de qualquer operação
     await new Promise(resolve => {
       if (typeof db !== 'undefined') return resolve();
@@ -527,15 +532,15 @@ const Dashboard = {
       });
     } catch(e) { console.log('Auth check:', e); }
   },
- 
+
   carregarTema() {
     if(window.NasTheme) NasTheme.carregar();
   },
- 
+
   toggleTema() {
     if(window.NasTheme) NasTheme.toggle();
   },
- 
+
   mudarAba(aba) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -546,7 +551,7 @@ const Dashboard = {
     // Carrega calendário automaticamente ao abrir a aba
     if (aba === 'mercado') setTimeout(() => this.atualizarCalendario(), 150);
   },
- 
+
   inicializarSidebarMobile() {
     const mover=()=>{
       const sidebar=document.getElementById('sidebarDesktop'),anchor=document.getElementById('sidebarMobileAnchor'),container=document.querySelector('.dashboard-container');
@@ -557,7 +562,7 @@ const Dashboard = {
     };
     mover();window.addEventListener('resize',mover);
   },
- 
+
   inicializarGestosMobile() {
     const container=document.querySelector('.main-content');if(!container)return;
     let startX=0,startY=0;
@@ -572,26 +577,26 @@ const Dashboard = {
       }
     },{passive:true});
   },
- 
+
   async gerarRelatorioPDF() {
     const btn = document.getElementById('pdfReportBtn');
     if (!btn) return;
     const textoOriginal = btn.textContent;
     btn.classList.add('loading');
     btn.textContent = '⏳ Gerando...';
- 
+
     try {
       if (!window.html2canvas) {
         alert('Erro ao carregar biblioteca de captura. Recarregue a página.');
         return;
       }
- 
+
       // ── Coleta dados ──
       const d = this.obterDadosFiltrados();
       const todosDados = this.dados || [];
       const anoAtual = document.getElementById('filtroAno')?.value || new Date().getFullYear().toString();
       const mesAtual = document.getElementById('filtroMes')?.value || 'ALL';
- 
+
       const t = d.reduce((a, x) => ({
         trades:       a.trades       + x.trades,
         pontosNasdaq: a.pontosNasdaq + (x.pontosNasdaq || 0),
@@ -599,24 +604,26 @@ const Dashboard = {
         gain: a.gain + x.gain,
         stop: a.stop + x.stop,
       }), { trades: 0, pontosNasdaq: 0, pontosDow: 0, gain: 0, stop: 0 });
- 
+
       const dias = d.filter(x => x.trades > 0).length;
       const op   = t.gain + t.stop;
       const ass  = op ? Math.round((t.gain / op) * 100) : 0;
- 
+
       // ── Determina qual mês mostrar no calendário ──
       // Se filtro em mês específico → usa ele; se ALL → usa o mês atual do sistema
       const mesCalendario = mesAtual !== 'ALL'
         ? mesAtual
-        : (new Date().getMonth() + 1).toString().padStart(2, '0');
- 
-      const dadosMes = todosDados.filter(x =>
-        x.ano === anoAtual && x.mes === mesCalendario
-      );
- 
+        : (new Date().getFullYear().toString() === anoAtual
+            ? (new Date().getMonth() + 1).toString().padStart(2, '0')
+            : [...new Set(this.dados.filter(x=>x.ano===anoAtual).map(x=>x.mes))].sort().pop() || '01');
+
+      // dadosMes = dados JÁ filtrados (respeita semana/mês) limitados ao mês do calendário
+      // Se filtro de semana ativo → mostra só os dias daquela semana no calendário
+      const dadosMes = d.filter(x => x.mes === mesCalendario);
+
       // ── Monta o HTML da imagem como string e injeta num div oculto ──
       // (string HTML é mais confiável com html2canvas que manipulação de DOM)
- 
+
       // Calendário — gera as células
       let calCells = '';
       if (dadosMes.length > 0) {
@@ -627,19 +634,19 @@ const Dashboard = {
         const primeiro = new Date(ano2, mes2, 1);
         const ultimo   = new Date(ano2, mes2 + 1, 0);
         const nomeMesCal = nomesMeses[mesCalendario] || mesCalendario;
- 
+
         // Cabeçalho dos dias
         const diasSem = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
         const headerCells = diasSem.map(ds =>
           `<div style="text-align:center;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:1px;padding:4px 0;">${ds}</div>`
         ).join('');
- 
+
         // Células vazias no início
         let emptyCells = '';
         for (let i = 0; i < primeiro.getDay(); i++) {
           emptyCells += `<div style="min-height:68px;"></div>`;
         }
- 
+
         // Células dos dias
         let dayCells = '';
         for (let dd = 1; dd <= ultimo.getDate(); dd++) {
@@ -648,19 +655,19 @@ const Dashboard = {
             const dx = x.data instanceof Date ? x.data : new Date(x.data);
             return dx.toDateString() === data2.toDateString();
           });
- 
+
           const pN  = r ? (r.pontosNasdaq || 0) : 0;
           const pD  = r ? (r.pontosDow    || 0) : 0;
           const pts = r ? (r.pontos       || 0) : 0;
           const hasBoth = pN !== 0 && pD !== 0;
- 
+
           const bg = r && pts > 0 ? 'rgba(16,185,129,0.12)'
                    : r && pts < 0 ? 'rgba(239,68,68,0.12)'
                    : 'rgba(15,20,32,0.6)';
           const bc = r && pts > 0 ? 'rgba(16,185,129,0.4)'
                    : r && pts < 0 ? 'rgba(239,68,68,0.4)'
                    : 'rgba(255,255,255,0.06)';
- 
+
           let ptHtml = '';
           if (r && r.trades > 0) {
             if (hasBoth) {
@@ -673,13 +680,13 @@ const Dashboard = {
             }
             ptHtml += `<div style="font-size:9px;color:#64748b;font-weight:600;">${r.trades}T ${r.gain}G ${r.stop}S</div>`;
           }
- 
+
           dayCells += `<div style="background:${bg};border:1px solid ${bc};border-radius:8px;min-height:68px;padding:5px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;">
             <div style="font-size:10px;color:#475569;font-weight:700;align-self:flex-start;">${dd}</div>
             ${ptHtml}
           </div>`;
         }
- 
+
         calCells = `
           <div style="font-size:15px;font-weight:700;color:#94a3b8;margin-bottom:14px;">📅 ${nomeMesCal} ${ano2}</div>
           <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px;">${headerCells}</div>
@@ -687,13 +694,13 @@ const Dashboard = {
       } else {
         calCells = `<div style="color:#64748b;text-align:center;padding:20px;font-size:14px;">Sem dados para o período selecionado</div>`;
       }
- 
+
       // ── HTML completo da imagem ──
       const logoSrc = document.querySelector('.header-logo');
       const logoHTML = logoSrc && logoSrc.naturalWidth > 0
         ? `<img src="${logoSrc.src}" style="max-height:100px;width:auto;display:block;margin:0 auto;">`
         : `<div style="font-size:42px;font-weight:900;color:#818cf8;text-align:center;">NasdaqPro</div>`;
- 
+
       const kpis = [
         { label: 'DIAS OPERADOS',    value: String(dias),                                       color: '#e5e7eb' },
         { label: 'TOTAL DE TRADES',  value: String(t.trades),                                   color: '#e5e7eb' },
@@ -701,25 +708,25 @@ const Dashboard = {
         { label: 'PONTOS DOW JONES', value: (t.pontosDow    > 0 ? '+' : '') + t.pontosDow,      color: t.pontosDow    > 0 ? '#f97316' : t.pontosDow    < 0 ? '#ef4444' : '#94a3b8' },
         { label: 'ASSERTIVIDADE',    value: ass + '%',                                           color: '#e5e7eb' },
       ];
- 
+
       const kpisHTML = kpis.map(k => `
         <div style="background:#0f172a;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 10px;text-align:center;">
           <div style="font-size:9px;font-weight:700;color:#64748b;letter-spacing:1.2px;margin-bottom:8px;text-transform:uppercase;">${k.label}</div>
           <div style="font-size:30px;font-weight:900;color:${k.color};font-family:'JetBrains Mono',monospace;">${k.value}</div>
         </div>`).join('');
- 
+
       const fullHTML = `
         <div style="text-align:center;margin-bottom:20px;">${logoHTML}</div>
         <div style="height:2px;background:linear-gradient(90deg,transparent,#6366f1,transparent);margin-bottom:24px;"></div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;">${kpisHTML}</div>
         <div style="background:#0f172a;border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:20px;">${calCells}</div>`;
- 
+
       // ── Injeta num div fora da tela e captura ──
       const wrap = document.createElement('div');
       wrap.style.cssText = 'position:absolute;left:-9999px;top:0;width:960px;background:#020617;padding:36px;box-sizing:border-box;font-family:Archivo,sans-serif;color:#e5e7eb;border-radius:20px;';
       wrap.innerHTML = fullHTML;
       document.body.appendChild(wrap);
- 
+
       // Aguarda imagens carregarem
       await new Promise(r => setTimeout(r, 300));
       // Carrega a logo se for img
@@ -727,7 +734,7 @@ const Dashboard = {
       if (logoEl && !logoEl.complete) {
         await new Promise(r => { logoEl.onload = r; logoEl.onerror = r; setTimeout(r, 2000); });
       }
- 
+
       const canvas = await html2canvas(wrap, {
         backgroundColor: '#020617',
         scale: 2,
@@ -737,9 +744,9 @@ const Dashboard = {
         width: 960,
         height: wrap.scrollHeight,
       });
- 
+
       document.body.removeChild(wrap);
- 
+
       btn.textContent = '💾 Salvando...';
       canvas.toBlob(blob => {
         const url  = URL.createObjectURL(blob);
@@ -754,7 +761,7 @@ const Dashboard = {
         btn.textContent = '✅ Imagem Salva!';
         setTimeout(() => { btn.textContent = textoOriginal; btn.classList.remove('loading'); }, 2000);
       }, 'image/png');
- 
+
     } catch (erro) {
       console.error('❌ Erro ao exportar:', erro);
       alert('❌ Erro ao gerar imagem. Tente novamente.');
@@ -762,7 +769,7 @@ const Dashboard = {
       setTimeout(() => { btn.textContent = textoOriginal; btn.classList.remove('loading'); }, 2000);
     }
   },
- 
+
   async carregarDados() {
     try {
       // Usa Sheets API via Worker (sem cache) se disponível, senão cai no CSV
@@ -787,7 +794,7 @@ const Dashboard = {
       document.getElementById('loading').classList.add('hidden');
     }
   },
- 
+
   processarSheetsAPI(values) {
     if (!values || values.length < 2) { this.dados=[]; this.inicializarFiltros(); return; }
     const rows = values.slice(1).map(cols => {
@@ -818,7 +825,7 @@ const Dashboard = {
     console.log('Total linhas:', values.length, 'DOW:', dowRows.length);
     this._processarRows(rows);
   },
- 
+
   processarCSV(texto) {
     const linhas=texto.trim().split(/\r?\n/);linhas.shift();
     // Cada linha = 1 registro (pode haver 2 linhas pro mesmo dia: NASDAQ e DOW)
@@ -829,7 +836,7 @@ const Dashboard = {
     }).filter(Boolean);
     this._processarRows(rows);
   },
- 
+
   _processarRows(rows) {
     // Agrupa por data: merge NASDAQ + DOW na mesma entrada de calendário
     const mapaData={};
@@ -856,7 +863,7 @@ const Dashboard = {
     this.inicializarFiltros();
     setTimeout(()=>{this.inicializarCalculadora();},100);
   },
- 
+
   inicializarFiltros() {
     const anos=[...new Set(this.dados.map(d=>d.ano))].sort();
     filtroAno.innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
@@ -865,7 +872,7 @@ const Dashboard = {
     filtroAno.onchange=()=>{this.primeiraCarga=false;this.inicializarMeses();this.atualizar();};
     this.inicializarMeses();
   },
- 
+
   inicializarMeses() {
     const meses=[...new Set(this.dados.filter(d=>d.ano===filtroAno.value).map(d=>d.mes))];
     filtroMes.innerHTML='<option value="ALL">Todos os meses</option>'+meses.map(m=>`<option value="${m}">${nomesMeses[m]}</option>`).join("");
@@ -876,7 +883,7 @@ const Dashboard = {
     if(filtroMes.value==="ALL")filtroSemana.disabled=true;
     this.inicializarSemanas();
   },
- 
+
   inicializarSemanas() {
     const semanas=[...new Set(this.dados.filter(d=>d.ano===filtroAno.value&&(filtroMes.value==="ALL"||d.mes===filtroMes.value)).map(d=>d.semana))].sort((a,b)=>a-b);
     filtroSemana.innerHTML='<option value="ALL">Todas as semanas</option>'+semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
@@ -884,7 +891,7 @@ const Dashboard = {
     filtroSemana.onchange=()=>{this.primeiraCarga=false;this.atualizar();};
     this.atualizar();
   },
- 
+
   inicializarCalculadora() {
     setTimeout(()=>{
       const btnP=document.getElementById('btnMais'),btnM=document.getElementById('btnMenos'),div=document.getElementById('valorContratos');
@@ -894,22 +901,11 @@ const Dashboard = {
       btnM.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(val>0){val--;div.textContent=val;Dashboard.atualizar();}});
     },500);
   },
- 
-  inicializarToggleMode() {
-    const toggleBtn=document.getElementById('toggleMode'),modeIcon=document.getElementById('modeIcon'),modeText=document.getElementById('modeText');
-    let isProMode=false;
-    document.body.classList.add('basic-mode');toggleBtn.classList.add('basic');modeIcon.textContent='📊';modeText.textContent='Modo Básico';
-    if(toggleBtn){toggleBtn.addEventListener('click',()=>{
-      isProMode=!isProMode;
-      if(isProMode){document.body.classList.remove('basic-mode');toggleBtn.classList.add('pro');toggleBtn.classList.remove('basic');modeIcon.textContent='⚡';modeText.textContent='Modo Pro';setTimeout(()=>{this.inicializarCalculadora();},100);}
-      else{document.body.classList.add('basic-mode');toggleBtn.classList.remove('pro');toggleBtn.classList.add('basic');modeIcon.textContent='📊';modeText.textContent='Modo Básico';}
-    });}
-  },
- 
-  obterDadosFiltrados(){return this.dados.filter(d=>d.ano===filtroAno.value&&(filtroMes.value==="ALL"||d.mes===filtroMes.value)&&(filtroSemana.value==="ALL"||d.semana===filtroSemana.value));},
- 
+
+obterDadosFiltrados(){return this.dados.filter(d=>d.ano===filtroAno.value&&(filtroMes.value==="ALL"||d.mes===filtroMes.value)&&(filtroSemana.value==="ALL"||d.semana===filtroSemana.value));},
+
   atualizar(){const d=this.obterDadosFiltrados();this.renderizarKPIs(d);this.renderizarTabela(d);this.renderizarGraficos(d);this.renderizarCalendario(d);this.atualizarSidebarStats(d);this.atualizarPerformanceIndicator(d);},
- 
+
   renderizarKPIs(dados){
     const t=dados.reduce((acc,d)=>({trades:acc.trades+d.trades,pontos:acc.pontos+d.pontos,pontosNasdaq:acc.pontosNasdaq+(d.pontosNasdaq||0),pontosDow:acc.pontosDow+(d.pontosDow||0),gain:acc.gain+d.gain,stop:acc.stop+d.stop,zero:acc.zero+d.zero}),{trades:0,pontos:0,pontosNasdaq:0,pontosDow:0,gain:0,stop:0,zero:0});
     const op=t.gain+t.stop,ass=op?Math.round((t.gain/op)*100):0,dias=dados.filter(d=>d.trades>0).length;
@@ -930,7 +926,7 @@ const Dashboard = {
     const kg=document.getElementById("kGains"),ks=document.getElementById("kStops"),kz=document.getElementById("kZero");
     if(kg)kg.textContent=t.gain;if(ks)ks.textContent=t.stop;if(kz)kz.textContent=t.zero;
   },
- 
+
   atualizarSidebarStats(dados){
     const t=dados.reduce((acc,d)=>({pontos:acc.pontos+d.pontos,gain:acc.gain+d.gain,stop:acc.stop+d.stop}),{pontos:0,gain:0,stop:0});
     const op=t.gain+t.stop,wr=op?Math.round((t.gain/op)*100):0;
@@ -939,7 +935,7 @@ const Dashboard = {
     const sw=document.getElementById('sidebarWinRate'),sb=document.getElementById('sidebarBestDay'),swd=document.getElementById('sidebarWorstDay');
     if(sw)sw.textContent=wr+'%';if(sb){sb.textContent=best;sb.style.color='var(--green)';}if(swd){swd.textContent=worst;swd.style.color=worst<0?'var(--red)':'var(--text)';}
   },
- 
+
   atualizarPerformanceIndicator(dados=[]){
     const pi=document.getElementById('perfIndicator'),pt=document.getElementById('perfText'),pd=pi?.querySelector('.performance-dot');
     if(!pi||!dados.length){if(pi)pi.style.display='none';return;}
@@ -949,7 +945,7 @@ const Dashboard = {
     else if(total<0){pt.textContent=`Performance: Negativa (${total})`;pd.className='performance-dot negative';}
     else{pt.textContent='Performance: Neutro';pd.className='performance-dot neutral';}
   },
- 
+
   renderizarTabela(dados){
     let html='',tot={p:0,pN:0,pD:0,t:0,g:0,s:0,z:0};
     dados.forEach(d=>{
@@ -967,7 +963,7 @@ const Dashboard = {
     html+=`<tr class="total"><td>TOTAL</td><td style="font-weight:800">${totPtCell}</td><td>${tot.t}</td><td style="color:var(--green)">${tot.g}</td><td style="color:var(--red)">${tot.s}</td><td style="color:var(--yellow)">${tot.z}</td><td colspan="2"></td></tr>`;
     document.getElementById('tbody').innerHTML=html;
   },
- 
+
   renderizarGraficos(dados){
     let saldo=0;const labels=[],acumulado=[0];
     dados.forEach(d=>{saldo+=d.pontos;labels.push(d.dia);acumulado.push(saldo);});
@@ -976,9 +972,9 @@ const Dashboard = {
     if(ctxAc){this.chartAcumulado=new Chart(ctxAc,{type:'line',data:{labels:['Início',...labels],datasets:[{label:'Pontos Acumulados',data:acumulado,borderColor:'#6366f1',backgroundColor:(context)=>{const ctx=context.chart.ctx;const g=ctx.createLinearGradient(0,0,0,400);g.addColorStop(0,'rgba(99,102,241,0.3)');g.addColorStop(1,'rgba(99,102,241,0.01)');return g;},fill:true,tension:0.4,borderWidth:3,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:'#6366f1',pointBorderColor:'#fff',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{intersect:false,mode:'index'},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(0,0,0,0.9)',titleColor:'#fff',bodyColor:'#e5e7eb',borderColor:'#6366f1',borderWidth:1,padding:12,displayColors:false,callbacks:{title:(items)=>items[0].label,label:(item)=>`Acumulado: ${item.formattedValue} pts`}}},scales:{y:{ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(255,255,255,0.05)'}},x:{ticks:{color:'#cbd5e1',maxRotation:45,font:{size:11,weight:'600'}},grid:{display:false}}}}});}
     if(ctxBar){const tg=dados.reduce((a,b)=>a+b.gain,0),ts=dados.reduce((a,b)=>a+b.stop,0),tz=dados.reduce((a,b)=>a+b.zero,0);this.chartBar=new Chart(ctxBar,{type:'doughnut',data:{labels:['Gains','Stops','Breakeven'],datasets:[{data:[tg,ts,tz],backgroundColor:['#10b981','#ef4444','#fbbf24'],borderColor:'#0f1420',borderWidth:3,hoverOffset:10}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#9ca3af',padding:16,font:{size:12,weight:'600'}}},tooltip:{backgroundColor:'rgba(0,0,0,0.9)',titleColor:'#fff',bodyColor:'#e5e7eb',borderColor:'#6366f1',borderWidth:1,padding:12,callbacks:{label:(item)=>`${item.label}: ${item.formattedValue} operações`}}}}});}
   },
- 
+
   voltarParaMeses(){filtroMes.value="ALL";filtroSemana.disabled=true;filtroSemana.value="ALL";this.primeiraCarga=false;this.atualizar();},
- 
+
   abrirModal(dadosDia){
     this.tradeAtual=dadosDia;
     const modal=document.getElementById('tradePhotoModal'),mt=document.getElementById('modalTitle'),mig=document.getElementById('modalInfoGrid'),mpc=document.getElementById('modalPhotoContainer');
@@ -991,9 +987,9 @@ const Dashboard = {
     this.carregarFotoTrade(dadosDia.dia,mpc,dadosDia.fotoId);
     modal.classList.add('active');document.body.style.overflow='hidden';
   },
- 
+
   fecharModal(){const modal=document.getElementById('tradePhotoModal');modal.classList.remove('active');document.body.style.overflow='auto';this.zoomLevel=1;this.zoomPosX=0;this.zoomPosY=0;},
- 
+
   async inicializarConversorMoeda(){await this.atualizarCotacao();},
   async atualizarCotacao(){try{const r=await fetch('https://api.exchangerate-api.com/v4/latest/USD');const d=await r.json();this.cotacaoUSDtoBRL=d.rates.BRL;}catch(e){console.warn('⚠️ Erro ao buscar cotação:',this.cotacaoUSDtoBRL);}},
   atualizarValorReal(){
@@ -1010,7 +1006,7 @@ const Dashboard = {
     if(brlN)brlN.textContent=(usdN*taxa).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     if(brlD)brlD.textContent=(usdD*taxa).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
   },
- 
+
   atualizarCalendario(){
     const container = document.getElementById('tvCalendarContainer');
     if (!container) return;
@@ -1023,7 +1019,7 @@ const Dashboard = {
         id="investingCalendar">
       </iframe>`;
   },
- 
+
   inicializarZoomFoto(container,img){
     const db=document.createElement('button');db.className='download-btn';db.innerHTML='<span>📥</span><span>Baixar Foto</span>';db.onclick=()=>this.baixarFoto();container.appendChild(db);
     const controls=document.createElement('div');controls.className='zoom-controls';controls.innerHTML=`<button class="zoom-btn" id="zoomIn">+</button><button class="zoom-btn" id="zoomOut">−</button><button class="zoom-btn" id="zoomReset">⟲</button>`;container.appendChild(controls);
@@ -1037,12 +1033,12 @@ const Dashboard = {
     container.addEventListener('mouseup',()=>{this.isDragging=false;container.classList.remove('grabbing');});
     container.addEventListener('mouseleave',()=>{this.isDragging=false;container.classList.remove('grabbing');});
   },
- 
+
   zoom(img,container,delta){this.zoomLevel=Math.max(1,Math.min(5,this.zoomLevel+delta));if(this.zoomLevel===1){this.zoomPosX=0;this.zoomPosY=0;}this.atualizarTransform(img);this.mostrarZoomInfo(container);},
   resetZoom(img,container){this.zoomLevel=1;this.zoomPosX=0;this.zoomPosY=0;this.atualizarTransform(img);this.mostrarZoomInfo(container);},
   atualizarTransform(img){img.style.transform=`scale(${this.zoomLevel}) translate(${this.zoomPosX/this.zoomLevel}px,${this.zoomPosY/this.zoomLevel}px)`;},
   mostrarZoomInfo(container){const zi=container.querySelector('.zoom-info');if(zi){zi.textContent=`${Math.round(this.zoomLevel*100)}%`;zi.classList.add('show');setTimeout(()=>zi.classList.remove('show'),1500);}},
- 
+
   async baixarFoto(){
     if(!this.tradeAtual){alert('❌ Nenhum trade selecionado');return;}
     const btn=document.querySelector('.download-btn');if(btn){btn.classList.add('downloading');btn.innerHTML='<span>⏳</span><span>Gerando...</span>';}
@@ -1057,7 +1053,7 @@ const Dashboard = {
     }catch(error){console.error('❌ Erro:',error);alert('❌ Erro ao gerar imagem.');}
     finally{if(btn){btn.classList.remove('downloading');btn.innerHTML='<span>📥</span><span>Baixar Foto</span>';}}
   },
- 
+
   carregarFotoTrade(dataStr,container,fotoId){
     container.innerHTML=`<div class="modal-photo-loading"><div class="modal-photo-spinner"></div>Carregando foto...</div>`;
     if(fotoId&&fotoId.trim()){
@@ -1076,7 +1072,7 @@ const Dashboard = {
       container.innerHTML=`<div class="modal-photo-error">📷 Nenhuma foto configurada<br><small style="font-size:11px;opacity:0.8;margin-top:10px;display:block">Adicione o ID da foto na coluna FOTO_ID da planilha</small></div>`;
     }
   },
- 
+
   renderizarCalendario(dados){
     const grid=document.getElementById("calendar"),ct=document.getElementById("calendarTitle");
     if(!grid)return;grid.innerHTML="";
@@ -1143,13 +1139,12 @@ const Dashboard = {
     }
   }
 };
- 
+
 Dashboard.init();
 document.getElementById('tradePhotoModal')?.addEventListener('click',(e)=>{if(e.target.id==='tradePhotoModal')Dashboard.fecharModal();});
-document.addEventListener('keydown',(e)=>{if(e.key==='Escape')Dashboard.fecharModal();if(e.ctrlKey&&e.key==='m'){e.preventDefault();document.getElementById('toggleMode')?.click();}});
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape')Dashboard.fecharModal();});
 </script>
- 
- 
+
+
 </body>
 </html>
- 
