@@ -32,6 +32,7 @@
  --transition-fast:0.15s;--transition-normal:0.3s;--transition-slow:0.5s;
 }
 html.light-theme,body.light-theme{--sidebar-bg:#fff;--main-bg:#f1f5f9;--card-bg:#fff;--card-hover:#f8fafc;--border:rgba(99,102,241,0.2);--border-bright:rgba(99,102,241,0.5);--text:#0f172a;--text-dim:#475569;--muted:#94a3b8;--shadow-sm:0 1px 3px rgba(0,0,0,0.1);--shadow-md:0 4px 12px rgba(0,0,0,0.1);--shadow-lg:0 10px 30px rgba(0,0,0,0.15);--shadow-glow:0 0 20px rgba(99,102,241,0.25)}
+body.light-theme{background:#f1f5f9;color:#0f172a}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Archivo',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--main-bg);color:var(--text);display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;position:relative;transition:background-color var(--transition-normal),color var(--transition-normal)}
 body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(168,85,247,0.08) 0%,transparent 50%);pointer-events:none;z-index:0}
@@ -278,7 +279,14 @@ tbody tr:hover{background:rgba(99,102,241,0.08);transform:scale(1.01)}
 
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="theme.js"></script>
+<script>
+/* anti-flash: aplica tema no <html> antes do body renderizar */
+(function(){
+  var t=localStorage.getItem('dashboard-tema')||'dark';
+  if(t==='light') document.documentElement.classList.add('light-theme');
+  else document.documentElement.classList.remove('light-theme');
+})();
+</script>
 </head>
 <body>
 
@@ -1134,5 +1142,6 @@ document.addEventListener('keydown',(e)=>{if(e.key==='Escape')Dashboard.fecharMo
 </script>
 
 
+<script src="theme.js"></script>
 </body>
 </html>

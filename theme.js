@@ -8,10 +8,10 @@
   function aplicarTema(tema) {
     if (tema === 'light') {
       document.documentElement.classList.add('light-theme');
-      document.body.classList.add('light-theme');
+      if (document.body) document.body.classList.add('light-theme');
     } else {
       document.documentElement.classList.remove('light-theme');
-      document.body.classList.remove('light-theme');
+      if (document.body) document.body.classList.remove('light-theme');
     }
     // Atualiza ícone do botão (se existir nesta página)
     const icon = document.getElementById('themeIcon');
