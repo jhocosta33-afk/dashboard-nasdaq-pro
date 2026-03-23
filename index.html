@@ -16,21 +16,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script>
-// Firebase config inline
-const firebaseConfig = {
-  apiKey: "AIzaSyCABn9XHvjrFCbbeHT_0gHFaF5uGlKLUWM",
-  authDomain: "dashboard-nasdaq-pro.firebaseapp.com",
-  projectId: "dashboard-nasdaq-pro",
-  storageBucket: "dashboard-nasdaq-pro.firebasestorage.app",
-  messagingSenderId: "325405049429",
-  appId: "1:325405049429:web:a0289dc4f604fee1d20adc"
-};
-const app = firebase.initializeApp(firebaseConfig);
-const db  = firebase.firestore(app);
-const auth = firebase.auth(app);
-console.log('✅ Firebase configurado e pronto para uso');
-</script>
+<script src="portal/firebase-config.js"></script>
 
 <style>
 :root {
@@ -314,7 +300,9 @@ tbody tr:hover{background:rgba(99,102,241,0.08);transform:scale(1.01)}
   <div class="filter-group"><label>📊 Semana</label><select id="filtroSemana"></select></div>
  </div>
  
-
+ <a href="portal/login.html" class="mode-toggle" style="text-decoration:none;margin-top:12px;background:linear-gradient(135deg,#22c55e,#3b82f6);color:#000;font-weight:700;">
+  <span>🎓</span><span>Portal do Aluno</span>
+ </a>
  <div class="stats-sidebar">
   <div class="sidebar-stat"><span>Assertividade</span><span id="sidebarWinRate">0%</span></div>
   <div class="sidebar-stat"><span>Melhor Dia</span><span id="sidebarBestDay">0</span></div>
