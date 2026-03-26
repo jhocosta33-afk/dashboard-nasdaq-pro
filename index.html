@@ -12,11 +12,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="portal/firebase-config.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="portal/supabase-config.js"></script>
 
 <style>
 :root {
@@ -480,17 +478,18 @@ let SHEETS_TAB_NAME = null;
 
 async function carregarConfiguracoes() {
   try {
-    const doc = await db.collection('config').doc('public').get();
-    if (!doc.exists) throw new Error('config/public não encontrado no Firestore');
-    const data = doc.data();
-    CSV_URL = data.csv_url;
-    GOOGLE_DRIVE_FOLDER_ID = data.drive_folder_id;
-    SHEETS_API_KEY        = data.sheets_api_key        || null;
-    SHEETS_SPREADSHEET_ID = data.sheets_spreadsheet_id || null;
-    SHEETS_TAB_NAME       = data.sheets_tab_name       || 'atual dashboard NASDAQ';
+    const sb = window._supabase;
+    const { data, error } = await sb.from('config').select('data').eq('id', 'public').single();
+    if (error) throw error;
+    const cfg = data.data;
+    CSV_URL               = cfg.csv_url               || null;
+    GOOGLE_DRIVE_FOLDER_ID= cfg.drive_folder_id       || null;
+    SHEETS_API_KEY        = cfg.sheets_api_key        || null;
+    SHEETS_SPREADSHEET_ID = cfg.sheets_spreadsheet_id || null;
+    SHEETS_TAB_NAME       = cfg.sheets_tab_name       || 'atual dashboard NASDAQ';
   } catch (err) {
     console.error('Erro ao carregar configurações:', err);
-    alert('❌ Erro ao carregar configurações. Verifique o Firestore.');
+    alert('❌ Erro ao carregar configurações. Verifique o Supabase.');
   }
 }
 
@@ -503,11 +502,11 @@ const Dashboard = {
 
   async init() {
     this.carregarTema();
-    // Aguarda Firebase estar pronto antes de qualquer operação
+    // Aguarda Supabase estar prontoronto
     await new Promise(resolve => {
-      if (typeof db !== 'undefined') return resolve();
-      const check = setInterval(() => { if (typeof db !== 'undefined') { clearInterval(check); resolve(); } }, 50);
-      setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+      if (window._supabase) return resolve();
+      document.addEventListener('supabase-ready', resolve, { once: true });
+      setTimeout(resolve, 5000);
     });
     await carregarConfiguracoes();
     await this.carregarDados();
@@ -517,10 +516,11 @@ const Dashboard = {
     this.inicializarGestosMobile();
     // Mostra botão exportar só para admins
     try {
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          const uDoc = await db.collection('users').doc(user.uid).get();
-          if (uDoc.exists && uDoc.data().role === 'admin') {
+      const sb = window._supabase;
+      sb.auth.onAuthStateChange(async (event, session) => {
+        if (session) {
+          const { data: uData } = await sb.from('users').select('role').eq('id', session.user.id).single();
+          if (uData && uData.role === 'admin') {
             const btn = document.getElementById('pdfReportBtn');
             if (btn) btn.style.visibility = 'visible';
           }
