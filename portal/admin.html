@@ -706,7 +706,7 @@ async function salvarPerfilAdmin() {
 async function verInfoUsuario(autorId, nomeExibido) {
   if (!autorId) { alert('ID do usuário não disponível.'); return; }
   try {
-    var doc = const { data: _res2 } = await getSB().from('users').select('nome,email,created_at').eq('id', autorId).single();
+    const { data: _res2 } = await getSB().from('users').select('nome,email,created_at').eq('id', autorId).single();
     var data = _res2 || {};
     var nome = data.nome || nomeExibido || 'Desconhecido';
     var email = data.email || autorId;
@@ -775,7 +775,7 @@ async function inicializarYouTubeAuth() {
     return;
   }
   try {
-    const doc = const { data: _ytCfg } = await getSB().from('config').select('data').eq('id','youtube').single();
+    const { data: _ytCfg } = await getSB().from('config').select('data').eq('id','youtube').single();
     if (_ytCfg?.data?.refresh_token) await renovarAccessToken(_ytCfg.data.refresh_token);
   } catch (err) { console.log('Token YouTube não configurado ainda.'); }
   atualizarBotaoYouTube();
@@ -871,7 +871,7 @@ async function trocarCodePorToken(code) {
 
 async function uploadYouTubeDireto(file, titulo, descricao) {
   if (!ytAccessToken) {
-    const doc = const { data: _ytDoc } = await getSB().from('config').select('data').eq('id','youtube').single();
+    const { data: _ytDoc } = await getSB().from('config').select('data').eq('id','youtube').single();
     if (_ytDoc?.data?.refresh_token) {
       const ok = await renovarAccessToken(_ytDoc.data.refresh_token);
       if (!ok) throw new Error('Não foi possível renovar o token. Clique em "Reconectar YouTube".');
@@ -1022,7 +1022,7 @@ function aplicarPermissoesUI() {
 // Carrega dados do superadmin e lista de admins
 async function carregarAdmins() {
   try {
-    const snapshot = const { data: admins } = await getSB().from('users').select('*').eq('role','admin');
+    const { data: admins } = await getSB().from('users').select('*').eq('role','admin');
     // admins already array
 
     // Stats
@@ -1665,7 +1665,7 @@ let _todosAlunos = [];
 
 async function carregarUsuarios() {
   try {
-    const snapshot = const { data: _allUsers } = await getSB().from('users').select('*');
+    const { data: _allUsers } = await getSB().from('users').select('*');
     _todosAlunos = [];
     let pendentes = [];
 
@@ -1890,7 +1890,7 @@ async function deletarPost(postId) {
   if (!confirm('Excluir este post permanentemente? Esta ação não pode ser desfeita.')) return;
   try {
     // Busca o post para verificar se tem vídeo no YouTube
-    const postDoc = const { data: _postDoc } = await getSB().from('posts').select('youtube_video_id').eq('id',postId).single();
+    const { data: _postDoc } = await getSB().from('posts').select('youtube_video_id').eq('id',postId).single();
     const postData = _postDoc;
     const videoId = postData?.youtube_video_id || null;
 
@@ -1902,7 +1902,7 @@ async function deletarPost(postId) {
       try {
         // Garante token válido
         if (!ytAccessToken) {
-          const cfgDoc = const { data: _cfgDoc } = await getSB().from('config').select('data').eq('id','youtube').single();
+          const { data: _cfgDoc } = await getSB().from('config').select('data').eq('id','youtube').single();
           if (_cfgDoc?.data?.refresh_token) {
             await renovarAccessToken(_cfgDoc.data.refresh_token);
           }
