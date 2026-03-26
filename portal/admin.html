@@ -737,14 +737,14 @@ let   ytAccessToken = null;
 async function carregarConfiguracoes() {
   try {
     const [docOauth, docPublic] = await Promise.all([
-      getSB().from('config').select('data').eq('id','oauth').single(),
-      getSB().from('config').select('data').eq('id','public').single()
+      getSB().from('config').select('*').eq('id','oauth').single(),
+      getSB().from('config').select('*').eq('id','public').single()
     ]);
     if (docOauth.error || !docOauth.data) throw new Error('Documento config/oauth não encontrado');
-    const data = docOauth.data.data;
-    APPS_SCRIPT_URL  = data.apps_script_url;
-    YT_CLIENT_ID     = data.client_id;
-    YT_CLIENT_SECRET = data.client_secret;
+    const oauthCfg = docOauth.data.data;
+    APPS_SCRIPT_URL  = oauthCfg.apps_script_url;
+    YT_CLIENT_ID     = oauthCfg.client_id;
+    YT_CLIENT_SECRET = oauthCfg.client_secret;
     // config/public — spreadsheet ID para o botão abrir planilha
     if (!docPublic.error && docPublic.data) {
       const pub = docPublic.data.data;
