@@ -358,6 +358,11 @@ input::placeholder { color: var(--text-muted); }
 
     <div class="divider">ou</div>
 
+    <button type="button" class="btn btn-google" id="btnGoogle">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="margin-right:8px;vertical-align:middle"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z"/></svg>
+      Entrar com Google
+    </button>
+
     <div class="links">
       <a href="cadastro.html">Criar conta</a>
       <a href="#" id="esqueceuSenha">Esqueceu a senha?</a>
@@ -416,11 +421,9 @@ input::placeholder { color: var(--text-muted); }
   </div>
 </div>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 
 <script>
 function toggleMesas() {
@@ -430,85 +433,127 @@ function toggleMesas() {
   panel.classList.toggle('open');
 }
 
-document.body.style.opacity = '0.5';
-document.body.style.pointerEvents = 'none';
+// Aguarda Supabase estar pronto
+document.addEventListener('supabase-ready', inicializar);
+// fallback se já carregou
+if (window._supabase) inicializar();
 
-auth.onAuthStateChanged(async (user) => {
-  if (user) {
+function inicializar() {
+  const sb = window._supabase;
+
+  // ── Verifica sessão ativa ──
+  document.body.style.opacity = '0.5';
+  document.body.style.pointerEvents = 'none';
+
+  sb.auth.getSession().then(async ({ data: { session } }) => {
+    if (session) {
+      const user = session.user;
+      try {
+        const { data: userData } = await sb.from('users').select('role, aprovado').eq('id', user.id).single();
+        if (userData) {
+          if (userData.role === 'admin') { window.location.href = 'admin.html'; return; }
+          if (userData.aprovado === true) { window.location.href = 'aluno.html'; return; }
+        }
+        await sb.auth.signOut();
+      } catch (err) { console.error('Erro ao verificar usuário:', err); }
+    }
+    document.body.style.opacity = '1';
+    document.body.style.pointerEvents = 'auto';
+  });
+
+  const form     = document.getElementById('loginForm');
+  const alertBox = document.getElementById('alert');
+  const btnLogin = document.getElementById('btnLogin');
+
+  function mostrarAlerta(mensagem, tipo) {
+    alertBox.textContent = mensagem;
+    alertBox.className = `alert ${tipo}`;
+    alertBox.style.display = 'block';
+  }
+
+  // ── Login com email + senha ──
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
+    btnLogin.disabled = true;
+    btnLogin.textContent = 'Entrando...';
     try {
-      const userDoc = await db.collection('users').doc(user.uid).get();
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        if (userData.role === 'admin') { window.location.href = 'admin.html'; return; }
-        if (userData.aprovado === true) { window.location.href = 'aluno.html'; return; }
-        await auth.signOut();
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+      if (error) throw error;
+
+      const user = data.user;
+      // Garante row em users (cria se não existir via upsert)
+      const { data: userData } = await sb.from('users').select('role, aprovado').eq('id', user.id).single();
+
+      if (!userData) {
+        // Primeiro acesso — trigger já cria a row, mas garante aprovado=false
+        await sb.from('users').upsert({
+          id: user.id,
+          nome: user.user_metadata?.full_name || email.split('@')[0],
+          email: user.email,
+          role: 'aluno',
+          aprovado: false,
+          created_at: new Date().toISOString()
+        });
+        mostrarAlerta('⏳ Conta criada. Aguarde aprovação do administrador.', 'warning');
+        await sb.auth.signOut();
+        btnLogin.disabled = false; btnLogin.textContent = 'Entrar'; return;
       }
-    } catch (error) { console.error('Erro ao verificar usuário:', error); }
-  }
-  document.body.style.opacity = '1';
-  document.body.style.pointerEvents = 'auto';
-});
 
-const form = document.getElementById('loginForm');
-const alertBox = document.getElementById('alert');
-const btnLogin = document.getElementById('btnLogin');
+      if (userData.role === 'admin') { window.location.href = 'admin.html'; return; }
+      if (userData.aprovado !== true) {
+        mostrarAlerta('⏳ Sua conta ainda está aguardando aprovação do administrador.', 'warning');
+        await sb.auth.signOut();
+        btnLogin.disabled = false; btnLogin.textContent = 'Entrar'; return;
+      }
+      window.location.href = 'aluno.html';
 
-function mostrarAlerta(mensagem, tipo) {
-  alertBox.textContent = mensagem;
-  alertBox.className = `alert ${tipo}`;
-  alertBox.style.display = 'block';
-}
+    } catch (error) {
+      let mensagem = '❌ ';
+      const msg = error.message || '';
+      if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+        mensagem += 'E-mail ou senha incorretos.';
+      } else if (msg.includes('Email not confirmed')) {
+        mensagem += 'Confirme seu e-mail antes de entrar.';
+      } else if (msg.includes('Too many requests')) {
+        mensagem += 'Muitas tentativas. Tente novamente mais tarde.';
+      } else {
+        mensagem += msg;
+      }
+      mostrarAlerta(mensagem, 'error');
+      btnLogin.disabled = false; btnLogin.textContent = 'Entrar';
+    }
+  });
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  const senha = document.getElementById('senha').value;
-  btnLogin.disabled = true;
-  btnLogin.textContent = 'Entrando...';
-  try {
-    const userCredential = await auth.signInWithEmailAndPassword(email, senha);
-    const user = userCredential.user;
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (!userDoc.exists) {
-      await db.collection('users').doc(user.uid).set({
-        nome: user.displayName || user.email.split('@')[0],
-        email: user.email, role: 'aluno', aprovado: false,
-        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  // ── Login com Google ──
+  const btnGoogle = document.getElementById('btnGoogle');
+  if (btnGoogle) {
+    btnGoogle.addEventListener('click', async () => {
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + window.location.pathname }
       });
-      mostrarAlerta('⏳ Conta criada. Aguarde aprovação do administrador.', 'warning');
-      await auth.signOut(); btnLogin.disabled = false; btnLogin.textContent = 'Entrar'; return;
-    }
-    const userData = userDoc.data();
-    if (userData.role === 'admin') { window.location.href = 'admin.html'; return; }
-    if (userData.aprovado !== true) {
-      mostrarAlerta('⏳ Sua conta ainda está aguardando aprovação do administrador.', 'warning');
-      await auth.signOut(); btnLogin.disabled = false; btnLogin.textContent = 'Entrar'; return;
-    }
-    window.location.href = 'aluno.html';
-  } catch (error) {
-    let mensagem = '❌ ';
-    switch (error.code) {
-      case 'auth/user-not-found': case 'auth/wrong-password': mensagem += 'E-mail ou senha incorretos.'; break;
-      case 'auth/invalid-email': mensagem += 'E-mail inválido.'; break;
-      case 'auth/too-many-requests': mensagem += 'Muitas tentativas. Tente novamente mais tarde.'; break;
-      default: mensagem += error.message;
-    }
-    mostrarAlerta(mensagem, 'error');
-    btnLogin.disabled = false; btnLogin.textContent = 'Entrar';
+      if (error) mostrarAlerta('❌ Erro ao entrar com Google: ' + error.message, 'error');
+    });
   }
-});
 
-document.getElementById('esqueceuSenha').addEventListener('click', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  if (!email) { mostrarAlerta('❌ Digite seu e-mail primeiro', 'error'); return; }
-  try {
-    await auth.sendPasswordResetEmail(email);
-    mostrarAlerta('✅ E-mail de recuperação enviado! Verifique sua caixa de entrada.', 'warning');
-  } catch (error) {
-    mostrarAlerta('❌ Erro ao enviar e-mail de recuperação: ' + error.message, 'error');
-  }
-});
+  // ── Esqueceu senha ──
+  document.getElementById('esqueceuSenha').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!email) { mostrarAlerta('❌ Digite seu e-mail primeiro', 'error'); return; }
+    try {
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/portal/reset-password.html'
+      });
+      if (error) throw error;
+      mostrarAlerta('✅ E-mail de recuperação enviado! Verifique sua caixa de entrada.', 'warning');
+    } catch (error) {
+      mostrarAlerta('❌ Erro ao enviar e-mail de recuperação: ' + error.message, 'error');
+    }
+  });
+}
 </script>
 </body>
 </html>

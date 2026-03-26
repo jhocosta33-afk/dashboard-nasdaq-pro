@@ -637,12 +637,13 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
   document.addEventListener('DOMContentLoaded',function(){aplicar(get());});
 })();
 </script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 
 <script>
+// Alias Supabase → sb (usado em todo o script)
+function getSB() { return window._supabase; }
+
 // ══════════════════════════════════════════════
 // PERFIL ADMIN — definidas PRIMEIRO para hoisting seguro
 // ══════════════════════════════════════════════
@@ -689,7 +690,10 @@ async function salvarPerfilAdmin() {
   try {
     var update = { nome: nome };
     if (window._adminFotoTemp) update.fotoUrl = window._adminFotoTemp;
-    await db.collection('users').doc(window._adminUid).update(update);
+    const _updateData = { nome };
+    if (window._adminFotoTemp) _updateData.foto_url = window._adminFotoTemp;
+    const { error: _upErr } = await getSB().from('users').update(_updateData).eq('id', window._adminUid);
+    if (_upErr) throw _upErr;
     window._adminNome = nome;
     if (window._adminFotoTemp) { window._adminFotoUrl = window._adminFotoTemp; delete window._adminFotoTemp; }
     document.getElementById('adminName').textContent = nome;
@@ -702,16 +706,16 @@ async function salvarPerfilAdmin() {
 async function verInfoUsuario(autorId, nomeExibido) {
   if (!autorId) { alert('ID do usuário não disponível.'); return; }
   try {
-    var doc = await db.collection('users').doc(autorId).get();
-    var data = doc.exists ? doc.data() : {};
+    var doc = const { data: _res2 } = await getSB().from('users').select('nome,email,created_at').eq('id', autorId).single();
+    var data = _res2 || {};
     var nome = data.nome || nomeExibido || 'Desconhecido';
-    var email = data.email || doc.id;
-    var criado = data.criadoEm ? data.criadoEm.toDate().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+    var email = data.email || autorId;
+    var criado = data.criado_em ? new Date(data.criado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
     document.getElementById('infoUserNome').textContent = nome;
     document.getElementById('infoUserEmail').textContent = '📧 ' + email;
     document.getElementById('infoUserCadastro').textContent = 'Cadastrado em: ' + criado;
     var avatarEl = document.getElementById('infoUserAvatar');
-    if (data.fotoUrl) avatarEl.innerHTML = '<img src="' + data.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    if (data.foto_url) avatarEl.innerHTML = '<img src="' + data.foto_url + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
     else avatarEl.textContent = nome.charAt(0).toUpperCase();
     document.getElementById('modalInfoUser').style.display = 'flex';
   } catch(e) { alert('Erro ao buscar dados do usuário.'); }
@@ -723,7 +727,7 @@ async function verInfoUsuario(autorId, nomeExibido) {
 let APPS_SCRIPT_URL  = null;
 let YT_CLIENT_ID     = null;
 let YT_CLIENT_SECRET = null;
-const YT_SCOPE    = 'https://www.googleapis.com/auth/youtube.upload';
+const YT_SCOPE    = 'https://www.googleapis.com/auth/youtube.force-ssl';
 const YT_REDIRECT = 'https://jhocosta33-afk.github.io/dashboard-nasdaq-pro/portal/admin.html';
 let SHEETS_SPREADSHEET_ID = null;
 const YT_WORKER   = 'https://youtube-upload-proxy.nasdaqpro7.workers.dev';
@@ -733,17 +737,17 @@ let   ytAccessToken = null;
 async function carregarConfiguracoes() {
   try {
     const [docOauth, docPublic] = await Promise.all([
-      db.collection('config').doc('oauth').get(),
-      db.collection('config').doc('public').get()
+      getSB().from('config').select('data').eq('id','oauth').single(),
+      getSB().from('config').select('data').eq('id','public').single()
     ]);
-    if (!docOauth.exists) throw new Error('Documento config/oauth não encontrado no Firestore');
-    const data = docOauth.data();
+    if (docOauth.error || !docOauth.data) throw new Error('Documento config/oauth não encontrado');
+    const data = docOauth.data.data;
     APPS_SCRIPT_URL  = data.apps_script_url;
     YT_CLIENT_ID     = data.client_id;
     YT_CLIENT_SECRET = data.client_secret;
     // config/public — spreadsheet ID para o botão abrir planilha
-    if (docPublic.exists) {
-      const pub = docPublic.data();
+    if (!docPublic.error && docPublic.data) {
+      const pub = docPublic.data.data;
       SHEETS_SPREADSHEET_ID = pub.sheets_spreadsheet_id || null;
     }
   } catch (err) {
@@ -771,8 +775,8 @@ async function inicializarYouTubeAuth() {
     return;
   }
   try {
-    const doc = await db.collection('config').doc('youtube').get();
-    if (doc.exists && doc.data().refresh_token) await renovarAccessToken(doc.data().refresh_token);
+    const doc = const { data: _ytCfg } = await getSB().from('config').select('data').eq('id','youtube').single();
+    if (_ytCfg?.data?.refresh_token) await renovarAccessToken(_ytCfg.data.refresh_token);
   } catch (err) { console.log('Token YouTube não configurado ainda.'); }
   atualizarBotaoYouTube();
 }
@@ -838,12 +842,15 @@ async function trocarCodePorToken(code) {
     if (data.success && data.access_token) {
       ytAccessToken = data.access_token;
       if (data.refresh_token) {
-        await db.collection('config').doc('youtube').set({
-          refresh_token: data.refresh_token,
-          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-          configuradoPor: auth.currentUser?.email || 'admin'
+        await getSB().from('config').upsert({
+          id: 'youtube',
+          data: {
+            refresh_token: data.refresh_token,
+            atualizado_em: new Date().toISOString(),
+            configurado_por: window._adminUid || 'admin'
+          }
         });
-        console.log('[YT] ✅ refresh_token salvo no Firestore');
+        console.log('[YT] ✅ refresh_token salvo no Supabase');
       } else {
         console.warn('[YT] ⚠️ Sem refresh_token — access_token válido por 1h');
       }
@@ -864,9 +871,9 @@ async function trocarCodePorToken(code) {
 
 async function uploadYouTubeDireto(file, titulo, descricao) {
   if (!ytAccessToken) {
-    const doc = await db.collection('config').doc('youtube').get();
-    if (doc.exists && doc.data().refresh_token) {
-      const ok = await renovarAccessToken(doc.data().refresh_token);
+    const doc = const { data: _ytDoc } = await getSB().from('config').select('data').eq('id','youtube').single();
+    if (_ytDoc?.data?.refresh_token) {
+      const ok = await renovarAccessToken(_ytDoc.data.refresh_token);
       if (!ok) throw new Error('Não foi possível renovar o token. Clique em "Reconectar YouTube".');
     } else { throw new Error('YouTube não conectado. Clique em "Conectar YouTube" primeiro.'); }
   }
@@ -942,7 +949,7 @@ async function desconectarYouTube() {
   if (!confirm('Desconectar o YouTube? Você precisará reconectar para enviar vídeos.')) return;
   ytAccessToken = null;
   try {
-    await db.collection('config').doc('youtube').delete();
+    await getSB().from('config').delete().eq('id','youtube');
   } catch(e) {}
   atualizarBotaoYouTube();
   alert('YouTube desconectado. Clique em "Conectar YouTube" para reconectar.');
@@ -1015,12 +1022,8 @@ function aplicarPermissoesUI() {
 // Carrega dados do superadmin e lista de admins
 async function carregarAdmins() {
   try {
-    const snapshot = await db.collection('users').where('role', '==', 'admin').get();
-    const admins = [];
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      admins.push({ id: doc.id, ...d });
-    });
+    const snapshot = const { data: admins } = await getSB().from('users').select('*').eq('role','admin');
+    // admins already array
 
     // Stats
     document.getElementById('stat-total-admins').textContent = admins.length;
@@ -1028,18 +1031,17 @@ async function carregarAdmins() {
     document.getElementById('badge-admins').textContent = admins.length + ' admin' + (admins.length !== 1 ? 's' : '');
 
     // Conta alunos aprovados elegíveis (não são admins)
-    const alunosSnap = await db.collection('users').where('aprovado', '==', true).get();
+    const { data: _usersAprov } = await getSB().from('users').select('id,nome,email').eq('aprovado',true).neq('role','admin');
     let elegíveis = 0;
     const selectEl = document.getElementById('selectAlunoAdmin');
     selectEl.innerHTML = '<option value="">— Escolha um aluno aprovado —</option>';
 
-    alunosSnap.forEach(doc => {
-      const d = doc.data();
+    (_usersAprov || []).forEach(d => {
       if (d.role === 'admin') return;
       elegíveis++;
       const opt = document.createElement('option');
-      opt.value = doc.id;
-      opt.textContent = (d.nome || d.email || doc.id) + ' — ' + (d.email || '');
+      opt.value = d.id;
+      opt.textContent = (d.nome || d.email || d.id) + ' — ' + (d.email || '');
       opt.dataset.nome = d.nome || d.email || '';
       selectEl.appendChild(opt);
     });
@@ -1061,7 +1063,7 @@ async function carregarAdmins() {
 }
 
 function renderAdminCard(a) {
-  const av = avatarHtml(a.nome || a.email || '?', a.fotoUrl || null, 42);
+  const av = avatarHtml(a.nome || a.email || '?', a.foto_url || null, 42);
   const nome = a.nome || '—';
   const email = a.email || '—';
   const isSuperA = !a.permissoes; // null/undefined = superadmin (acesso total)
@@ -1111,12 +1113,7 @@ async function promoverAdmin() {
   if (!confirm('Promover ' + nomeAluno + ' a administrador com ' + perms.length + ' permissão(ões)?')) return;
 
   try {
-    await db.collection('users').doc(uid).update({
-      role: 'admin',
-      permissoes: perms,
-      promotedBy: window._adminUid,
-      promotedAt: new Date()
-    });
+    await getSB().from('users').update({ role:'admin', permissoes:perms, promoted_by:window._adminUid, promoted_at:new Date().toISOString() }).eq('id',uid);
     mostrarAlerta('alert-admins', '✅ ' + nomeAluno + ' é agora administrador!', 'success');
     // Reset form
     select.value = '';
@@ -1164,7 +1161,7 @@ async function salvarPermissoes() {
     .map(p => p.id);
   if (novasPerms.length === 0) { alert('❌ Selecione ao menos uma permissão.'); return; }
   try {
-    await db.collection('users').doc(_editingAdminId).update({ permissoes: novasPerms, updatedBy: window._adminUid, updatedAt: new Date() });
+    await getSB().from('users').update({ permissoes:novasPerms, promoted_by:window._adminUid, promoted_at:new Date().toISOString() }).eq('id',_editingAdminId);
     fecharModalPermissoes();
     mostrarAlerta('alert-admins', '✅ Permissões atualizadas!', 'success');
     carregarAdmins();
@@ -1175,9 +1172,7 @@ async function rebaixarAdmin() {
   if (!_editingAdminId) return;
   if (!confirm('Remover este administrador? Ele voltará a ser aluno.')) return;
   try {
-    await db.collection('users').doc(_editingAdminId).update({
-      role: 'aluno', permissoes: null, promotedBy: null, promotedAt: null
-    });
+    await getSB().from('users').update({ role:'aluno', permissoes:null, promoted_by:null, promoted_at:null }).eq('id',_editingAdminId);
     fecharModalPermissoes();
     mostrarAlerta('alert-admins', '✅ Admin removido, voltou a ser aluno.', 'success');
     carregarAdmins();
@@ -1188,21 +1183,21 @@ async function rebaixarAdmin() {
 // ══════════════════════════════════════════════
 // AUTENTICAÇÃO
 // ══════════════════════════════════════════════
-auth.onAuthStateChanged(async (user) => {
+getSB().auth.getSession().then(async ({ data: { session } }) => {
+  const user = session?.user;
   if (!user) { window.location.href = 'login.html'; return; }
   try {
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (!userDoc.exists || userDoc.data().role !== 'admin') {
+    const { data: adminData, error: _authErr } = await getSB().from('users').select('*').eq('id', user.id).single();
+    if (_authErr || !adminData || adminData.role !== 'admin') {
       alert('❌ Acesso negado.');
-      await auth.signOut();
+      await getSB().auth.signOut();
       window.location.href = 'login.html';
       return;
     }
-    const adminData = userDoc.data();
-    window._adminNome = adminData.nome || user.displayName || user.email.split('@')[0];
-    window._adminUid = user.uid;
+    window._adminNome = adminData.nome || user.user_metadata?.full_name || user.email.split('@')[0];
+    window._adminUid = user.id;
     window._adminEmail = user.email;
-    window._adminFotoUrl = adminData.fotoUrl || null;
+    window._adminFotoUrl = adminData.foto_url || user.user_metadata?.avatar_url || null;
 
     // Permissões: null/undefined = superadmin (acesso total); array = admin com restrições
     const perms = adminData.permissoes;
@@ -1242,7 +1237,7 @@ function switchTab(tabName) {
   else if (tabName === 'admins') carregarAdmins();
 }
 
-function logout() { if (confirm('Deseja realmente sair?')) { auth.signOut(); window.location.href = 'login.html'; } }
+function logout() { if (confirm('Deseja realmente sair?')) { getSB().auth.signOut(); window.location.href = 'login.html'; } }
 
 function mostrarAlerta(id, mensagem, tipo) {
   const el = document.getElementById(id);
@@ -1374,15 +1369,15 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
     }
     const titulo = document.getElementById('postTitulo').value.trim();
     if (!titulo) { alert('❌ Preencha o título do post'); throw new Error('Título obrigatório'); }
-    await db.collection('posts').add({
+    const { data: _newPost, error: _postErr } .select().single();= await getSB().from('posts').insert({
       titulo, texto: document.getElementById('postTexto').value.trim(),
       categoria: document.getElementById('postCategoria').value,
       link: document.getElementById('postLink').value || null,
-      midiaURL: finalMidiaURL, midiaTipo, youtubeEmbedURL,
-      youtubeVideoId: youtubeVideoId || null, driveFileId: driveFileId || null,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-      autor: window._adminNome || auth.currentUser.displayName || 'Admin',
-      autorUid: window._adminUid || auth.currentUser.uid
+      midia_url: finalMidiaURL, midia_tipo: midiaTipo, youtube_embed_url: youtubeEmbedURL,
+      youtube_video_id: youtubeVideoId || null, drive_file_id: driveFileId || null,
+      criado_em: new Date().toISOString(),
+      autor: window._adminNome || window._adminNome || 'Admin',
+      autorUid: window._adminUid || window._adminUid
     });
     mostrarAlerta('alert-post', '✅ Post publicado com sucesso!', 'success');
     document.getElementById('formPost').reset();
@@ -1403,16 +1398,16 @@ document.getElementById('formPost').addEventListener('submit', async (e) => {
 function buildPostItemHTML(doc, isNovo) {
   const post = doc.data ? doc.data() : doc;
   const postId = doc.id || post.id;
-  const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR') : 'Agora';
+  const data = post.criado_em ? new Date(post.criado_em).toLocaleDateString('pt-BR') : 'Agora';
 
   let midiaHTML = '';
-  if (post.youtubeEmbedURL) {
+  if (post.youtube_embed_url) {
     midiaHTML = `<div style="position:relative;width:280px;height:158px;background:#000;border-radius:10px;overflow:hidden;flex-shrink:0;">
-      <iframe src="${post.youtubeEmbedURL}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+      <iframe src="${post.youtube_embed_url}" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
     </div>`;
-  } else if (post.midiaURL && post.midiaTipo === 'imagem') {
-    midiaHTML = `<img src="${post.midiaURL}" class="post-image" alt="${post.titulo}" onerror="this.style.display='none'">`;
-  } else if (post.midiaURL && post.midiaTipo === 'pdf') {
+  } else if (post.midia_url && post.midia_tipo === 'imagem') {
+    midiaHTML = `<img src="${post.midia_url}" class="post-image" alt="${post.titulo}" onerror="this.style.display='none'">`;
+  } else if (post.midia_url && post.midia_tipo === 'pdf') {
     midiaHTML = `<div style="width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;">📄</div>`;
   }
 
@@ -1430,7 +1425,7 @@ function buildPostItemHTML(doc, isNovo) {
       ${(post.texto||'').trim() ? `<div class="post-desc" style="font-size:12px;color:var(--text-muted);line-height:1.5;margin:4px 0 6px;font-style:italic;"><span style="color:var(--blue);font-style:normal;font-weight:700;font-size:11px;">DESCRIÇÃO</span> ${(post.texto||'').substring(0,140)}${(post.texto||'').length>140?'…':''}</div>` : ''}
       <div class="post-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         📅 ${data} • 📁 ${post.categoria} • ✍️ ${post.autor||'Admin'}
-        ${post.youtubeEmbedURL ? '<span class="yt-badge">▶ YouTube</span>' : ''}
+        ${post.youtube_embed_url ? '<span class="yt-badge">▶ YouTube</span>' : ''}
       </div>
       <div class="post-actions">
         <button class="btn btn-sm" onclick="toggleComentariosAdmin('${postId}')" style="background:var(--blue);color:#fff;">
@@ -1452,85 +1447,29 @@ function buildPostItemHTML(doc, isNovo) {
   </div>`;
 }
 
-function carregarPosts() {
+async function carregarPosts() {
   const container = document.getElementById('posts-list');
   if (!container) return;
 
-  if (window._postsListener) { window._postsListener(); window._postsListener = null; }
+  if (window._postsChannel) { getSB().removeChannel(window._postsChannel); window._postsChannel = null; }
   container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando posts...</p></div>';
 
-  try {
-    window._postsListener = db.collection('posts')
-      .orderBy('criadoEm', 'desc')
-      .limit(50)
-      .onSnapshot(snapshot => {
-        if (snapshot.empty) {
-          container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px;">Nenhum post ainda.</p>';
-          return;
-        }
-
-        const isFirstLoad = !container.querySelector('.post-item');
-
-        snapshot.docChanges().forEach(change => {
-          const doc = change.doc;
-          const id = doc.id;
-
-          if (change.type === 'added') {
-            if (isFirstLoad) return; // handled by full render below
-            const html = buildPostItemHTML(doc, true);
-            const tmp = document.createElement('div');
-            tmp.innerHTML = html;
-            const el = tmp.firstElementChild;
-            if (el) {
-              container.prepend(el);
-              // Remove empty-state if present
-              container.querySelectorAll('p').forEach(p => { if (p.textContent.includes('Nenhum post')) p.remove(); });
-            }
-
-          } else if (change.type === 'modified') {
-            const existing = document.getElementById('post-item-' + id);
-            if (existing) {
-              const html = buildPostItemHTML(doc, false);
-              const tmp = document.createElement('div');
-              tmp.innerHTML = html;
-              const el = tmp.firstElementChild;
-              if (el) {
-                el.style.animation = 'fadeIn .3s ease';
-                existing.replaceWith(el);
-              }
-            }
-
-          } else if (change.type === 'removed') {
-            const existing = document.getElementById('post-item-' + id);
-            if (existing) {
-              existing.style.transition = 'all .35s ease';
-              existing.style.opacity = '0';
-              existing.style.transform = 'translateY(-10px) scale(0.97)';
-              existing.style.maxHeight = existing.offsetHeight + 'px';
-              setTimeout(() => {
-                existing.style.maxHeight = '0';
-                existing.style.margin = '0';
-                existing.style.padding = '0';
-                existing.style.overflow = 'hidden';
-                setTimeout(() => existing.remove(), 350);
-              }, 10);
-            }
-          }
-        });
-
-        if (isFirstLoad) {
-          let html = '';
-          snapshot.forEach(doc => { html += buildPostItemHTML(doc, false); });
-          container.innerHTML = html || '<p style="text-align:center;color:var(--text-muted);padding:40px;">Nenhum post ainda.</p>';
-        }
-
-      }, err => {
-        console.error('Erro posts:', err);
-        container.innerHTML = '<p style="color:var(--red);padding:20px;">❌ Erro ao carregar posts.</p>';
-      });
-  } catch(error) {
-    console.error('Erro posts:', error);
+  async function _renderPosts() {
+    const { data: postsData, error } = await getSB()
+      .from('posts').select('*').order('criado_em', { ascending: false }).limit(50);
+    if (error) { container.innerHTML = '<p style="color:var(--red);padding:20px;">❌ Erro ao carregar posts.</p>'; return; }
+    if (!postsData?.length) { container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px;">Nenhum post ainda.</p>'; return; }
+    const snapshot = { docs: postsData.map(d => ({ id: d.id, data: () => d })), empty: false };
+    container.innerHTML = snapshot.docs.map(doc => buildPostItemHTML(doc, false)).join('');
   }
+
+  await _renderPosts();
+
+  // Realtime subscription
+  window._postsChannel = getSB()
+    .channel('admin-posts')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => _renderPosts())
+    .subscribe();
 }
 
 function toggleComentariosAdmin(postId) {
@@ -1552,41 +1491,25 @@ function iniciarListenerAdmin(postId) {
   const countEl = document.getElementById('count-admin-' + postId);
   lista.innerHTML = '<p style="text-align:center;padding:16px;color:#64748b;font-size:13px;">Carregando...</p>';
 
-  const unsub = db.collection('posts').doc(postId).collection('comentarios')
-    .orderBy('criadoEm', 'asc')
-    .onSnapshot(snapshot => {
-      if (countEl) countEl.textContent = snapshot.size;
-      if (snapshot.empty) {
-        lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>';
-        return;
-      }
-
-      // Detecta novos docs para animar
-      const novos = new Set();
-      snapshot.docChanges().forEach(change => {
-        if (change.type === 'added') novos.add(change.doc.id);
-      });
-
-      let html = '';
-      snapshot.forEach(doc => {
-        html += renderComentarioAdmin(postId, doc.id, doc.data(), novos.has(doc.id));
-      });
-      lista.innerHTML = html;
-
-      // Avatars nos forms de resposta
-      snapshot.forEach(doc => {
-        const el = document.getElementById('respAdminAv-' + doc.id);
-        if (!el) return;
-        if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-        else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
-      });
-
-      // Scroll suave para novo comentário
-      if (novos.size > 0 && lista.children.length > 0) {
-        const lastNew = lista.querySelector('.novo-comentario');
-        if (lastNew) lastNew.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }, err => {
+  const unsub = null; // realtime disabled, using polling
+  async function _recarregarComentariosAdmin() {
+    const { data: _coments } = await getSB().from('comentarios').select('*').eq('post_id',postId).order('criado_em',{ascending:true});
+    const docs = _coments || [];
+    if (countEl) countEl.textContent = docs.length;
+    if (!docs.length) {
+      lista.innerHTML = '<p style="text-align:center;padding:16px;color:var(--text-muted);">Nenhum comentário ainda.</p>';
+      return;
+    }
+    let html = '';
+    docs.forEach(d => { html += renderComentarioAdmin(postId, d.id, d, false); });
+    lista.innerHTML = html;
+    docs.forEach(d => {
+      const el = document.getElementById('respAdminAv-' + d.id);
+      if (!el) return;
+      if (window._adminFotoUrl) el.innerHTML = '<img src="' + window._adminFotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      else el.textContent = (window._adminNome||'A').charAt(0).toUpperCase();
+    });
+  }, err => {
       lista.innerHTML = '<p style="color:var(--red);padding:16px;">Erro: ' + err.message + '</p>';
     });
 
@@ -1594,16 +1517,16 @@ function iniciarListenerAdmin(postId) {
 }
 
 function renderComentarioAdmin(postId, docId, co, isNovo) {
-  const dateCriado = co.criadoEm ? co.criadoEm.toDate() : null;
+  const dateCriado = co.criado_em ? new Date(co.criado_em) : null;
   const tempo = tempoRelativo(dateCriado);
   const nomeAutor = co.autor || 'Aluno';
-  const av = avatarHtml(nomeAutor, co.fotoUrl || null, 34);
+  const av = avatarHtml(nomeAutor, co.foto_url || null, 34);
 
   // Respostas
   let respostasHtml = '';
   if (co.respostas && co.respostas.length > 0) {
     co.respostas.forEach((r, idx) => {
-      const rTempo = tempoRelativo(r.criadoEm);
+      const rTempo = tempoRelativo(r.criadoEm ? new Date(r.criadoEm) : null);
       const rAv = avatarHtml(r.autor||'?', r.fotoUrl||null, 28);
       respostasHtml += `<div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;background:rgba(99,102,241,0.06);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;">
         ${rAv}
@@ -1625,16 +1548,16 @@ function renderComentarioAdmin(postId, docId, co, isNovo) {
   const animStyle = isNovo ? 'animation:slideInComment 0.35s cubic-bezier(0.4,0,0.2,1);' : '';
 
   return `<div class="${animClass}" style="${animStyle}display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:14px;border-radius:10px;margin-bottom:10px;transition:all 0.2s;">
-    <div onclick="verInfoUsuario('${co.autorId||''}','${nomeAutor}')" title="Ver info" style="cursor:pointer;border:2px solid transparent;border-radius:50%;transition:border .2s;flex-shrink:0;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${av}</div>
+    <div onclick="verInfoUsuario('${co.autor_id||''}','${nomeAutor}')" title="Ver info" style="cursor:pointer;border:2px solid transparent;border-radius:50%;transition:border .2s;flex-shrink:0;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='transparent'">${av}</div>
     <div style="flex:1;min-width:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <strong style="color:var(--accent);font-size:13px;">${nomeAutor}</strong>
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:11px;color:var(--text-muted);" title="${dateCriado ? dateCriado.toLocaleString('pt-BR') : ''}">${tempo}</span>
-          ${(window._isSuperAdmin || temPermissao('comentarios') || co.autorId === window._adminUid) ? `<button onclick="deletarComentarioAdmin('${postId}','${docId}','${co.autorId||''}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;" title="Deletar comentário">🗑️</button>` : ''}
+          ${(window._isSuperAdmin || temPermissao('comentarios') || co.autor_id === window._adminUid) ? `<button onclick="deletarComentarioAdmin('${postId}','${docId}','${co.autor_id||''}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;" title="Deletar comentário">🗑️</button>` : ''}
         </div>
       </div>
-      <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">${co.texto}${co.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+      <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">${co.texto}${co.editado_em ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
       ${respostasHtml}
       <div id="form-resposta-admin-${docId}" style="display:none;margin-top:10px;">
         <div style="display:flex;gap:8px;align-items:flex-start;">
@@ -1669,13 +1592,13 @@ async function enviarRespostaAdmin(postId, comentarioId) {
     const resposta = {
       texto,
       autor: window._adminNome || 'Admin',
-      autorId: auth.currentUser.uid,
-      fotoUrl: window._adminFotoUrl || null,
-      criadoEm: new Date().toISOString()
+      autor_id: window._adminUid,
+      foto_url: window._adminFotoUrl || null,
+      criado_em: new Date().toISOString()
     };
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({
-      respostas: firebase.firestore.FieldValue.arrayUnion(resposta)
-    });
+    const { data: _cDoc } = await getSB().from('comentarios').select('respostas').eq('id',comentarioId).single();
+    const _resps = _cDoc?.respostas || []; _resps.push(resposta);
+    await getSB().from('comentarios').update({ respostas: _resps }).eq('id',comentarioId);
     textarea.value = '';
     document.getElementById('form-resposta-admin-' + comentarioId).style.display = 'none';
     // onSnapshot atualiza automaticamente
@@ -1690,10 +1613,10 @@ async function deletarRespostaAdmin(postId, comentarioId, idx, autorId) {
   }
   if (!confirm('Deletar esta resposta?')) return;
   try {
-    const docRef = db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId);
-    const snap = await docRef.get();
-    const respostas = snap.data().respostas || [];
+    const { data: _crFix } = await getSB().from('comentarios').select('respostas').eq('id',comentarioId).single();
+    const respostas = _crFix?.respostas || [];
     respostas.splice(idx, 1);
+    await getSB().from('comentarios').update({ respostas }).eq('id',comentarioId);
     await docRef.update({ respostas });
     // onSnapshot atualiza automaticamente
   } catch (err) { alert('Erro ao deletar resposta'); }
@@ -1707,12 +1630,12 @@ async function enviarComentarioAdmin(postId) {
   try {
     textarea.disabled = true;
     if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
-    await db.collection('posts').doc(postId).collection('comentarios').add({
+    await getSB().from('comentarios').insert({ post_id: postId,
       texto,
-      autor: window._adminNome || auth.currentUser.displayName || 'Admin',
-      autorId: auth.currentUser.uid,
-      fotoUrl: window._adminFotoUrl || null,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      autor: window._adminNome || window._adminNome || 'Admin',
+      autor_id: window._adminUid,
+      foto_url: window._adminFotoUrl || null,
+      criado_em: new Date().toISOString()
     });
     textarea.value = '';
     // onSnapshot atualiza automaticamente — sem recarregar
@@ -1728,7 +1651,7 @@ async function deletarComentarioAdmin(postId, comentarioId, autorId) {
   }
   if (!confirm('Deletar este comentário?')) return;
   try {
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete();
+    await getSB().from('comentarios').delete().eq('id',comentarioId);
     // onSnapshot atualiza automaticamente
   } catch (err) { alert('Erro ao deletar'); }
 }
@@ -1742,14 +1665,14 @@ let _todosAlunos = [];
 
 async function carregarUsuarios() {
   try {
-    const snapshot = await db.collection('users').get();
+    const snapshot = const { data: _allUsers } = await getSB().from('users').select('*');
     _todosAlunos = [];
     let pendentes = [];
 
-    snapshot.forEach(doc => {
-      const user = doc.data();
+    (_allUsers||[]).forEach(doc => {
+      const user = doc;
       if (user.role === 'admin') return;
-      const entry = { id: doc.id, ...user };
+      const entry = { id: doc.id || user.id, ...user };
       if (user.aprovado) _todosAlunos.push(entry);
       else pendentes.push(entry);
     });
@@ -1852,19 +1775,19 @@ function exportarAlunos() {
 }
 async function aprovarUsuario(uid) {
   if (!temPermissao('alunos')) { alert('❌ Sem permissão.'); return; }
-  try { await db.collection('users').doc(uid).update({ aprovado: true }); mostrarAlerta('alert-aprovacao','✅ Aprovado!','success'); carregarUsuarios(); }
+  try { await getSB().from('users').update({ aprovado:true }).eq('id',uid); mostrarAlerta('alert-aprovacao','✅ Aprovado!','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro ao aprovar','error'); }
 }
 async function rejeitarUsuario(uid) {
   if (!temPermissao('alunos')) { alert('❌ Sem permissão.'); return; }
   if (!confirm('Rejeitar e excluir este usuário?')) return;
-  try { await db.collection('users').doc(uid).delete(); mostrarAlerta('alert-aprovacao','✅ Rejeitado','success'); carregarUsuarios(); }
+  try { await getSB().from('users').delete().eq('id',uid); mostrarAlerta('alert-aprovacao','✅ Rejeitado','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
 }
 async function revogarAprovacao(uid) {
   if (!temPermissao('alunos')) { alert('❌ Sem permissão.'); return; }
   if (!confirm('Revogar aprovação?')) return;
-  try { await db.collection('users').doc(uid).update({ aprovado: false }); mostrarAlerta('alert-aprovacao','✅ Revogado','success'); carregarUsuarios(); }
+  try { await getSB().from('users').update({ aprovado:false }).eq('id',uid); mostrarAlerta('alert-aprovacao','✅ Revogado','success'); carregarUsuarios(); }
   catch (err) { mostrarAlerta('alert-aprovacao','❌ Erro','error'); }
 }
 
@@ -1967,21 +1890,21 @@ async function deletarPost(postId) {
   if (!confirm('Excluir este post permanentemente? Esta ação não pode ser desfeita.')) return;
   try {
     // Busca o post para verificar se tem vídeo no YouTube
-    const postDoc = await db.collection('posts').doc(postId).get();
-    const postData = postDoc.exists ? postDoc.data() : null;
-    const videoId = postData?.youtubeVideoId || null;
+    const postDoc = const { data: _postDoc } = await getSB().from('posts').select('youtube_video_id').eq('id',postId).single();
+    const postData = _postDoc;
+    const videoId = postData?.youtube_video_id || null;
 
-    // Apaga do Firestore
-    await db.collection('posts').doc(postId).delete();
+    // Apaga do Supabase
+    await getSB().fromlection('posts').doc(postId).delete();
 
     // Se tinha vídeo no YouTube, apaga também
     if (videoId) {
       try {
         // Garante token válido
         if (!ytAccessToken) {
-          const cfgDoc = await db.collection('config').doc('youtube').get();
-          if (cfgDoc.exists && cfgDoc.data().refresh_token) {
-            await renovarAccessToken(cfgDoc.data().refresh_token);
+          const cfgDoc = const { data: _cfgDoc } = await getSB().from('config').select('data').eq('id','youtube').single();
+          if (_cfgDoc?.data?.refresh_token) {
+            await renovarAccessToken(_cfgDoc.data.refresh_token);
           }
         }
         if (ytAccessToken) {
@@ -1994,7 +1917,9 @@ async function deletarPost(postId) {
           if (data.success) {
             console.log('[YT] Vídeo deletado:', videoId);
           } else {
-            console.warn('[YT] Falha ao deletar vídeo:', data.error);
+            console.warn('[YT] Falha ao deletar vídeo:', data.error, data.detail || '');
+            // Informa o admin mas não bloqueia
+            if (data.hint) console.warn('[YT] Dica:', data.hint);
           }
         }
       } catch (ytErr) {
@@ -2011,9 +1936,8 @@ async function deletarPost(postId) {
 let _editPostCache = {};
 
 function abrirEditarPost(postId) {
-  db.collection('posts').doc(postId).get().then(doc => {
-    if (!doc.exists) { alert('Post não encontrado.'); return; }
-    const p = doc.data();
+  getSB().from('posts').select('*').eq('id',postId).single().then(({data:p,error:_e}) => {
+    if (_e || !p) { alert('Post não encontrado.'); return; }
     _editPostCache = { id: postId, ...p };
     document.getElementById('editPostId').value = postId;
     document.getElementById('editPostTitulo').value = p.titulo || '';
@@ -2037,14 +1961,14 @@ async function salvarEdicaoPost() {
   if (!titulo) { mostrarAlerta('alert-edit-post', '❌ Título obrigatório.', 'error'); return; }
 
   try {
-    await db.collection('posts').doc(postId).update({
+    await getSB().from('posts').update({
       titulo,
       texto: document.getElementById('editPostTexto').value.trim(),
       categoria: document.getElementById('editPostCategoria').value,
       link: document.getElementById('editPostLink').value.trim() || null,
-      editadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-      editadoPor: window._adminNome || 'Admin'
-    });
+      editado_em: new Date().toISOString(),
+      editado_por: window._adminNome || 'Admin'
+    }).eq('id', postId);;
     mostrarAlerta('alert-edit-post', '✅ Post atualizado!', 'success');
     setTimeout(() => fecharEditarPost(), 1200);
   } catch (err) {

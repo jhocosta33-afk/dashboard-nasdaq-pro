@@ -280,15 +280,15 @@ h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(
   <img id="modalImage" src="" alt="" onclick="event.stopPropagation()">
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 
 <script>
 let todosOsPosts = [];
 let filtroAtual = 'todos';
 let usuarioAtual = null;
+let _realtimeChannel = null;
+let _listeners = {};
 
 const categoriaLabels = {
   'sala-ao-vivo': '🔴 Sala ao Vivo',
@@ -299,124 +299,113 @@ const categoriaLabels = {
   'link':         '🔗 Link'
 };
 
-// ── AUTENTICAÇÃO ──
-auth.onAuthStateChanged(async (user) => {
-  if (!user) { window.location.href = 'login.html'; return; }
+// ── AGUARDA SUPABASE E INICIALIZA ──
+document.addEventListener('supabase-ready', inicializar);
+if (window._supabase) inicializar();
+
+async function inicializar() {
+  const sb = window._supabase;
+
+  // ── AUTENTICAÇÃO ──
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  const user = session.user;
   try {
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (!userDoc.exists) { await auth.signOut(); window.location.href = 'login.html'; return; }
-    const userData = userDoc.data();
+    const { data: userData, error } = await sb.from('users').select('*').eq('id', user.id).single();
+    if (error || !userData) { await sb.auth.signOut(); window.location.href = 'login.html'; return; }
+
     if (userData.role === 'admin') {
-      // Se veio do admin ou está visualizando como aluno, permite ficar
       const fromAdmin = new URLSearchParams(window.location.search).get('from') === 'admin';
       const vistaAluno = localStorage.getItem('nasdaqpro_vista_preferencia') === 'aluno';
       if (!fromAdmin && !vistaAluno) { window.location.href = 'admin.html'; return; }
-      // Mostra botão de voltar ao admin
       const btnVoltar = document.getElementById('btnVoltarAdmin');
       if (btnVoltar) btnVoltar.style.display = '';
     }
     if (userData.aprovado !== true) {
       alert('⏳ Sua conta ainda aguarda aprovação.');
-      await auth.signOut(); window.location.href = 'login.html'; return;
+      await sb.auth.signOut(); window.location.href = 'login.html'; return;
     }
-    usuarioAtual = { uid: user.uid, nome: userData.nome || user.displayName || user.email.split('@')[0], email: user.email, fotoUrl: userData.fotoUrl || null };
+
+    usuarioAtual = {
+      uid: user.id,
+      nome: userData.nome || user.user_metadata?.full_name || user.email.split('@')[0],
+      email: user.email,
+      fotoUrl: userData.foto_url || user.user_metadata?.avatar_url || null
+    };
     document.getElementById('userName').textContent = usuarioAtual.nome;
     document.getElementById('welcomeMsg').textContent = `Bem-vindo de volta, ${usuarioAtual.nome.split(' ')[0]}! 👋`;
     atualizarAvatarUI();
     carregarPosts();
   } catch (err) {
     console.error('Erro auth:', err);
-    usuarioAtual = { uid: user.uid, nome: user.displayName || 'Aluno', email: user.email, fotoUrl: null };
+    usuarioAtual = { uid: user.id, nome: user.email.split('@')[0], email: user.email, fotoUrl: null };
     carregarPosts();
   }
-});
+}
 
-// ── CARREGAR POSTS DO FIRESTORE (real-time) ──
-let _postsListener = null;
-let _primeiraCarrga = true;
-
-function carregarPosts() {
+// ── CARREGAR POSTS (realtime via Supabase) ──
+async function carregarPosts() {
+  const sb = window._supabase;
   const container = document.getElementById('posts-container');
   if (!container) return;
 
-  if (_postsListener) { _postsListener(); _postsListener = null; }
-  _primeiraCarrga = true;
+  // Cancela listener anterior
+  if (_realtimeChannel) { sb.removeChannel(_realtimeChannel); _realtimeChannel = null; }
   todosOsPosts = [];
-
   container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><p>Carregando publicações...</p></div>';
 
-  _postsListener = db.collection('posts')
-    .orderBy('criadoEm', 'desc')
-    .onSnapshot(snapshot => {
+  // Carga inicial
+  const { data: posts, error } = await sb
+    .from('posts')
+    .select('*')
+    .order('criado_em', { ascending: false });
 
-      if (_primeiraCarrga) {
-        // Primeira carga: usa snapshot.docs que já vem na ordem certa (desc)
-        todosOsPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        _primeiraCarrga = false;
+  if (error) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Erro ao carregar. Tente recarregar.</p></div>';
+    return;
+  }
+  todosOsPosts = posts || [];
+  renderizarPosts();
+
+  // Realtime
+  _realtimeChannel = sb
+    .channel('posts-changes')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
+      const existe = todosOsPosts.findIndex(p => p.id === payload.new.id);
+      if (existe === -1) {
+        todosOsPosts.unshift(payload.new);
         renderizarPosts();
-        return;
+        setTimeout(() => {
+          const card = document.getElementById('card-' + payload.new.id);
+          if (card) { card.style.animation = 'slideInPost .4s cubic-bezier(0.34,1.56,0.64,1)'; card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        }, 50);
       }
-
-      // Atualizações em tempo real após a primeira carga
-      snapshot.docChanges().forEach(change => {
-        const id = change.doc.id;
-        const data = { id, ...change.doc.data() };
-
-        if (change.type === 'added') {
-          // Novo post — insere no início (mais recente)
-          const existe = todosOsPosts.findIndex(p => p.id === id);
-          if (existe === -1) todosOsPosts.unshift(data);
-          // Anima entrada
-          renderizarPosts();
-          setTimeout(() => {
-            const card = document.getElementById('card-' + id);
-            if (card) {
-              card.style.animation = 'slideInPost .4s cubic-bezier(0.34,1.56,0.64,1)';
-              card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 50);
-
-        } else if (change.type === 'modified') {
-          const idx = todosOsPosts.findIndex(p => p.id === id);
-          if (idx !== -1) todosOsPosts[idx] = data;
-          const card = document.getElementById('card-' + id);
-          if (card) {
-            const tmp = document.createElement('div');
-            tmp.innerHTML = montarPostHTML(data);
-            const novoCard = tmp.firstElementChild;
-            if (novoCard) {
-              novoCard.style.animation = 'fadeIn .3s ease';
-              card.replaceWith(novoCard);
-            }
-          }
-
-        } else if (change.type === 'removed') {
-          todosOsPosts = todosOsPosts.filter(p => p.id !== id);
-          const card = document.getElementById('card-' + id);
-          if (card) {
-            card.style.transition = 'all .35s ease';
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(-12px) scale(0.97)';
-            card.style.maxHeight = card.offsetHeight + 'px';
-            setTimeout(() => {
-              card.style.maxHeight = '0';
-              card.style.margin = '0';
-              card.style.padding = '0';
-              card.style.overflow = 'hidden';
-              setTimeout(() => {
-                card.remove();
-                const posts = filtroAtual === 'todos' ? todosOsPosts : todosOsPosts.filter(p => p.categoria === filtroAtual);
-                if (posts.length === 0) renderizarPosts();
-              }, 350);
-            }, 10);
-          }
-        }
-      });
-
-    }, err => {
-      console.error('Erro posts listener:', err);
-      container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Erro ao carregar. Tente recarregar.</p></div>';
-    });
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'posts' }, payload => {
+      const idx = todosOsPosts.findIndex(p => p.id === payload.new.id);
+      if (idx !== -1) { todosOsPosts[idx] = payload.new; }
+      const card = document.getElementById('card-' + payload.new.id);
+      if (card) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = montarPostHTML(payload.new);
+        const novoCard = tmp.firstElementChild;
+        if (novoCard) { novoCard.style.animation = 'fadeIn .3s ease'; card.replaceWith(novoCard); }
+      }
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'posts' }, payload => {
+      todosOsPosts = todosOsPosts.filter(p => p.id !== payload.old.id);
+      const card = document.getElementById('card-' + payload.old.id);
+      if (card) {
+        card.style.transition = 'all .35s ease'; card.style.opacity = '0'; card.style.transform = 'translateY(-12px) scale(0.97)';
+        card.style.maxHeight = card.offsetHeight + 'px';
+        setTimeout(() => {
+          card.style.maxHeight = '0'; card.style.margin = '0'; card.style.padding = '0'; card.style.overflow = 'hidden';
+          setTimeout(() => { card.remove(); if (todosOsPosts.length === 0) renderizarPosts(); }, 350);
+        }, 10);
+      }
+    })
+    .subscribe();
 }
 
 // ── RENDERIZAR ──
@@ -431,24 +420,21 @@ function renderizarPosts() {
 }
 
 function montarPostHTML(post) {
-  const data = post.criadoEm ? post.criadoEm.toDate().toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' }) : '';
+  const data = post.criado_em ? new Date(post.criado_em).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' }) : '';
   const catLabel = categoriaLabels[post.categoria] || post.categoria || 'Geral';
-
   let midiaHTML = '';
-  if (post.youtubeEmbedURL) {
-    midiaHTML = `<div class="post-video-wrap"><iframe src="${post.youtubeEmbedURL}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-  } else if (post.midiaURL && post.midiaTipo === 'video') {
-    const driveMatch = post.midiaURL.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (driveMatch) {
-      midiaHTML = `<div class="post-video-wrap"><iframe src="https://drive.google.com/file/d/${driveMatch[1]}/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div><p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;text-align:center;">⚠️ Se o vídeo não carregar, pode ainda estar sendo processado.</p>`;
-    }
-  } else if (post.midiaURL && post.midiaTipo === 'pdf') {
-    const downloadURL = post.driveFileId ? `https://drive.google.com/uc?export=download&id=${post.driveFileId}` : post.midiaURL;
-    midiaHTML = `<div class="post-file-box"><span class="post-file-icon">📄</span><div class="post-file-info"><strong>Arquivo Anexado</strong><span>Clique para baixar</span></div><a href="${downloadURL}" download target="_blank" class="btn btn-primary">📥 Baixar</a></div>`;
-  } else if (post.midiaURL) {
-    midiaHTML = `<img src="${post.midiaURL}" alt="${post.titulo}" class="post-media-img" onclick="abrirImagemModal('${post.midiaURL}')" loading="lazy" onerror="this.style.display='none'">`;
+  if (post.youtube_embed_url || post.youtube_embed_url) {
+    const url = post.youtube_embed_url || post.youtube_embed_url;
+    midiaHTML = `<div class="post-video-wrap"><iframe src="${url}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  } else if (post.midia_url && post.midia_tipo === 'video') {
+    const driveMatch = (post.midia_url).match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveMatch) midiaHTML = `<div class="post-video-wrap"><iframe src="https://drive.google.com/file/d/${driveMatch[1]}/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`;
+  } else if (post.midia_url && post.midia_tipo === 'pdf') {
+    const dl = post.drive_file_id ? `https://drive.google.com/uc?export=download&id=${post.drive_file_id}` : post.midia_url;
+    midiaHTML = `<div class="post-file-box"><span class="post-file-icon">📄</span><div class="post-file-info"><strong>Arquivo Anexado</strong><span>Clique para baixar</span></div><a href="${dl}" download target="_blank" class="btn btn-primary">📥 Baixar</a></div>`;
+  } else if (post.midia_url) {
+    midiaHTML = `<img src="${post.midia_url}" alt="${post.titulo}" class="post-media-img" onclick="abrirImagemModal('${post.midia_url}')" loading="lazy" onerror="this.style.display='none'">`;
   }
-
   return `
     <div class="post-card" id="card-${post.id}">
       <div class="post-content">
@@ -484,13 +470,8 @@ function montarPostHTML(post) {
 function aplicarFiltro(categoria, btnEl) {
   filtroAtual = categoria;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  if (btnEl) {
-    btnEl.classList.add('active');
-  } else {
-    document.querySelectorAll('.filter-btn').forEach(b => {
-      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + categoria + "'")) b.classList.add('active');
-    });
-  }
+  if (btnEl) btnEl.classList.add('active');
+  else document.querySelectorAll('.filter-btn').forEach(b => { if (b.getAttribute('onclick')?.includes("'" + categoria + "'")) b.classList.add('active'); });
   document.getElementById('posts-topo').scrollIntoView({ behavior: 'smooth' });
   renderizarPosts();
 }
@@ -509,11 +490,8 @@ function atualizarAvatarUI() {
 function abrirPerfil() {
   document.getElementById('inputNomePerfil').value = usuarioAtual.nome;
   document.getElementById('inputEmailPerfil').value = usuarioAtual.email || '';
-  if (usuarioAtual.fotoUrl) {
-    document.getElementById('avatarBig').innerHTML = `<img src="${usuarioAtual.fotoUrl}" alt="foto">`;
-  } else {
-    document.getElementById('avatarBig').innerHTML = `<span id="avatarBigLetra">${usuarioAtual.nome.charAt(0).toUpperCase()}</span>`;
-  }
+  if (usuarioAtual.fotoUrl) document.getElementById('avatarBig').innerHTML = `<img src="${usuarioAtual.fotoUrl}" alt="foto">`;
+  else document.getElementById('avatarBig').innerHTML = `<span id="avatarBigLetra">${usuarioAtual.nome.charAt(0).toUpperCase()}</span>`;
   document.getElementById('msgPerfil').style.display = 'none';
   document.getElementById('modalPerfil').classList.add('open');
 }
@@ -526,13 +504,15 @@ function previsualizarFoto(input) {
   reader.readAsDataURL(file);
 }
 async function salvarPerfil() {
+  const sb = window._supabase;
   const nome = document.getElementById('inputNomePerfil').value.trim();
   if (!nome) { alert('Preencha o nome'); return; }
   const msgEl = document.getElementById('msgPerfil');
   try {
     const update = { nome };
-    if (usuarioAtual._fotoTemp) update.fotoUrl = usuarioAtual._fotoTemp;
-    await db.collection('users').doc(usuarioAtual.uid).update(update);
+    if (usuarioAtual._fotoTemp) update.foto_url = usuarioAtual._fotoTemp;
+    const { error } = await sb.from('users').update(update).eq('id', usuarioAtual.uid);
+    if (error) throw error;
     usuarioAtual.nome = nome;
     if (usuarioAtual._fotoTemp) { usuarioAtual.fotoUrl = usuarioAtual._fotoTemp; delete usuarioAtual._fotoTemp; }
     document.getElementById('userName').textContent = nome;
@@ -542,19 +522,17 @@ async function salvarPerfil() {
   } catch(e) { msgEl.textContent = '❌ Erro ao salvar'; msgEl.style.color='#ef4444'; msgEl.style.display='block'; }
 }
 
-// ── COMENTÁRIOS (onSnapshot — tempo real) ──
-const _listeners = {};
-
+// ── COMENTÁRIOS (realtime via Supabase) ──
 function tempoRelativo(date) {
   if (!date) return '';
-  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const diff = Math.floor((Date.now() - d.getTime()) / 1000);
   if (diff < 60) return 'agora mesmo';
   if (diff < 3600) return `há ${Math.floor(diff/60)} min`;
   if (diff < 86400) return `há ${Math.floor(diff/3600)}h`;
   if (diff < 604800) return `há ${Math.floor(diff/86400)} dia${Math.floor(diff/86400)>1?'s':''}`;
-  return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
 }
-
 function avatarHTML(nome, fotoUrl, size=34) {
   const s = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;`;
   if (fotoUrl) return `<div style="${s}background:linear-gradient(135deg,#6366f1,#22c55e);"><img src="${fotoUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='${(nome||'A').charAt(0).toUpperCase()}'"></div>`;
@@ -562,12 +540,11 @@ function avatarHTML(nome, fotoUrl, size=34) {
 }
 
 function renderComentario(postId, docId, data) {
-  const dateCriado = data.criadoEm ? data.criadoEm.toDate() : null;
+  const dateCriado = data.criado_em ? new Date(data.criado_em) : null;
   const tempo = tempoRelativo(dateCriado);
-  const isOwner = usuarioAtual && data.autorId === usuarioAtual.uid;
+  const isOwner = usuarioAtual && data.autor_id === usuarioAtual.uid;
   const nomeDisplay = isOwner ? usuarioAtual.nome : (data.autor || 'Aluno');
-  const fotoDisplay = isOwner ? (usuarioAtual.fotoUrl || null) : (data.fotoUrl || null);
-
+  const fotoDisplay = isOwner ? (usuarioAtual.fotoUrl || null) : (data.foto_url || null);
   return `<div class="comentario-item" id="comentario-${docId}">
     ${avatarHTML(nomeDisplay, fotoDisplay)}
     <div class="comentario-body">
@@ -582,7 +559,7 @@ function renderComentario(postId, docId, data) {
           ` : ''}
         </div>
       </div>
-      <p class="comentario-texto" id="texto-display-${docId}">${data.texto}${data.editadoEm ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
+      <p class="comentario-texto" id="texto-display-${docId}">${data.texto}${data.editado_em ? '<span style="font-size:11px;color:#64748b;margin-left:6px;font-style:italic;">(editado)</span>' : ''}</p>
       <div id="edit-form-${docId}" style="display:none;margin-top:8px;">
         <textarea id="edit-textarea-${docId}" style="width:100%;min-height:70px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:vertical;">${data.texto}</textarea>
         <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end;">
@@ -607,45 +584,51 @@ function toggleComentarios(postId) {
   const isVisible = section.style.display !== 'none';
   if (isVisible) {
     section.style.display = 'none';
-    if (_listeners[postId]) { _listeners[postId](); delete _listeners[postId]; }
+    if (_listeners[postId]) { window._supabase.removeChannel(_listeners[postId]); delete _listeners[postId]; }
   } else {
     section.style.display = 'block';
     iniciarListenerComentarios(postId);
   }
 }
 
-function iniciarListenerComentarios(postId) {
+async function iniciarListenerComentarios(postId) {
   if (_listeners[postId]) return;
+  const sb = window._supabase;
   const lista = document.getElementById('lista-' + postId);
   const countEl = document.getElementById('count-' + postId);
   lista.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:13px;">Carregando...</div>';
 
-  const unsub = db.collection('posts').doc(postId).collection('comentarios')
-    .orderBy('criadoEm','asc')
-    .onSnapshot(snap => {
-      if (countEl) countEl.textContent = snap.size > 0 ? `(${snap.size})` : '';
-      if (snap.empty) { lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px;">Nenhum comentário ainda. Seja o primeiro! 💬</p>'; return; }
-      let html = '';
-      snap.forEach(doc => { html += renderComentario(postId, doc.id, doc.data()); });
-      lista.innerHTML = html;
-      snap.forEach(doc => renderRespostas(postId, doc.id, doc.data().respostas || []));
-    }, err => {
-      lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>';
-    });
-  _listeners[postId] = unsub;
+  async function recarregarComentarios() {
+    const { data: comentarios, error } = await sb
+      .from('comentarios')
+      .select('*')
+      .eq('post_id', postId)
+      .order('criado_em', { ascending: true });
+    if (error) { lista.innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;font-size:13px;">Erro ao carregar comentários.</p>'; return; }
+    if (countEl) countEl.textContent = comentarios.length > 0 ? `(${comentarios.length})` : '';
+    if (!comentarios.length) { lista.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-muted);font-size:14px;">Nenhum comentário ainda. Seja o primeiro! 💬</p>'; return; }
+    lista.innerHTML = comentarios.map(doc => renderComentario(postId, doc.id, doc)).join('');
+    comentarios.forEach(doc => renderRespostas(postId, doc.id, doc.respostas || []));
+  }
+
+  await recarregarComentarios();
+
+  const channel = sb.channel('comentarios-' + postId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'comentarios', filter: `post_id=eq.${postId}` },
+      () => recarregarComentarios())
+    .subscribe();
+  _listeners[postId] = channel;
 }
 
 function renderRespostas(postId, comentarioId, respostas) {
   const container = document.getElementById('respostas-' + comentarioId);
-  if (!container) return;
-  if (!respostas || respostas.length === 0) { container.innerHTML = ''; return; }
-  let html = '';
-  respostas.forEach((r, idx) => {
+  if (!container || !respostas?.length) { if(container) container.innerHTML = ''; return; }
+  container.innerHTML = respostas.map((r, idx) => {
     const isOwner = usuarioAtual && r.autorId === usuarioAtual.uid;
     const nomeR = isOwner ? usuarioAtual.nome : (r.autor || 'Aluno');
     const fotoR = isOwner ? (usuarioAtual.fotoUrl || null) : (r.fotoUrl || null);
     const tempo = r.criadoEm ? tempoRelativo(new Date(r.criadoEm)) : 'agora mesmo';
-    html += `<div class="resposta-item">
+    return `<div class="resposta-item">
       ${avatarHTML(nomeR, fotoR, 28)}
       <div style="flex:1;min-width:0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -658,23 +641,24 @@ function renderRespostas(postId, comentarioId, respostas) {
         <p style="font-size:13px;color:var(--text);line-height:1.5;margin:0;">${r.texto}</p>
       </div>
     </div>`;
-  });
-  container.innerHTML = html;
+  }).join('');
 }
 
 async function enviarComentario(postId) {
+  const sb = window._supabase;
   if (!usuarioAtual) { alert('Você precisa estar logado.'); return; }
   const textarea = document.getElementById('textarea-' + postId);
-  const texto = textarea.value.trim();
-  if (!texto) { textarea.focus(); return; }
+  const texto = textarea.value.trim(); if (!texto) { textarea.focus(); return; }
   const btn = textarea.nextElementSibling?.querySelector('button');
   try {
     textarea.disabled = true; if(btn){btn.disabled=true;btn.textContent='Enviando...';}
-    await db.collection('posts').doc(postId).collection('comentarios').add({
-      texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid,
-      fotoUrl: usuarioAtual.fotoUrl || null,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    const { error } = await sb.from('comentarios').insert({
+      post_id: postId, texto,
+      autor: usuarioAtual.nome, autor_id: usuarioAtual.uid,
+      foto_url: usuarioAtual.fotoUrl || null,
+      criado_em: new Date().toISOString()
     });
+    if (error) throw error;
     textarea.value = '';
   } catch (err) { alert('Erro ao enviar. Tente novamente.'); }
   finally { textarea.disabled = false; if(btn){btn.disabled=false;btn.textContent='Enviar';} }
@@ -688,27 +672,34 @@ function mostrarFormResposta(postId, comentarioId) {
 function ocultarFormResposta(comentarioId) {
   const form = document.getElementById('reply-form-' + comentarioId); if (form) form.style.display = 'none';
 }
+
 async function enviarResposta(postId, comentarioId) {
+  const sb = window._supabase;
   if (!usuarioAtual) { alert('Você precisa estar logado.'); return; }
   const textarea = document.getElementById('reply-textarea-' + comentarioId);
   const texto = textarea.value.trim(); if (!texto) { textarea.focus(); return; }
   try {
     textarea.disabled = true;
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({
-      respostas: firebase.firestore.FieldValue.arrayUnion({ texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid, fotoUrl: usuarioAtual.fotoUrl || null, criadoEm: new Date().toISOString() })
-    });
+    const { data: doc } = await sb.from('comentarios').select('respostas').eq('id', comentarioId).single();
+    const respostas = doc.respostas || [];
+    respostas.push({ texto, autor: usuarioAtual.nome, autorId: usuarioAtual.uid, fotoUrl: usuarioAtual.fotoUrl || null, criadoEm: new Date().toISOString() });
+    const { error } = await sb.from('comentarios').update({ respostas }).eq('id', comentarioId);
+    if (error) throw error;
     textarea.value = ''; ocultarFormResposta(comentarioId);
   } catch(e) { alert('Erro ao enviar resposta: ' + e.message); }
   finally { textarea.disabled = false; }
 }
+
 async function deletarResposta(postId, comentarioId, idx) {
   if (!confirm('Apagar esta resposta?')) return;
+  const sb = window._supabase;
   try {
-    const doc = await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).get();
-    const respostas = doc.data().respostas || []; respostas.splice(idx, 1);
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({ respostas });
+    const { data: doc } = await sb.from('comentarios').select('respostas').eq('id', comentarioId).single();
+    const respostas = doc.respostas || []; respostas.splice(idx, 1);
+    await sb.from('comentarios').update({ respostas }).eq('id', comentarioId);
   } catch(e) { alert('Erro ao apagar resposta.'); }
 }
+
 function editarComentario(postId, comentarioId) {
   document.getElementById('texto-display-' + comentarioId).style.display = 'none';
   document.getElementById('edit-form-' + comentarioId).style.display = 'block';
@@ -718,24 +709,32 @@ function cancelarEdicao(comentarioId) {
   document.getElementById('edit-form-' + comentarioId).style.display = 'none';
 }
 async function salvarEdicao(postId, comentarioId) {
+  const sb = window._supabase;
   const textarea = document.getElementById('edit-textarea-' + comentarioId);
   const texto = textarea.value.trim(); if (!texto) { textarea.focus(); return; }
   try {
-    await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).update({ texto, editadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+    const { error } = await sb.from('comentarios').update({ texto, editado_em: new Date().toISOString() }).eq('id', comentarioId);
+    if (error) throw error;
   } catch (err) { alert('Erro ao editar. Tente novamente.'); }
 }
 async function deletarComentario(postId, comentarioId) {
   if (!confirm('Apagar seu comentário?')) return;
-  try { await db.collection('posts').doc(postId).collection('comentarios').doc(comentarioId).delete(); }
-  catch (err) { alert('Erro ao apagar. Tente novamente.'); }
+  const sb = window._supabase;
+  try {
+    const { error } = await sb.from('comentarios').delete().eq('id', comentarioId);
+    if (error) throw error;
+  } catch (err) { alert('Erro ao apagar. Tente novamente.'); }
 }
 
 function abrirImagemModal(url) { document.getElementById('modalImage').src = url; document.getElementById('imageModal').classList.add('active'); }
 function fecharImagemModal() { document.getElementById('imageModal').classList.remove('active'); document.getElementById('modalImage').src = ''; }
+
 async function fazerLogout() {
+  const sb = window._supabase;
   if (confirm('Deseja sair da sua conta?')) {
-    Object.values(_listeners).forEach(fn => fn());
-    await auth.signOut(); window.location.href = 'login.html';
+    Object.values(_listeners).forEach(ch => sb.removeChannel(ch));
+    if (_realtimeChannel) sb.removeChannel(_realtimeChannel);
+    await sb.auth.signOut(); window.location.href = 'login.html';
   }
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharImagemModal(); });
