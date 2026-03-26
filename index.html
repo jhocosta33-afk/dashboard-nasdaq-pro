@@ -479,9 +479,9 @@ let SHEETS_TAB_NAME = null;
 async function carregarConfiguracoes() {
   try {
     const sb = window._supabase;
-    const { data, error } = await sb.from('config').select('data').eq('id', 'public').single();
+    const { data: row, error } = await sb.from('config').select('*').eq('id', 'public').single();
     if (error) throw error;
-    const cfg = data.data;
+    const cfg = row.data;
     CSV_URL               = cfg.csv_url               || null;
     GOOGLE_DRIVE_FOLDER_ID= cfg.drive_folder_id       || null;
     SHEETS_API_KEY        = cfg.sheets_api_key        || null;
